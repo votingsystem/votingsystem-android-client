@@ -10,7 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
 import org.votingsystem.android.fragment.MessageFragment;
@@ -26,13 +26,13 @@ public class MessagesPagerActivity extends ActionBarActivity {
 
     public static final String TAG = MessagesPagerActivity.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);

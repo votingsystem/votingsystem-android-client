@@ -30,7 +30,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativePagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -54,7 +54,7 @@ public class RepresentativeGridFragment extends Fragment
     private GridView gridView;
     private RepresentativeListAdapter adapter = null;
     private String queryStr = null;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = RepresentativeGridFragment.class.getSimpleName();
@@ -81,7 +81,7 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);

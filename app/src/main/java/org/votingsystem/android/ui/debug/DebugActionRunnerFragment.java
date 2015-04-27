@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.ui.debug.actions.BrowserVSAction;
 import org.votingsystem.android.ui.debug.actions.DeleteDBAction;
@@ -37,12 +37,12 @@ public class DebugActionRunnerFragment extends Fragment {
         mLogArea = (TextView) rootView.findViewById(R.id.logArea);
         ViewGroup tests = (ViewGroup) rootView.findViewById(R.id.debug_action_list);
         tests.addView(createTestAction(new ForceSyncNowAction(
-                (AppContextVS) getActivity().getApplicationContext())));
+                (AppVS) getActivity().getApplicationContext())));
         tests.addView(createTestAction(new SimulateBadgeScannedAction()));
         tests.addView(createTestAction(new PrefsAction()));
         tests.addView(createTestAction(new DeleteDBAction()));
         tests.addView(createTestAction(new BrowserVSAction(
-                (AppContextVS) getActivity().getApplicationContext())));
+                (AppVS) getActivity().getApplicationContext())));
         setHasOptionsMenu(true);
         return rootView;
     }

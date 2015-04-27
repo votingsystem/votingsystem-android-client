@@ -21,7 +21,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -45,7 +45,7 @@ public class RepresentativeFragment extends Fragment {
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private View rootView;
     private String broadCastId = null;
     private Button selectButton;
@@ -87,7 +87,7 @@ public class RepresentativeFragment extends Fragment {
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         rootView = inflater.inflate(R.layout.representative, container, false);
         representative_image = (ImageView) rootView.findViewById(R.id.representative_image);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {

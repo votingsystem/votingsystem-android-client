@@ -8,7 +8,7 @@ import android.widget.Toast;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.WalletActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
@@ -59,10 +59,10 @@ public class PaymentService extends IntentService {
 
     public PaymentService() { super(TAG); }
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         if(contextVS.getCurrencyServer() == null) {
             LOGD(TAG + ".updateUserInfo", "missing connection to Currency Server");
             Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,

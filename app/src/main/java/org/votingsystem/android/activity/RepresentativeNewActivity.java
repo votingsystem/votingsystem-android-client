@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.fragment.EditorFragment;
@@ -59,7 +59,7 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     private TypeVS operationType;
     private EditorFragment editorFragment;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private TextView imageCaption;
     private UserVSDto representative;
     private String broadCastId = RepresentativeNewActivity.class.getSimpleName();
@@ -137,7 +137,7 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         LOGD(TAG + ".onCreate", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);

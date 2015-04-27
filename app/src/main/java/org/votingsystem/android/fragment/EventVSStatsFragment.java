@@ -29,7 +29,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
 import org.votingsystem.dto.voting.EventVSDto;
@@ -48,7 +48,7 @@ public class EventVSStatsFragment extends Fragment {
 
     private View rootView;
     private EventVSDto eventVS;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String htmlContent;
     private String baseURL;
 
@@ -63,7 +63,7 @@ public class EventVSStatsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         Long eventId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         Cursor cursor = getActivity().getContentResolver().query(
                 EventVSContentProvider.getEventURI(eventId), null, null, null, null);
         cursor.moveToFirst();

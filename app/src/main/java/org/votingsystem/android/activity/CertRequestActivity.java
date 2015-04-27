@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CertRequestFormFragment;
 import org.votingsystem.android.util.UIUtils;
@@ -26,12 +26,12 @@ public class CertRequestActivity extends ActionBarActivity {
 	
 	public static final String TAG = CertRequestActivity.class.getSimpleName();
 
-    private AppContextVS appContextVS;
+    private AppVS appVS;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        appContextVS = (AppContextVS) getApplicationContext();
-        LOGD(TAG + ".onCreate", "appContextVS.getState(): " + appContextVS.getState() +
+        appVS = (AppVS) getApplicationContext();
+        LOGD(TAG + ".onCreate", "appVS.getState(): " + appVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         setContentView(R.layout.cert_request_advice);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
@@ -56,7 +56,7 @@ public class CertRequestActivity extends ActionBarActivity {
         });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        switch(appContextVS.getState()) {
+        switch(appVS.getState()) {
             case WITH_CSR:
                 startActivity(new Intent(this, CertResponseActivity.class));
                 break;

@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
@@ -53,7 +53,7 @@ public class TransactionVSFragment extends Fragment {
     private Button receipt;
     private SMIMEMessage messageSMIME;
     private String broadCastId = null;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -88,7 +88,7 @@ public class TransactionVSFragment extends Fragment {
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
         Cursor cursor = getActivity().getContentResolver().query(
                 TransactionVSContentProvider.CONTENT_URI, null, selection,

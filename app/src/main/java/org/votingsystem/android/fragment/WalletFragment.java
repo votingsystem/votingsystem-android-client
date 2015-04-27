@@ -23,7 +23,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CurrencyActivity;
 import org.votingsystem.android.util.MsgUtils;
@@ -66,7 +66,7 @@ public class WalletFragment extends Fragment {
                     case CURRENCY:
                         try {
                             Set<Currency> currencySet = Wallet.getCurrencySet((String) responseVS.getData(),
-                                    (AppContextVS) getActivity().getApplicationContext());
+                                    (AppVS) getActivity().getApplicationContext());
                             currencyList = new ArrayList<>(currencySet);
                             Utils.launchCurrencyStatusCheck(broadCastId, null, getActivity());
                             printSummary();

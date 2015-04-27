@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.WalletFragment;
 
@@ -20,12 +20,12 @@ public class WalletActivity extends ActivityBase {
     public static final String TAG = WalletActivity.class.getSimpleName();
 
     WeakReference<WalletFragment> walletRef;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         setContentView(R.layout.activity_base);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);

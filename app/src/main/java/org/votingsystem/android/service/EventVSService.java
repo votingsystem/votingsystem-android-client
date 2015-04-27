@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSSearchResultActivity;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
@@ -35,7 +35,7 @@ public class EventVSService extends IntentService {
 
     public EventVSService() { super(TAG); }
 
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
 
     public void checkDates(EventVSDto eventVS) {
         Date todayDate = Calendar.getInstance().getTime();
@@ -62,7 +62,7 @@ public class EventVSService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "onHandleIntent ");
         ResponseVS responseVS = null;
         final Bundle arguments = intent.getExtras();
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
             String queryStr = arguments.getString(ContextVS.QUERY_KEY);

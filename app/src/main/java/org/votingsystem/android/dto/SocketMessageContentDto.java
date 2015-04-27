@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
@@ -73,7 +73,7 @@ public class SocketMessageContentDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
         messageContentDto.setDeviceFromName(DeviceUtils.getDeviceName());
-        messageContentDto.setDeviceFromId(AppContextVS.getInstance().getConnectedDevice().getId());
+        messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
         return messageContentDto;
     }
@@ -84,7 +84,7 @@ public class SocketMessageContentDto {
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
         messageContentDto.setFrom(userVS.getFullName());
         messageContentDto.setDeviceFromName(DeviceUtils.getDeviceName());
-        messageContentDto.setDeviceFromId(AppContextVS.getInstance().getConnectedDevice().getId());
+        messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setToUser(toUser);
         messageContentDto.setMessage(message);
         return messageContentDto;

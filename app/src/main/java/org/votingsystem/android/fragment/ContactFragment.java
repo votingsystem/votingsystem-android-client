@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.UserContentProvider;
 import org.votingsystem.android.dto.SocketMessageDto;
@@ -52,7 +52,7 @@ public class ContactFragment extends Fragment {
 
 	public static final String TAG = ContactFragment.class.getSimpleName();
 
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private View rootView;
     private String broadCastId = null;
     private Button toggle_contact_button;
@@ -139,7 +139,7 @@ public class ContactFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.contact, container, false);

@@ -20,7 +20,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
@@ -57,7 +57,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     private CheckBox anonymousCheckBox;
     private CheckBox publicCheckBox;
     private EditText weeks_delegation;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private String broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     private UserVSDto representative = null;
     private Date anonymousDelegationFromDate;
@@ -116,7 +116,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         representative = (UserVSDto) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

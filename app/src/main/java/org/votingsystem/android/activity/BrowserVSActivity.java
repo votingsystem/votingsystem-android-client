@@ -16,7 +16,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
@@ -43,7 +43,7 @@ public class BrowserVSActivity extends ActionBarActivity {
 
     private String viewerURL = null;
     private TypeVS operationType;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private String broadCastId = BrowserVSActivity.class.getSimpleName();
     private WebView webView;
     private OperationVS operationVS;
@@ -70,7 +70,7 @@ public class BrowserVSActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

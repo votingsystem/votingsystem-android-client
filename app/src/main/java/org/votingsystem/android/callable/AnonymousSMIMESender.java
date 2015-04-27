@@ -1,6 +1,6 @@
 package org.votingsystem.android.callable;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
@@ -23,7 +23,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
 
     public static final String TAG = AnonymousSMIMESender.class.getSimpleName();
 ;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private CertificationRequestVS certificationRequest;
     private String fromUser;
     private String toUser;
@@ -35,7 +35,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
 
     public AnonymousSMIMESender(String fromUser, String toUser, String textToSign, String subject,
             Header header, String serviceURL, X509Certificate receiverCert,
-            CertificationRequestVS certificationRequest,  AppContextVS context) {
+            CertificationRequestVS certificationRequest,  AppVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;

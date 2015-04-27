@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.EditorFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -58,7 +58,7 @@ public class EventVSNewActivity extends ActionBarActivity {
 	
 	public static final String TAG = EventVSNewActivity.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private EditText dateElectionText;
     private TextView optionCaption;
     private EditText subjectEditText;
@@ -162,7 +162,7 @@ public class EventVSNewActivity extends ActionBarActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) this.getApplicationContext();
+        contextVS = (AppVS) this.getApplicationContext();
         broadCastId = EventVSNewActivity.class.getSimpleName();
         setContentView(R.layout.eventvs_new);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

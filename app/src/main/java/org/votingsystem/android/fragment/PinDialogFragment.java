@@ -34,7 +34,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CertRequestActivity;
 import org.votingsystem.android.activity.CertResponseActivity;
@@ -133,7 +133,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateDialog", "savedInstanceState: ");
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        AppContextVS contextVS = (AppContextVS) getActivity().getApplicationContext();
+        AppVS contextVS = (AppVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         final ContextVS.State appState = contextVS.getState();

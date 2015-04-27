@@ -5,7 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.ui.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -14,9 +14,9 @@ public class ForceSyncNowAction implements DebugAction {
 
     private static final String TAG = ForceSyncNowAction.class.getSimpleName();
 
-    private AppContextVS appContext;
+    private AppVS appContext;
 
-    public ForceSyncNowAction(AppContextVS context) {
+    public ForceSyncNowAction(AppVS context) {
         this.appContext = context;
     }
 

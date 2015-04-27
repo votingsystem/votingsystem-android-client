@@ -13,7 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.AnonymousSMIMESender;
 import org.votingsystem.android.callable.SignedMapSender;
@@ -57,12 +57,12 @@ public class RepresentativeService extends IntentService {
 
     public static final String TAG = RepresentativeService.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
 
     public RepresentativeService() { super(TAG); }
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
@@ -348,7 +348,7 @@ public class RepresentativeService extends IntentService {
                     contextVS.getAccessControl().getName(),
                     anonymousDelegation.getRequest().toString(), mapToSend, messageSubject, null,
                     contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
-                    representativeDataFileName, (AppContextVS)getApplicationContext());
+                    representativeDataFileName, (AppVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
@@ -361,7 +361,7 @@ public class RepresentativeService extends IntentService {
                         representative.getName()).toString(), messageSubject, null,
                         contextVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
                         anonymousDelegation.getCertificationRequest(),
-                        (AppContextVS)getApplicationContext());
+                        (AppVS)getApplicationContext());
                 responseVS = anonymousSender.call();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(

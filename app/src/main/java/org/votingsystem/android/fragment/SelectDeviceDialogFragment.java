@@ -21,7 +21,7 @@ import android.widget.TextView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
@@ -47,7 +47,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
 
     public static final String TAG = SelectDeviceDialogFragment.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private SimpleAdapter simpleAdapter;
     private String dialogCaller;
     private List<DeviceVSDto> deviceListDto;
@@ -64,7 +64,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.select_device_dialog, null);
@@ -127,7 +127,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             simpleAdapter.notifyDataSetChanged();
         } else {
             deviceLoader = new DeviceLoader();
-            String targetURL = ((AppContextVS)getActivity().getApplicationContext()).getCurrencyServer().
+            String targetURL = ((AppVS)getActivity().getApplicationContext()).getCurrencyServer().
                     getDeviceVSConnectedServiceURL(contextVS.getUserVS().getNIF());
             deviceLoader.execute(targetURL);
         }

@@ -2,7 +2,7 @@ package org.votingsystem.android.callable;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.VoteVS;
@@ -36,9 +36,9 @@ public class VoteSender implements Callable<ResponseVS> {
     public static final String TAG = VoteSender.class.getSimpleName();
 
     private VoteVS vote;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
 
-    public VoteSender(VoteVS vote, AppContextVS context) {
+    public VoteSender(VoteVS vote, AppVS context) {
         this.vote = vote;
         this.contextVS = context;
     }

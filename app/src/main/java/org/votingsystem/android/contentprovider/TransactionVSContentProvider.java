@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -221,7 +221,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         }
     }
 
-    public static List<String> getTransactionWeekList(AppContextVS contextVS) {
+    public static List<String> getTransactionWeekList(AppVS contextVS) {
         List<String> result = new ArrayList<String>();
         Cursor cursor = contextVS.getContentResolver().query(
                 TransactionVSContentProvider.CONTENT_URI, null, null, null, null);

@@ -10,7 +10,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.dto.OperationVS;
 
@@ -27,12 +27,12 @@ public class VotingAppService extends Service implements Runnable {
 
     public static final String TAG = VotingAppService.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private Handler handler;
     private static final int UPDATE_FREQUENCY_IN_MINUTES = 60;
 
     @Override public void onCreate(){
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         handler = new Handler();
         LOGD(TAG + ".onCreate", "VotingAppService created");
     }

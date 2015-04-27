@@ -9,7 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CurrencyAccountsFragment;
 import org.votingsystem.android.fragment.TransactionVSGridFragment;
@@ -27,12 +27,12 @@ public class CurrencyAccountsMainActivity extends ActivityBase {
     private static final int USER_ACCOUNTS_POS       = 0;
     private static final int TRANSANCTIONVS_LIST_POS = 1;
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         setContentView(R.layout.currency_accounts_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);

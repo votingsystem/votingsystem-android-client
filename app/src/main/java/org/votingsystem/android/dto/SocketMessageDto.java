@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.android.util.SessionVS;
@@ -99,7 +99,7 @@ public class SocketMessageDto {
 
     public SocketMessageDto getResponse(Integer statusCode, String message,
                                 TypeVS operation) throws Exception {
-        WebSocketSession socketSession = AppContextVS.getInstance().getWSSession(UUID);
+        WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
@@ -117,7 +117,7 @@ public class SocketMessageDto {
 
     public SocketMessageDto getSignResponse(Integer statusCode, String message,
                     SMIMEMessage smimeMessage) throws Exception {
-        WebSocketSession socketSession = AppContextVS.getInstance().getWSSession(UUID);
+        WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(TypeVS.MESSAGEVS_FROM_DEVICE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_SIGN_RESPONSE);
@@ -494,7 +494,7 @@ public class SocketMessageDto {
 
     public static SocketMessageDto getMessageVSToDevice(DeviceVSDto deviceVS, String toUser,
                             String textToEncrypt) throws Exception {
-        UserVSDto userVS = AppContextVS.getInstance().getUserVS();
+        UserVSDto userVS = AppVS.getInstance().getUserVS();
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null,
                 TypeVS.MESSAGEVS);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
@@ -547,11 +547,11 @@ public class SocketMessageDto {
     private static <T> WebSocketSession checkWebSocketSession (DeviceVSDto deviceVS, T data, TypeVS typeVS)
             throws NoSuchAlgorithmException {
         WebSocketSession webSocketSession = null;
-        if(deviceVS != null) webSocketSession = AppContextVS.getInstance().getWSSession(deviceVS.getId());
+        if(deviceVS != null) webSocketSession = AppVS.getInstance().getWSSession(deviceVS.getId());
         if(webSocketSession == null) {
             AESParams aesParams = new AESParams();
             webSocketSession = new WebSocketSession(aesParams, deviceVS, null, null);
-            AppContextVS.getInstance().putWSSession(java.util.UUID.randomUUID().toString(), webSocketSession);
+            AppVS.getInstance().putWSSession(java.util.UUID.randomUUID().toString(), webSocketSession);
         }
         webSocketSession.setData(data);
         webSocketSession.setTypeVS(typeVS);

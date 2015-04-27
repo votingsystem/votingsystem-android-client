@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.dto.DeviceVSDto;
@@ -41,7 +41,7 @@ public class UserCertRequestService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         LOGD(TAG + ".onHandleIntent", "arguments: " + arguments);
-        AppContextVS contextVS = (AppContextVS) getApplicationContext();
+        AppVS contextVS = (AppVS) getApplicationContext();
         String serviceCaller = arguments.getString(CALLER_KEY);
         ResponseVS responseVS = null;
         try {

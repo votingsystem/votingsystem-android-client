@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
 import org.votingsystem.android.dto.SocketMessageDto;
@@ -55,7 +55,7 @@ public class MessageFragment extends Fragment {
     private static final int CONTENT_VIEW_ID = 1000000;
 
     private WeakReference<CurrencyFragment> currencyRef;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private SocketMessageDto socketMessage;
     private TypeVS typeVS;
     private Currency currency;
@@ -85,7 +85,7 @@ public class MessageFragment extends Fragment {
                 case CURRENCY:
                     try {
                         Set<Currency> currencyList = Wallet.getCurrencySet((String) responseVS.getData(),
-                                (AppContextVS) getActivity().getApplicationContext());
+                                (AppVS) getActivity().getApplicationContext());
                         if(currencyList != null) updateWallet();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -101,7 +101,7 @@ public class MessageFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
         fragment_container = (LinearLayout)rootView.findViewById(R.id.fragment_container);
         message_content = (TextView)rootView.findViewById(R.id.message_content);

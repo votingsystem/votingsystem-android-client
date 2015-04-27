@@ -26,7 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
@@ -63,7 +63,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private List<Button> voteOptionsButtonList;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private View rootView;
     private String broadCastId = null;
 
@@ -136,7 +136,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                ViewGroup container, Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         try {
             if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
                 String dtoStr = getArguments().getString(ContextVS.EVENTVS_KEY);

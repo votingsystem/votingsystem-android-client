@@ -27,7 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.EventVSPagerActivity;
 import org.votingsystem.android.contentprovider.EventVSContentProvider;
@@ -57,7 +57,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private GridView gridView;
     private EventListAdapter mAdapter = null;
     private EventVSDto.State eventState = null;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private static final int loaderId = 0;
@@ -77,7 +77,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         eventState = (EventVSDto.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
         PrefUtils.registerPreferenceChangeListener(contextVS, this);
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);

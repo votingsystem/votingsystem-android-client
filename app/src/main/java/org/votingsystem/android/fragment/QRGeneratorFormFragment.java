@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.util.UIUtils;
@@ -39,7 +39,7 @@ public class QRGeneratorFormFragment extends Fragment {
 
     public static final String TAG = QRGeneratorFormFragment.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String broadCastId = QRGeneratorFormFragment.class.getSimpleName();
     private View rootView;
     private Button btn_plus;
@@ -67,7 +67,7 @@ public class QRGeneratorFormFragment extends Fragment {
                ViewGroup container, Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.qr_generator_form_fragment, container, false);
         ((Button) rootView.findViewById(R.id.request_button)).setOnClickListener(
                 new View.OnClickListener() {

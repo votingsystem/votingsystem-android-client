@@ -4,7 +4,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.CMSSignedData;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -24,18 +24,18 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String timeStampServiceURL;
       
     public MessageTimeStamper (SMIMEMessage smimeMessage,
-            AppContextVS context) throws Exception {
+            AppVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
         this.contextVS = context;
     }
 
     public MessageTimeStamper (SMIMEMessage smimeMessage, String timeStampServiceURL,
-               AppContextVS context) throws Exception {
+               AppVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
         this.contextVS = context;
@@ -43,13 +43,13 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     }
     
     public MessageTimeStamper (TimeStampRequest timeStampRequest,
-            AppContextVS context) throws Exception {
+            AppVS context) throws Exception {
         this.timeStampRequest = timeStampRequest;
         this.contextVS = context;
     }
         
     public MessageTimeStamper (String timeStampDigestAlgorithm, 
-    		byte[] digestToTimeStamp, AppContextVS context) throws Exception {
+    		byte[] digestToTimeStamp, AppVS context) throws Exception {
     	TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         this.timeStampRequest = reqgen.generate(
         		timeStampDigestAlgorithm, digestToTimeStamp);

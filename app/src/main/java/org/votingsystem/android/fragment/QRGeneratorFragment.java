@@ -14,7 +14,7 @@ import android.widget.ImageView;
 
 import com.google.zxing.WriterException;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.QRMessageVS;
 import org.votingsystem.android.util.QRUtils;
@@ -31,7 +31,7 @@ public class QRGeneratorFragment extends Fragment {
 
     public static final String TAG = QRGeneratorFragment.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String broadCastId = QRGeneratorFragment.class.getSimpleName();
     private View rootView;
     private QRMessageVS qrMessageVS;
@@ -40,7 +40,7 @@ public class QRGeneratorFragment extends Fragment {
                ViewGroup container, Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.qr_generator_fragment, container, false);
         Intent intent = getActivity().getIntent();
         String qrMessage = intent.getStringExtra(ContextVS.MESSAGE_KEY);

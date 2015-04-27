@@ -26,7 +26,7 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
@@ -60,7 +60,7 @@ public class ReceiptFragment extends Fragment {
 
     public static final String TAG = ReceiptFragment.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private ReceiptContainer selectedReceipt;
     private TransactionVSDto transactionDto;
     private TextView receiptSubject;
@@ -123,7 +123,7 @@ public class ReceiptFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(

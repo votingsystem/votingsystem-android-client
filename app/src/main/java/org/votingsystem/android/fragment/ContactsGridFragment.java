@@ -35,7 +35,7 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.ContactPagerActivity;
 import org.votingsystem.android.contentprovider.UserContentProvider;
@@ -68,7 +68,7 @@ public class ContactsGridFragment extends Fragment
     private GridView gridView;
     private String queryStr = null;
     private Mode mode = Mode.CONTACT;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private Integer firstVisiblePosition = null;
     private String broadCastId = ContactsGridFragment.class.getSimpleName();
     private static final int loaderId = 0;
@@ -96,7 +96,7 @@ public class ContactsGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);

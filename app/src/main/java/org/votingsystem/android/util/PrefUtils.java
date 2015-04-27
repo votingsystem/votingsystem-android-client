@@ -7,7 +7,7 @@ import android.util.Base64;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.UserVSDto;
@@ -82,11 +82,11 @@ public class PrefUtils {
     }
 
     public static String getApplicationId()  {
-        SharedPreferences settings = AppContextVS.getInstance().getSharedPreferences(
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String applicationId = settings.getString(ContextVS.APPLICATION_ID_KEY, null);
         if(applicationId == null) {
-            TelephonyManager telephonyManager = (TelephonyManager)AppContextVS.getInstance().getSystemService(
+            TelephonyManager telephonyManager = (TelephonyManager) AppVS.getInstance().getSystemService(
                     Context.TELEPHONY_SERVICE);
             // phone = telephonyManager.getLine1Number(); -> operator dependent
             //IMSI

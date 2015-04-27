@@ -16,7 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.dto.SocketMessageDto;
 import org.votingsystem.android.fragment.CurrencyFragment;
@@ -50,7 +50,7 @@ public class CurrencyActivity extends ActionBarActivity {
 	public static final String TAG = CurrencyActivity.class.getSimpleName();
 
     private WeakReference<CurrencyFragment> currencyRef;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private Currency currency;
     private String broadCastId = CurrencyActivity.class.getSimpleName();
 
@@ -133,7 +133,7 @@ public class CurrencyActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         currency = (Currency) getIntent().getSerializableExtra(ContextVS.CURRENCY_KEY);
         setContentView(R.layout.fragment_container_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

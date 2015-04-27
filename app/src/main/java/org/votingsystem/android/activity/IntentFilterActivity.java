@@ -12,7 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.service.BootStrapService;
@@ -39,7 +39,7 @@ public class IntentFilterActivity extends ActionBarActivity {
 
     private ProgressDialog progressDialog = null;
     private OperationVS operationVS;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String broadCastId = IntentFilterActivity.class.getSimpleName();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -95,7 +95,7 @@ public class IntentFilterActivity extends ActionBarActivity {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);
             LOGD(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);

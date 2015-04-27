@@ -72,9 +72,9 @@ import static org.votingsystem.util.LogUtils.LOGE;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AppContextVS extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class AppVS extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static final String TAG = AppContextVS.class.getSimpleName();
+    public static final String TAG = AppVS.class.getSimpleName();
 
     private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
     private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
@@ -95,10 +95,10 @@ public class AppContextVS extends Application implements SharedPreferences.OnSha
     private AtomicInteger notificationId = new AtomicInteger(1);
 
 
-    private static AppContextVS INSTANCE;
+    private static AppVS INSTANCE;
 
 
-    public static AppContextVS getInstance() {
+    public static AppVS getInstance() {
         return INSTANCE;
     }
 

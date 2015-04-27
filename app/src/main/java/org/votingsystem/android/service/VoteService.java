@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.text.Html;
 
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.callable.VoteSender;
 import org.votingsystem.android.contentprovider.ReceiptContentProvider;
@@ -36,10 +36,10 @@ public class VoteService extends IntentService {
 
     public VoteService() { super(TAG); }
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);

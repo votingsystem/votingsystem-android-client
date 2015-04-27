@@ -12,7 +12,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CurrencyAccountsMainActivity;
 import org.votingsystem.android.activity.MessagesMainActivity;
@@ -100,7 +100,7 @@ public class Utils {
         context.startService(startIntent);
     }
 
-    public static void toggleWebSocketServiceConnection(AppContextVS contextVS) {
+    public static void toggleWebSocketServiceConnection(AppVS contextVS) {
         Intent startIntent = new Intent(contextVS, WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
         if(contextVS.isWithSocketConnection()) typeVS = TypeVS.WEB_SOCKET_CLOSE;

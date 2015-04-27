@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.SMIMESignerActivity;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
@@ -64,12 +64,12 @@ public class WebSocketService extends Service {
 
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private Session session;
     private CountDownLatch latch = new CountDownLatch(1);
 
     @Override public void onCreate(){
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         LOGD(TAG + ".onCreate", "WebSocketService started");
     }
 

@@ -29,7 +29,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.contentprovider.TransactionVSContentProvider;
@@ -58,7 +58,7 @@ public class TransactionVSGridFragment extends Fragment
     private GridView gridView;
     private TransactionVSListAdapter adapter = null;
     private String queryStr = null;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = TransactionVSGridFragment.class.getName();
@@ -105,7 +105,7 @@ public class TransactionVSGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         queryStr = getArguments().getString(SearchManager.QUERY);
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
@@ -172,7 +172,7 @@ public class TransactionVSGridFragment extends Fragment
         menu.removeItem(R.id.search_item);
         menu.removeItem(R.id.update_signers_info);
         List<String> transactionWeekList =TransactionVSContentProvider.getTransactionWeekList (
-                (AppContextVS)getActivity().getApplicationContext());
+                (AppVS)getActivity().getApplicationContext());
         for(final String weekLbl: transactionWeekList) {
             MenuItem item = menu.add (weekLbl);
             item.setOnMenuItemClickListener (new MenuItem.OnMenuItemClickListener(){

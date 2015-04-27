@@ -2,7 +2,7 @@ package org.votingsystem.android.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
@@ -52,21 +52,21 @@ public class Wallet {
         return result;
     }
 
-    public static Set<Currency> getCurrencySet(String pin, AppContextVS context) throws Exception {
+    public static Set<Currency> getCurrencySet(String pin, AppVS context) throws Exception {
         Set<CurrencyDto> currencyDtoList = getWallet(pin, context);
         currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
         return new HashSet<Currency>(currencySet);
     }
 
     public static void saveCurrencyCollection(Collection<Currency> currencyCollection, String pin,
-             AppContextVS context) throws Exception {
+             AppVS context) throws Exception {
         Set<Currency> newCurrencySet = new HashSet<>(currencySet);
         newCurrencySet.addAll(currencyCollection);
         Wallet.saveWallet(newCurrencySet, pin, context);
     }
 
     public static void removeCurrencyCollection(
-            Collection<Currency> currencyCollection, AppContextVS context) throws Exception {
+            Collection<Currency> currencyCollection, AppVS context) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
             currencyMap.put(currency.getHashCertVS(), currency);
@@ -80,7 +80,7 @@ public class Wallet {
     }
 
 
-    public static Currency removeExpendedCurrency(String hashCertVS, AppContextVS context) throws Exception {
+    public static Currency removeExpendedCurrency(String hashCertVS, AppVS context) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<String, Currency>();
         for(Currency currency : currencySet) {
             currencyMap.put(currency.getHashCertVS(), currency);
@@ -101,7 +101,7 @@ public class Wallet {
     }
 
     public static Set<Currency> updateCurrencyWithErrors(List<String> currencySetToRemove,
-            AppContextVS contextVS) throws Exception {
+            AppVS contextVS) throws Exception {
         Set<Currency> errorList = new HashSet<>();
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetToRemove) {
@@ -116,7 +116,7 @@ public class Wallet {
     }
 
     public static void updateCurrencyState(List<String> currencySetOK, Currency.State state,
-                AppContextVS contextVS) throws Exception {
+                AppVS contextVS) throws Exception {
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetOK) {
             Currency currency = currencyMap.get(hashCertVS);
@@ -156,13 +156,13 @@ public class Wallet {
         return result;
     }
 
-    public static Set<CurrencyDto> getWallet(String pin, AppContextVS context) throws Exception {
+    public static Set<CurrencyDto> getWallet(String pin, AppVS context) throws Exception {
         byte[] walletBytes = getWalletBytes(pin, context);
         if(walletBytes == null) return new HashSet<>();
         else return JSON.getMapper().readValue(walletBytes, new TypeReference<Set<CurrencyDto>>(){});
     }
 
-    private static byte[] getWalletBytes(String pin, AppContextVS context) throws Exception {
+    private static byte[] getWalletBytes(String pin, AppVS context) throws Exception {
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash(context);
             String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
@@ -181,7 +181,7 @@ public class Wallet {
     }
 
     public static void saveWallet(Collection<Currency> currencyCollection, String pin,
-                                  AppContextVS context) throws Exception {
+                                  AppVS context) throws Exception {
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash(context);
             String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
@@ -200,7 +200,7 @@ public class Wallet {
     }
 
     public static void updateWallet(Collection<Currency> currencyCollection,
-                                    AppContextVS contextVS) throws Exception {
+                                    AppVS contextVS) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<String, Currency>();
         for(Currency currency : currencyCollection) {
             currencyMap.put(currency.getHashCertVS(), currency);

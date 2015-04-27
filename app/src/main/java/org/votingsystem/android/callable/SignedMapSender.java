@@ -1,6 +1,6 @@
 package org.votingsystem.android.callable;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
@@ -26,7 +26,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
     public static final String TAG = SignedMapSender.class.getSimpleName();
 
     private SMIMEMessage smimeMessage = null;
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private String fromUser = null;
     private String toUser = null;
     private String subject = null;
@@ -37,7 +37,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
 
     public SignedMapSender(String fromUser, String toUser, String textToSign,
             Map<String, Object> mapToSend, String subject, Header header, String serviceURL,
-            String signedFileName, AppContextVS context) {
+            String signedFileName, AppVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;

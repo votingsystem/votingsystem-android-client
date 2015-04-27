@@ -19,7 +19,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.json.JSONObject;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.CertRequestFormFragment;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -66,7 +66,7 @@ public class CertResponseActivity extends ActionBarActivity {
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String broadCastId = CertResponseActivity.class.getSimpleName();;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -82,7 +82,7 @@ public class CertResponseActivity extends ActionBarActivity {
         setContentView(R.layout.cert_request_form_response);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         LOGD(TAG + ".onCreate", "state: " + contextVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));

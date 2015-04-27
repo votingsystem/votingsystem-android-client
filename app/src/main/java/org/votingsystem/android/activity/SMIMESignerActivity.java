@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.dto.SocketMessageDto;
 import org.votingsystem.android.fragment.MessageDialogFragment;
@@ -41,7 +41,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
 	
 	public static final String TAG = SMIMESignerActivity.class.getSimpleName();
 
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private String broadCastId = SMIMESignerActivity.class.getSimpleName();
     private WebView webView;
     private SocketMessageDto socketMessage;
@@ -95,7 +95,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         webView = (WebView) findViewById(R.id.smime_signed_content);
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         String dtoStr = getIntent().getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
             socketMessage = JSON.getMapper().readValue(dtoStr, SocketMessageDto.class);

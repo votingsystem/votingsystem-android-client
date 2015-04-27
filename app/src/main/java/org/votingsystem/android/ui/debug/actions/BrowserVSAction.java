@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.activity.BrowserVSActivity;
 import org.votingsystem.android.ui.debug.DebugAction;
 import org.votingsystem.util.ContextVS;
@@ -16,9 +16,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class BrowserVSAction implements DebugAction {
     private static final String TAG = BrowserVSAction.class.getSimpleName();
 
-    private AppContextVS appContext;
+    private AppVS appContext;
 
-    public BrowserVSAction(AppContextVS context) {
+    public BrowserVSAction(AppVS context) {
         this.appContext = context;
     }
 

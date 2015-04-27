@@ -39,7 +39,7 @@ public class MessageActivity extends ActionBarActivity {
             return;
         }
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
-                AppContextVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
+                AppVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
         View view = getLayoutInflater().inflate(R.layout.message_activity, null);
         TypeVS typeVS = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         String broadCastId = getIntent().getStringExtra(ContextVS.CALLER_KEY);

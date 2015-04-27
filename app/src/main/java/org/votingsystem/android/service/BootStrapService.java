@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.util.PrefUtils;
 import org.votingsystem.dto.ActorDto;
@@ -27,7 +27,7 @@ public class BootStrapService extends IntentService {
 
     public static final String TAG = BootStrapService.class.getSimpleName();
 
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private String serviceCaller;
     private Handler mHandler;
 
@@ -37,7 +37,7 @@ public class BootStrapService extends IntentService {
     }
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         final String accessControlURL = arguments.getString(ContextVS.ACCESS_CONTROL_URL_KEY);

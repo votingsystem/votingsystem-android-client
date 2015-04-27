@@ -1,7 +1,7 @@
 package org.votingsystem.android.util;
 
 import org.bouncycastle2.util.encoders.Base64;
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.callable.MessageTimeStamper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -140,7 +140,7 @@ public class CurrencyBundle {
         BigDecimal bundleAmount = getTotalAmount();
         if(bundleAmount.compareTo(requestAmount) == 0) return null;
         else if(requestAmount.compareTo(bundleAmount) < 0) {
-            return new Currency( AppContextVS.getInstance().getCurrencyServer().getServerURL(),
+            return new Currency( AppVS.getInstance().getCurrencyServer().getServerURL(),
                     bundleAmount.subtract(requestAmount), currencyCode, tagVS);
         } else throw new ValidationExceptionVS(MessageFormat.format(
                 "requestAmount ''{0}'' exceeds bundle amount ''{1}''", requestAmount, bundleAmount));
@@ -156,7 +156,7 @@ public class CurrencyBundle {
                 transactionDto.getSubject(), transactionDto.getToUserIBAN().get(0),
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                 transactionDto.getTagVS().getName(), transactionDto.isTimeLimited(),
-                AppContextVS.getInstance().getTimeStampServiceURL());
+                AppVS.getInstance().getTimeStampServiceURL());
     }
     
     public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, Payment paymentMethod, String subject, 
@@ -177,7 +177,7 @@ public class CurrencyBundle {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(
                     currency.getHashCertVS(), StringUtils.getNormalized(currency.getToUserName()),
                     JSON.getMapper().writeValueAsString(dto), subject, null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, AppContextVS.getInstance());
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, AppVS.getInstance());
             timeStamper.call();
             currency.setSmimeMessage(timeStamper.getSMIME());
             currencyTransactionBatch.add(new String(Base64.encode(currency.getSmimeMessage().getBytes())));
@@ -189,7 +189,7 @@ public class CurrencyBundle {
         return dto;
     }
 
-    public void updateWallet(Currency leftOverCurrency, AppContextVS contextVS) throws Exception {
+    public void updateWallet(Currency leftOverCurrency, AppVS contextVS) throws Exception {
         Set<Currency> currencyListToRemove = getCurrencySet();
         Wallet.removeCurrencyCollection(currencyListToRemove, contextVS);
         if(leftOverCurrency != null) Wallet.updateWallet(

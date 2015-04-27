@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.fragment.MessageDialogFragment;
 import org.votingsystem.android.fragment.PinDialogFragment;
@@ -39,7 +39,7 @@ public class RepresentativesMainActivity extends ActivityBase {
 
 	public static final String TAG = RepresentativesMainActivity.class.getSimpleName();
 
-    private AppContextVS contextVS = null;
+    private AppVS contextVS = null;
     private String broadCastId = RepresentativesMainActivity.class.getSimpleName();
     private WeakReference<RepresentativeGridFragment> representativeGridRef;
 
@@ -87,7 +87,7 @@ public class RepresentativesMainActivity extends ActivityBase {
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
-        contextVS = (AppContextVS) getApplicationContext();
+        contextVS = (AppVS) getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

@@ -22,7 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.CashRequestFormActivity;
 import org.votingsystem.android.service.PaymentService;
@@ -60,7 +60,7 @@ public class CurrencyAccountsFragment extends Fragment {
     private TransactionVSDto transactionVS;
     private View rootView;
     private String broadCastId = CurrencyAccountsFragment.class.getSimpleName();
-    private AppContextVS contextVS;
+    private AppVS contextVS;
     private TextView last_request_date;
     private RecyclerView accounts_recycler_view;
     private String IBAN;
@@ -103,7 +103,7 @@ public class CurrencyAccountsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppContextVS) getActivity().getApplicationContext();
+        contextVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.currency_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         //https://developer.android.com/training/material/lists-cards.html

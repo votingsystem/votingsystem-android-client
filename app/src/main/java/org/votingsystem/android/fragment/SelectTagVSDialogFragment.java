@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.android.AppContextVS;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
@@ -90,7 +90,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
     private void processSearch(String searchParam) {
         if(previousSearch != null && previousSearch.equals(searchParam)) return;
         TagVSLoader tagVSLoader = new TagVSLoader();
-        String targetURL = ((AppContextVS)getActivity().getApplicationContext()).getCurrencyServer().
+        String targetURL = ((AppVS)getActivity().getApplicationContext()).getCurrencyServer().
                 getTagVSSearchServiceURL(searchParam);
         tagVSLoader.execute(targetURL);
         previousSearch = searchParam;
