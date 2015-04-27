@@ -47,7 +47,7 @@
                 android:hint="@string/date_election_lbl"
                 android:gravity="center_vertical|center_horizontal">
             </EditText>
-            <fragment android:name="org.votingsystem.android.fragment.EditorFragment"
+            <fragment android:name="org.votingsystem.fragment.EditorFragment"
                 android:id="@+id/editor"
                 android:tag="EditorFragment"
                 android:layout_width="match_parent"
