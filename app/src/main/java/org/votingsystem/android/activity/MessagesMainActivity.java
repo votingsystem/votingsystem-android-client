@@ -20,12 +20,12 @@ public class MessagesMainActivity extends ActivityBase {
     public static final String TAG = MessagesMainActivity.class.getSimpleName();
 
     WeakReference<MessagesGridFragment> messagesGridRef;
-    private AppVS contextVS;
+    private AppVS appVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         setContentView(R.layout.activity_base);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);

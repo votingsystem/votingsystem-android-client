@@ -41,7 +41,7 @@ public class UserCertRequestService extends IntentService {
     @Override protected void onHandleIntent(Intent intent) {
         final Bundle arguments = intent.getExtras();
         LOGD(TAG + ".onHandleIntent", "arguments: " + arguments);
-        AppVS contextVS = (AppVS) getApplicationContext();
+        AppVS appVS = (AppVS) getApplicationContext();
         String serviceCaller = arguments.getString(CALLER_KEY);
         ResponseVS responseVS = null;
         try {
@@ -57,12 +57,12 @@ public class UserCertRequestService extends IntentService {
                     givenName, surname, DeviceVSDto.Type.MOBILE);
             byte[] csrBytes = certificationRequest.getCsrPEM();
             responseVS = HttpHelper.sendData(csrBytes, null,
-                    contextVS.getAccessControl().getUserCSRServiceURL());
+                    appVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 certificationRequest.setHashPin(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
                 PrefUtils.putCsrRequest(requestId, certificationRequest, this);
-                PrefUtils.putAppCertState(contextVS.getAccessControl().getServerURL(),
+                PrefUtils.putAppCertState(appVS.getAccessControl().getServerURL(),
                         State.WITH_CSR, null, this);
                 responseVS.setCaption(getString(R.string.operation_ok_msg));
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
@@ -71,7 +71,7 @@ public class UserCertRequestService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller);
-            contextVS.broadcastResponse(responseVS);
+            appVS.broadcastResponse(responseVS);
         }
     }
 

@@ -26,13 +26,13 @@ public class MessagesPagerActivity extends ActionBarActivity {
 
     public static final String TAG = MessagesPagerActivity.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);

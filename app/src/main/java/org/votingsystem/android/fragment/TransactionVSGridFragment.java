@@ -58,7 +58,7 @@ public class TransactionVSGridFragment extends Fragment
     private GridView gridView;
     private TransactionVSListAdapter adapter = null;
     private String queryStr = null;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = TransactionVSGridFragment.class.getName();
@@ -105,7 +105,7 @@ public class TransactionVSGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         queryStr = getArguments().getString(SearchManager.QUERY);
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
@@ -207,7 +207,7 @@ public class TransactionVSGridFragment extends Fragment
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
         CursorLoader loader = new CursorLoader(getActivity(),
                 TransactionVSContentProvider.CONTENT_URI, null, selection,
-                new String[]{contextVS.getCurrentWeekLapseId()}, null);
+                new String[]{appVS.getCurrentWeekLapseId()}, null);
         return loader;
     }
 

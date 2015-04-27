@@ -23,7 +23,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
 
     public static final String TAG = AnonymousSMIMESender.class.getSimpleName();
 ;
-    private AppVS contextVS;
+    private AppVS appVS;
     private CertificationRequestVS certificationRequest;
     private String fromUser;
     private String toUser;
@@ -43,7 +43,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         this.header = header;
         this.serviceURL = serviceURL;
         this.receiverCert = receiverCert;
-        this.contextVS = context;
+        this.appVS = context;
         this.certificationRequest = certificationRequest;
     }
 
@@ -53,7 +53,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         try {
             SMIMEMessage signedMessage = certificationRequest.getSMIME(fromUser, toUser,
                     textToSign, subject, header);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, contextVS);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, appVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
@@ -82,7 +82,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
             } else return responseVS;
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, contextVS);
+            responseVS = ResponseVS.EXCEPTION(ex, appVS);
         } finally { return responseVS; }
     }
 

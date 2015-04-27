@@ -43,7 +43,7 @@ public class BrowserVSActivity extends ActionBarActivity {
 
     private String viewerURL = null;
     private TypeVS operationType;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private String broadCastId = BrowserVSActivity.class.getSimpleName();
     private WebView webView;
     private OperationVS operationVS;
@@ -70,7 +70,7 @@ public class BrowserVSActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
@@ -127,7 +127,7 @@ public class BrowserVSActivity extends ActionBarActivity {
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
         LOGD(TAG + ".sendMessageToWebSocketService", "messageTypeVS: " + messageTypeVS.toString());
-        Intent startIntent = new Intent(contextVS, WebSocketService.class);
+        Intent startIntent = new Intent(appVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
         runOnUiThread(new Runnable() { @Override public void run() { setProgressDialogVisible(true); } });

@@ -39,7 +39,7 @@ public class RepresentativesMainActivity extends ActivityBase {
 
 	public static final String TAG = RepresentativesMainActivity.class.getSimpleName();
 
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private String broadCastId = RepresentativesMainActivity.class.getSimpleName();
     private WeakReference<RepresentativeGridFragment> representativeGridRef;
 
@@ -87,7 +87,7 @@ public class RepresentativesMainActivity extends ActivityBase {
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

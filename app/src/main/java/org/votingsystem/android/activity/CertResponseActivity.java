@@ -66,7 +66,7 @@ public class CertResponseActivity extends ActionBarActivity {
     private Button goAppButton;
     private Button insertPinButton;
     private Button requestCertButton;
-    private AppVS contextVS;
+    private AppVS appVS;
     private String broadCastId = CertResponseActivity.class.getSimpleName();;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -82,8 +82,8 @@ public class CertResponseActivity extends ActionBarActivity {
         setContentView(R.layout.cert_request_form_response);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
-        contextVS = (AppVS) getApplicationContext();
-        LOGD(TAG + ".onCreate", "state: " + contextVS.getState() +
+        appVS = (AppVS) getApplicationContext();
+        LOGD(TAG + ".onCreate", "state: " + appVS.getState() +
                 " - savedInstanceState: " + savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.voting_system_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -108,7 +108,7 @@ public class CertResponseActivity extends ActionBarActivity {
         requestCertButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	Intent intent = null;
-          	  	switch(contextVS.getState()) {
+          	  	switch(appVS.getState()) {
 			    	case WITHOUT_CSR:
 			    		intent = new Intent(getBaseContext(), CertRequestActivity.class);
 			    		break;
@@ -159,18 +159,18 @@ public class CertResponseActivity extends ActionBarActivity {
                 certificates.toArray(certsArray);
                 LOGD(TAG + ".updateKeyStore", "===== FIX THIS!!!");
                 /*
-                String walletBase64 = PrefUtils.getWallet(contextVS);
+                String walletBase64 = PrefUtils.getWallet(appVS);
                 JSONArray wallet = null;
                 if(walletBase64 != null) {
-                    byte[] walletBytes = contextVS.decryptMessage(walletBase64.getBytes());
+                    byte[] walletBytes = appVS.decryptMessage(walletBase64.getBytes());
                     wallet = new JSONArray(new String(walletBytes, "UTF-8"));
                 }*/
                 keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, null, certsArray);
-                PrefUtils.putAppCertState(contextVS.getAccessControl().getServerURL(),
-                        State.WITH_CERTIFICATE, user.getNIF(), contextVS);
-                PrefUtils.putPin(Integer.valueOf(pin), contextVS);
+                PrefUtils.putAppCertState(appVS.getAccessControl().getServerURL(),
+                        State.WITH_CERTIFICATE, user.getNIF(), appVS);
+                PrefUtils.putPin(Integer.valueOf(pin), appVS);
                 /*if(wallet != null) {
-                    Wallet.saveWallet(wallet, pin, contextVS);
+                    Wallet.saveWallet(wallet, pin, appVS);
                 }*/
                 setMessage(getString(R.string.request_cert_result_activity_ok));
                 PrefUtils.putSessionUserVS(user, this);
@@ -186,7 +186,7 @@ public class CertResponseActivity extends ActionBarActivity {
     }
 
     private void checkCertState () {
-  	  	switch(contextVS.getState()) {
+  	  	switch(appVS.getState()) {
 	    	case WITHOUT_CSR:
 	    		Intent intent = new Intent(getBaseContext(), CertRequestActivity.class);
 	    		startActivity(intent);
@@ -198,7 +198,7 @@ public class CertResponseActivity extends ActionBarActivity {
 	        	Long csrRequestId = settings.getLong(CSR_REQUEST_ID_KEY, -1);
 	        	LOGD(TAG + ".checkCertState() ", "csrRequestId: " + csrRequestId);
                 new GetDataTask(null).execute(
-                        contextVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
+                        appVS.getAccessControl().getUserCSRServiceURL(csrRequestId));
   	  	}
     }
 
@@ -286,7 +286,7 @@ public class CertResponseActivity extends ActionBarActivity {
                 insertPinButton.setVisibility(View.VISIBLE);
                 isCertStateChecked.set(true);
             } else if(ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                String certificationAddresses = contextVS.getAccessControl().getCertificationCentersURL();
+                String certificationAddresses = appVS.getAccessControl().getCertificationCentersURL();
                 setMessage(getString(R.string.request_cert_result_activity, certificationAddresses));
             } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.request_user_cert_error_msg), getSupportFragmentManager());

@@ -60,7 +60,7 @@ public class ReceiptFragment extends Fragment {
 
     public static final String TAG = ReceiptFragment.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private ReceiptContainer selectedReceipt;
     private TransactionVSDto transactionDto;
     private TextView receiptSubject;
@@ -123,7 +123,7 @@ public class ReceiptFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
@@ -355,7 +355,7 @@ public class ReceiptFragment extends Fragment {
                     break;
                 case R.id.show_timestamp_info:
                     UIUtils.showTimeStampInfoDialog(selectedReceiptSMIME.getSigner().getTimeStampToken(),
-                            contextVS.getTimeStampCert(), getFragmentManager(), getActivity());
+                            appVS.getTimeStampCert(), getFragmentManager(), getActivity());
                     break;
                 case R.id.share_receipt:
                     try {
@@ -462,7 +462,7 @@ public class ReceiptFragment extends Fragment {
             ResponseVS responseVS = null;
             try {
                 String hashHex = StringUtils.toHex(params[0]);
-                responseVS = HttpHelper.getData(contextVS.getAccessControl().
+                responseVS = HttpHelper.getData(appVS.getAccessControl().
                         getVoteVSCheckServiceURL(hashHex), ContentTypeVS.JSON);
             } catch(Exception ex) {
                 responseVS = ResponseVS.EXCEPTION(ex, getActivity());
@@ -489,7 +489,7 @@ public class ReceiptFragment extends Fragment {
                     selectedReceipt.setReceiptBytes(responseVS.getMessageBytes());
                     if(transactionDto != null) {
                         transactionDto.setSmimeMessage(responseVS.getSMIME());
-                        TransactionVSContentProvider.updateTransaction(contextVS, transactionDto);
+                        TransactionVSContentProvider.updateTransaction(appVS, transactionDto);
                     }
                     initReceiptScreen(selectedReceipt);
                 } catch (Exception ex) {

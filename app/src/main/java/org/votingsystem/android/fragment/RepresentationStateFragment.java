@@ -42,7 +42,7 @@ public class RepresentationStateFragment extends Fragment implements
 
     public static final String TAG = RepresentationStateFragment.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private RepresentationStateDto representation;
     private AnonymousDelegation anonymousDelegation;
     private View rootView;
@@ -70,7 +70,7 @@ public class RepresentationStateFragment extends Fragment implements
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.representative_state, container, false);

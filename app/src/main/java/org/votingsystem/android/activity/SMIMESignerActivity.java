@@ -24,6 +24,7 @@ import org.votingsystem.android.fragment.PinDialogFragment;
 import org.votingsystem.android.fragment.ProgressDialogFragment;
 import org.votingsystem.android.service.WebSocketService;
 import org.votingsystem.android.util.UIUtils;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.JSON;
@@ -41,7 +42,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
 	
 	public static final String TAG = SMIMESignerActivity.class.getSimpleName();
 
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private String broadCastId = SMIMESignerActivity.class.getSimpleName();
     private WebView webView;
     private SocketMessageDto socketMessage;
@@ -59,7 +60,9 @@ public class SMIMESignerActivity extends ActionBarActivity {
         } catch (Exception ex) { ex.printStackTrace();}
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) sendSocketMessage(socketMessage);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            signAndSendSocketMessage(socketMessage);
+        }
         else {
             setProgressDialogVisible(false, null, null);
             if(socketMessageResponse != null) {
@@ -82,8 +85,29 @@ public class SMIMESignerActivity extends ActionBarActivity {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
             startIntent.putExtra(ContextVS.MESSAGE_KEY,
                     JSON.getMapper().writeValueAsString(socketMessage));
-            setProgressDialogVisible(true,
-                    getString(R.string.wait_msg), getString(R.string.signing_document_lbl));
+            startService(startIntent);
+        } catch (Exception ex) { ex.printStackTrace();}
+    }
+
+    private void signAndSendSocketMessage(final SocketMessageDto socketMessage) {
+        LOGD(TAG + ".signAndSendSocketMessage() ", "signAndSendSocketMessage");
+        setProgressDialogVisible(true,
+                getString(R.string.wait_msg), getString(R.string.signing_document_lbl));
+        new Thread(new Runnable() {
+            @Override public void run() {
+                try {
+                    SMIMEMessage smimeMessage = appVS.signMessage(socketMessage.getDeviceFromName(),
+                            socketMessage.getTextToSign(), getString(R.string.sign_request_lbl));
+                    sendSocketMessage(socketMessage.getSignResponse(ResponseVS.SC_OK, null, smimeMessage));
+                } catch (Exception e) { e.printStackTrace(); }
+            }
+        });
+        try {
+            Intent startIntent = new Intent(this, WebSocketService.class);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
+            startIntent.putExtra(ContextVS.MESSAGE_KEY,
+                    JSON.getMapper().writeValueAsString(socketMessage));
+
             startService(startIntent);
         } catch (Exception ex) { ex.printStackTrace();}
     }
@@ -95,7 +119,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         webView = (WebView) findViewById(R.id.smime_signed_content);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         String dtoStr = getIntent().getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
             socketMessage = JSON.getMapper().readValue(dtoStr, SocketMessageDto.class);
@@ -126,6 +150,8 @@ public class SMIMESignerActivity extends ActionBarActivity {
             case android.R.id.home:
             case R.id.reject_sign_request:
                 try {
+                    setProgressDialogVisible(true,
+                            getString(R.string.wait_msg), getString(R.string.sending_data_lbl));
                     SocketMessageDto messageDto = socketMessage.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
                                     DeviceUtils.getDeviceName()), TypeVS.MESSAGEVS_SIGN_RESPONSE);

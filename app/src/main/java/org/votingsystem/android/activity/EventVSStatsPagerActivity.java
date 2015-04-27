@@ -29,12 +29,12 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
 
     public static final String TAG = EventVSStatsPagerActivity.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         Integer cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         EventVSDto.State eventState = (EventVSDto.State)getIntent().getSerializableExtra(ContextVS.EVENT_STATE_KEY);
         TypeVS eventType = (TypeVS)getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);

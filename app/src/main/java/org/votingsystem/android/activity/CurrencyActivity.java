@@ -50,7 +50,7 @@ public class CurrencyActivity extends ActionBarActivity {
 	public static final String TAG = CurrencyActivity.class.getSimpleName();
 
     private WeakReference<CurrencyFragment> currencyRef;
-    private AppVS contextVS;
+    private AppVS appVS;
     private Currency currency;
     private String broadCastId = CurrencyActivity.class.getSimpleName();
 
@@ -68,7 +68,7 @@ public class CurrencyActivity extends ActionBarActivity {
                     case WEB_SOCKET_INIT:
                         setProgressDialogVisible(true, getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg));
-                        Utils.toggleWebSocketServiceConnection(contextVS);
+                        Utils.toggleWebSocketServiceConnection(appVS);
                         break;
                 }
             } else if(socketMsg != null){
@@ -86,7 +86,7 @@ public class CurrencyActivity extends ActionBarActivity {
                                     CurrencyActivity.this).setPositiveButton(getString(R.string.accept_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
-                                            startActivity(new Intent(contextVS, WalletActivity.class));
+                                            startActivity(new Intent(appVS, WalletActivity.class));
                                         }
                                     });
                             UIUtils.showMessageDialog(builder);
@@ -133,7 +133,7 @@ public class CurrencyActivity extends ActionBarActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         currency = (Currency) getIntent().getSerializableExtra(ContextVS.CURRENCY_KEY);
         setContentView(R.layout.fragment_container_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
@@ -162,11 +162,11 @@ public class CurrencyActivity extends ActionBarActivity {
                     break;
                 case R.id.show_timestamp_info:
                     UIUtils.showTimeStampInfoDialog(currency.getReceipt().getSigner().
-                                    getTimeStampToken(), contextVS.getTimeStampCert(),
+                                    getTimeStampToken(), appVS.getTimeStampCert(),
                             getSupportFragmentManager(), this);
                     break;
                 case R.id.send_to_wallet:
-                    if(!contextVS.isWithSocketConnection()) {
+                    if(!appVS.isWithSocketConnection()) {
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                 getString(R.string.send_to_wallet),
                                 getString(R.string.send_to_wallet_connection_required_msg),

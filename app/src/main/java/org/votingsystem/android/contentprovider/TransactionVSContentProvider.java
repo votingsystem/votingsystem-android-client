@@ -221,9 +221,9 @@ public class TransactionVSContentProvider extends ContentProvider {
         }
     }
 
-    public static List<String> getTransactionWeekList(AppVS contextVS) {
+    public static List<String> getTransactionWeekList(AppVS appVS) {
         List<String> result = new ArrayList<String>();
-        Cursor cursor = contextVS.getContentResolver().query(
+        Cursor cursor = appVS.getContentResolver().query(
                 TransactionVSContentProvider.CONTENT_URI, null, null, null, null);
         if(cursor.getCount() == 0) return result;
         cursor.moveToFirst(); //ORDER -> ID_COL DESC
@@ -250,7 +250,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
         while(iteratorCalendar.before(lastTransactionCalendar)) {
             TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
-            String periodLbl = contextVS.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
+            String periodLbl = appVS.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
                     timePeriod.getDateFrom()), DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
             result.add(periodLbl);
             LOGD(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);

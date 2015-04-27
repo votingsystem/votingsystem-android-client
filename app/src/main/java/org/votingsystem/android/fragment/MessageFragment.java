@@ -55,7 +55,7 @@ public class MessageFragment extends Fragment {
     private static final int CONTENT_VIEW_ID = 1000000;
 
     private WeakReference<CurrencyFragment> currencyRef;
-    private AppVS contextVS;
+    private AppVS appVS;
     private SocketMessageDto socketMessage;
     private TypeVS typeVS;
     private Currency currency;
@@ -101,7 +101,7 @@ public class MessageFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
         fragment_container = (LinearLayout)rootView.findViewById(R.id.fragment_container);
         message_content = (TextView)rootView.findViewById(R.id.message_content);
@@ -142,7 +142,7 @@ public class MessageFragment extends Fragment {
                     getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
                             messageId), MessageContentProvider.getContentValues(socketMessage,
                             MessageContentProvider.State.READED), null, null);
-                    PrefUtils.addNumMessagesNotReaded(contextVS, -1);
+                    PrefUtils.addNumMessagesNotReaded(appVS, -1);
                 }
             }
         } catch(Exception ex) { ex.printStackTrace(); }
@@ -244,10 +244,10 @@ public class MessageFragment extends Fragment {
             try {
                 SocketMessageDto socketMessageDto = null;
                 try {
-                    Wallet.updateWallet(new HashSet(Arrays.asList(currency)), contextVS);
+                    Wallet.updateWallet(new HashSet(Arrays.asList(currency)), appVS);
                     String msg = getString(R.string.save_to_wallet_ok_msg, currency.getAmount().toString() + " " +
                             currency.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
-                            MsgUtils.getTagVSMessage(currency.getSignedTagVS(), contextVS);
+                            MsgUtils.getTagVSMessage(currency.getSignedTagVS(), appVS);
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             getString(R.string.save_to_wallet_lbl), msg, getActivity());
                     builder.setPositiveButton(getString(R.string.accept_lbl),

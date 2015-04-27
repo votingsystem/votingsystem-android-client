@@ -189,11 +189,11 @@ public class CurrencyBundle {
         return dto;
     }
 
-    public void updateWallet(Currency leftOverCurrency, AppVS contextVS) throws Exception {
+    public void updateWallet(Currency leftOverCurrency, AppVS appVS) throws Exception {
         Set<Currency> currencyListToRemove = getCurrencySet();
-        Wallet.removeCurrencyCollection(currencyListToRemove, contextVS);
+        Wallet.removeCurrencyCollection(currencyListToRemove, appVS);
         if(leftOverCurrency != null) Wallet.updateWallet(
-                new HashSet<Currency>(Arrays.asList(leftOverCurrency)),contextVS);
+                new HashSet<Currency>(Arrays.asList(leftOverCurrency)),appVS);
     }
 
     private static Comparator<Currency> currencyComparator = new Comparator<Currency>() {

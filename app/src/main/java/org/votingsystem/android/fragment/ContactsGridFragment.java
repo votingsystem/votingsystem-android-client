@@ -68,7 +68,7 @@ public class ContactsGridFragment extends Fragment
     private GridView gridView;
     private String queryStr = null;
     private Mode mode = Mode.CONTACT;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private Integer firstVisiblePosition = null;
     private String broadCastId = ContactsGridFragment.class.getSimpleName();
     private static final int loaderId = 0;
@@ -96,7 +96,7 @@ public class ContactsGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);
@@ -137,7 +137,7 @@ public class ContactsGridFragment extends Fragment
             if(dtoStr != null) {
                 try {
                     userVSList = JSON.getMapper().readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
-                    ContactListAdapter adapter = new ContactListAdapter(userVSList, contextVS);
+                    ContactListAdapter adapter = new ContactListAdapter(userVSList, appVS);
                     gridView.setAdapter(adapter);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -367,9 +367,9 @@ public class ContactsGridFragment extends Fragment
         @Override protected ResponseVS doInBackground(String... params) {
             String contactsURL = null;
             if(phone != null || email != null) {
-                contactsURL = contextVS.getCurrencyServer().getSearchServiceURL(phone, email);
+                contactsURL = appVS.getCurrencyServer().getSearchServiceURL(phone, email);
             } else {
-                contactsURL = contextVS.getCurrencyServer().getSearchServiceURL(params[0]);
+                contactsURL = appVS.getCurrencyServer().getSearchServiceURL(params[0]);
             }
             return HttpHelper.getData(contactsURL, ContentTypeVS.JSON);
         }
@@ -388,7 +388,7 @@ public class ContactsGridFragment extends Fragment
                         ResultListDto<UserVSDto> resultList = ((ResultListDto<UserVSDto>) responseVS
                                 .getMessage(new TypeReference<ResultListDto<UserVSDto>>() {}));
                         userVSList = resultList.getResultList();
-                        ContactListAdapter adapter = new ContactListAdapter(userVSList, contextVS);
+                        ContactListAdapter adapter = new ContactListAdapter(userVSList, appVS);
                         gridView.setAdapter(adapter);
                     }
                 } catch (Exception ex) {

@@ -47,7 +47,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
 
     public static final String TAG = SelectDeviceDialogFragment.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private SimpleAdapter simpleAdapter;
     private String dialogCaller;
     private List<DeviceVSDto> deviceListDto;
@@ -64,7 +64,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.select_device_dialog, null);
@@ -128,7 +128,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         } else {
             deviceLoader = new DeviceLoader();
             String targetURL = ((AppVS)getActivity().getApplicationContext()).getCurrencyServer().
-                    getDeviceVSConnectedServiceURL(contextVS.getUserVS().getNIF());
+                    getDeviceVSConnectedServiceURL(appVS.getUserVS().getNIF());
             deviceLoader.execute(targetURL);
         }
     }

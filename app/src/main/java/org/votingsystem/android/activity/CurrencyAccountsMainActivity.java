@@ -27,12 +27,12 @@ public class CurrencyAccountsMainActivity extends ActivityBase {
     private static final int USER_ACCOUNTS_POS       = 0;
     private static final int TRANSANCTIONVS_LIST_POS = 1;
 
-    private AppVS contextVS;
+    private AppVS appVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         setContentView(R.layout.currency_accounts_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
@@ -67,7 +67,7 @@ public class CurrencyAccountsMainActivity extends ActivityBase {
         switch (item.getItemId()) {
             /*case R.id.admin_currency_menu_item:
                 Intent intent = new Intent(this, BrowserVSActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, contextVS.getCurrencyServer().getMenuAdminURL());
+                intent.putExtra(ContextVS.URL_KEY, appVS.getCurrencyServer().getMenuAdminURL());
                 startActivity(intent);
                 return true;*/
             default:

@@ -57,7 +57,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     private CheckBox anonymousCheckBox;
     private CheckBox publicCheckBox;
     private EditText weeks_delegation;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private String broadCastId = RepresentativeDelegationActivity.class.getSimpleName();
     private UserVSDto representative = null;
     private Date anonymousDelegationFromDate;
@@ -116,7 +116,7 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         representative = (UserVSDto) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

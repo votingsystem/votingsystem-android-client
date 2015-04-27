@@ -71,6 +71,7 @@ import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.json.JSONException;
+import org.votingsystem.android.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.android.activity.FragmentContainerActivity;
 import org.votingsystem.android.activity.MessageActivity;
@@ -126,14 +127,13 @@ public class UIUtils  {
         context.startActivity(intent);
     }
 
-    public static void launchMessageActivity(Integer statusCode, String message, String caption,
-             Context context) {
+    public static void launchMessageActivity(Integer statusCode, String message, String caption) {
         ResponseVS responseVS = new ResponseVS(statusCode);
         responseVS.setCaption(caption).setNotificationMessage(message);
-        Intent intent = new Intent(context, MessageActivity.class);
+        Intent intent = new Intent(AppVS.getInstance(), MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        context.startActivity(intent);
+        AppVS.getInstance().startActivity(intent);
     }
 
     public static void showSignersInfoDialog(Set<UserVSDto> signers, FragmentManager fragmentManager,

@@ -31,7 +31,7 @@ public class QRGeneratorFragment extends Fragment {
 
     public static final String TAG = QRGeneratorFragment.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private String broadCastId = QRGeneratorFragment.class.getSimpleName();
     private View rootView;
     private QRMessageVS qrMessageVS;
@@ -40,7 +40,7 @@ public class QRGeneratorFragment extends Fragment {
                ViewGroup container, Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.qr_generator_fragment, container, false);
         Intent intent = getActivity().getIntent();
         String qrMessage = intent.getStringExtra(ContextVS.MESSAGE_KEY);
@@ -62,7 +62,7 @@ public class QRGeneratorFragment extends Fragment {
         ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_code_lbl));
         ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
                 getOperationMessage(qrMessageVS));
-        if(!contextVS.isWithSocketConnection()) {
+        if(!appVS.isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.qr_code_lbl), getString(R.string.qr_connection_required_msg),
                     getActivity()).setPositiveButton(getString(R.string.accept_lbl),

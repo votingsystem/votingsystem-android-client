@@ -26,7 +26,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
     public static final String TAG = SignedMapSender.class.getSimpleName();
 
     private SMIMEMessage smimeMessage = null;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private String fromUser = null;
     private String toUser = null;
     private String subject = null;
@@ -43,7 +43,7 @@ public class SignedMapSender implements Callable<ResponseVS> {
         this.textToSign = textToSign;
         this.mapToSend = mapToSend;
         this.subject = subject;
-        this.contextVS = context;
+        this.appVS = context;
         this.serviceURL = serviceURL;
         this.signedFileName = signedFileName;
     }
@@ -52,15 +52,15 @@ public class SignedMapSender implements Callable<ResponseVS> {
         LOGD(TAG + ".call", "serviceURL: " + serviceURL);
         ResponseVS responseVS = null;
         try {
-            KeyStore.PrivateKeyEntry keyEntry = contextVS.getUserPrivateKey();
+            KeyStore.PrivateKeyEntry keyEntry = appVS.getUserPrivateKey();
             SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
                     keyEntry.getCertificateChain(), SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
             smimeMessage = signedMailGenerator.getSMIME(fromUser, toUser,textToSign, subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, contextVS);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, appVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setStatusCode(ResponseVS.SC_ERROR_TIMESTAMP);
-                responseVS.setCaption(contextVS.getString(R.string.timestamp_service_error_caption));
+                responseVS.setCaption(appVS.getString(R.string.timestamp_service_error_caption));
                 responseVS.setNotificationMessage(responseVS.getMessage());
                 return responseVS;
             }
@@ -68,11 +68,11 @@ public class SignedMapSender implements Callable<ResponseVS> {
             responseVS = HttpHelper.sendObjectMap(mapToSend, serviceURL);
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(contextVS.getString(R.string.exception_lbl),
-                    contextVS.getString(R.string.pin_error_msg));
+            responseVS = ResponseVS.EXCEPTION(appVS.getString(R.string.exception_lbl),
+                    appVS.getString(R.string.pin_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, contextVS);
+            responseVS = ResponseVS.EXCEPTION(ex, appVS);
         } finally {return responseVS;}
     }
 

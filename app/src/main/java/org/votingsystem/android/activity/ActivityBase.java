@@ -61,7 +61,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private ObjectAnimator mStatusBarColorAnimator;
     private ViewGroup mDrawerItemsListContainer;
 
@@ -150,7 +150,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
                                 getString(R.string.connecting_to_service_msg),
                                 getSupportFragmentManager());
                         new Thread(new Runnable() {@Override public void run() {
-                                Utils.toggleWebSocketServiceConnection(contextVS); }}).start();
+                                Utils.toggleWebSocketServiceConnection(appVS); }}).start();
                         break;
                 }
             } else if(socketMsg != null) {
@@ -174,7 +174,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -292,7 +292,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
         userBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG, "userBox clicked");
-                if(!contextVS.isWithSocketConnection()) {
+                if(!appVS.isWithSocketConnection()) {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
                             R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
                 } else {showConnectionStatusDialog();}
@@ -380,7 +380,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
                 }
                 return true;
             case R.id.close_app:
-                contextVS.finish();
+                appVS.finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -455,7 +455,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
 
     private void setConnectionStatusUI() {
         if(connectionStatusText != null && connectionStatusView != null) {
-            if(contextVS.isWithSocketConnection()) {
+            if(appVS.isWithSocketConnection()) {
                 connectionStatusText.setText(getString(R.string.connected_lbl));
                 connectionStatusView.setVisibility(View.VISIBLE);
             } else {
@@ -468,7 +468,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
     @Override protected void onResume() {
         super.onResume();
         if(messageDrawerItemTextView != null) messageDrawerItemTextView.setText(
-                MsgUtils.getMessagesDrawerItemMessage(contextVS));
+                MsgUtils.getMessagesDrawerItemMessage(appVS));
         PrefUtils.registerPreferenceChangeListener(this, this);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
@@ -521,14 +521,14 @@ public abstract class ActivityBase extends ActionBarActivity implements
     }
 
     private void showConnectionStatusDialog() {
-        if(contextVS.isWithSocketConnection()) {
+        if(appVS.isWithSocketConnection()) {
             UserVSDto sessionUserVS = PrefUtils.getSessionUserVS(this);
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Utils.toggleWebSocketServiceConnection(contextVS);
+                        Utils.toggleWebSocketServiceConnection(appVS);
                         dialog.dismiss();
                     }
                 });
@@ -651,7 +651,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(ContextVS.NUM_MESSAGES_KEY.equals(key)) {
-            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(contextVS));
+            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(appVS));
         }
     }
 }

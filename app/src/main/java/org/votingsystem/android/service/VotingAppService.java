@@ -27,12 +27,12 @@ public class VotingAppService extends Service implements Runnable {
 
     public static final String TAG = VotingAppService.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private Handler handler;
     private static final int UPDATE_FREQUENCY_IN_MINUTES = 60;
 
     @Override public void onCreate(){
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         handler = new Handler();
         LOGD(TAG + ".onCreate", "VotingAppService created");
     }
@@ -76,7 +76,7 @@ public class VotingAppService extends Service implements Runnable {
     private void checkForPendingOperations() {
         LOGD(TAG + ".checkForPendingOperations()", "");
         GregorianCalendar nextCheckTime = new GregorianCalendar();
-        Calendar lastCheckedTime = PrefUtils.getLastPendingOperationCheckedTime(contextVS);
+        Calendar lastCheckedTime = PrefUtils.getLastPendingOperationCheckedTime(appVS);
         nextCheckTime = (GregorianCalendar) lastCheckedTime.clone();
         nextCheckTime.add(GregorianCalendar.MINUTE, UPDATE_FREQUENCY_IN_MINUTES);
         LOGD(TAG + ".checkForPendingOperations() ", "last checked time:" +

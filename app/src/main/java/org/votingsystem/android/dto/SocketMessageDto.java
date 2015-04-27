@@ -118,9 +118,9 @@ public class SocketMessageDto {
     public SocketMessageDto getSignResponse(Integer statusCode, String message,
                     SMIMEMessage smimeMessage) throws Exception {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
-        socketSession.setTypeVS(TypeVS.MESSAGEVS_FROM_DEVICE);
+        socketSession.setTypeVS(TypeVS.MESSAGEVS_SIGN_RESPONSE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_SIGN_RESPONSE);
+        socketMessageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setSessionId(sessionId);
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignResponse(

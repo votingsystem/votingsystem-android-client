@@ -24,28 +24,28 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
-    private AppVS contextVS;
+    private AppVS appVS;
     private String timeStampServiceURL;
       
     public MessageTimeStamper (SMIMEMessage smimeMessage,
             AppVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
-        this.contextVS = context;
+        this.appVS = context;
     }
 
     public MessageTimeStamper (SMIMEMessage smimeMessage, String timeStampServiceURL,
                AppVS context) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
-        this.contextVS = context;
+        this.appVS = context;
         this.timeStampServiceURL = timeStampServiceURL;
     }
     
     public MessageTimeStamper (TimeStampRequest timeStampRequest,
             AppVS context) throws Exception {
         this.timeStampRequest = timeStampRequest;
-        this.contextVS = context;
+        this.appVS = context;
     }
         
     public MessageTimeStamper (String timeStampDigestAlgorithm, 
@@ -53,19 +53,19 @@ public class MessageTimeStamper implements Callable<ResponseVS> {
     	TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         this.timeStampRequest = reqgen.generate(
         		timeStampDigestAlgorithm, digestToTimeStamp);
-        this.contextVS = context;
+        this.appVS = context;
     }
     
         
     @Override public ResponseVS call() throws Exception {
         //byte[] base64timeStampRequest = Base64.encode(timeStampRequest.getEncoded());
         if(timeStampServiceURL == null) timeStampServiceURL =
-                contextVS.getTimeStampServiceURL();
+                appVS.getTimeStampServiceURL();
         ResponseVS responseVS = HttpHelper.sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             timeStampToken= new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
-            X509Certificate timeStampCert = contextVS.getTimeStampCert();
+            X509Certificate timeStampCert = appVS.getTimeStampCert();
                 /* -> Android project config problem
                  * SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);

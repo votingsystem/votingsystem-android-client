@@ -48,7 +48,7 @@ public class EventVSStatsFragment extends Fragment {
 
     private View rootView;
     private EventVSDto eventVS;
-    private AppVS contextVS;
+    private AppVS appVS;
     private String htmlContent;
     private String baseURL;
 
@@ -63,7 +63,7 @@ public class EventVSStatsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         Long eventId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         Cursor cursor = getActivity().getContentResolver().query(
                 EventVSContentProvider.getEventURI(eventId), null, null, null, null);
         cursor.moveToFirst();
@@ -72,7 +72,7 @@ public class EventVSStatsFragment extends Fragment {
         LOGD(TAG + ".onCreateView", "eventJSONData: " + eventJSONData);
         try {
             eventVS = JSON.getMapper().readValue(eventJSONData, EventVSDto.class);
-            eventVS.setAccessControlVS(contextVS.getAccessControl());
+            eventVS.setAccessControlVS(appVS.getAccessControl());
         } catch(Exception ex) { ex.printStackTrace(); }
         rootView = inflater.inflate(R.layout.eventvs_stats, container, false);
         setHasOptionsMenu(true);

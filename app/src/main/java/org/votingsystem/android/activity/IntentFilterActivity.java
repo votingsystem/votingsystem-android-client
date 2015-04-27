@@ -39,7 +39,7 @@ public class IntentFilterActivity extends ActionBarActivity {
 
     private ProgressDialog progressDialog = null;
     private OperationVS operationVS;
-    private AppVS contextVS;
+    private AppVS appVS;
     private String broadCastId = IntentFilterActivity.class.getSimpleName();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -47,7 +47,7 @@ public class IntentFilterActivity extends ActionBarActivity {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             try {
-                if(operationVS != null  && ContextVS.State.WITH_CERTIFICATE == contextVS.getState()){
+                if(operationVS != null  && ContextVS.State.WITH_CERTIFICATE == appVS.getState()){
                     if(operationVS.getEventVS() != null) {
                         //We don't pass all eventvs data on uri because content can be very large
                         responseVS = HttpHelper.getData(operationVS.getEventVS().getURL(), null);
@@ -65,7 +65,7 @@ public class IntentFilterActivity extends ActionBarActivity {
                     }
                 } else {
                     Intent responseIntent = null;
-                    switch (contextVS.getState()) {
+                    switch (appVS.getState()) {
                         case WITHOUT_CSR:
                             String applicationID = PrefUtils.getApplicationId();
                             LOGD(TAG + ".processOperation(.. ) ", "WITHOUT_CSR - applicationID: " +
@@ -95,7 +95,7 @@ public class IntentFilterActivity extends ActionBarActivity {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
             String query = getIntent().getStringExtra(SearchManager.QUERY);
             LOGD(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);

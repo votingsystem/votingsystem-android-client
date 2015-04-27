@@ -54,7 +54,7 @@ public class RepresentativeGridFragment extends Fragment
     private GridView gridView;
     private RepresentativeListAdapter adapter = null;
     private String queryStr = null;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = RepresentativeGridFragment.class.getSimpleName();
@@ -81,7 +81,7 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);
@@ -169,16 +169,16 @@ public class RepresentativeGridFragment extends Fragment
 
 
     public void fetchItems(Long offset) {
-        if(contextVS.getAccessControl() == null) {
-            Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,
-                    contextVS.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
+        if(appVS.getAccessControl() == null) {
+            Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
+                    appVS.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
             return;
         }
         LOGD(TAG +  ".fetchItems", "offset: " + offset);
         if(isProgressDialogVisible.get()) return;
         else setProgressDialogVisible(true);
         Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
-        startIntent.putExtra(ContextVS.URL_KEY, contextVS.getAccessControl().
+        startIntent.putExtra(ContextVS.URL_KEY, appVS.getAccessControl().
                 getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);

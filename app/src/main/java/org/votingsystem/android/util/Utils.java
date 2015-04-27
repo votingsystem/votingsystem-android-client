@@ -100,13 +100,13 @@ public class Utils {
         context.startService(startIntent);
     }
 
-    public static void toggleWebSocketServiceConnection(AppVS contextVS) {
-        Intent startIntent = new Intent(contextVS, WebSocketService.class);
+    public static void toggleWebSocketServiceConnection(AppVS appVS) {
+        Intent startIntent = new Intent(appVS, WebSocketService.class);
         TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(contextVS.isWithSocketConnection()) typeVS = TypeVS.WEB_SOCKET_CLOSE;
+        if(appVS.isWithSocketConnection()) typeVS = TypeVS.WEB_SOCKET_CLOSE;
         LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
         startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-        contextVS.startService(startIntent);
+        appVS.startService(startIntent);
     }
 
     public static void showAccountsUpdatedNotification(Context context){

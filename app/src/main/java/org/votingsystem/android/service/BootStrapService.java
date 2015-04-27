@@ -27,7 +27,7 @@ public class BootStrapService extends IntentService {
 
     public static final String TAG = BootStrapService.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private String serviceCaller;
     private Handler mHandler;
 
@@ -37,7 +37,7 @@ public class BootStrapService extends IntentService {
     }
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         final String accessControlURL = arguments.getString(ContextVS.ACCESS_CONTROL_URL_KEY);
@@ -45,35 +45,35 @@ public class BootStrapService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "accessControlURL: " + accessControlURL +
                 " - currencyServerURL: " + currencyServerURL);
         ResponseVS responseVS = null;
-        if(contextVS.getAccessControl() == null) {
+        if(appVS.getAccessControl() == null) {
             responseVS = HttpHelper.getData(AccessControlDto.getServerInfoURL(accessControlURL),
                     ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     AccessControlDto accessControl = (AccessControlDto) responseVS.getMessage(AccessControlDto.class);
-                    contextVS.setAccessControlVS(accessControl);
+                    appVS.setAccessControlVS(accessControl);
                 } catch(Exception ex) {ex.printStackTrace();}
             } else {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,
+                        Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
                                 accessControlURL), Toast.LENGTH_LONG).show();
                     }
                 });
             }
         }
-        if(contextVS.getCurrencyServer() == null) {
+        if(appVS.getCurrencyServer() == null) {
             responseVS = HttpHelper.getData(ActorDto.getServerInfoURL(currencyServerURL),
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     CurrencyServerDto currencyServer = (CurrencyServerDto) responseVS.getMessage(CurrencyServerDto.class);
-                    contextVS.setCurrencyServerDto(currencyServer);
+                    appVS.setCurrencyServerDto(currencyServer);
                 } catch(Exception ex) {ex.printStackTrace();}
             } else {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        Toast.makeText(contextVS, contextVS.getString(R.string.server_connection_error_msg,
+                        Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
                                 currencyServerURL), Toast.LENGTH_LONG).show();
                     }
                 });
@@ -81,7 +81,7 @@ public class BootStrapService extends IntentService {
         }
         if(!PrefUtils.isDataBootstrapDone(this)) {
             PrefUtils.markDataBootstrapDone(this);
-            /*if(contextVS.getCurrencyServer() == null && contextVS.getAccessControl() == null) {
+            /*if(appVS.getCurrencyServer() == null && appVS.getAccessControl() == null) {
                 intent = new Intent(getBaseContext(), IntentFilterActivity.class);
                 responseVS.setCaption(getString(R.string.connection_error_msg));
                 if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
@@ -93,7 +93,7 @@ public class BootStrapService extends IntentService {
         }
         if(responseVS == null) responseVS = new ResponseVS();
         responseVS.setServiceCaller(serviceCaller);
-        contextVS.broadcastResponse(responseVS);
+        appVS.broadcastResponse(responseVS);
     }
 
     private void runOnUiThread(Runnable runnable) {

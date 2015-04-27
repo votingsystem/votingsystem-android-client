@@ -63,7 +63,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private List<Button> voteOptionsButtonList;
     private Button saveReceiptButton;
     private Button cancelVoteButton;
-    private AppVS contextVS;
+    private AppVS appVS;
     private View rootView;
     private String broadCastId = null;
 
@@ -136,12 +136,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                ViewGroup container, Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         try {
             if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
                 String dtoStr = getArguments().getString(ContextVS.EVENTVS_KEY);
                 eventVS = JSON.getMapper().readValue(dtoStr, EventVSDto.class);
-                eventVS.setAccessControlVS(contextVS.getAccessControl());
+                eventVS.setAccessControlVS(appVS.getAccessControl());
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -291,7 +291,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 FieldEventVSDto optionSelected = option;
                 public void onClick(View v) {
                     LOGD(TAG + "- optionButton - optionId: " +
-                            optionSelected.getId(), "state: " + contextVS.getState().toString());
+                            optionSelected.getId(), "state: " + appVS.getState().toString());
                     processSelectedOption(optionSelected);
                 }
             });

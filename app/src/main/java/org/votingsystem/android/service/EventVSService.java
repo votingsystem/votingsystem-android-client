@@ -35,11 +35,11 @@ public class EventVSService extends IntentService {
 
     public EventVSService() { super(TAG); }
 
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
 
     public void checkDates(EventVSDto eventVS) {
         Date todayDate = Calendar.getInstance().getTime();
-        final String checkURL = contextVS.getAccessControl().
+        final String checkURL = appVS.getAccessControl().
                 getCheckDatesServiceURL(eventVS.getId());
         Runnable runnable = null;
         if(eventVS.getState() == EventVSDto.State.ACTIVE) {
@@ -62,13 +62,13 @@ public class EventVSService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "onHandleIntent ");
         ResponseVS responseVS = null;
         final Bundle arguments = intent.getExtras();
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
             String queryStr = arguments.getString(ContextVS.QUERY_KEY);
             EventVSDto.State eventState = (EventVSDto.State) arguments.getSerializable(ContextVS.STATE_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
-            if(contextVS.getAccessControl() == null) {
+            if(appVS.getAccessControl() == null) {
                 LOGD(TAG, "AccessControl not initialized");
                 return;
             }
@@ -76,7 +76,7 @@ public class EventVSService extends IntentService {
                 processSearch(queryStr, eventState);
                 return;
             }
-            String serviceURL = contextVS.getAccessControl().getEventVSURL(eventState,
+            String serviceURL = appVS.getAccessControl().getEventVSURL(eventState,
                     ContextVS.EVENTS_PAGE_SIZE, offset);
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -127,12 +127,12 @@ public class EventVSService extends IntentService {
                     responseVS = ResponseVS.EXCEPTION(ex, this);
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
-            contextVS.broadcastResponse(responseVS);
+            appVS.broadcastResponse(responseVS);
         } else LOGD(TAG + ".onHandleIntent", "missing params");
     }
 
     private void processSearch(String queryStr, EventVSDto.State eventState) {
-        String serviceURL = contextVS.getAccessControl().getSearchServiceURL(null, null, queryStr,
+        String serviceURL = appVS.getAccessControl().getSearchServiceURL(null, null, queryStr,
                 EventVSDto.Type.ELECTION, eventState);
         ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
         Intent intent = new Intent(this, EventVSSearchResultActivity.class);

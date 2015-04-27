@@ -52,7 +52,7 @@ public class ContactFragment extends Fragment {
 
 	public static final String TAG = ContactFragment.class.getSimpleName();
 
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private View rootView;
     private String broadCastId = null;
     private Button toggle_contact_button;
@@ -77,7 +77,7 @@ public class ContactFragment extends Fragment {
                 case WEB_SOCKET_INIT:
                     setProgressDialogVisible(true, getString(R.string.connecting_caption),
                             getString(R.string.connecting_to_service_msg));
-                    Utils.toggleWebSocketServiceConnection(contextVS);
+                    Utils.toggleWebSocketServiceConnection(appVS);
                     break;
             }
         } else setProgressDialogVisible(false, null, null);
@@ -139,7 +139,7 @@ public class ContactFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.contact, container, false);
@@ -245,7 +245,7 @@ public class ContactFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.send_message:
-                if(!contextVS.isWithSocketConnection()) {
+                if(!appVS.isWithSocketConnection()) {
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             getString(R.string.send_message_lbl),
                             getString(R.string.connection_required_msg),
@@ -304,8 +304,8 @@ public class ContactFragment extends Fragment {
             try {
                 ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getData(
                         new TypeReference<ResultListDto<DeviceVSDto>>(){},
-                        contextVS.getCurrencyServer().getDeviceVSConnectedServiceURL(
-                        contextVS.getUserVS().getNIF()), MediaTypeVS.JSON);
+                        appVS.getCurrencyServer().getDeviceVSConnectedServiceURL(
+                        appVS.getUserVS().getNIF()), MediaTypeVS.JSON);
                 return resultListDto.getResultList();
             } catch (Exception ex) { ex.printStackTrace();}
             return null;

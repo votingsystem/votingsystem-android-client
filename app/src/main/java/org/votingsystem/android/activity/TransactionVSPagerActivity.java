@@ -25,13 +25,13 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
 
     public static final String TAG = TransactionVSPagerActivity.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
@@ -39,7 +39,7 @@ public class TransactionVSPagerActivity extends ActionBarActivity {
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
         cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI, null, selection,
-                new String[]{contextVS.getCurrentWeekLapseId()}, null);
+                new String[]{appVS.getCurrentWeekLapseId()}, null);
         TransactionVSPagerAdapter pagerAdapter = new TransactionVSPagerAdapter(
                 getSupportFragmentManager(), cursor.getCount());
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);

@@ -53,7 +53,7 @@ public class TransactionVSFragment extends Fragment {
     private Button receipt;
     private SMIMEMessage messageSMIME;
     private String broadCastId = null;
-    private AppVS contextVS;
+    private AppVS appVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -69,7 +69,7 @@ public class TransactionVSFragment extends Fragment {
                     try {
                         selectedTransaction.setSmimeMessage(new SMIMEMessage(receiptBytes));
                     } catch (Exception e) { e.printStackTrace(); }
-                    TransactionVSContentProvider.updateTransaction(contextVS, selectedTransaction);
+                    TransactionVSContentProvider.updateTransaction(appVS, selectedTransaction);
                 break;
             }
         }
@@ -88,11 +88,11 @@ public class TransactionVSFragment extends Fragment {
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + "= ? ";
         Cursor cursor = getActivity().getContentResolver().query(
                 TransactionVSContentProvider.CONTENT_URI, null, selection,
-                new String[]{contextVS.getCurrentWeekLapseId()}, null);
+                new String[]{appVS.getCurrentWeekLapseId()}, null);
         cursor.moveToPosition(cursorPosition);
         Long transactionId = cursor.getLong(cursor.getColumnIndex(
                 TransactionVSContentProvider.ID_COL));

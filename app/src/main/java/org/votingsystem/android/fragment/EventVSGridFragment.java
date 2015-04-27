@@ -57,7 +57,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private GridView gridView;
     private EventListAdapter mAdapter = null;
     private EventVSDto.State eventState = null;
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private static final int loaderId = 0;
@@ -77,9 +77,9 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         eventState = (EventVSDto.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
-        PrefUtils.registerPreferenceChangeListener(contextVS, this);
+        PrefUtils.registerPreferenceChangeListener(appVS, this);
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
@@ -121,7 +121,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onScroll(AbsListView view,  int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        if(contextVS.getAccessControl() == null) {
+        if(appVS.getAccessControl() == null) {
             LOGD(TAG +  ".onScroll", "Missing Access Control. Waiting for data");
             Toast.makeText(getActivity(), getString(R.string.waiting_for_access_control_connection),
                     Toast.LENGTH_SHORT).show();
@@ -222,7 +222,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
         if((EventVSContentProvider.getNumTotal(eventState) == null)
-                && contextVS.getAccessControl() != null)
+                && appVS.getAccessControl() != null)
             fetchItems(offset);
         else {
             setProgressDialogVisible(false);
@@ -243,7 +243,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(this, contextVS);
+        PrefUtils.unregisterPreferenceChangeListener(this, appVS);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 

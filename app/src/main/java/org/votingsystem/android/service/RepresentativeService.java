@@ -57,20 +57,20 @@ public class RepresentativeService extends IntentService {
 
     public static final String TAG = RepresentativeService.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
 
     public RepresentativeService() { super(TAG); }
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         LOGD(TAG + ".onHandleIntent", "operation: " + operation + " - serviceCaller: " + serviceCaller);
-        if(contextVS.getAccessControl() == null) {
-            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, contextVS.getString(
-                    R.string.server_connection_error_msg, contextVS.getAccessControlURL()));
-            contextVS.broadcastResponse(responseVS.setServiceCaller(
+        if(appVS.getAccessControl() == null) {
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, appVS.getString(
+                    R.string.server_connection_error_msg, appVS.getAccessControlURL()));
+            appVS.broadcastResponse(responseVS.setServiceCaller(
                     serviceCaller).setTypeVS(operation));
         }
         switch(operation) {
@@ -109,12 +109,12 @@ public class RepresentativeService extends IntentService {
     private void checkRepresentationState(String serviceCaller) {
         ResponseVS responseVS = updateRepresentationState();
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.STATE);
-        contextVS.broadcastResponse(responseVS);
+        appVS.broadcastResponse(responseVS);
     }
 
     private ResponseVS updateRepresentationState() {
-        String serviceURL = contextVS.getAccessControl().getRepresentationStateServiceURL(
-                contextVS.getUserVS().getNIF());
+        String serviceURL = appVS.getAccessControl().getRepresentationStateServiceURL(
+                appVS.getUserVS().getNIF());
         ResponseVS responseVS = null;
         try {
             RepresentationStateDto stateDto = HttpHelper.getData(
@@ -123,7 +123,7 @@ public class RepresentativeService extends IntentService {
                 case REPRESENTATIVE:
                 case WITH_PUBLIC_REPRESENTATION:
                     ResponseVS representativeImageReponse = HttpHelper.getData(
-                            contextVS.getAccessControl().getRepresentativeImageURL(
+                            appVS.getAccessControl().getRepresentativeImageURL(
                                     stateDto.getRepresentative().getId()), null);
                     if (ResponseVS.SC_OK == representativeImageReponse.getStatusCode()) {
                         stateDto.getRepresentative().setImageBytes(
@@ -150,13 +150,13 @@ public class RepresentativeService extends IntentService {
         contentToSignMap.put("UUID", UUID.randomUUID().toString());
         ResponseVS responseVS = null;
         try {
-            SMIMEMessage smimeMessage = contextVS.signMessage(contextVS.getAccessControl().getName(),
+            SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
                     new JSONObject(contentToSignMap).toString(),
                     getString(R.string.revoke_representative_msg_subject));
             responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    contextVS.getAccessControl().getRepresentativeRevokeServiceURL());
+                    appVS.getAccessControl().getRepresentativeRevokeServiceURL());
             String selection = UserContentProvider.NIF_COL + " = ?";
-            String[] selectionArgs = { contextVS.getUserVS().getNIF() };
+            String[] selectionArgs = { appVS.getUserVS().getNIF() };
             getContentResolver().delete(UserContentProvider.CONTENT_URI, selection, selectionArgs);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) updateRepresentationState();
         } catch (Exception ex) {
@@ -164,7 +164,7 @@ public class RepresentativeService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_REVOKE);
-        contextVS.broadcastResponse(responseVS);
+        appVS.broadcastResponse(responseVS);
     }
 
     private void requestRepresentatives(String serviceURL, String serviceCaller) {
@@ -193,12 +193,12 @@ public class RepresentativeService extends IntentService {
             }
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.ITEMS_REQUEST);
-        contextVS.broadcastResponse(responseVS);
+        appVS.broadcastResponse(responseVS);
     }
 
 
     private void requestRepresentativeByNif(String nif, String serviceCaller) {
-        String serviceURL = contextVS.getAccessControl().getRepresentativeURLByNif(nif);
+        String serviceURL = appVS.getAccessControl().getRepresentativeURLByNif(nif);
         ResponseVS responseVS = HttpHelper.getData(serviceURL, null);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             responseVS.setCaption(getString(R.string.operation_error_msg));
@@ -213,12 +213,12 @@ public class RepresentativeService extends IntentService {
             }
         }
         responseVS.setTypeVS(TypeVS.ITEM_REQUEST).setServiceCaller(serviceCaller);
-        contextVS.broadcastResponse(responseVS);
+        appVS.broadcastResponse(responseVS);
     }
 
     private void requestRepresentative(Long representativeId, String serviceCaller) {
-        String serviceURL = contextVS.getAccessControl().getRepresentativeURL(representativeId);
-        String imageServiceURL = contextVS.getAccessControl().
+        String serviceURL = appVS.getAccessControl().getRepresentativeURL(representativeId);
+        String imageServiceURL = appVS.getAccessControl().
                 getRepresentativeImageURL(representativeId);
         byte[] representativeImageBytes = null;
         ResponseVS responseVS = null;
@@ -243,23 +243,23 @@ public class RepresentativeService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.ITEM_REQUEST);
-        contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
+        appVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
     }
 
     private void publicDelegation(Bundle arguments, String serviceCaller) {
         ResponseVS responseVS = null;
         UserVSDto representative = (UserVSDto) arguments.getSerializable(ContextVS.USER_KEY);
-        String serviceURL = contextVS.getAccessControl().getRepresentativeDelegationServiceURL();
+        String serviceURL = appVS.getAccessControl().getRepresentativeDelegationServiceURL();
         String messageSubject = getString(R.string.representative_delegation_lbl);
         try {
             Map signatureDataMap = new HashMap();
             signatureDataMap.put("operation", TypeVS.REPRESENTATIVE_SELECTION.toString());
             signatureDataMap.put("UUID", UUID.randomUUID().toString());
-            signatureDataMap.put("accessControlURL", contextVS.getAccessControl().getServerURL());
+            signatureDataMap.put("accessControlURL", appVS.getAccessControl().getServerURL());
             signatureDataMap.put("representativeNif", representative.getNIF());
             signatureDataMap.put("representativeName", representative.getName());
             JSONObject signatureContent = new JSONObject(signatureDataMap);
-            SMIMEMessage smimeMessage = contextVS.signMessage(contextVS.getAccessControl().getName(),
+            SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
                     signatureContent.toString(), messageSubject);
             responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
                     ContentTypeVS.JSON_SIGNED, serviceURL);
@@ -276,7 +276,7 @@ public class RepresentativeService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_SELECTION);
-            contextVS.broadcastResponse(responseVS);
+            appVS.broadcastResponse(responseVS);
         }
     }
 
@@ -302,7 +302,7 @@ public class RepresentativeService extends IntentService {
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(
                     TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
-            contextVS.broadcastResponse(responseVS);
+            appVS.broadcastResponse(responseVS);
         }
     }
 
@@ -310,15 +310,15 @@ public class RepresentativeService extends IntentService {
             AnonymousDelegation anonymousDelegation) throws Exception {
         LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
         JSONObject requestJSON = anonymousDelegation.getCancellationRequest();
-        SMIMEMessage smimeMessage = contextVS.signMessage(contextVS.getAccessControl().getName(),
+        SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
                 requestJSON.toString(), getString(R.string.anonymous_delegation_cancellation_lbl));
         ResponseVS responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                contextVS.getAccessControl().getCancelAnonymousDelegationServiceURL());
+                appVS.getAccessControl().getCancelAnonymousDelegationServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
                     responseVS.getMessageBytes()));
             Collection matches = delegationReceipt.checkSignerCert(
-                    contextVS.getAccessControl().getCertificate());
+                    appVS.getAccessControl().getCertificate());
             if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
             responseVS.setSMIME(delegationReceipt);
         }
@@ -335,8 +335,8 @@ public class RepresentativeService extends IntentService {
         try {
             String messageSubject = getString(R.string.representative_delegation_lbl);
             AnonymousDelegation anonymousDelegation = new AnonymousDelegation(weeksOperationActive,
-                    dateFrom, dateTo, contextVS.getAccessControl().getServerURL());
-            String fromUser = contextVS.getUserVS().getNIF();
+                    dateFrom, dateTo, appVS.getAccessControl().getServerURL());
+            String fromUser = appVS.getUserVS().getNIF();
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
                     MediaTypeVS.JSON_SIGNED;
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.TEXT.getName();
@@ -345,21 +345,21 @@ public class RepresentativeService extends IntentService {
                     getCertificationRequest().getCsrPEM());
             //request signed with user certificate (data signed without representative data)
             SignedMapSender signedMapSender = new SignedMapSender(fromUser,
-                    contextVS.getAccessControl().getName(),
+                    appVS.getAccessControl().getName(),
                     anonymousDelegation.getRequest().toString(), mapToSend, messageSubject, null,
-                    contextVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
+                    appVS.getAccessControl().getAnonymousDelegationRequestServiceURL(),
                     representativeDataFileName, (AppVS)getApplicationContext());
             responseVS = signedMapSender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                 responseVS.setData(anonymousDelegation.getCertificationRequest());
                 String fromAnonymousUser = anonymousDelegation.getHashCertVS();
-                String toUser = contextVS.getAccessControl().getName();
+                String toUser = appVS.getAccessControl().getName();
                 //delegation signed with anonymous certificate (with delegation data)
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, anonymousDelegation.getDelegation(representative.getNIF(),
                         representative.getName()).toString(), messageSubject, null,
-                        contextVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
+                        appVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
                         anonymousDelegation.getCertificationRequest(),
                         (AppVS)getApplicationContext());
                 responseVS = anonymousSender.call();
@@ -367,7 +367,7 @@ public class RepresentativeService extends IntentService {
                     SMIMEMessage delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(
                             responseVS.getMessageBytes()));
                     Collection matches = delegationReceipt.checkSignerCert(
-                            contextVS.getAccessControl().getCertificate());
+                            appVS.getAccessControl().getCertificate());
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
                     anonymousDelegation.setRepresentative(representative);
                     PrefUtils.putAnonymousDelegation(anonymousDelegation, this);
@@ -389,14 +389,14 @@ public class RepresentativeService extends IntentService {
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(
                     TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
-            contextVS.broadcastResponse(responseVS);
+            appVS.broadcastResponse(responseVS);
         }
     }
 
     private void newRepresentative(Bundle arguments, String serviceCaller, TypeVS operationType) {
         ResponseVS responseVS = null;
         try {
-            String serviceURL = contextVS.getAccessControl().getRepresentativeServiceURL();
+            String serviceURL = appVS.getAccessControl().getRepresentativeServiceURL();
             String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
             String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
             byte[] imageBytes = arguments.getByteArray(ContextVS.IMAGE_KEY);
@@ -409,7 +409,7 @@ public class RepresentativeService extends IntentService {
             contentToSignMap.put("base64ImageHash", base64ResultDigest);
             contentToSignMap.put("representativeInfo", editorContent);
             contentToSignMap.put("UUID", UUID.randomUUID().toString());
-            SMIMEMessage smimeMessage = contextVS.signMessage(contextVS.getAccessControl().getName(),
+            SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
                     new JSONObject(contentToSignMap).toString(), messageSubject);
             Map<String, Object> fileMap = new HashMap<String, Object>();
             String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
@@ -431,7 +431,7 @@ public class RepresentativeService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setTypeVS(TypeVS.NEW_REPRESENTATIVE).setServiceCaller(serviceCaller);
-        contextVS.broadcastResponse(responseVS);
+        appVS.broadcastResponse(responseVS);
     }
 
     private byte[] reduceImageFileSize(Uri imageUri) {

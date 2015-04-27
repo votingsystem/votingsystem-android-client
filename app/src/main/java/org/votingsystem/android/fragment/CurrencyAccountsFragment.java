@@ -60,7 +60,7 @@ public class CurrencyAccountsFragment extends Fragment {
     private TransactionVSDto transactionVS;
     private View rootView;
     private String broadCastId = CurrencyAccountsFragment.class.getSimpleName();
-    private AppVS contextVS;
+    private AppVS appVS;
     private TextView last_request_date;
     private RecyclerView accounts_recycler_view;
     private String IBAN;
@@ -103,7 +103,7 @@ public class CurrencyAccountsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.currency_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         //https://developer.android.com/training/material/lists-cards.html
@@ -138,13 +138,13 @@ public class CurrencyAccountsFragment extends Fragment {
         try {
             last_request_date.setText(Html.fromHtml(getString(R.string.currency_last_request_info_lbl,
                     DateUtils.getDayWeekDateStr(lastCheckedTime))));
-            BalancesDto userInfo = PrefUtils.getBalances(contextVS);
+            BalancesDto userInfo = PrefUtils.getBalances(appVS);
             if(userInfo != null) {
                 Map<String, TagVSInfoDto> tagVSBalancesMap = userInfo.getTagVSInfoMap(
                         Currency.getInstance("EUR").getCurrencyCode());
                 if(tagVSBalancesMap != null) {
                     String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
-                    AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(contextVS,
+                    AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(appVS,
                             tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
                     accounts_recycler_view.setAdapter(accountVSInfoAdapter);
                 }

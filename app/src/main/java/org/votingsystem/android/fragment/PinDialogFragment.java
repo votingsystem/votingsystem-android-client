@@ -133,12 +133,12 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateDialog", "savedInstanceState: ");
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        AppVS contextVS = (AppVS) getActivity().getApplicationContext();
+        AppVS appVS = (AppVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        final ContextVS.State appState = contextVS.getState();
+        final ContextVS.State appState = appVS.getState();
         AlertDialog.Builder builder = null;
-        if(!ContextVS.State.WITH_CERTIFICATE.equals(contextVS.getState()) && isWithCertValidation) {
+        if(!ContextVS.State.WITH_CERTIFICATE.equals(appVS.getState()) && isWithCertValidation) {
             builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.cert_not_found_caption),
                     getString(R.string.cert_not_found_msg), getActivity()).setPositiveButton(

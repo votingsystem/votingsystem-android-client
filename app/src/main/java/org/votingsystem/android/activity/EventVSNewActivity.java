@@ -58,7 +58,7 @@ public class EventVSNewActivity extends ActionBarActivity {
 	
 	public static final String TAG = EventVSNewActivity.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private EditText dateElectionText;
     private TextView optionCaption;
     private EditText subjectEditText;
@@ -162,7 +162,7 @@ public class EventVSNewActivity extends ActionBarActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) this.getApplicationContext();
+        appVS = (AppVS) this.getApplicationContext();
         broadCastId = EventVSNewActivity.class.getSimpleName();
         setContentView(R.layout.eventvs_new);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);

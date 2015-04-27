@@ -24,7 +24,7 @@ public class CurrencyFragment extends Fragment {
 
     public static final String TAG = CurrencyFragment.class.getSimpleName();
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private Currency currency;
     private TextView currency_amount, currency_state, currency_currency, date_info, hash_cert;
 
@@ -32,7 +32,7 @@ public class CurrencyFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.currency, container, false);

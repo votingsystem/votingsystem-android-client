@@ -45,7 +45,7 @@ public class RepresentativeFragment extends Fragment {
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
-    private AppVS contextVS = null;
+    private AppVS appVS = null;
     private View rootView;
     private String broadCastId = null;
     private Button selectButton;
@@ -87,7 +87,7 @@ public class RepresentativeFragment extends Fragment {
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         rootView = inflater.inflate(R.layout.representative, container, false);
         representative_image = (ImageView) rootView.findViewById(R.id.representative_image);
-        contextVS = (AppVS) getActivity().getApplicationContext();
+        appVS = (AppVS) getActivity().getApplicationContext();
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -174,7 +174,7 @@ public class RepresentativeFragment extends Fragment {
         @Override protected void onPreExecute() { }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            return  HttpHelper.getData(contextVS.getAccessControl().
+            return  HttpHelper.getData(appVS.getAccessControl().
                     getRepresentativeImageURL(representativeId), null);
         }
 

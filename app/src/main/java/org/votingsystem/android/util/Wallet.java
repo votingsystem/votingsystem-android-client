@@ -101,7 +101,7 @@ public class Wallet {
     }
 
     public static Set<Currency> updateCurrencyWithErrors(List<String> currencySetToRemove,
-            AppVS contextVS) throws Exception {
+            AppVS appVS) throws Exception {
         Set<Currency> errorList = new HashSet<>();
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetToRemove) {
@@ -111,12 +111,12 @@ public class Wallet {
                 errorList.add(removedCurrency);
             }
         }
-        Wallet.saveWallet(currencySet, null, contextVS);
+        Wallet.saveWallet(currencySet, null, appVS);
         return errorList;
     }
 
     public static void updateCurrencyState(List<String> currencySetOK, Currency.State state,
-                AppVS contextVS) throws Exception {
+                AppVS appVS) throws Exception {
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetOK) {
             Currency currency = currencyMap.get(hashCertVS);
@@ -125,7 +125,7 @@ public class Wallet {
                 currency.setState(Currency.State.OK);
             }
         }
-        Wallet.saveWallet(currencySet, null, contextVS);
+        Wallet.saveWallet(currencySet, null, appVS);
     }
 
     public static Map<String, Map<String, IncomesDto>> getCurrencyTagMap() {
@@ -200,18 +200,18 @@ public class Wallet {
     }
 
     public static void updateWallet(Collection<Currency> currencyCollection,
-                                    AppVS contextVS) throws Exception {
+                                    AppVS appVS) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<String, Currency>();
         for(Currency currency : currencyCollection) {
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         for(Currency currency : currencySet) {
             if(currencyMap.containsKey(currency.getHashCertVS())) throw new ValidationExceptionVS(
-                    contextVS.getString(R.string.currency_repeated_wallet_error_msg, currency.getAmount().toString() +
+                    appVS.getString(R.string.currency_repeated_wallet_error_msg, currency.getAmount().toString() +
                     " " + currency.getCurrencyCode()));
             else currencyMap.put(currency.getHashCertVS(), currency);
         }
-        Wallet.saveWallet(currencyMap.values(), null, contextVS);
+        Wallet.saveWallet(currencyMap.values(), null, appVS);
     }
 
     public static BigDecimal getAvailableForTagVS(String currencyCode, String tagVS) {

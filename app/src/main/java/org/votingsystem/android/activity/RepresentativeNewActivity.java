@@ -59,7 +59,7 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     private TypeVS operationType;
     private EditorFragment editorFragment;
-    private AppVS contextVS;
+    private AppVS appVS;
     private TextView imageCaption;
     private UserVSDto representative;
     private String broadCastId = RepresentativeNewActivity.class.getSimpleName();
@@ -137,7 +137,7 @@ public class RepresentativeNewActivity extends ActivityBase {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         operationType = (TypeVS) getIntent().getSerializableExtra(ContextVS.TYPEVS_KEY);
         LOGD(TAG + ".onCreate", "operationType: " + operationType +
                 " - savedInstanceState: " + savedInstanceState);

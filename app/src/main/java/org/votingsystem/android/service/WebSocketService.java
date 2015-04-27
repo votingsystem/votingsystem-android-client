@@ -20,6 +20,7 @@ import org.votingsystem.android.activity.SMIMESignerActivity;
 import org.votingsystem.android.contentprovider.MessageContentProvider;
 import org.votingsystem.android.dto.SocketMessageDto;
 import org.votingsystem.android.util.PrefUtils;
+import org.votingsystem.android.util.UIUtils;
 import org.votingsystem.android.util.Utils;
 import org.votingsystem.android.util.Wallet;
 import org.votingsystem.android.util.WebSocketSession;
@@ -64,12 +65,12 @@ public class WebSocketService extends Service {
 
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 
-    private AppVS contextVS;
+    private AppVS appVS;
     private Session session;
     private CountDownLatch latch = new CountDownLatch(1);
 
     @Override public void onCreate(){
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         LOGD(TAG + ".onCreate", "WebSocketService started");
     }
 
@@ -80,7 +81,7 @@ public class WebSocketService extends Service {
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         LOGD(TAG + ".onStartCommand", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        if(contextVS.getCurrencyServer() == null) {
+        if(appVS.getCurrencyServer() == null) {
             SocketMessageDto messageDto = new SocketMessageDto(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
                     getString(R.string.missing_server_connection), TypeVS.INIT_SIGNED_SESSION);
             messageDto.setCaption(getString(R.string.connection_error_msg));
@@ -89,7 +90,7 @@ public class WebSocketService extends Service {
         } else {
             if(session == null || !session.isOpen()) {
                 WebSocketListener socketListener = new WebSocketListener(
-                        contextVS.getCurrencyServer().getWebSocketURL());
+                        appVS.getCurrencyServer().getWebSocketURL());
                 new Thread(null, socketListener, "websocket_service_thread").start();
             }
             try {
@@ -147,10 +148,10 @@ public class WebSocketService extends Service {
         new Thread(null, new Runnable() {
             @Override public void run() {
                 try {
-                    CurrencyServerDto currencyServer = contextVS.getCurrencyServer();
+                    CurrencyServerDto currencyServer = appVS.getCurrencyServer();
                     SocketMessageDto messageDto = SocketMessageDto.INIT_SESSION_REQUEST();
                     String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
-                    SMIMEMessage smimeMessage = contextVS.signMessage(currencyServer.getName(),
+                    SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
                             JSON.getMapper().writeValueAsString(messageDto), msgSubject,
                             currencyServer.getTimeStampServiceURL());
                     messageDto.setSMIME(smimeMessage);
@@ -158,7 +159,7 @@ public class WebSocketService extends Service {
                     LOGD(TAG + ".onStartCommand", "websocket session started");
                 } catch(Exception ex) {
                     ex.printStackTrace();
-                    contextVS.broadcastResponse(ResponseVS.EXCEPTION(ex, contextVS)
+                    appVS.broadcastResponse(ResponseVS.EXCEPTION(ex, appVS)
                             .setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID));
                 }
             }
@@ -193,7 +194,7 @@ public class WebSocketService extends Service {
                 try {
                     KeyStore p12Store = KeyStore.getInstance("PKCS12");
                     p12Store.load(null, null);
-                    X509Certificate serverCert = contextVS.getSSLServerCert();
+                    X509Certificate serverCert = appVS.getSSLServerCert();
                     p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
                     ByteArrayOutputStream baos  = new ByteArrayOutputStream();
                     p12Store.store(baos, "".toCharArray());
@@ -226,7 +227,7 @@ public class WebSocketService extends Service {
                             @Override
                             public void beforeRequest(Map<String, List<String>> headers) {
                                 //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
-                                headers.put("Origin", Arrays.asList(contextVS.getCurrencyServerURL()));
+                                headers.put("Origin", Arrays.asList(appVS.getCurrencyServerURL()));
                             }
 
                             @Override
@@ -261,14 +262,14 @@ public class WebSocketService extends Service {
         LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                 " - type: " + socketMsg.getOperation() + " - serviceCaller: " + socketMsg.getServiceCaller());
         Intent intent =  new Intent(socketMsg.getServiceCaller());
-        WebSocketSession socketSession = contextVS.getWSSession(socketMsg.getUUID());
+        WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
         try {
             if(socketSession == null && socketMsg.isEncrypted()) {
-                byte[] decryptedBytes = contextVS.decryptMessage(socketMsg.getAesParams().getBytes());
+                byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());
                 AESParamsDto aesDto = JSON.getMapper().readValue(decryptedBytes, AESParamsDto.class);
                 AESParams aesParams = AESParams.load(aesDto);
                 socketMsg.decryptMessage(aesParams);
-                contextVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(
+                appVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(
                         socketMsg.getAesEncryptParams(), null, null, socketMsg.getOperation()));
             } else if(socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
@@ -282,9 +283,9 @@ public class WebSocketService extends Service {
                         switch(socketSession.getTypeVS()) {
                             case INIT_SIGNED_SESSION:
                                 if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                                    contextVS.setConnectedDevice(socketMsg.getConnectedDevice());
-                                    contextVS.setWithSocketConnection(true);
-                                } else contextVS.setWithSocketConnection(false);
+                                    appVS.setConnectedDevice(socketMsg.getConnectedDevice());
+                                    appVS.setWithSocketConnection(true);
+                                } else appVS.setWithSocketConnection(false);
                                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                                 break;
                             default: sendWebSocketBroadcast(socketMsg);
@@ -293,7 +294,7 @@ public class WebSocketService extends Service {
                     break;
                 case WEB_SOCKET_CLOSE:
                     if(ResponseVS.SC_OK == socketMsg.getStatusCode())
-                        contextVS.setWithSocketConnection(false);
+                        appVS.setWithSocketConnection(false);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS:
@@ -302,15 +303,20 @@ public class WebSocketService extends Service {
                         responseVS.setCaption(getString(R.string.message_lbl)).
                                 setNotificationMessage(socketMsg.getMessage());
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        PrefUtils.addNumMessagesNotReaded(contextVS, 1);
-                        Utils.showNewMessageNotification(contextVS);
+                        PrefUtils.addNumMessagesNotReaded(appVS, 1);
+                        Utils.showNewMessageNotification(appVS);
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:
-                    intent = new Intent(this, SMIMESignerActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
-                    startActivity(intent);
+                    if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR,getString(R.string.error_lbl) ,
+                                socketMsg.getMessage());
+                    } else {
+                        intent = new Intent(this, SMIMESignerActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
+                        startActivity(intent);
+                    }
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -318,13 +324,13 @@ public class WebSocketService extends Service {
                 case CURRENCY_WALLET_CHANGE:
                     if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_DEVICE) {
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
-                            Wallet.removeCurrencyCollection((Collection<Currency>) socketSession.getData(), contextVS);
+                            Wallet.removeCurrencyCollection((Collection<Currency>) socketSession.getData(), appVS);
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                         }
                     } else if(socketMsg.getOperation() == TypeVS.MESSAGEVS_TO_DEVICE) {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        PrefUtils.addNumMessagesNotReaded(contextVS, 1);
-                        Utils.showNewMessageNotification(contextVS);
+                        PrefUtils.addNumMessagesNotReaded(appVS, 1);
+                        Utils.showNewMessageNotification(appVS);
                     }
                     break;
                 default: LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

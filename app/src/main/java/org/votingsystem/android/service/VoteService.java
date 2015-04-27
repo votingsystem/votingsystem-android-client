@@ -36,10 +36,10 @@ public class VoteService extends IntentService {
 
     public VoteService() { super(TAG); }
 
-    private AppVS contextVS;
+    private AppVS appVS;
 
     @Override protected void onHandleIntent(Intent intent) {
-        contextVS = (AppVS) getApplicationContext();
+        appVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
@@ -56,10 +56,10 @@ public class VoteService extends IntentService {
             switch(operation) {
                 case VOTING_PUBLISHING:
                     String textToSign = arguments.getString(ContextVS.MESSAGE_KEY);
-                    SMIMEMessage smimeMessage = contextVS.signMessage(contextVS.getAccessControl().getName(),
+                    SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
                             textToSign, getString(R.string.publish_election_msg_subject));
                     responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
-                            ContentTypeVS.JSON_SIGNED, contextVS.getAccessControl().
+                            ContentTypeVS.JSON_SIGNED, appVS.getAccessControl().
                             getPublishServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         responseVS.setCaption(getString(R.string.operation_ok_msg)).
@@ -67,12 +67,12 @@ public class VoteService extends IntentService {
                     }
                     break;
                 case VOTEVS:
-                    if(contextVS.getControlCenter() == null) {
-                        ControlCenterDto controlCenter = contextVS.getActorVS(ControlCenterDto.class,
+                    if(appVS.getControlCenter() == null) {
+                        ControlCenterDto controlCenter = appVS.getActorVS(ControlCenterDto.class,
                                 vote.getEventVS().getControlCenter().getServerURL());
-                        contextVS.setControlCenter(controlCenter);
+                        appVS.setControlCenter(controlCenter);
                     }
-                    VoteSender voteSender = new VoteSender(vote, contextVS);
+                    VoteSender voteSender = new VoteSender(vote, appVS);
                     responseVS = voteSender.call();
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         VoteVS voteReceipt = (VoteVS)responseVS.getData();
@@ -93,11 +93,11 @@ public class VoteService extends IntentService {
                     break;
                 case CANCEL_VOTE:
                     JSONObject cancelDataJSON = new JSONObject(vote.getCancelVoteDataMap());
-                    SMIMEMessage smime = contextVS.signMessage(contextVS.getAccessControl().getName(),
+                    SMIMEMessage smime = appVS.signMessage(appVS.getAccessControl().getName(),
                             cancelDataJSON.toString(), getString(R.string.cancel_vote_msg_subject));
                     responseVS = HttpHelper.sendData(smime.getBytes(),
                             ContentTypeVS.JSON_SIGNED,
-                            contextVS.getAccessControl().getCancelVoteServiceURL());
+                            appVS.getAccessControl().getCancelVoteServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         SMIMEMessage cancelReceipt = responseVS.getSMIME();
                         vote.setCancelVoteReceipt(cancelReceipt);
@@ -128,7 +128,7 @@ public class VoteService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
-            contextVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
+            appVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
         }
     }
 
