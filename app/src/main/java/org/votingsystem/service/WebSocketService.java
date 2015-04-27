@@ -272,9 +272,8 @@ public class WebSocketService extends Service {
                 AESParamsDto aesDto = JSON.getMapper().readValue(decryptedBytes, AESParamsDto.class);
                 AESParams aesParams = AESParams.load(aesDto);
                 socketMsg.decryptMessage(aesParams);
-                appVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(
-                        socketMsg.getAesEncryptParams(), null, null, socketMsg.getOperation()));
-            } else if(socketSession != null && socketMsg.isEncrypted()) {
+                appVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(socketMsg));
+            } else if (socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
             intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
@@ -291,6 +290,7 @@ public class WebSocketService extends Service {
                                 } else appVS.setWithSocketConnection(false);
                                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                                 break;
+                            case OPERATION_CANCELED: break;
                             default: sendWebSocketBroadcast(socketMsg);
                         }
                     }
@@ -330,6 +330,13 @@ public class WebSocketService extends Service {
                         PrefUtils.addNumMessagesNotReaded(appVS, 1);
                         Utils.showNewMessageNotification(appVS);
                     }
+                    break;
+                case OPERATION_CANCELED:
+                    socketMsg.setOperation(socketSession.getTypeVS());
+                    socketMsg.setStatusCode(ResponseVS.SC_CANCELED);
+                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY,
+                            JSON.getMapper().writeValueAsString(socketMsg));
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 default: LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Looper;
+import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -73,7 +74,7 @@ import static org.votingsystem.util.LogUtils.LOGE;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AppVS extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class AppVS extends MultiDexApplication implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = AppVS.class.getSimpleName();
 

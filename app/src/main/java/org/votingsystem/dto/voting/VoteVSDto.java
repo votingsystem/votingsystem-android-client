@@ -1,9 +1,7 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.votingsystem.model.VoteVS;
-
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -139,5 +137,26 @@ public class VoteVSDto {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+
+    public AccessRequestDto getAccessRequestDto() {
+        AccessRequestDto accessRequestDto = new AccessRequestDto();
+        accessRequestDto.setEventId(eventVSId);
+        accessRequestDto.setEventURL(eventVSURL);
+        accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        accessRequestDto.setHashCertVSBase64(hashCertVSBase64);
+        accessRequestDto.setUUID(java.util.UUID.randomUUID().toString());
+        return accessRequestDto;
+    }
+
+    public VoteVSCancelerDto getCancelVoteDto(String originHashAccessRequest, String originHashCertVote) {
+        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
+        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
+        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        cancelerDto.setOriginHashCertVote(originHashCertVote);
+        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
+        cancelerDto.setUUID(java.util.UUID.randomUUID().toString());
+        return cancelerDto;
     }
 }

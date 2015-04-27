@@ -2,15 +2,19 @@ package org.votingsystem.model;
 
 import android.content.Context;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -139,11 +143,12 @@ public class ReceiptContainer implements Serializable {
     }
 
     public TypeVS getTypeVS() {
-        if(typeVS == null && (receipt != null)) {
+        if(typeVS == null && receipt != null) {
             try {
-                JSONObject signedContent = new JSONObject(getReceipt().getSignedContent());
-                if(signedContent.has("operation")) {
-                    typeVS = TypeVS.valueOf(signedContent.getString("operation"));
+                Map signedContent = JSON.getMapper().readValue(receipt.getSignedContent(),
+                        new TypeReference<Map<String, Object>>() {});
+                if(signedContent.containsKey("operation")) {
+                    typeVS = TypeVS.valueOf((String) signedContent.get("operation"));
                 }
             } catch (Exception ex) { ex.printStackTrace(); }
         }

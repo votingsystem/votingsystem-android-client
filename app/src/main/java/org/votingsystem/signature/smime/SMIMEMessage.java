@@ -82,7 +82,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final String CONTENT_TYPE_VS = "CONTENT_TYPE_VS";
-	
+
     static {
         MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
 
@@ -91,7 +91,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
         mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
         mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        
+
         mc.addMailcap("application/pkcs7-signature;; x-java-content-handler=org.bouncycastle2.mail.smime.handlers.pkcs7_signature");
         mc.addMailcap("application/pkcs7-mime;; x-java-content-handler=org.bouncycastle2.mail.smime.handlers.pkcs7_mime");
         mc.addMailcap("application/x-pkcs7-signature;; x-java-content-handler=org.bouncycastle2.mail.smime.handlers.x_pkcs7_signature");
@@ -164,7 +164,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         if(contentInfo == null) contentInfo = new SMIMEContentInfo(getContent(), getHeader(CONTENT_TYPE_VS));
         return true;
     }
-    
+
     public boolean hasTimeStampToken() throws Exception {
         //Call this method after isValidSignature()
         SignerInformationStore  signers = smimeSigned.getSignerInfos();
@@ -176,7 +176,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         }
         return result;
     }
-    
+
     private TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         //Call this method after isValidSignature()
         TimeStampToken timeStampToken = null;
@@ -189,7 +189,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                     PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
             if(timeStampAttribute != null) {
                 DEREncodable dob = timeStampAttribute.getAttrValues().getObjectAt(0);
-                org.bouncycastle2.cms.CMSSignedData signedData = 
+                org.bouncycastle2.cms.CMSSignedData signedData =
                         new org.bouncycastle2.cms.CMSSignedData(dob.getDERObject().getEncoded());
                 timeStampToken = new TimeStampToken(signedData);
                 //byte[] hashToken = timeStampToken.getTimeStampInfo().getMessageImprintDigest();

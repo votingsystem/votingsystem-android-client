@@ -40,7 +40,7 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_WS_MESSAGE_ENCRYPTED     = 810;
     public static final int SC_WS_CONNECTION_INIT_ERROR = 840;
     public static final int SC_WS_CONNECTION_NOT_FOUND  = 841;
-    public static final int SC_CANCELLED                = 0;
+    public static final int SC_CANCELED                = 0;
     public static final int SC_INITIALIZED              = 1;
     public static final int SC_PAUSED                   = 10;
 
@@ -380,4 +380,5 @@ public class ResponseVS<T> implements Parcelable {
         return this.getClass().getSimpleName() + " - statusCode: " + statusCode +
                 " - typeVS:" + typeVS;
     }
+
 }

@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.signature.util.AESParams;
 
 /**
@@ -14,11 +15,14 @@ public class WebSocketSession<T> {
     private DeviceVSDto deviceVS;
     private String UUID;
 
-    public WebSocketSession(AESParams aesParams, DeviceVSDto deviceVS, T data, TypeVS typeVS) {
+    public WebSocketSession(SocketMessageDto socketMsg) {
+        this.aesParams = socketMsg.getAesEncryptParams();
+        this.typeVS = socketMsg.getOperation();
+    }
+
+    public WebSocketSession(AESParams aesParams, DeviceVSDto deviceVS) {
         this.aesParams = aesParams;
-        this.data = data;
         this.deviceVS = deviceVS;
-        this.typeVS = typeVS;
     }
 
     public AESParams getAESParams() {

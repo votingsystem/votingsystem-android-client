@@ -538,7 +538,7 @@ public class SocketMessageDto {
         if(deviceVS != null) webSocketSession = AppVS.getInstance().getWSSession(deviceVS.getId());
         if(webSocketSession == null) {
             AESParams aesParams = new AESParams();
-            webSocketSession = new WebSocketSession(aesParams, deviceVS, null, null);
+            webSocketSession = new WebSocketSession(aesParams, deviceVS);
             AppVS.getInstance().putWSSession(java.util.UUID.randomUUID().toString(), webSocketSession);
         }
         webSocketSession.setData(data);

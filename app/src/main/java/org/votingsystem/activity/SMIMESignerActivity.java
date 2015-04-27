@@ -13,9 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
-
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.SocketMessageDto;
@@ -73,7 +71,8 @@ public class SMIMESignerActivity extends ActionBarActivity {
                         SMIMESignerActivity.this.finish();
                     } else showMessage(socketMessageResponse.getStatusCode(),
                             getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
-                }
+                } else LOGD(TAG + ".broadcastReceiver", "socketMessageResponse:" +
+                        socketMessageResponse.getOperation());
             }
         }
     }};
@@ -146,8 +145,9 @@ public class SMIMESignerActivity extends ActionBarActivity {
                             getString(R.string.wait_msg), getString(R.string.sending_data_lbl));
                     SocketMessageDto messageDto = socketMessage.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
-                                    DeviceUtils.getDeviceName()), TypeVS.MESSAGEVS_SIGN_RESPONSE);
+                                    DeviceUtils.getDeviceName()), TypeVS.OPERATION_CANCELED);
                     sendSocketMessage(messageDto);
+                    finish();
                 } catch(Exception ex) {ex.printStackTrace();}
                 return true;
             case R.id.ban_device:
