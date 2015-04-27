@@ -22,6 +22,7 @@ public class VoteVSDto {
     private String messageSMIMEURL;
     private String cancelationMessageSMIMEURL;
     private String eventVSURL;
+    private String UUID;
     private VoteVS.State state;
     private FieldEventVSDto optionSelected;
 
@@ -132,4 +133,11 @@ public class VoteVSDto {
         this.optionSelected = optionSelected;
     }
 
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
 }

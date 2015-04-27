@@ -2,6 +2,8 @@ package org.votingsystem.signature.smime;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -40,8 +42,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.JsonUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.activation.CommandMap;
@@ -394,8 +395,10 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
+                    Map<String, Object> dataMap = JSON.getMapper().readValue(
+                            signedContent, new TypeReference<Map<String, Object>>() {});
                     JSONObject voteJSON = new JSONObject(signedContent);
-                    voteVS = VoteVS.getInstance(JsonUtils.toMap(voteJSON), cert, timeStampToken);
+                    voteVS = VoteVS.getInstance(dataMap, cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}

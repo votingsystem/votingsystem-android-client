@@ -29,12 +29,11 @@ import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.KeyStoreUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
@@ -196,7 +195,9 @@ public class WebSocketService extends Service {
                     p12Store.load(null, null);
                     X509Certificate serverCert = contextVS.getSSLServerCert();
                     p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
-                    byte[] p12KeyStoreBytes = KeyStoreUtils.getBytes(p12Store, "".toCharArray());
+                    ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+                    p12Store.store(baos, "".toCharArray());
+                    byte[] p12KeyStoreBytes = baos.toByteArray();
                     SSLContextConfigurator sslContext = new SSLContextConfigurator();
                     sslContext.setTrustStoreType("PKCS12");
                     sslContext.setTrustStoreBytes(p12KeyStoreBytes);
