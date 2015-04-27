@@ -89,6 +89,7 @@ public class WebSocketService extends Service {
             return START_STICKY;
         } else {
             if(session == null || !session.isOpen()) {
+                if(latch.getCount() == 0) latch = new CountDownLatch(1);
                 WebSocketListener socketListener = new WebSocketListener(
                         appVS.getCurrencyServer().getWebSocketURL());
                 new Thread(null, socketListener, "websocket_service_thread").start();
@@ -136,7 +137,10 @@ public class WebSocketService extends Service {
                             default:
                                 session.getBasicRemote().sendText(message);
                         }
-                    } catch(Exception ex) {ex.printStackTrace();}
+                    } catch(Exception ex) {
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
+                                getString(R.string.error_lbl));
+                    }
                 }
             }, "websocket_message_proccessor_thread").start();
         }
@@ -216,7 +220,6 @@ public class WebSocketService extends Service {
 
         @Override public void run() {
             try {
-                if(latch.getCount() == 0) latch = new CountDownLatch(1);
                 LOGD(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
                 //sets the incoming buffer size to 1000000 bytes ~ 900K
                 //client.getProperties().put("org.glassfish.tyrus.incomingBufferSize", 1000000);
@@ -260,8 +263,8 @@ public class WebSocketService extends Service {
 
     public void sendWebSocketBroadcast(SocketMessageDto socketMsg) {
         LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
-                " - type: " + socketMsg.getOperation() + " - serviceCaller: " + socketMsg.getServiceCaller());
-        Intent intent =  new Intent(socketMsg.getServiceCaller());
+                " - type: " + socketMsg.getOperation());
+        Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
         WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
         try {
             if(socketSession == null && socketMsg.isEncrypted()) {
@@ -308,15 +311,10 @@ public class WebSocketService extends Service {
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:
-                    if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR,getString(R.string.error_lbl) ,
-                                socketMsg.getMessage());
-                    } else {
-                        intent = new Intent(this, SMIMESignerActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
-                        startActivity(intent);
-                    }
+                    intent = new Intent(this, SMIMESignerActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
+                    startActivity(intent);
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

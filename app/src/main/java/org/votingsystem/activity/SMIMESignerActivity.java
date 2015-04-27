@@ -101,15 +101,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
                     sendSocketMessage(socketMessage.getSignResponse(ResponseVS.SC_OK, null, smimeMessage));
                 } catch (Exception e) { e.printStackTrace(); }
             }
-        });
-        try {
-            Intent startIntent = new Intent(this, WebSocketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
-            startIntent.putExtra(ContextVS.MESSAGE_KEY,
-                    JSON.getMapper().writeValueAsString(socketMessage));
-
-            startService(startIntent);
-        } catch (Exception ex) { ex.printStackTrace();}
+        }).start();
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +148,6 @@ public class SMIMESignerActivity extends ActionBarActivity {
                             getString(R.string.reject_websocket_request_msg,
                                     DeviceUtils.getDeviceName()), TypeVS.MESSAGEVS_SIGN_RESPONSE);
                     sendSocketMessage(messageDto);
-                    this.finish();
                 } catch(Exception ex) {ex.printStackTrace();}
                 return true;
             case R.id.ban_device:

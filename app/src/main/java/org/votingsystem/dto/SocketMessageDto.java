@@ -76,7 +76,6 @@ public class SocketMessageDto {
 
     private SocketMessageContentDto content;
 
-    private String serviceCaller = ContextVS.WEB_SOCKET_BROADCAST_ID;
 
     @JsonIgnore private UserVSDto userVS;
     @JsonIgnore private Set<Currency> currencySet;
@@ -159,14 +158,6 @@ public class SocketMessageDto {
 
     public void setCurrencyDtoList(List<CurrencyDto> currencyDtoList) {
         this.currencyDtoList = currencyDtoList;
-    }
-
-    public String getServiceCaller() {
-        return serviceCaller;
-    }
-
-    public void setServiceCaller(String serviceCaller) {
-        this.serviceCaller = serviceCaller;
     }
 
     public String getCaption() {
