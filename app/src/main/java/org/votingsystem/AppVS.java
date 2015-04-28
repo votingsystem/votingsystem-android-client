@@ -35,14 +35,12 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -371,15 +369,12 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         mgr.notify(notificationId.getAndIncrement(), builder.build());
     }
 
-    public void broadcastResponse(ResponseVS responseVS, ArgVS... args ) {
+    public void broadcastResponse(ResponseVS responseVS) {
         LOGD(TAG + ".broadcastResponse", "statusCode: " + responseVS.getStatusCode() +
                 " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
                 responseVS.getServiceCaller());
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        if(args != null) {
-            for(ArgVS argVS: args) intent.putExtra(argVS.getKey(), argVS.getValue());
-        }
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

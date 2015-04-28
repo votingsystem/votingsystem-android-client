@@ -27,6 +27,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.List;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -46,6 +47,27 @@ public class Utils {
         integrator.addExtra("PROMPT_MESSAGE", "Enfoque el código QR");
         integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES, activity);
     }
+
+    protected void sendEmail(Context context, List<String> recipients,
+                             String toUser, String content) {
+
+        //String[] recipients = {recipient.getText().toString()};
+        Intent email = new Intent(Intent.ACTION_SEND, Uri.parse("mailto:"));
+        // prompts email clients only
+        email.setType("message/rfc822");
+
+        email.putExtra(Intent.EXTRA_EMAIL, recipients.toArray());
+        email.putExtra(Intent.EXTRA_SUBJECT, toUser);
+        email.putExtra(Intent.EXTRA_TEXT, content);
+
+        try {
+            // the user can choose the email client
+            context.startActivity(Intent.createChooser(email, "Choose an email client from..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            //Toast.makeText(context, "No email client installed.", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     public static ResponseVS getBroadcastResponse(TypeVS operation, String serviceCaller,
               ResponseVS responseVS, Context context) {

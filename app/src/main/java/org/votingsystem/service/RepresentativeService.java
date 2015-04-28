@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -27,7 +28,6 @@ import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -35,7 +35,6 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -222,28 +221,30 @@ public class RepresentativeService extends IntentService {
                 getRepresentativeImageURL(representativeId);
         byte[] representativeImageBytes = null;
         ResponseVS responseVS = null;
-        List<ArgVS> argVSList = new ArrayList<ArgVS>();
+        UserVSDto representative = null;
         try {
             responseVS = HttpHelper.getData(imageServiceURL, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 representativeImageBytes = responseVS.getMessageBytes();
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                UserVSDto representative = (UserVSDto) responseVS.getMessage(UserVSDto.class);
+                representative = (UserVSDto) responseVS.getMessage(UserVSDto.class);
                 representative.setImageBytes(representativeImageBytes);
                 Uri representativeURI = UserContentProvider.getUserVSURI(
                         representative.getId());
                 getContentResolver().insert(UserContentProvider.CONTENT_URI,
                         UserContentProvider.getContentValues(representative));
                 responseVS.setUri(representativeURI);
-                argVSList.add(new ArgVS(ContextVS.USER_KEY, representative));
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);
         }
         responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.ITEM_REQUEST);
-        appVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
+        Intent intent = new Intent(serviceCaller);
+        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        intent.putExtra(ContextVS.USER_KEY, representative);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void publicDelegation(Bundle arguments, String serviceCaller) {

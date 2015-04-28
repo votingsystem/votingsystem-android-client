@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 
 import org.json.JSONObject;
@@ -14,7 +15,6 @@ import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.voting.ControlCenterDto;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ArgVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -43,10 +43,10 @@ public class VoteService extends IntentService {
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
-        List<ArgVS> argVSList = new ArrayList<ArgVS>();
         VoteVS vote = (VoteVS) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
         String eventSubject = null;
+        Intent resultIntent = new Intent(responseVS.getServiceCaller());
         if(vote != null) {
             eventSubject = vote.getEventVS().getSubject();
             if(eventSubject.length() > 50) eventSubject = eventSubject.substring(0, 50) + "...";
@@ -122,13 +122,15 @@ public class VoteService extends IntentService {
                     }
                     break;
             }
-            argVSList.add(new ArgVS(ContextVS.VOTE_KEY, vote));
+            resultIntent.putExtra(ContextVS.VOTE_KEY, vote);
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
-            appVS.broadcastResponse(responseVS, argVSList.toArray(new ArgVS[argVSList.size()]));
+            resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(resultIntent);
+
         }
     }
 

@@ -295,22 +295,6 @@ public class CMSUtils {
         }
     }
 
-    public static MimeMessage createMimeMessage(String subject, Object content,
-        String contentType, String from, String to) throws MessagingException {
-        Properties props = System.getProperties();
-        Session session = Session.getDefaultInstance(props, null);
-        //Address fromUser = new InternetAddress("\"admin\"<admin@sistemavotacion.org>");
-        Address fromUser = new InternetAddress(from);
-        Address toUser = new InternetAddress(to);
-        MimeMessage message = new MimeMessage(session);
-        message.setFrom(fromUser);
-        message.setRecipient(Message.RecipientType.TO, toUser);
-        message.setSubject(subject);
-        message.setContent(content, contentType);
-        message.saveChanges();
-        return message;
-    }
-
     public static String getDigestId (String digestAlgOID) {
         if (DIGEST_SHA1.equals(digestAlgOID)) return "SHA1";
         if (DIGEST_SHA224.equals(digestAlgOID)) return "SHA224";

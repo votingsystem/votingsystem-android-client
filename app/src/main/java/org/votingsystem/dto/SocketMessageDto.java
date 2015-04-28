@@ -9,7 +9,6 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.SessionVS;
 import org.votingsystem.util.WebSocketSession;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
@@ -82,7 +81,6 @@ public class SocketMessageDto {
     @JsonIgnore private AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
-    @JsonIgnore private SessionVS sessionVS;
     @JsonIgnore private SMIMEMessage smime;
 
     public SocketMessageDto () {}
@@ -228,29 +226,8 @@ public class SocketMessageDto {
         this.remoteAddress = remoteAddress;
     }
 
-    public SessionVS getSessionVS() {
-        return sessionVS;
-    }
-
-    public void setSessionVS(SessionVS sessionVS) {
-        this.sessionVS = sessionVS;
-    }
-
     public Session getSession() {
         return session;
-    }
-
-    public void setSession(Session session, SessionVS sessionVS) throws ValidationExceptionVS {
-        if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        /*if(TypeVS.MESSAGEVS_SIGN == operation && deviceId == null) {
-            throw new ValidationExceptionVS("missing message 'deviceId'");
-        }*/
-        /*this.remoteAddress = ((String)((AbstractServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
-                ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.getRemoteAddr());*/
-        this.session = session;
-        this.sessionVS = sessionVS;
-        if(sessionId == null) sessionId = session.getId();
-        //Locale.forLanguageTag(locale)
     }
 
     public Integer getStatusCode() {
