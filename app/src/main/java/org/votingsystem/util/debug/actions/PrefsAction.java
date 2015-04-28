@@ -3,9 +3,9 @@ package org.votingsystem.util.debug.actions;
 import android.content.Context;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.util.debug.DebugAction;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.PrefUtils;
+import org.votingsystem.util.debug.DebugAction;
 
 public class PrefsAction implements DebugAction {
 

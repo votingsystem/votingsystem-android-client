@@ -18,11 +18,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.util.Country;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

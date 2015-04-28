@@ -22,9 +22,6 @@ import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**

@@ -27,21 +27,21 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.FragmentContainerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
-import org.votingsystem.service.VoteService;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.VoteVS;
+import org.votingsystem.service.VoteService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;

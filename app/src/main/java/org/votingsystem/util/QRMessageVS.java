@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
 

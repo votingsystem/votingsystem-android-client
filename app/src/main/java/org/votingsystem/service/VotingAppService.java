@@ -11,8 +11,8 @@ import android.os.Parcel;
 import android.os.RemoteException;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.util.PrefUtils;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;

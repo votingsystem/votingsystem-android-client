@@ -31,15 +31,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.RepresentativePagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.service.RepresentativeService;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.service.RepresentativeService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

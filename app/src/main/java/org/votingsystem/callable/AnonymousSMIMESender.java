@@ -12,8 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 
-import javax.mail.Header;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -31,16 +29,14 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
     private String subject;
     private String serviceURL;
     private X509Certificate receiverCert;
-    private Header header;
 
     public AnonymousSMIMESender(String fromUser, String toUser, String textToSign, String subject,
-            Header header, String serviceURL, X509Certificate receiverCert,
+            String serviceURL, X509Certificate receiverCert,
             CertificationRequestVS certificationRequest,  AppVS context) {
         this.fromUser = fromUser;
         this.toUser = toUser;
         this.textToSign = textToSign;
         this.subject = subject;
-        this.header = header;
         this.serviceURL = serviceURL;
         this.receiverCert = receiverCert;
         this.appVS = context;
@@ -52,7 +48,7 @@ public class AnonymousSMIMESender implements Callable<ResponseVS> {
         ResponseVS responseVS = null;
         try {
             SMIMEMessage signedMessage = certificationRequest.getSMIME(fromUser, toUser,
-                    textToSign, subject, header);
+                    textToSign, subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedMessage, appVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

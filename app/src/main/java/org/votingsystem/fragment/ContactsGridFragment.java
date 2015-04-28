@@ -36,19 +36,19 @@ import android.widget.TextView;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.ContactPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.util.DBUtils;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.DBUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

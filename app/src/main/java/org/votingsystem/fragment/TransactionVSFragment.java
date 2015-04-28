@@ -23,8 +23,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.FragmentContainerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;

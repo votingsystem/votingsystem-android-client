@@ -65,12 +65,7 @@ public class ContextVS {
     public static final String HASH_CERTVS_KEY = "HASH_CERTVS_KEY";
     public static final String NIF_KEY = "NIF";
     public static final String USER_KEY = "USER_KEY";
-    public static final String EMAIL_KEY = "EMAIL_KEY";
-    public static final String SURNAME_KEY = "SURNAME_KEY";
-    public static final String PHONE_KEY = "PHONE_KEY";
-    public static final String DEVICE_ID_KEY = "DEVICE_ID_KEY";
     public static final String DEVICE_KEY = "DEVICE_KEY";
-    public static final String NAME_KEY = "NAME_KEY";
     public static final String URI_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CURRENCY_SERVER_URL = "CURRENCY_SERVER_URL";

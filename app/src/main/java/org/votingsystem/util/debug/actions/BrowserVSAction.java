@@ -8,8 +8,8 @@ import android.os.Bundle;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.BrowserVSActivity;
-import org.votingsystem.util.debug.DebugAction;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

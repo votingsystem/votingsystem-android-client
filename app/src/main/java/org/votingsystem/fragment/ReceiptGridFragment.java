@@ -22,8 +22,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.votingsystem.android.R;
 import org.votingsystem.activity.ReceiptPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.model.ReceiptContainer;
 import org.votingsystem.model.VoteVS;

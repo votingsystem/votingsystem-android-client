@@ -14,14 +14,14 @@ import android.support.v7.app.ActionBarActivity;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.service.BootStrapService;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.service.BootStrapService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 

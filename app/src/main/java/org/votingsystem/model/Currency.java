@@ -98,8 +98,7 @@ public class Currency extends ReceiptContainer {
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
             this.hashCertVS = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
-            certificationRequest = CertificationRequestVS.getCurrencyRequest(
-                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
+            certificationRequest = CertificationRequestVS.getCurrencyRequest(ContextVS.VOTE_SIGN_MECHANISM,
                     ContextVS.PROVIDER, currencyServerURL, hashCertVS, amount, this.currencyCode, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
     }

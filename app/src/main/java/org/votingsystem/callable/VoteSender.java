@@ -22,9 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.votingsystem.util.ContextVS.KEY_SIZE;
 import static org.votingsystem.util.ContextVS.PROVIDER;
-import static org.votingsystem.util.ContextVS.SIG_NAME;
 import static org.votingsystem.util.ContextVS.VOTE_SIGN_MECHANISM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -57,7 +55,7 @@ public class VoteSender implements Callable<ResponseVS> {
             //send access request to fetch the anonymous certificate that signs the vote
             String csrFileName = ContextVS.CSR_FILE_NAME + ":" + ContentTypeVS.TEXT.getName();
             CertificationRequestVS certificationRequest = CertificationRequestVS.getVoteRequest(
-                    KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM, PROVIDER,
+                    VOTE_SIGN_MECHANISM, PROVIDER,
                     vote.getEventVS().getAccessControl().getServerURL(),
                     vote.getEventVS().getEventVSId(), vote.getHashCertVSBase64());
             String accessRequestFileName = ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + MediaTypeVS.JSON_SIGNED;
@@ -71,7 +69,7 @@ public class VoteSender implements Callable<ResponseVS> {
             JSONObject voteJSON = new JSONObject(vote.getVoteDataMap());
             SMIMEMessage signedVote = certificationRequest.getSMIME(
                     vote.getHashCertVSBase64(), vote.getEventVS().getControlCenter().getName(),
-                    voteJSON.toString(), appVS.getString(R.string.vote_msg_subject), null);
+                    voteJSON.toString(), appVS.getString(R.string.vote_msg_subject));
             MessageTimeStamper timeStamper = new MessageTimeStamper(signedVote, appVS);
             responseVS = timeStamper.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

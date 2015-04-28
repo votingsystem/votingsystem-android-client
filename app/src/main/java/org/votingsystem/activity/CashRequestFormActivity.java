@@ -24,19 +24,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectTagVSDialogFragment;
 import org.votingsystem.service.PaymentService;
-import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.UIUtils;
-import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.math.BigDecimal;
 

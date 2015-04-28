@@ -1,6 +1,5 @@
 package org.votingsystem;
 
-import android.app.Application;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -17,17 +16,14 @@ import com.google.common.eventbus.EventBus;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.service.BootStrapService;
-import org.votingsystem.service.WebSocketService;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.WebSocketSession;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.ControlCenterDto;
+import org.votingsystem.service.BootStrapService;
+import org.votingsystem.service.WebSocketService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.AESParams;
@@ -40,7 +36,11 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.WebSocketSession;
+
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;

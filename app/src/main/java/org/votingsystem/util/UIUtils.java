@@ -72,13 +72,13 @@ import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.json.JSONException;
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
-import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
+import org.votingsystem.fragment.MessageDialogFragment;
 
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;

@@ -14,8 +14,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.fragment.ContactFragment;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.fragment.ContactFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 

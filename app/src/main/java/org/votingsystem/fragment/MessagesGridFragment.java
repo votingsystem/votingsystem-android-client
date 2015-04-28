@@ -23,12 +23,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.votingsystem.android.R;
 import org.votingsystem.activity.MessagesPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.util.CurrencyBundle;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.CurrencyBundle;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;

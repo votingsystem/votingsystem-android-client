@@ -35,16 +35,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.CertRequestActivity;
 import org.votingsystem.activity.CertResponseActivity;
 import org.votingsystem.activity.MessageActivity;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.UIUtils;
+import org.votingsystem.android.R;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

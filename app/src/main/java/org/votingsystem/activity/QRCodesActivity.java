@@ -11,17 +11,17 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.votingsystem.android.R;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRGeneratorFormFragment;
-import org.votingsystem.util.Utils;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.Utils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

@@ -26,12 +26,12 @@ import android.view.View;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.votingsystem.android.R;
-import org.votingsystem.fragment.AddressFormFragment;
-import org.votingsystem.util.HelpUtils;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.dto.AddressVS;
+import org.votingsystem.fragment.AddressFormFragment;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HelpUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.util.HashMap;

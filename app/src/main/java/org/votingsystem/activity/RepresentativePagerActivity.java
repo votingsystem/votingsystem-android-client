@@ -12,8 +12,8 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.fragment.RepresentativeFragment;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.fragment.RepresentativeFragment;
 import org.votingsystem.util.ContextVS;
 
 import static org.votingsystem.util.LogUtils.LOGD;

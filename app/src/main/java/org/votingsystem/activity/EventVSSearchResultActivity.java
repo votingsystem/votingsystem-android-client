@@ -18,13 +18,13 @@ import android.widget.TextView;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
-import org.votingsystem.fragment.EventVSFragment;
-import org.votingsystem.util.MsgUtils;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.fragment.EventVSFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.util.List;

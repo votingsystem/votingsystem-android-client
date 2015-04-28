@@ -28,25 +28,24 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.votingsystem.android.R;
+import org.votingsystem.dto.CertRequestDto;
 import org.votingsystem.service.UserCertRequestService;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.UIUtils;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.util.ContextVS.CALLER_KEY;
-import static org.votingsystem.util.ContextVS.DEVICE_ID_KEY;
-import static org.votingsystem.util.ContextVS.EMAIL_KEY;
-import static org.votingsystem.util.ContextVS.NAME_KEY;
-import static org.votingsystem.util.ContextVS.NIF_KEY;
-import static org.votingsystem.util.ContextVS.PHONE_KEY;
+import static org.votingsystem.util.ContextVS.DTO_KEY;
 import static org.votingsystem.util.ContextVS.PIN_KEY;
-import static org.votingsystem.util.ContextVS.SURNAME_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -265,14 +264,18 @@ public class CertRequestFormFragment extends Fragment {
 
     private void launchUserCertRequestService(String pin) {
         LOGD(TAG + ".launchUserCertRequestService() ", "launchUserCertRequestService");
+        CertRequestDto dto = new CertRequestDto();
+        dto.setDeviceId(deviceId);
+        dto.setPhone(phone);
+        dto.setGivenName(givenname);
+        dto.setSurname(surname);
+        dto.setNif(nif);
+        dto.setEmail(email);
         Intent startIntent = new Intent(getActivity(), UserCertRequestService.class);
         startIntent.putExtra(PIN_KEY, pin);
-        startIntent.putExtra(DEVICE_ID_KEY, deviceId);
-        startIntent.putExtra(PHONE_KEY, phone);
-        startIntent.putExtra(NAME_KEY, givenname);
-        startIntent.putExtra(SURNAME_KEY, surname);
-        startIntent.putExtra(NIF_KEY, nif);
-        startIntent.putExtra(EMAIL_KEY, email);
+        try {
+            startIntent.putExtra(DTO_KEY, JSON.getMapper().writeValueAsString(dto));
+        } catch (JsonProcessingException e) {  e.printStackTrace();  }
         startIntent.putExtra(CALLER_KEY, broadCastId);
         getActivity().startService(startIntent);
         showProgress(true, true);

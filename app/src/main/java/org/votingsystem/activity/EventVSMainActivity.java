@@ -33,13 +33,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.fragment.EventVSGridFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.EventVSService;
-import org.votingsystem.util.UIUtils;
-import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

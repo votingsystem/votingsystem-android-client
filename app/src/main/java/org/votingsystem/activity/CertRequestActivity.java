@@ -13,8 +13,8 @@ import android.widget.Button;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.CertRequestFormFragment;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;

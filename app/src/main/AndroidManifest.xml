@@ -157,7 +157,6 @@
         <service android:name="org.votingsystem.service.BootStrapService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.EventVSService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.RepresentativeService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.RssService" android:process=":rss_service"/>
         <service android:name="org.votingsystem.service.PaymentService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.UserCertRequestService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.VoteService"  android:exported="false"/>

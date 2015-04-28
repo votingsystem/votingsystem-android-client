@@ -8,18 +8,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.WebSocketSession;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.WebSocketSession;
 
 import java.io.ByteArrayInputStream;
 import java.security.NoSuchAlgorithmException;
@@ -30,8 +28,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import javax.websocket.Session;
-
-import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Base64.DEFAULT -> problems with Java 8 Base64

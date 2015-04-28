@@ -16,11 +16,11 @@ import com.google.zxing.WriterException;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.QRMessageVS;
 import org.votingsystem.util.QRUtils;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

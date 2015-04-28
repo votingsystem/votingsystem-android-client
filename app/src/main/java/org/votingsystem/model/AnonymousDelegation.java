@@ -62,9 +62,8 @@ public class AnonymousDelegation extends ReceiptContainer {
         hashCertVSBase64 = CMSUtils.getHashBase64(getOriginHashCertVS(),
                 ContextVS.VOTING_DATA_DIGEST);
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
-                ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
-                ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive,
-                dateFrom, dateTo);
+                ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER, serverURL, hashCertVSBase64,
+                weeksOperationActive, dateFrom, dateTo);
         setTypeVS(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
     }
 

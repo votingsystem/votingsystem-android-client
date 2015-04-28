@@ -13,9 +13,9 @@ import android.support.v4.app.NotificationCompat;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.CurrencyAccountsMainActivity;
 import org.votingsystem.activity.MessagesMainActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.service.WebSocketService;
 

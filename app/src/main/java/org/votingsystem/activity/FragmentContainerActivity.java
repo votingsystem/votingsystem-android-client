@@ -23,8 +23,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.Utils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Utils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

@@ -28,18 +28,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.EventVSPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
-import org.votingsystem.service.EventVSService;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.service.EventVSService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

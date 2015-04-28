@@ -9,14 +9,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.AnonymousSMIMESender;
 import org.votingsystem.callable.SignedMapSender;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
@@ -30,12 +31,13 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -327,7 +329,7 @@ public class RepresentativeService extends IntentService {
                 //delegation signed with anonymous certificate (with delegation data)
                 AnonymousSMIMESender anonymousSender = new AnonymousSMIMESender(fromAnonymousUser,
                         toUser, anonymousDelegation.getDelegation(representative.getNIF(),
-                        representative.getName()).toString(), messageSubject, null,
+                        representative.getName()).toString(), messageSubject,
                         appVS.getAccessControl().getAnonymousDelegationServiceURL(), null,
                         anonymousDelegation.getCertificationRequest(),
                         (AppVS)getApplicationContext());

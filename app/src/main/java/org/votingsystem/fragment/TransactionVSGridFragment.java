@@ -30,17 +30,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.TransactionVSPagerActivity;
+import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.service.PaymentService;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.io.IOException;
 import java.util.Date;

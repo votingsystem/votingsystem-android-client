@@ -24,11 +24,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.fragment.ContactsGridFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.util.UIUtils;
-import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 

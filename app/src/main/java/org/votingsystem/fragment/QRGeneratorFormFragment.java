@@ -19,11 +19,11 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.FragmentContainerActivity;
-import org.votingsystem.util.UIUtils;
+import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

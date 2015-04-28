@@ -24,17 +24,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.activity.CurrencyActivity;
-import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.Utils;
-import org.votingsystem.util.Wallet;
+import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Utils;
+import org.votingsystem.util.Wallet;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

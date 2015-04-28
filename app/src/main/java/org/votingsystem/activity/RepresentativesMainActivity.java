@@ -15,18 +15,18 @@ import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.RepresentationStateFragment;
 import org.votingsystem.fragment.RepresentativeGridFragment;
 import org.votingsystem.service.RepresentativeService;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.UIUtils;
-import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 

@@ -8,13 +8,13 @@ import android.widget.Toast;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 
 import static org.votingsystem.util.LogUtils.LOGD;

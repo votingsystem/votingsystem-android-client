@@ -9,10 +9,10 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.util.MsgUtils;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.MsgUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

@@ -172,7 +172,7 @@ public class CurrencyBundle {
         for (Currency currency : transactionCurrencySet) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(
                     currency.getHashCertVS(), StringUtils.getNormalized(currency.getToUserName()),
-                    JSON.getMapper().writeValueAsString(dto), subject, null);
+                    JSON.getMapper().writeValueAsString(dto), subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, AppVS.getInstance());
             timeStamper.call();
             currency.setSmimeMessage(timeStamper.getSMIME());
