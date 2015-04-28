@@ -83,7 +83,7 @@ public class VoteVS extends ReceiptContainer {
     public HashMap getVoteDataMap() {
         Log.d(TAG + ".getVoteDataMap", "getVoteDataMap");
         Map map = new HashMap();
-        map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
+        map.put("operation", TypeVS.SEND_VOTE.toString());
         map.put("eventURL", eventVS.getURL());
         HashMap optionSelectedMap = new HashMap();
         optionSelectedMap.put("id", optionSelected.getId());

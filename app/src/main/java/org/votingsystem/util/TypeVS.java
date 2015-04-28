@@ -2,7 +2,7 @@ package org.votingsystem.util;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ */
 public enum TypeVS {
 
     ACCESS_REQUEST,
@@ -26,7 +26,7 @@ public enum TypeVS {
     PIN_CHANGE,
     EVENT_CANCELLATION,
     BACKUP_REQUEST,
-    SEND_SMIME_VOTE,
+    SEND_VOTE,
     VOTING_PUBLISHING,
 
     CURRENCY,
@@ -39,6 +39,7 @@ public enum TypeVS {
     CURRENCY_USERVS_CHANGE,
     CURRENCY_WALLET_CHANGE,
     CURRENCY_SEND,
+    CURRENCY_SEND_REQUEST,
     CURRENCY_ACCOUNTS_INFO,
     DEVICE_SELECT,
 
@@ -54,8 +55,7 @@ public enum TypeVS {
     TRANSACTIONVS,
     OPERATION_CANCELED,
 
-    PAYMENT,
-    PAYMENT_REQUEST,
+
     DELIVERY_WITHOUT_PAYMENT,
     DELIVERY_WITH_PAYMENT,
     REQUEST_FORM,

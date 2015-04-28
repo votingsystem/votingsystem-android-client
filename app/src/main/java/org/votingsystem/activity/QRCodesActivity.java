@@ -116,8 +116,7 @@ public class QRCodesActivity extends ActivityBase {
                     TransactionVSDto dto = (TransactionVSDto) responseVS.getMessage(TransactionVSDto.class);
                     dto.setInfoURL(infoURL);
                     switch (dto.getOperation()) {
-                        case PAYMENT:
-                        case PAYMENT_REQUEST:
+                        case CURRENCY_SEND_REQUEST:
                         case DELIVERY_WITHOUT_PAYMENT:
                         case DELIVERY_WITH_PAYMENT:
                         case REQUEST_FORM:

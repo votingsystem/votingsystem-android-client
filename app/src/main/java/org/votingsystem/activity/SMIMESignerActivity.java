@@ -143,8 +143,6 @@ public class SMIMESignerActivity extends ActionBarActivity {
             case android.R.id.home:
             case R.id.reject_sign_request:
                 try {
-                    setProgressDialogVisible(true,
-                            getString(R.string.wait_msg), getString(R.string.sending_data_lbl));
                     SocketMessageDto messageDto = socketMessage.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
                                     DeviceUtils.getDeviceName()), TypeVS.OPERATION_CANCELED);
