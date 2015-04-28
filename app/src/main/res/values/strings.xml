@@ -23,17 +23,11 @@
     <string name="menuSync">sincronizar</string>
     <string name="processing_lbl">procesando</string>
     <string name="initializing_app_lbl">preparando aplicación</string>
-    <string name="publish_voting_caption">publicando votación</string>
     <string name="publishing_document_msg">publicando documento...</string>
-    <string name="publish_voting_OK_prefix_msg">la votación</string>
-    <string name="publish_document_OK_sufix_msg">se ha publicado correctamente</string>    
-    <string name="publish_document_ERROR_msg">error publicando el documento</string>
-    <string name="publish_document_lbl">publicar documento</string>
-    <string name="publish_voting_lbl">publicar votación</string>
+
     <string name="loading_info_msg">cargando información, por favor espere</string>
     <string name="pdf_signed_by_lbl">firmado electrónicamente por</string>
     <string name="BACKUP_REQUEST">solicitud de copia de seguridad</string>
-    <string name="VOTING_PUBLISHING">publicación de documento de votación</string>
     <string name="EVENT_CANCELLATION">cancelar evento</string>
     <string name="operationNotFoundErrorMsg">operación desconocida</string>
     <string name="eventVSDataWithErrors">errores en datos del evento</string>
@@ -173,8 +167,6 @@
     <string name="voting_info_lbl">datos sobre la votación</string>
     <string name="eventfields_dialog_caption">campos de la reclamación</string>
     <string name="check_representative_lbl">comprobar mi representante</string>
-    <string name="representative_revoke_button">dar de baja como representante</string>
-    <string name="edit_representative_lbl">editar datos de representante</string>
     <string name="editor_empty_error_lbl">debe rellenar el campo del editor</string>
     <string name="signature_msg_subject">[firma]-</string>
     <string name="representative_lbl">representante</string>
@@ -219,7 +211,6 @@
     <string name="date_finish_lbl">fecha finalización</string>
     <string name="date_error_lbl">debe seleccionar una fecha válida posterior a la fecha actual</string>
     <string name="subject_error_lbl">debe rellenar el campo asunto</string>
-    <string name="publish_election_msg_subject">solicitud de publicación de votación</string>
     <string name="date_begin_lbl">fecha inicio</string>
     <string name="date_init_after_finish_error_lbl">la fecha de inicio no puede ser posterior a la fecha de finalización</string>
     <string name="select_control_center_lbl">seleccione un centro de control</string>
@@ -234,23 +225,13 @@
     <string name="option_repeated_msg">ya ha introducido una opción con el valor \'%1$s\'</string>
     <string name="election_published_ok_msg">la votación se ha publicado corréctamente</string>
     <string name="representative_image_lbl">imagen del representante</string>
-    <string name="new_representative_title">dar de alta representante</string>
     <string name="cancel_anonymouys_representation_lbl">cancelar representación anónima</string>
     <string name="representative_list_lbl">lista de representantes</string>
     <string name="receipt_list_lbl">lista de recibos</string>
     <string name="options_for_representatives_lbl">opciones para representantes</string>
-    <string name="new_representative_lbl">dar de alta como representante</string>
     <string name="missing_representative_img_error_msg">debe proporcionar una imagen que identifique al representante</string>
     <string name="select_img_lbl">seleccione una imagen</string>
     <string name="select_representative_image_lbl">seleccione una imagen asociada al representante</string>
-    <string name="new_representative_error_caption">error dando de alta representante</string>
-    <string name="new_representative_ok_notification_msg">usuario dado de alta como representante</string>
-    <string name="new_representative_progress_lbl">enviando datos del representante</string>
-    <string name="remove_representative_caption">dar de baja como representante</string>
-    <string name="remove_representative_msg"> <![CDATA[para darse de baja como representante deberá firmar
-        la solicitud con su certificado, la solicitud debe estar firmada por por el propio representante que se da de baja]]></string>
-    <string name="revoke_representative_msg_subject">dar de baja representante</string>
-    <string name="representative_revoke_ok_msg">el usuario ha sido dado de baja como representante</string>
     <string name="confirm_selection_msg">confirme la selección</string>
     <string name="representative_delegation_lbl">delegar en representante</string>
     <string name="anonymous_delegation_lbl">delegar de forma anónima</string>
@@ -263,7 +244,6 @@
         <br/>por su seguridad la operación será efectiva a partir del <b>\'%3$s\'</b> y terminará el
         <b>\'%4$s\'</b>]]></string>
     <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
-    <string name="updating_representative_data_msg">actualizando datos del representante</string>
     <string name="currency_request_formatted"><![CDATA[importe de la operación: <b>%1$s %2$ss</b>
         <br/>url de servidor: <a href=\'%3$s\'>%3$s</a>]]></string>
     <string name="receipt_vote_subtitle">voto</string>
@@ -342,7 +322,6 @@
     <string name="mail_lbl">correo electrónico</string>
     <string name="phone_missing_msg">introduzca un número de telefono móvil</string>
     <string name="mail_missing_msg">introduzca una dirección de correo electrónico válida</string>
-    <string name="publish_poll_lbl">publicar votación</string>
     <string name="hint_phone">teléfono móvil</string>
     <string name="hint_email">email</string>
     <string name="hint_nif">nif</string>

@@ -55,12 +55,6 @@ public class RepresentativesMainActivity extends ActivityBase {
             setProgressDialogVisible(null, null, false);
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
-            } else {
-                if(responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                    MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                            getString(R.string.revoke_representative_msg_subject),
-                            getString(R.string.operation_ok_msg), getSupportFragmentManager());
-                }
             }
         }
         }
@@ -73,9 +67,6 @@ public class RepresentativesMainActivity extends ActivityBase {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         String caption = null;
         switch(operationType) {
-            case REPRESENTATIVE_REVOKE:
-                caption = getString(R.string.revoke_representative_msg_subject);
-                break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
                 caption = getString(R.string.cancel_anonymouys_representation_lbl);
                 break;
@@ -116,31 +107,8 @@ public class RepresentativesMainActivity extends ActivityBase {
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
                 UIUtils.showMessageDialog(builder);
                 return true;
-            case R.id.new_representative:
-                Intent intent = new Intent(this, RepresentativeNewActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.representative_revoke:
-                builder = UIUtils.getMessageDialogBuilder(
-                        getString(R.string.remove_representative_caption),
-                        getString(R.string.remove_representative_msg), this);
-                builder.setPositiveButton(getString(R.string.continue_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                broadCastId, getString(R.string.enter_signature_pin_msg),
-                                false, TypeVS.REPRESENTATIVE_REVOKE);
-                        }
-                    }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                UIUtils.showMessageDialog(builder);
-                return true;
-            case R.id.edit_representative:
-                Intent editIntent = new Intent(this, RepresentativeNewActivity.class);
-                editIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.REPRESENTATIVE);
-                startActivity(editIntent);
-                return true;
             case R.id.representative_list:
-                intent = new Intent(this, FragmentContainerActivity.class);
+                Intent intent = new Intent(this, FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, RepresentativeGridFragment.class.getName());
                 startActivity(intent);
                 return true;
@@ -160,20 +128,14 @@ public class RepresentativesMainActivity extends ActivityBase {
                 case REPRESENTATIVE:
                     menu.removeGroup(R.id.options_for_uservs);
                     break;
-                case WITH_ANONYMOUS_REPRESENTATION:
-                    menu.removeGroup(R.id.options_for_representatives);
-                    break;
                 case WITH_PUBLIC_REPRESENTATION:
-                    menu.removeGroup(R.id.options_for_representatives);
                     menu.removeItem(R.id.cancel_anonymouys_representation);
                     break;
                 case WITHOUT_REPRESENTATION:
-                    menu.removeGroup(R.id.options_for_representatives);
                     menu.removeItem(R.id.cancel_anonymouys_representation);
                     break;
             }
         } else {
-            menu.removeGroup(R.id.options_for_representatives);
             menu.removeGroup(R.id.options_for_uservs);
         }
         return super.onCreateOptionsMenu(menu);

@@ -99,10 +99,6 @@ public class ContactsActivity extends ActivityBase {
             case R.id.search_item:
                 onSearchRequested();
                 return true;
-            case R.id.publish_document:
-                intent = new Intent(this, EventVSNewActivity.class);
-                startActivity(intent);
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

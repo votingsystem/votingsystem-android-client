@@ -54,18 +54,7 @@ public class VoteService extends IntentService {
         try {
             LOGD(TAG + ".onHandleIntent", "operation: " + operation);
             switch(operation) {
-                case VOTING_PUBLISHING:
-                    String textToSign = arguments.getString(ContextVS.MESSAGE_KEY);
-                    SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
-                            textToSign, getString(R.string.publish_election_msg_subject));
-                    responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
-                            ContentTypeVS.JSON_SIGNED, appVS.getAccessControl().
-                            getPublishServiceURL());
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        responseVS.setCaption(getString(R.string.operation_ok_msg)).
-                                setNotificationMessage(getString(R.string.election_published_ok_msg));
-                    }
-                    break;
+
                 case VOTEVS:
                     if(appVS.getControlCenter() == null) {
                         ControlCenterDto controlCenter = appVS.getActorVS(ControlCenterDto.class,

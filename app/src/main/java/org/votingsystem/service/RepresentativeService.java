@@ -9,10 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.LocalBroadcastManager;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
@@ -83,17 +80,11 @@ public class RepresentativeService extends IntentService {
                 String nif = arguments.getString(ContextVS.NIF_KEY);
                 requestRepresentativeByNif(nif, serviceCaller);
                 break;
-            case NEW_REPRESENTATIVE:
-                newRepresentative(intent.getExtras(), serviceCaller, operation);
-                break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 anonymousDelegation(intent.getExtras(), serviceCaller);
                 break;
             case REPRESENTATIVE_SELECTION:
                 publicDelegation(intent.getExtras(), serviceCaller);
-                break;
-            case REPRESENTATIVE_REVOKE:
-                revokeRepresentative(serviceCaller);
                 break;
             case STATE:
                 checkRepresentationState(serviceCaller);
@@ -141,29 +132,6 @@ public class RepresentativeService extends IntentService {
         } finally {
             return responseVS;
         }
-    }
-
-    private void revokeRepresentative(String serviceCaller) {
-        Map contentToSignMap = new HashMap();
-        contentToSignMap.put("operation", TypeVS.REPRESENTATIVE_REVOKE.toString());
-        contentToSignMap.put("UUID", UUID.randomUUID().toString());
-        ResponseVS responseVS = null;
-        try {
-            SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
-                    new JSONObject(contentToSignMap).toString(),
-                    getString(R.string.revoke_representative_msg_subject));
-            responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    appVS.getAccessControl().getRepresentativeRevokeServiceURL());
-            String selection = UserContentProvider.NIF_COL + " = ?";
-            String[] selectionArgs = { appVS.getUserVS().getNIF() };
-            getContentResolver().delete(UserContentProvider.CONTENT_URI, selection, selectionArgs);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) updateRepresentationState();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, this);
-        }
-        responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_REVOKE);
-        appVS.broadcastResponse(responseVS);
     }
 
     private void requestRepresentatives(String serviceURL, String serviceCaller) {
@@ -394,46 +362,6 @@ public class RepresentativeService extends IntentService {
         }
     }
 
-    private void newRepresentative(Bundle arguments, String serviceCaller, TypeVS operationType) {
-        ResponseVS responseVS = null;
-        try {
-            String serviceURL = appVS.getAccessControl().getRepresentativeServiceURL();
-            String editorContent = arguments.getString(ContextVS.MESSAGE_KEY);
-            String messageSubject = arguments.getString(ContextVS.MESSAGE_SUBJECT_KEY);
-            byte[] imageBytes = arguments.getByteArray(ContextVS.IMAGE_KEY);
-            MessageDigest messageDigest = MessageDigest.getInstance(
-                    ContextVS.VOTING_DATA_DIGEST);
-            byte[] resultDigest =  messageDigest.digest(imageBytes);
-            String base64ResultDigest = new String(Base64.encode(resultDigest));
-            Map contentToSignMap = new HashMap();
-            contentToSignMap.put("operation", TypeVS.NEW_REPRESENTATIVE.toString());
-            contentToSignMap.put("base64ImageHash", base64ResultDigest);
-            contentToSignMap.put("representativeInfo", editorContent);
-            contentToSignMap.put("UUID", UUID.randomUUID().toString());
-            SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
-                    new JSONObject(contentToSignMap).toString(), messageSubject);
-            Map<String, Object> fileMap = new HashMap<String, Object>();
-            String representativeDataFileName = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
-                    MediaTypeVS.JSON_SIGNED;
-            fileMap.put(representativeDataFileName, smimeMessage.getBytes());
-            fileMap.put(ContextVS.IMAGE_FILE_NAME, imageBytes);
-            responseVS = HttpHelper.sendObjectMap(fileMap, serviceURL);
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                responseVS.setCaption(getString(R.string.new_representative_error_caption));
-            } else {
-                responseVS.setCaption(getString(R.string.operation_ok_msg));
-                responseVS.setNotificationMessage(getString(R.string.new_representative_ok_notification_msg));
-                new Thread(
-                    new Runnable() { @Override public void run() {updateRepresentationState();}
-                }).start();
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, this);
-        }
-        responseVS.setTypeVS(TypeVS.NEW_REPRESENTATIVE).setServiceCaller(serviceCaller);
-        appVS.broadcastResponse(responseVS);
-    }
 
     private byte[] reduceImageFileSize(Uri imageUri) {
         byte[] imageBytes = null;

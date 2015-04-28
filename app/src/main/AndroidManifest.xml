@@ -56,9 +56,6 @@
         <activity android:name="org.votingsystem.activity.ContactPagerActivity"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.EventVSNewActivity"
-            android:label="@string/publish_poll_lbl" android:theme="@style/ThemeVS"/>
-
         <activity android:name="org.votingsystem.activity.EventVSPagerActivity" android:label="@string/app_name"
             android:theme="@style/ThemeVS"/>
 
@@ -113,9 +110,6 @@
 
         <activity android:name="org.votingsystem.activity.RepresentativeDelegationActivity"
             android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.RepresentativeNewActivity"
-            android:label="@string/new_representative_title" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.RepresentativesMainActivity" android:theme="@style/ThemeVS"/>
 

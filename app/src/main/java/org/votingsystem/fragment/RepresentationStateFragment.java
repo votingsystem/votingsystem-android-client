@@ -142,7 +142,6 @@ public class RepresentationStateFragment extends Fragment implements
         if(representation == null) return;
         switch(representation.getState()) {
             case WITH_ANONYMOUS_REPRESENTATION:
-                menu.removeItem(R.id.new_representative);
                 if(anonymousDelegation == null)
                     menu.removeItem(R.id.cancel_anonymouys_representation);
                 break;
