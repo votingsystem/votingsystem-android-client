@@ -96,7 +96,7 @@ public class TransactionVSDto implements Serializable{
     public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVSDto.Type userToType, BigDecimal amount,
                String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionVSDto dto = new TransactionVSDto();
-        dto.setOperation(TypeVS.PAYMENT_REQUEST);
+        dto.setOperation(TypeVS.CURRENCY_SEND_REQUEST);
         dto.setUserToType(userToType);
         dto.setToUser(toUser);
         dto.setAmount(amount);
