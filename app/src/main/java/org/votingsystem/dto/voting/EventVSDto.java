@@ -237,7 +237,7 @@ public class EventVSDto implements Serializable {
         return vote;
     }
 
-    public String getURLstats() {
+    public String getStatsServiceURL() {
         return accessControl.getServerURL() + "/eventVSElection/" + id + "/stats";
     }
 
