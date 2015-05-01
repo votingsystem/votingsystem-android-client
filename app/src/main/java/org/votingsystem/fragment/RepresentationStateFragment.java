@@ -57,7 +57,7 @@ public class RepresentationStateFragment extends Fragment implements
             setProgressDialogVisible(false);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 switch(responseVS.getTypeVS()) {
-                    case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+                    case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
                         MessageDialogFragment.showDialog(responseVS, getFragmentManager());
                         break;
                 }

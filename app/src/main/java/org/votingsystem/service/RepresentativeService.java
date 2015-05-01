@@ -91,7 +91,7 @@ public class RepresentativeService extends IntentService {
             case STATE:
                 checkRepresentationState(serviceCaller);
                 break;
-            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
                 cancelAnonymousDelegation(intent.getExtras(), serviceCaller);
                 break;
             default: LOGD(TAG + ".onHandleIntent", "unhandled operation: " + operation.toString());
@@ -272,7 +272,7 @@ public class RepresentativeService extends IntentService {
             responseVS = ResponseVS.EXCEPTION(ex, this);
         } finally {
             responseVS.setServiceCaller(serviceCaller).setTypeVS(
-                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
+                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
             appVS.broadcastResponse(responseVS);
         }
     }

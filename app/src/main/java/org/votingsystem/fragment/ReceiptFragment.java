@@ -211,7 +211,7 @@ public class ReceiptFragment extends Fragment {
                     selectedReceiptSMIME.getSubject();
             switch(receiptContainer.getTypeVS()) {
                 case REPRESENTATIVE_SELECTION:
-                case ANONYMOUS_REPRESENTATIVE_REQUEST:
+                case ANONYMOUS_SELECTION_CERT_REQUEST:
                     dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
                     contentFormatted = getString(R.string.anonymous_representative_request_formatted,
                         dataJSON.getString("weeksOperationActive"),

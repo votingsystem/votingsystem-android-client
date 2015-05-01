@@ -53,7 +53,7 @@ public class ReceiptContainer implements Serializable {
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
+            case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
             case CURRENCY_REQUEST:
                 return context.getString(R.string.currency_request_subtitle);
@@ -77,7 +77,7 @@ public class ReceiptContainer implements Serializable {
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
+            case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
             case CURRENCY_REQUEST:
                 return context.getString(R.string.currency_request_subtitle);
@@ -97,7 +97,7 @@ public class ReceiptContainer implements Serializable {
             case VOTEVS_CANCELLED:
                 return R.drawable.poll_32;
             case REPRESENTATIVE_SELECTION:
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
+            case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return R.drawable.system_users_32;
             default:
                 return R.drawable.receipt_32;

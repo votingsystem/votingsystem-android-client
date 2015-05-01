@@ -67,7 +67,7 @@ public class RepresentativesMainActivity extends ActivityBase {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         String caption = null;
         switch(operationType) {
-            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED:
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
                 caption = getString(R.string.cancel_anonymouys_representation_lbl);
                 break;
         }
@@ -102,7 +102,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 PinDialogFragment.showPinScreen(getSupportFragmentManager(),
                                         broadCastId, getString(R.string.enter_signature_pin_msg),
-                                        false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED);
+                                        false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
                             }
                         }).setNegativeButton(getString(R.string.cancel_lbl), null);
                 UIUtils.showMessageDialog(builder);

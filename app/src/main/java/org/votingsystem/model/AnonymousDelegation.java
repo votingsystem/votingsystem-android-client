@@ -180,7 +180,7 @@ public class AnonymousDelegation extends ReceiptContainer {
         result.put("dateFrom", DateUtils.getDateStr(dateFrom));
         result.put("dateTo", DateUtils.getDateStr(dateTo));
         result.put("accessControlURL", serverURL);
-        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());
+        result.put("operation", TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST.toString());
         result.put("UUID", UUID.randomUUID().toString());
         return new JSONObject(result);
     }
@@ -195,7 +195,7 @@ public class AnonymousDelegation extends ReceiptContainer {
         result.put("representativeName", representative.getName());
         result.put("hashCertVSBase64", hashCertVSBase64);
         result.put("originHashCertVSBase64", originHashCertVS);
-        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELLED.toString());
+        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION.toString());
         result.put("UUID", UUID.randomUUID().toString());
         return new JSONObject(result);
     }
