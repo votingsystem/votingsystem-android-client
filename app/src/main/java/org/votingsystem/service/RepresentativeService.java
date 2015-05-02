@@ -22,7 +22,6 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
-import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.AnonymousDelegation;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
@@ -140,11 +139,11 @@ public class RepresentativeService extends IntentService {
         ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             try {
-                ResultListDto<RepresentativeDto> resultListDto = (ResultListDto<RepresentativeDto>)
-                        responseVS.getMessage(new TypeReference<ResultListDto<RepresentativeDto>>() {});
+                ResultListDto<UserVSDto> resultListDto = (ResultListDto<UserVSDto>)
+                        responseVS.getMessage(new TypeReference<ResultListDto<UserVSDto>>() {});
                 UserContentProvider.setNumTotalRepresentatives(resultListDto.getTotalCount());
                 List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
-                for(RepresentativeDto representative : resultListDto.getResultList()) {
+                for(UserVSDto representative : resultListDto.getResultList()) {
                     contentValuesList.add(UserContentProvider.getContentValues(representative));
                 }
                 if(!contentValuesList.isEmpty()) {
@@ -191,14 +190,14 @@ public class RepresentativeService extends IntentService {
                 getRepresentativeImageURL(representativeId);
         byte[] representativeImageBytes = null;
         ResponseVS responseVS = null;
-        UserVSDto representative = null;
+        org.votingsystem.dto.UserVSDto representative = null;
         try {
             responseVS = HttpHelper.getData(imageServiceURL, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 representativeImageBytes = responseVS.getMessageBytes();
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                representative = (UserVSDto) responseVS.getMessage(UserVSDto.class);
+                representative = (org.votingsystem.dto.UserVSDto) responseVS.getMessage(org.votingsystem.dto.UserVSDto.class);
                 representative.setImageBytes(representativeImageBytes);
                 Uri representativeURI = UserContentProvider.getUserVSURI(
                         representative.getId());
@@ -219,7 +218,7 @@ public class RepresentativeService extends IntentService {
 
     private void publicDelegation(Bundle arguments, String serviceCaller) {
         ResponseVS responseVS = null;
-        UserVSDto representative = (UserVSDto) arguments.getSerializable(ContextVS.USER_KEY);
+        org.votingsystem.dto.UserVSDto representative = (org.votingsystem.dto.UserVSDto) arguments.getSerializable(ContextVS.USER_KEY);
         String serviceURL = appVS.getAccessControl().getRepresentativeDelegationServiceURL();
         String messageSubject = getString(R.string.representative_delegation_lbl);
         try {
@@ -301,7 +300,7 @@ public class RepresentativeService extends IntentService {
         Date dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         Integer weeksDelegation = Integer.valueOf(weeksOperationActive);
         Date dateTo = DateUtils.addDays(dateFrom, weeksDelegation * 7).getTime();
-        UserVSDto representative = (UserVSDto) arguments.getSerializable(ContextVS.USER_KEY);
+        org.votingsystem.dto.UserVSDto representative = (org.votingsystem.dto.UserVSDto) arguments.getSerializable(ContextVS.USER_KEY);
         ResponseVS responseVS = null;
         try {
             String messageSubject = getString(R.string.representative_delegation_lbl);
