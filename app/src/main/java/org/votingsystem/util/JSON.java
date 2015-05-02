@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -27,7 +28,7 @@ public class JSON {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    private static ObjectMapper mapper = getMapper();
+    private static final ObjectMapper mapper = getMapper();
 
     public static class HTMLCharacterEscapes extends CharacterEscapes {
         private final int[] asciiEscapes;
@@ -67,5 +68,15 @@ public class JSON {
     public static <T> T readValue(String content, Class<T> valueType)
             throws IOException, JsonParseException, JsonMappingException {
         return mapper.readValue(content, valueType);
+    }
+
+    public static <T> T readValue(byte[] src, TypeReference valueTypeRef)
+            throws IOException, JsonParseException, JsonMappingException {
+        return mapper.readValue(src, valueTypeRef);
+    }
+
+    public static String writeValueAsString(Object value)
+            throws IOException, JsonParseException, JsonMappingException {
+        return mapper.writeValueAsString(value);
     }
 }

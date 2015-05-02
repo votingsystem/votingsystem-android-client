@@ -259,11 +259,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     public class EventListAdapter  extends CursorAdapter {
 
-        private ObjectMapper mapper;
-
         public EventListAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);
-            mapper = JSON.getMapper();
         }
 
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
@@ -274,7 +271,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             try {
                 String eventJSON = cursor.getString(cursor.getColumnIndex(
                         EventVSContentProvider.JSON_DATA_COL));
-                EventVSDto eventVS = mapper.readValue(eventJSON, EventVSDto.class);
+                EventVSDto eventVS = JSON.readValue(eventJSON, EventVSDto.class);
                 int state_color = R.color.frg_vs;
                 String tameInfoMsg = null;
                 switch(eventVS.getState()) {

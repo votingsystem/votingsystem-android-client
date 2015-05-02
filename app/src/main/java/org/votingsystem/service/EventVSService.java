@@ -81,7 +81,7 @@ public class EventVSService extends IntentService {
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    ResultListDto<EventVSDto> resultListDto = JSON.getMapper().readValue(
+                    ResultListDto<EventVSDto> resultListDto = JSON.readValue(
                             responseVS.getMessageBytes(), new TypeReference<ResultListDto<EventVSDto>>() {});
                     switch (eventState) {
                         case ACTIVE:
@@ -108,7 +108,7 @@ public class EventVSService extends IntentService {
                         values.put(EventVSContentProvider.ID_COL, eventVS.getId());
                         values.put(EventVSContentProvider.URL_COL, eventVS.getURL());
                         values.put(EventVSContentProvider.JSON_DATA_COL,
-                                JSON.getMapper().writeValueAsString(eventVS));
+                                JSON.writeValueAsString(eventVS));
                         values.put(EventVSContentProvider.TYPE_COL, eventVS.getTypeVS().toString());
                         values.put(EventVSContentProvider.STATE_COL, eventVSState.toString());
                         contentValuesList.add(values);
