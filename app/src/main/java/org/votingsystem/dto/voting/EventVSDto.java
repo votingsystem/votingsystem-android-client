@@ -3,7 +3,6 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.CommentVSDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.TypeVS;
 
@@ -21,15 +20,7 @@ public class EventVSDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = "EventVS";
-
-    public String getUUID() {
-        return UUID;
-    }
-
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
-    }
+    public static final String TAG = EventVSDto.class.getSimpleName();
 
     public enum State {ACTIVE, TERMINATED, CANCELLED, PENDING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM}
 
@@ -39,7 +30,7 @@ public class EventVSDto implements Serializable {
 
     private Long id;
     private Long eventId;
-    private TypeVS typeVS;
+    private TypeVS typeVS = TypeVS.VOTING_EVENT;
     private Cardinality cardinality;
     private String content;
     private String subject;
@@ -47,7 +38,7 @@ public class EventVSDto implements Serializable {
     private Integer numSignaturesCollected;
     private Integer numVotesCollected;
     private ControlCenterDto controlCenter;
-    private UserVSDto userVS;
+    private String userVS;
     private AccessControlDto accessControl;
     private Integer numComments = 0;
 
@@ -64,6 +55,7 @@ public class EventVSDto implements Serializable {
     private VoteVS vote;
     private String UUID;
 
+    public EventVSDto() {}
 
     public TypeVS getTypeVS() {
         return typeVS;
@@ -147,6 +139,14 @@ public class EventVSDto implements Serializable {
         return tags;
     }
 
+    public String getUserVS() {
+        return userVS;
+    }
+
+    public void setUserVS(String userVS) {
+        this.userVS = userVS;
+    }
+
     public void setTags(String[] tags) {
         if (tags.length == 0) return;
         ArrayList<String> arrayTags = new ArrayList<String>();
@@ -194,14 +194,6 @@ public class EventVSDto implements Serializable {
 
     public void setNumVotesCollected(Integer numVotesCollected) {
         this.numVotesCollected = numVotesCollected;
-    }
-
-    public UserVSDto getUserVS() {
-        return userVS;
-    }
-
-    public void setUserVS(UserVSDto userVS) {
-        this.userVS = userVS;
     }
 
     public Date getDateBegin() {
@@ -261,6 +253,14 @@ public class EventVSDto implements Serializable {
 
     public void setURL(String uRL) {
         URL = uRL;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 
 }
