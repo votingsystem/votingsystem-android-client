@@ -97,7 +97,7 @@ public class EventVSService extends IntentService {
                                     Long.valueOf(resultListDto.getTotalCount()));
                             break;
                     }
-                    List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
+                    List<ContentValues> contentValuesList = new ArrayList<>();
                     for(EventVSDto eventVS : resultListDto.getResultList()) {
                         EventVSDto.State eventVSState = eventVS.getState();
                         if(eventVSState == EventVSDto.State.CANCELLED) eventVSState =

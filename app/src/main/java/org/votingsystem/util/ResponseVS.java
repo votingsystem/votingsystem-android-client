@@ -175,6 +175,13 @@ public class ResponseVS<T> implements Parcelable {
         return EXCEPTION(context.getString(R.string.exception_lbl), message);
     }
 
+    public static ResponseVS ERROR(String caption, String message) {
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
+        responseVS.setCaption(caption);
+        responseVS.setNotificationMessage(message);
+        return responseVS;
+    }
+
     public String getMessage() {
         if(message == null && messageBytes != null) {
             try {

@@ -51,7 +51,7 @@ public class Wallet {
     public static Set<Currency> getCurrencySet(String pin, AppVS context) throws Exception {
         Set<CurrencyDto> currencyDtoList = getWallet(pin, context);
         currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
-        return new HashSet<Currency>(currencySet);
+        return new HashSet<>(currencySet);
     }
 
     public static void saveCurrencyCollection(Collection<Currency> currencyCollection, String pin,

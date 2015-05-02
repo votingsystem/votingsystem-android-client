@@ -114,6 +114,7 @@
     <string name="access_request_repeated_url_msg"><![CDATA[
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
     <string name="cert_install_error_msg">error instalando certificado de usuario</string>
+    <string name="cert_required_error_msg">para acceder al servicio necesita tener instalado un certificado de usuario</string>
     <string name="request_cert_result_activity_ok">el certificado se ha importado correctamente</string>
     <string name="request_cert_again_button">volver a solicitar el certificado</string>
     <string name="install_cert_button">instalar el certificado</string>
@@ -415,7 +416,6 @@
     <string name="representative_new_msg">dando de alta representante</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
     <string name="representatives_lbl">representantes</string>
-    <string name="representation_state_missing_lbl">seleccione la opción \'consultar estado de mi representación\'</string>
     <string name="representation_last_checked_msg">última actualización: \'%1$s\'</string>
     <string name="without_representative_msg">no tiene activa ninguna representación</string>
     <string name="with_public_representation_msg">tiene activa una representación \'no anónima\'</string>

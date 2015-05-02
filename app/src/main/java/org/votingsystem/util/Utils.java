@@ -5,9 +5,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NotificationCompat;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -19,6 +22,8 @@ import org.votingsystem.android.R;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.service.WebSocketService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -157,4 +162,33 @@ public class Utils {
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
+
+    private byte[] reduceImageFileSize(Uri imageUri) {
+        byte[] imageBytes = null;
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    AppVS.getInstance().getContentResolver().openFileDescriptor(imageUri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            parcelFileDescriptor.close();
+            int compressFactor = 80;
+            //Gallery images form phones like Nexus4 can be greater than 3 MB
+            //InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            //representativeImageBytes = FileUtils.getBytesFromInputStream(inputStream);
+            //Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            do {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                //0 meaning compress for small size, 100 meaning compress for max quality.
+                // Some formats, like PNG which is lossless, will ignore the quality setting
+                bitmap.compress(Bitmap.CompressFormat.JPEG, compressFactor, out);
+                imageBytes = out.toByteArray();
+                compressFactor = compressFactor - 10;
+                LOGD(TAG + ".reduceImageFileSize", "compressFactor: " + compressFactor +
+                        " - imageBytes: " + imageBytes.length);
+            } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return imageBytes;
+    }
 }

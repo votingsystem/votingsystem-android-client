@@ -3,11 +3,9 @@ package org.votingsystem.service;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -35,8 +33,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -55,8 +51,12 @@ public class RepresentativeService extends IntentService {
     public static final String TAG = RepresentativeService.class.getSimpleName();
 
     private AppVS appVS;
+    private Handler mHandler;
 
-    public RepresentativeService() { super(TAG); }
+    public RepresentativeService() {
+        super(TAG);
+        mHandler = new Handler();
+    }
 
     @Override protected void onHandleIntent(Intent intent) {
         appVS = (AppVS) getApplicationContext();
@@ -65,7 +65,7 @@ public class RepresentativeService extends IntentService {
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         LOGD(TAG + ".onHandleIntent", "operation: " + operation + " - serviceCaller: " + serviceCaller);
         if(appVS.getAccessControl() == null) {
-            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, appVS.getString(
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR, getString(
                     R.string.server_connection_error_msg, appVS.getAccessControlURL()));
             appVS.broadcastResponse(responseVS.setServiceCaller(
                     serviceCaller).setTypeVS(operation));
@@ -91,19 +91,18 @@ public class RepresentativeService extends IntentService {
                 checkRepresentationState(serviceCaller);
                 break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                cancelAnonymousDelegation(intent.getExtras(), serviceCaller);
+                cancelAnonymousDelegation(serviceCaller);
                 break;
             default: LOGD(TAG + ".onHandleIntent", "unhandled operation: " + operation.toString());
         }
     }
 
     private void checkRepresentationState(String serviceCaller) {
-        ResponseVS responseVS = updateRepresentationState();
-        responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.STATE);
-        appVS.broadcastResponse(responseVS);
-    }
-
-    private ResponseVS updateRepresentationState() {
+        if(appVS.getUserVS() == null) {
+            appVS.broadcastResponse(ResponseVS.ERROR(getString(R.string.error_lbl),
+                    getString(R.string.cert_required_error_msg)).setServiceCaller(serviceCaller));
+            return;
+        }
         String serviceURL = appVS.getAccessControl().getRepresentationStateServiceURL(
                 appVS.getUserVS().getNIF());
         ResponseVS responseVS = null;
@@ -130,10 +129,11 @@ public class RepresentativeService extends IntentService {
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);
-        } finally {
-            return responseVS;
         }
+        responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.STATE);
+        appVS.broadcastResponse(responseVS);
     }
+
 
     private void requestRepresentatives(String serviceURL, String serviceCaller) {
         ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
@@ -142,7 +142,7 @@ public class RepresentativeService extends IntentService {
                 ResultListDto<UserVSDto> resultListDto = (ResultListDto<UserVSDto>)
                         responseVS.getMessage(new TypeReference<ResultListDto<UserVSDto>>() {});
                 UserContentProvider.setNumTotalRepresentatives(resultListDto.getTotalCount());
-                List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
+                List<ContentValues> contentValuesList = new ArrayList<>();
                 for(UserVSDto representative : resultListDto.getResultList()) {
                     contentValuesList.add(UserContentProvider.getContentValues(representative));
                 }
@@ -250,7 +250,7 @@ public class RepresentativeService extends IntentService {
         }
     }
 
-    private void cancelAnonymousDelegation(Bundle arguments, String serviceCaller) {
+    private void cancelAnonymousDelegation(String serviceCaller) {
         LOGD(TAG + ".cancelAnonymousDelegation", "cancelAnonymousDelegation");
         ResponseVS responseVS = null;
         try {
@@ -361,36 +361,6 @@ public class RepresentativeService extends IntentService {
                     TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
             appVS.broadcastResponse(responseVS);
         }
-    }
-
-
-    private byte[] reduceImageFileSize(Uri imageUri) {
-        byte[] imageBytes = null;
-        try {
-            ParcelFileDescriptor parcelFileDescriptor =
-                    getContentResolver().openFileDescriptor(imageUri, "r");
-            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-            Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-            parcelFileDescriptor.close();
-            int compressFactor = 80;
-            //Gallery images form phones like Nexus4 can be greater than 3 MB
-            //InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            //representativeImageBytes = FileUtils.getBytesFromInputStream(inputStream);
-            //Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            do {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                //0 meaning compress for small size, 100 meaning compress for max quality.
-                // Some formats, like PNG which is lossless, will ignore the quality setting
-                bitmap.compress(Bitmap.CompressFormat.JPEG, compressFactor, out);
-                imageBytes = out.toByteArray();
-                compressFactor = compressFactor - 10;
-                LOGD(TAG + ".reduceImageFileSize", "compressFactor: " + compressFactor +
-                        " - imageBytes: " + imageBytes.length);
-            } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return imageBytes;
     }
 
 }

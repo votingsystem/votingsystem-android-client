@@ -82,7 +82,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getRepresentativeURL (Long representativeId) {
-        return getServerURL() + "/rest/representative/" + representativeId;
+        return getServerURL() + "/rest/representative/id/" + representativeId;
     }
 
     public String getRepresentativeURLByNif (String nif) {
@@ -94,7 +94,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getRepresentativeImageURL (Long representativeId) {
-        return getServerURL() + "/rest/representative/" + representativeId + "/image";
+        return getServerURL() + "/rest/representative/id/" + representativeId + "/image";
     }
 
     public String getRepresentativeServiceURL () {

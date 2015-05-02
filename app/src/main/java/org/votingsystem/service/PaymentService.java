@@ -65,7 +65,7 @@ public class PaymentService extends IntentService {
         appVS = (AppVS) getApplicationContext();
         if(appVS.getCurrencyServer() == null) {
             LOGD(TAG + ".updateUserInfo", "missing connection to Currency Server");
-            Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
+            Toast.makeText(appVS, getString(R.string.server_connection_error_msg,
                     appVS.getCurrencyServerURL()), Toast.LENGTH_LONG).show();
             return;
         }

@@ -85,10 +85,11 @@ public class RepresentationStateFragment extends Fragment implements
     private void setRepresentationView(RepresentationStateDto representation) {
         this.representation = representation;
         if(representation == null) {
-            ((TextView)rootView.findViewById(R.id.last_checked_date)).setText(getString(
-                    R.string.representation_state_missing_lbl));
+            if(appVS.getUserVS() != null) launchRepresentativeService(TypeVS.STATE);
+            rootView.setVisibility(View.GONE);
             return;
         } else {
+            rootView.setVisibility(View.VISIBLE);
             ((TextView)rootView.findViewById(R.id.last_checked_date)).setText(getString(
                     R.string.representation_last_checked_msg,
                     DateUtils.getDayWeekDateStr(representation.getLastCheckedDate())));

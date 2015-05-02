@@ -1,5 +1,7 @@
 package org.votingsystem.dto;
 
+
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.signature.util.CertUtils;

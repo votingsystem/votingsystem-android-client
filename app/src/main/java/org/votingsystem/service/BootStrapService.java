@@ -56,7 +56,7 @@ public class BootStrapService extends IntentService {
             } else {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
+                        Toast.makeText(appVS, getString(R.string.server_connection_error_msg,
                                 accessControlURL), Toast.LENGTH_LONG).show();
                     }
                 });
@@ -73,7 +73,7 @@ public class BootStrapService extends IntentService {
             } else {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
+                        Toast.makeText(appVS, getString(R.string.server_connection_error_msg,
                                 currencyServerURL), Toast.LENGTH_LONG).show();
                     }
                 });

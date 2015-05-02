@@ -40,7 +40,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -65,9 +64,8 @@ public class WalletFragment extends Fragment {
                 switch(responseVS.getTypeVS()) {
                     case CURRENCY:
                         try {
-                            Set<Currency> currencySet = Wallet.getCurrencySet((String) responseVS.getData(),
-                                    (AppVS) getActivity().getApplicationContext());
-                            currencyList = new ArrayList<>(currencySet);
+                            currencyList = new ArrayList<>(Wallet.getCurrencySet((String) responseVS.getData(),
+                                    (AppVS) getActivity().getApplicationContext()));
                             Utils.launchCurrencyStatusCheck(broadCastId, null, getActivity());
                             printSummary();
                         } catch (Exception ex) {
@@ -113,14 +111,14 @@ public class WalletFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        currencyList = new ArrayList<>(Wallet.getCurrencySet());
-        adapter = new CurrencyListAdapter(currencyList, getActivity());
-        gridView.setAdapter(adapter);
-        if(currencyList == null) {
+        if(Wallet.getCurrencySet() == null) {
             PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                     getString(R.string.enter_wallet_pin_msg), false, TypeVS.CURRENCY);
-            currencyList = new ArrayList<Currency>();
+            currencyList = new ArrayList<>();
         } else {
+            currencyList = new ArrayList<>(Wallet.getCurrencySet());
+            adapter = new CurrencyListAdapter(currencyList, getActivity());
+            gridView.setAdapter(adapter);
             printSummary();
             walletLoaded = true;
         }
@@ -149,7 +147,7 @@ public class WalletFragment extends Fragment {
                 String contentFormatted = getString(R.string.tag_info,
                         ((BigDecimal)tagInfoMap.get(tag).getTotal()).toPlainString(), currency,
                         MsgUtils.getTagVSMessage(tag, getActivity()));
-                if(((BigDecimal)tagInfoMap.get(tag).getTimeLimited()).compareTo(BigDecimal.ZERO) > 0) {
+                if((tagInfoMap.get(tag).getTimeLimited()).compareTo(BigDecimal.ZERO) > 0) {
                     contentFormatted = contentFormatted + " " + getString(R.string.tag_info_time_limited,
                             ((BigDecimal)tagInfoMap.get(tag).getTimeLimited()).toPlainString(),
                             currency);

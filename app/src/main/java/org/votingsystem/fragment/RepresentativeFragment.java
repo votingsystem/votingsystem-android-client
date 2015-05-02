@@ -56,7 +56,7 @@ public class RepresentativeFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = (ResponseVS) intent.getSerializableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
             if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
                 printRepresentativeData((UserVSDto) intent.getSerializableExtra(ContextVS.USER_KEY));
