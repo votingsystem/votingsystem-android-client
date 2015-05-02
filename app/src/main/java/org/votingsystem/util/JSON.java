@@ -1,11 +1,14 @@
 package org.votingsystem.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -23,6 +26,8 @@ public class JSON {
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    private static ObjectMapper mapper = getMapper();
 
     public static class HTMLCharacterEscapes extends CharacterEscapes {
         private final int[] asciiEscapes;
@@ -59,4 +64,8 @@ public class JSON {
         return mapper;
     }
 
+    public static <T> T readValue(String content, Class<T> valueType)
+            throws IOException, JsonParseException, JsonMappingException {
+        return mapper.readValue(content, valueType);
+    }
 }

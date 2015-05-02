@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
@@ -140,7 +141,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         try {
             if(getArguments().getString(ContextVS.EVENTVS_KEY) != null) {
                 String dtoStr = getArguments().getString(ContextVS.EVENTVS_KEY);
-                eventVS = JSON.getMapper().readValue(dtoStr, EventVSDto.class);
+                eventVS = JSON.readValue(dtoStr, EventVSDto.class);
                 eventVS.setAccessControlVS(appVS.getAccessControl());
             }
         } catch(Exception ex) {
@@ -275,7 +276,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
-        contentTextView.setText(Html.fromHtml(event.getContent()));
+        String eventContent = null;
+        try {
+            eventContent = new String(Base64.decode(event.getContent().getBytes()), "UTF-8");
+        } catch (Exception ex) { ex.printStackTrace(); }
+        contentTextView.setText(Html.fromHtml(eventContent));
         //contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<FieldEventVSDto> fieldsEventVS = event.getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);

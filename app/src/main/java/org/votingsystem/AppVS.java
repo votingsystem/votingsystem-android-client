@@ -94,7 +94,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
     private AtomicInteger notificationId = new AtomicInteger(1);
 
-
     private static AppVS INSTANCE;
 
 
