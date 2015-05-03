@@ -146,13 +146,13 @@ public class HttpHelper {
         Log.d(TAG + ".getData", "----------------------------------------");
         byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
         if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            if(type != null) return JSON.getMapper().readValue(responseBytes, type);
-            else return JSON.getMapper().readValue(responseBytes, typeReference);
+            if(type != null) return JSON.readValue(responseBytes, type);
+            else return JSON.readValue(responseBytes, typeReference);
         } else {
             MessageDto messageDto = null;
             String responseStr = null;
             if(responseContentType != null && responseContentType.contains(MediaTypeVS.JSON)) messageDto =
-                    JSON.getMapper().readValue(responseBytes, MessageDto.class);
+                    JSON.readValue(responseBytes, MessageDto.class);
             else responseStr = new String(responseBytes, "UTF-8");
             switch (response.getStatusLine().getStatusCode()) {
                 case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);
@@ -201,13 +201,13 @@ public class HttpHelper {
         Log.d(TAG + ".sendData" , "----------------------------------------");
         byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
         if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-            if(type != null) return JSON.getMapper().readValue(responseBytes, type);
-            else return JSON.getMapper().readValue(responseBytes, typeReference);
+            if(type != null) return JSON.readValue(responseBytes, type);
+            else return JSON.readValue(responseBytes, typeReference);
         } else {
             MessageDto messageDto = null;
             String responseStr = null;
             if(responseContentType != null && responseContentType.contains(MediaTypeVS.JSON)) messageDto =
-                    JSON.getMapper().readValue(responseBytes, MessageDto.class);
+                    JSON.readValue(responseBytes, MessageDto.class);
             else responseStr = new String(responseBytes, "UTF-8");
             switch (response.getStatusLine().getStatusCode()) {
                 case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);

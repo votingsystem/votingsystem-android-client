@@ -19,7 +19,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
 
-import java.io.ByteArrayInputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Date;
@@ -100,7 +99,7 @@ public class SocketMessageDto {
         messageContentDto.setMessage(message);
         messageContentDto.setOperation(operation);
         messageDto.setEncryptedMessage(Encryptor.encryptAES(
-                JSON.getMapper().writeValueAsString(messageContentDto), socketSession.getAESParams()));
+                JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
         messageDto.setUUID(UUID);
         return messageDto;
     }
@@ -115,7 +114,7 @@ public class SocketMessageDto {
         socketMessageDto.setSessionId(sessionId);
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignResponse(
                 statusCode, message, smimeMessage);
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.getMapper()
+        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON
                 .writeValueAsString(messageContentDto), socketSession.getAESParams()));
         socketMessageDto.setUUID(UUID);
         return socketMessageDto;
@@ -268,7 +267,7 @@ public class SocketMessageDto {
 
     @JsonIgnore
     public SMIMEMessage getSMIME() throws Exception {
-        if(smime == null) smime = new SMIMEMessage(new ByteArrayInputStream(Base64.decode(smimeMessage)));
+        if(smime == null) smime = new SMIMEMessage(Base64.decode(smimeMessage));
         return smime;
     }
 
@@ -414,11 +413,11 @@ public class SocketMessageDto {
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(
                 deviceVS, toUser, textToSign, subject);
-        String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
+        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.getMapper().writeValueAsString(messageContentDto),
+        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
         return socketMessageDto;
     }
@@ -436,12 +435,12 @@ public class SocketMessageDto {
         SocketMessageContentDto messageContentDto = SocketMessageContentDto
                 .getCurrencyWalletChangeRequest(currencyList);
 
-        String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
+        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
                 deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(Base64.encode(encryptedAESDataRequestBytes)));
 
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.getMapper()
+        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON
                 .writeValueAsString(messageContentDto), socketSession.getAESParams()));
         return socketMessageDto;
     }
@@ -466,18 +465,18 @@ public class SocketMessageDto {
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(
                 userVS, toUser, textToEncrypt);
-        String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
+        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
                 deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(Base64.encode(encryptedAESDataRequestBytes)));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
-                JSON.getMapper().writeValueAsString(messageContentDto), socketSession.getAESParams()));
+                JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
         return socketMessageDto;
     }
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
-        AESParamsDto aesDto = JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class);
+        AESParamsDto aesDto = JSON.readValue(new String(decryptedBytes), AESParamsDto.class);
         this.aesEncryptParams = AESParams.load(aesDto);
         decryptMessage(this.aesEncryptParams);
     }
@@ -485,7 +484,7 @@ public class SocketMessageDto {
 
     public void decryptMessage(AESParams aesParams) throws Exception {
         this.aesEncryptParams = aesParams;
-        content = JSON.getMapper().readValue(Encryptor.decryptAES(encryptedMessage, aesParams),
+        content = JSON.readValue(Encryptor.decryptAES(encryptedMessage, aesParams),
                 SocketMessageContentDto.class);
         if(content.getOperation() != null) operation = content.getOperation();
         if(content.getStatusCode() != null) statusCode = content.getStatusCode();

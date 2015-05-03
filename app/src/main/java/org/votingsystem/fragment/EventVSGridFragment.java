@@ -26,8 +26,6 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.android.R;

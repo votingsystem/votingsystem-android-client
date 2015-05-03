@@ -3,11 +3,8 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.RepresentationState;
 
 import java.util.Date;
-
-;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -15,7 +12,11 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RepresentationStateDto {
 
-    private RepresentationState state;
+    public enum State {
+        REPRESENTATIVE, WITH_ANONYMOUS_REPRESENTATION, WITH_PUBLIC_REPRESENTATION, WITHOUT_REPRESENTATION;
+    }
+
+    private State state;
     private Date lastCheckedDate;
     private Date dateFrom;
     private Date dateTo;
@@ -28,7 +29,7 @@ public class RepresentationStateDto {
 
     public RepresentationStateDto() {}
 
-    public RepresentationStateDto(Date lastCheckedDate, RepresentationState state,
+    public RepresentationStateDto(Date lastCheckedDate, State state,
                                   UserVSDto representative, Date dateTo) {
         this.state = state;
         this.dateTo = dateTo;
@@ -47,11 +48,11 @@ public class RepresentationStateDto {
         return representationStateDto;
     }
 
-    public RepresentationState getState() {
+    public State getState() {
         return state;
     }
 
-    public void setState(RepresentationState state) {
+    public void setState(State state) {
         this.state = state;
     }
 

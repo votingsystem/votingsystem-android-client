@@ -13,8 +13,7 @@ import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
-import org.votingsystem.model.AnonymousDelegation;
-import org.votingsystem.model.RepresentationState;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
@@ -45,7 +44,7 @@ public class PrefUtils {
 
     private static Integer numMessagesNotReaded;
     private static RepresentationStateDto representation;
-    private static AnonymousDelegation anonymousDelegation;
+    private static RepresentativeDelegationDto representativeDelegationDto;
 
     public static void init(final Context context) {
         SharedPreferences sp = context.getSharedPreferences(
@@ -153,7 +152,7 @@ public class PrefUtils {
                 Context.MODE_PRIVATE);
         String balancesStr = pref.getString(editorKey, null);
         try {
-            return JSON.getMapper().readValue(balancesStr, BalancesDto.class);
+            return JSON.readValue(balancesStr, BalancesDto.class);
         } catch (Exception ex) { ex.printStackTrace();}
         return null;
     }
@@ -169,7 +168,7 @@ public class PrefUtils {
                 Calendar.getInstance().getTimeInMillis());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(timePeriod.getDateFrom());
         try {
-            editor.putString(editorKey, JSON.getMapper().writeValueAsString(balancesDto));
+            editor.putString(editorKey, JSON.writeValueAsString(balancesDto));
             editor.commit();
         } catch (Exception ex) { ex.printStackTrace();}
     }
@@ -215,7 +214,7 @@ public class PrefUtils {
         return settings.getString(ContextVS.CSR_KEY, null);
     }
 
-    public static State getAppCertState(final Context context, String accessControlURL) {
+    public static org.votingsystem.util.ContextVS.State getAppCertState(final Context context, String accessControlURL) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String stateStr = settings.getString(
@@ -315,7 +314,7 @@ public class PrefUtils {
         SharedPreferences.Editor editor = settings.edit();
         try {
             editor.putString(RepresentationStateDto.class.getSimpleName(),
-                    JSON.getMapper().writeValueAsString(stateDto));
+                    JSON.writeValueAsString(stateDto));
             editor.commit();
             representation = stateDto;
         } catch(Exception ex) {ex.printStackTrace();}
@@ -330,13 +329,13 @@ public class PrefUtils {
                 RepresentationStateDto.class.getSimpleName(), null);
         if(stateJSON != null) {
             try {
-                representation = JSON.getMapper().readValue(stateJSON, RepresentationStateDto.class);
+                representation = JSON.readValue(stateJSON, RepresentationStateDto.class);
             } catch (IOException e) { e.printStackTrace(); }
         }
         return representation;
     }
 
-    public static void putAnonymousDelegation(AnonymousDelegation delegation, Context context) {
+    public static void putAnonymousDelegation(RepresentativeDelegationDto delegation, Context context) {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -346,30 +345,30 @@ public class PrefUtils {
             if(delegation != null) {
                 serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
                 representation = new RepresentationStateDto(Calendar.getInstance().getTime(),
-                        RepresentationState.WITH_ANONYMOUS_REPRESENTATION, delegation.getRepresentative(),
+                        RepresentationStateDto.State.WITH_ANONYMOUS_REPRESENTATION, delegation.getRepresentative(),
                         delegation.getDateTo());
             } else {
                 representation = new RepresentationStateDto(Calendar.getInstance().getTime(),
-                        RepresentationState.WITHOUT_REPRESENTATION, null, null);
+                        RepresentationStateDto.State.WITHOUT_REPRESENTATION, null, null);
             }
             editor.putString(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, serializedDelegation);
             editor.commit();
             putRepresentationState(representation, context);
-            anonymousDelegation = delegation;
+            representativeDelegationDto = delegation;
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static AnonymousDelegation getAnonymousDelegation(Context context) {
-        if(anonymousDelegation != null) return anonymousDelegation;
+    public static RepresentativeDelegationDto getAnonymousDelegation(Context context) {
+        if(representativeDelegationDto != null) return representativeDelegationDto;
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedObject = settings.getString(
                 ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, null);
         if(serializedObject != null) {
-            anonymousDelegation = (AnonymousDelegation) ObjectUtils.
+            representativeDelegationDto = (RepresentativeDelegationDto) ObjectUtils.
                     deSerializeObject(serializedObject.getBytes());
         }
-        return anonymousDelegation;
+        return representativeDelegationDto;
     }
 
     public static void changePin(String newPin, String oldPin, Context context)

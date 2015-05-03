@@ -114,7 +114,7 @@ public class MessageFragment extends Fragment {
         String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
         ((TextView)rootView.findViewById(R.id.date)).setText(dateInfoStr);
         try {
-            socketMessage = JSON.getMapper().readValue(cursor.getString(
+            socketMessage = JSON.readValue(cursor.getString(
                     cursor.getColumnIndex(MessageContentProvider.JSON_COL)), SocketMessageDto.class);
             messageId = cursor.getLong(cursor.getColumnIndex(MessageContentProvider.ID_COL));
             typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
@@ -270,7 +270,7 @@ public class MessageFragment extends Fragment {
                     Intent startIntent = new Intent(getActivity(), WebSocketService.class);
                     startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_RESPONSE);
                     startIntent.putExtra(ContextVS.WEBSOCKET_MSG_KEY,
-                            JSON.getMapper().writeValueAsString(socketMessageDto));
+                            JSON.writeValueAsString(socketMessageDto));
                     startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                     getActivity().startService(startIntent);
                 }

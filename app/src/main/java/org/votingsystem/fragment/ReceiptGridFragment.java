@@ -25,11 +25,11 @@ import android.widget.TextView;
 import org.votingsystem.activity.ReceiptPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
-import org.votingsystem.model.ReceiptContainer;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.TypeVS;
 
 import java.util.Date;
@@ -43,7 +43,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     private View rootView;
     private ReceiptGridAdapter adapter = null;
-    private VoteVS vote = null;
+    private VoteVSDto vote = null;
     private int menuItemSelected;
     private GridView gridView;
     private static final int loaderId = 0;
@@ -158,10 +158,10 @@ public class ReceiptGridFragment extends Fragment implements
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
-                ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
+                ReceiptWrapper receiptWrapper = (ReceiptWrapper) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
-                if(receiptContainer.getTypeVS() == null) {
-                    LOGD(TAG + ".bindView", "receiptContainer id: " + receiptContainer.getLocalId() +
+                if(receiptWrapper.getTypeVS() == null) {
+                    LOGD(TAG + ".bindView", "receiptWrapper id: " + receiptWrapper.getLocalId() +
                             " has null TypeVS");
                     return;
                 }
@@ -170,16 +170,16 @@ public class ReceiptGridFragment extends Fragment implements
                 Long createdMillis = cursor.getLong(cursor.getColumnIndex(
                         ReceiptContentProvider.TIMESTAMP_CREATED_COL));
                 String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
-                ReceiptContainer.State state =  ReceiptContainer.State.valueOf(stateStr);
+                ReceiptWrapper.State state =  ReceiptWrapper.State.valueOf(stateStr);
                 TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
                 ((TextView) view.findViewById(R.id.receipt_subject)).setText(
-                        receiptContainer.getCardSubject(context));
+                        receiptWrapper.getCardSubject(context));
                 ((ImageView) view.findViewById(R.id.receipt_icon)).setImageResource(
-                        receiptContainer.getLogoId());
+                        receiptWrapper.getLogoId());
                 if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
-                if(state == ReceiptContainer.State.CANCELLED) {
+                if(state == ReceiptWrapper.State.CANCELLED) {
                     receiptState.setText(getString(R.string.vote_canceled_receipt_lbl));
                     receiptState.setVisibility(View.VISIBLE);
                 } else receiptState.setVisibility(View.GONE);

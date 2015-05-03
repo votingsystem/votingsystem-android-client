@@ -294,7 +294,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyCode());
         values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
         try {
-            byte[] jsonBytes = JSON.getMapper().writeValueAsBytes(transactionVS);
+            byte[] jsonBytes = JSON.writeValueAsBytes(transactionVS);
             values.put(TransactionVSContentProvider.JSON_COL, jsonBytes);
         } catch (Exception ex) { ex.printStackTrace(); }
         values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,

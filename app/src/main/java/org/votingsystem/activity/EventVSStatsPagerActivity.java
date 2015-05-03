@@ -76,7 +76,7 @@ public class EventVSStatsPagerActivity extends ActionBarActivity {
         String eventJSON = cursor.getString(cursor.getColumnIndex(
                 EventVSContentProvider.JSON_DATA_COL));
         try {
-            EventVSDto event = JSON.getMapper().readValue(eventJSON, EventVSDto.class);
+            EventVSDto event = JSON.readValue(eventJSON, EventVSDto.class);
             String subtTitle = null;
             String title = getString(R.string.voting_info_lbl) + " '"+ event.getSubject() + "'";
             switch(event.getState()) {

@@ -23,8 +23,6 @@ import android.preference.PreferenceActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.fragment.AddressFormFragment;
@@ -76,8 +74,8 @@ public class SettingsActivity extends PreferenceActivity
             @Override public boolean onPreferenceClick(Preference arg0) {
                 Intent intent = new Intent(SettingsActivity.this, CertRequestActivity.class);
                 try {
-                    intent.putExtra(ContextVS.OPERATIONVS_KEY, JSON.getMapper().writeValueAsString(new HashMap<>()));
-                } catch (JsonProcessingException e) { e.printStackTrace(); }
+                    intent.putExtra(ContextVS.OPERATIONVS_KEY, JSON.writeValueAsString(new HashMap<>()));
+                } catch (Exception e) { e.printStackTrace(); }
                 startActivity(intent);
                 return true;
             }

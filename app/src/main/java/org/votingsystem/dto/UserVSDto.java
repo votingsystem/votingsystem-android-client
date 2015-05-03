@@ -32,22 +32,6 @@ public class UserVSDto implements Serializable {
 
     public static final String TAG = UserVSDto.class.getSimpleName();
 
-    public String getRepresentativeMessageURL() {
-        return representativeMessageURL;
-    }
-
-    public void setRepresentativeMessageURL(String representativeMessageURL) {
-        this.representativeMessageURL = representativeMessageURL;
-    }
-
-    public String getImageURL() {
-        return imageURL;
-    }
-
-    public void setImageURL(String imageURL) {
-        this.imageURL = imageURL;
-    }
-
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS, CONTACT}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
@@ -160,6 +144,7 @@ public class UserVSDto implements Serializable {
         this.cn = cn;
     }
 
+    @JsonIgnore
     public String getSignedContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return new String(Base64.encode(signerInformation.getContentDigest()));
@@ -347,6 +332,22 @@ public class UserVSDto implements Serializable {
 
     public void setNumRepresentations(Long numRepresentations) {
         this.numRepresentations = numRepresentations;
+    }
+
+    public String getRepresentativeMessageURL() {
+        return representativeMessageURL;
+    }
+
+    public void setRepresentativeMessageURL(String representativeMessageURL) {
+        this.representativeMessageURL = representativeMessageURL;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

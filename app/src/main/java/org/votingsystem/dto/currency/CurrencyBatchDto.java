@@ -14,7 +14,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,8 +74,7 @@ public class CurrencyBatchDto {
             setLeftOverCurrency(new Currency(csr));
         }
         for(String currencyItem : getCurrency()) {
-            SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.decode(currencyItem.getBytes())));
+            SMIMEMessage smimeMessage = new SMIMEMessage(Base64.decode(currencyItem.getBytes()));
             smimeMessage.isValidSignature();
             try {
                 Currency currency = new Currency(smimeMessage);

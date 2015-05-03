@@ -182,12 +182,12 @@ public class OperationVS {
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
         if(jsonStr == null) return null;
-        return JSON.getMapper().readValue(JSON.getMapper().writeValueAsString(jsonStr), type);
+        return JSON.readValue(JSON.writeValueAsString(jsonStr), type);
     }
 
     public <T> T getSignedContent(TypeReference<T> type) throws Exception {
         if(jsonStr == null) return null;
-        return JSON.getMapper().readValue(JSON.getMapper().writeValueAsString(jsonStr), type);
+        return JSON.readValue(JSON.writeValueAsString(jsonStr), type);
     }
 
     public String getJsonStr() {

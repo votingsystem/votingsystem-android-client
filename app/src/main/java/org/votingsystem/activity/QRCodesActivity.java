@@ -124,7 +124,7 @@ public class QRCodesActivity extends ActivityBase {
                                     FragmentContainerActivity.class);
                             intent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
                             intent.putExtra(ContextVS.TRANSACTION_KEY,
-                                    JSON.getMapper().writeValueAsString(dto));
+                                    JSON.writeValueAsString(dto));
                             startActivity(intent);
                             break;
                     }

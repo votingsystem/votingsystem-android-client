@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NotificationCompat;
@@ -162,6 +163,16 @@ public class Utils {
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
+    //http://stackoverflow.com/questions/1995439/get-android-phone-model-programmatically
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return model.toLowerCase();
+        } else {
+            return (manufacturer + " " + model).toLowerCase();
+        }
+    }
 
     private byte[] reduceImageFileSize(Uri imageUri) {
         byte[] imageBytes = null;

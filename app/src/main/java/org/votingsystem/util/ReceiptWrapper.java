@@ -1,4 +1,4 @@
-package org.votingsystem.model;
+package org.votingsystem.util;
 
 import android.content.Context;
 
@@ -8,10 +8,7 @@ import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
 
-import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -19,9 +16,14 @@ import java.util.Map;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ReceiptContainer implements Serializable {
+public class ReceiptWrapper implements Serializable {
 
-    public static final String TAG = ReceiptContainer.class.getSimpleName();
+    public static final String TAG = ReceiptWrapper.class.getSimpleName();
+
+
+    private static final long serialVersionUID = 1L;
+
+    public enum State {ACTIVE, CANCELLED}
 
     private Long localId = -1L;
     private transient SMIMEMessage receipt;
@@ -29,22 +31,17 @@ public class ReceiptContainer implements Serializable {
     private String subject;
     private String url;
 
-    public ReceiptContainer() {}
+    public ReceiptWrapper() {}
 
-    public ReceiptContainer(TypeVS typeVS, String url) {
+    public ReceiptWrapper(TypeVS typeVS, String url) {
         this.typeVS = typeVS;
         this.url = url;
     }
 
-    public ReceiptContainer(TransactionVSDto transactionVS) {
+    public ReceiptWrapper(TransactionVSDto transactionVS) {
         this.typeVS = transactionVS.getOperation();
         this.url = transactionVS.getMessageSMIMEURL();
     }
-
-    private static final long serialVersionUID = 1L;
-
-    public enum State {ACTIVE, CANCELLED}
-
 
     public String getTypeDescription(Context context) {
         switch(getTypeVS()) {
@@ -72,8 +69,10 @@ public class ReceiptContainer implements Serializable {
     public String getCardSubject(Context context) {
         switch(getTypeVS()) {
             case VOTEVS:
-                return  context.getString(R.string.receipt_vote_subtitle) + " - " +
-                        ((VoteVS)this).getEventVS().getSubject();
+                try {
+                    return  context.getString(R.string.receipt_vote_subtitle) + " - " +
+                            receipt.getSubject();
+                } catch (Exception ex)  { ex.printStackTrace();}
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
@@ -110,7 +109,7 @@ public class ReceiptContainer implements Serializable {
 
     public void setReceiptBytes(byte[] receiptBytes) throws Exception {
         if(receiptBytes != null) {
-            receipt = new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
+            receipt = new SMIMEMessage(receiptBytes);
             subject = receipt.getSubject();
             receipt.isValidSignature();
             JSONObject signedJSON = new JSONObject(receipt.getSignedContent());
@@ -145,9 +144,10 @@ public class ReceiptContainer implements Serializable {
     public TypeVS getTypeVS() {
         if(typeVS == null && receipt != null) {
             try {
-                Map signedContent = JSON.getMapper().readValue(receipt.getSignedContent(),
-                        new TypeReference<Map<String, Object>>() {});
-                if(signedContent.containsKey("operation")) {
+                Map signedContent = JSON.readValue(receipt.getSignedContent(),
+                        new TypeReference<Map<String, Object>>() {
+                        });
+                if (signedContent.containsKey("operation")) {
                     typeVS = TypeVS.valueOf((String) signedContent.get("operation"));
                 }
             } catch (Exception ex) { ex.printStackTrace(); }

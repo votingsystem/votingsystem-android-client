@@ -25,30 +25,29 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.model.AnonymousDelegation;
-import org.votingsystem.model.ReceiptContainer;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.dto.voting.AccessRequestDto;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.service.VoteService;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -61,11 +60,11 @@ public class ReceiptFragment extends Fragment {
     public static final String TAG = ReceiptFragment.class.getSimpleName();
 
     private AppVS appVS;
-    private ReceiptContainer selectedReceipt;
+    private ReceiptWrapper receiptWrapper;
     private TransactionVSDto transactionDto;
     private TextView receiptSubject;
     private WebView receipt_content;
-    private SMIMEMessage selectedReceiptSMIME;
+    private SMIMEMessage receiptWrapperSMIME;
     private String broadCastId;
     private String receiptURL;
     private Menu menu;
@@ -96,7 +95,7 @@ public class ReceiptFragment extends Fragment {
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(typeVS) {
                 case CANCEL_VOTE:
-                    launchVoteCancellation((VoteVS)selectedReceipt);
+                    launchVoteCancellation((VoteVSHelper)receiptWrapper);
                     break;
             }
         } else {
@@ -110,11 +109,11 @@ public class ReceiptFragment extends Fragment {
         }
     };
 
-    private void launchVoteCancellation(VoteVS vote) {
+    private void launchVoteCancellation(VoteVSHelper voteVSHelper) {
         Intent startIntent = new Intent(getActivity(), VoteService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.VOTE_KEY, vote);
+        startIntent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
         setProgressDialogVisible(getString(R.string.loading_data_msg),
                 getString(R.string.loading_info_msg), true);
         getActivity().startService(startIntent);
@@ -141,23 +140,23 @@ public class ReceiptFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         receiptURL = getArguments().getString(ContextVS.URL_KEY);
-        selectedReceipt = (ReceiptContainer) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
+        receiptWrapper = (ReceiptWrapper) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
         String transactionStr = getArguments().getString(ContextVS.TRANSACTION_KEY);
         if(transactionStr != null) {
-            if(transactionDto != null) selectedReceipt = new ReceiptContainer(transactionDto);
+            if(transactionDto != null) receiptWrapper = new ReceiptWrapper(transactionDto);
 
         }
-        if(selectedReceipt != null) {
-            if(selectedReceipt.hashReceipt()) initReceiptScreen(selectedReceipt);
-            else receiptURL = selectedReceipt.getURL();
+        if(receiptWrapper != null) {
+            if(receiptWrapper.hashReceipt()) initReceiptScreen(receiptWrapper);
+            else receiptURL = receiptWrapper.getURL();
         }
         if(savedInstanceState != null) {
-            selectedReceipt = (ReceiptContainer) savedInstanceState.getSerializable(
+            receiptWrapper = (ReceiptWrapper) savedInstanceState.getSerializable(
                     ContextVS.RECEIPT_KEY);
-            initReceiptScreen(selectedReceipt);
+            initReceiptScreen(receiptWrapper);
         } else {
             if(receiptURL != null) {
-                selectedReceipt = new ReceiptContainer(type, receiptURL);
+                receiptWrapper = new ReceiptWrapper(type, receiptURL);
                 String selection = ReceiptContentProvider.URL_COL + "=? ";
                 String[] selectionArgs = new String[]{receiptURL};
                 Cursor cursor = getActivity().getContentResolver().query(
@@ -168,10 +167,10 @@ public class ReceiptFragment extends Fragment {
                             ReceiptContentProvider.SERIALIZED_OBJECT_COL));
                     Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
                     try {
-                        selectedReceipt = (ReceiptContainer) ObjectUtils.
+                        receiptWrapper = (ReceiptWrapper) ObjectUtils.
                                 deSerializeObject(serializedReceiptContainer);
-                        selectedReceipt.setLocalId(receiptId);
-                        initReceiptScreen(selectedReceipt);
+                        receiptWrapper.setLocalId(receiptId);
+                        initReceiptScreen(receiptWrapper);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -186,10 +185,10 @@ public class ReceiptFragment extends Fragment {
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
                 Long receiptId = cursor.getLong(cursor.getColumnIndex(ReceiptContentProvider.ID_COL));
                 try {
-                    selectedReceipt = (ReceiptContainer) ObjectUtils.
+                    receiptWrapper = (ReceiptWrapper) ObjectUtils.
                             deSerializeObject(serializedReceiptContainer);
-                    selectedReceipt.setLocalId(receiptId);
-                    initReceiptScreen(selectedReceipt);
+                    receiptWrapper.setLocalId(receiptId);
+                    initReceiptScreen(receiptWrapper);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -197,69 +196,66 @@ public class ReceiptFragment extends Fragment {
         }
     }
 
-    private void initReceiptScreen (ReceiptContainer receiptContainer) {
-        LOGD(TAG + ".initReceiptScreen", "type: " + receiptContainer.getTypeVS() +
-                " - messageId: " + receiptContainer.getMessageId());
+    private void initReceiptScreen (ReceiptWrapper receiptWrapper) {
+        LOGD(TAG + ".initReceiptScreen", "type: " + receiptWrapper.getTypeVS() +
+                " - messageId: " + receiptWrapper.getMessageId());
         try {
             String contentFormatted = "";
-            JSONObject dataJSON = null;
-            BigDecimal totalAmount = null;
-            String currency = null;
             String dateStr = null;
-            selectedReceiptSMIME = receiptContainer.getReceipt();
-            String receiptSubjectStr = selectedReceiptSMIME == null? null :
-                    selectedReceiptSMIME.getSubject();
-            switch(receiptContainer.getTypeVS()) {
+            receiptWrapperSMIME = receiptWrapper.getReceipt();
+            String receiptSubjectStr = receiptWrapperSMIME == null? null :
+                    receiptWrapperSMIME.getSubject();
+            switch(receiptWrapper.getTypeVS()) {
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_SELECTION_CERT_REQUEST:
-                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
+                    org.votingsystem.dto.voting.RepresentativeDelegationDto delegationDto = receiptWrapper.getReceipt()
+                            .getSignedContent(org.votingsystem.dto.voting.RepresentativeDelegationDto.class);
                     contentFormatted = getString(R.string.anonymous_representative_request_formatted,
-                        dataJSON.getString("weeksOperationActive"),
-                        DateUtils.getDateStr(DateUtils.getDateFromString(dataJSON.getString("dateFrom")),
-                                "EEE dd MMM yyyy' 'HH:mm"),
-                        DateUtils.getDateStr(DateUtils.getDateFromString(dataJSON.getString("dateTo")),
-                                "EEE dd MMM yyyy' 'HH:mm"),
-                        dataJSON.getString("accessControlURL"));
+                            delegationDto.getWeeksOperationActive(),
+                        DateUtils.getDateStr(delegationDto.getDateFrom()),
+                        DateUtils.getDateStr(delegationDto.getDateTo()),
+                        delegationDto.getServerURL());
                     break;
                 case CURRENCY_REQUEST:
-                    dataJSON = new JSONObject(receiptContainer.getReceipt().getSignedContent());
-                    totalAmount = new BigDecimal(dataJSON.getString("totalAmount"));
-                    currency = dataJSON.getString("currencyCode");
-                    String serverURL = dataJSON.getString("serverURL");
+                    CurrencyDto currencyDto = receiptWrapper.getReceipt()
+                            .getSignedContent(CurrencyDto.class);
                     contentFormatted = getString(R.string.currency_request_formatted,
-                            totalAmount.toPlainString(), currency, serverURL);
+                            currencyDto.getAmount(), currencyDto.getCurrencyCode(),
+                            currencyDto.getCurrencyServerURL());
                     break;
                 case VOTEVS:
-                    VoteVS voteVS = (VoteVS)receiptContainer;
-                    dateStr = DateUtils.getDayWeekDateStr(selectedReceiptSMIME.getSigner().
+                    VoteVSHelper voteVSHelper = (VoteVSHelper) receiptWrapper;
+                    dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime());
                     contentFormatted = getString(R.string.votevs_info_formatted, dateStr,
-                            voteVS.getEventVS().getSubject(), voteVS.getOptionSelected().getContent(),
-                            receiptContainer.getReceipt().getSignedContent());
+                            voteVSHelper.getVote().getEventVS().getSubject(),
+                            voteVSHelper.getVote().getOptionSelected().getContent(),
+                            receiptWrapper.getReceipt().getSignedContent());
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    dataJSON = new JSONObject(selectedReceiptSMIME.getSignedContent());
-                    AnonymousDelegation delegation = AnonymousDelegation.parse(dataJSON);
+                    RepresentativeDelegationDto delegation =  receiptWrapper.getReceipt()
+                            .getSignedContent(RepresentativeDelegationDto.class);
                     contentFormatted = getString(R.string.anonymous_representative_selection_formatted,
                             delegation.getWeeksOperationActive(),
                             DateUtils.getDateStr(delegation.getDateFrom(), "EEE dd MMM yyyy' 'HH:mm"),
                             DateUtils.getDateStr(delegation.getDateTo()), "EEE dd MMM yyyy' 'HH:mm");
                     break;
                 case ACCESS_REQUEST:
-                    dataJSON = new JSONObject(selectedReceiptSMIME.getSignedContent());
-                    dateStr = DateUtils.getDayWeekDateStr(selectedReceiptSMIME.getSigner().
+                    AccessRequestDto requestDto =  receiptWrapper.getReceipt()
+                            .getSignedContent(AccessRequestDto.class);
+                    dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime());
                     contentFormatted = getString(R.string.access_request_info_formatted, dateStr,
-                            dataJSON.getString("eventURL"));
+                            requestDto.getEventURL());
                     receiptSubjectStr = getString(R.string.access_request_lbl);
                     break;
                 case FROM_GROUP_TO_ALL_MEMBERS:
-                    TransactionVSDto transactionVSDto = selectedReceiptSMIME.getSignedContent(
+                    TransactionVSDto transactionVSDto = receiptWrapperSMIME.getSignedContent(
                             TransactionVSDto.class);
                     contentFormatted = transactionVSDto.getFormatted(getActivity());
                     break;
                 default:
-                    contentFormatted = receiptContainer.getReceipt().getSignedContent();
+                    contentFormatted = receiptWrapper.getReceipt().getSignedContent();
 
             }
             receiptSubject.setText(receiptSubjectStr);
@@ -281,17 +277,17 @@ public class ReceiptFragment extends Fragment {
             LOGD(TAG + ".setActionBarMenu", "menu null");
             return;
         }
-        if(selectedReceipt == null || selectedReceipt.getTypeVS() == null) {
-            LOGD(TAG + ".selectedReceipt", "selectedReceipt undefined");
+        if(receiptWrapper == null || receiptWrapper.getTypeVS() == null) {
+            LOGD(TAG + ".receiptWrapper", "receiptWrapper undefined");
             return;
         }
-        if(TypeVS.VOTEVS != selectedReceipt.getTypeVS()) {
+        if(TypeVS.VOTEVS != receiptWrapper.getTypeVS()) {
             menu.removeItem(R.id.cancel_vote);
             menu.removeItem(R.id.check_receipt);
         }
-        switch(selectedReceipt.getTypeVS()) {
+        switch(receiptWrapper.getTypeVS()) {
             case VOTEVS:
-                if(((VoteVS)selectedReceipt).getEventVS().getDateFinish().before(
+                if(((VoteVSHelper)receiptWrapper).getVote().getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
@@ -304,12 +300,12 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.cancel_vote);
                 break;
             default: LOGD(TAG + ".setActionBarMenu", "unprocessed type: " +
-                    selectedReceipt.getTypeVS());
+                    receiptWrapper.getTypeVS());
         }
-        if(selectedReceipt.getLocalId() < 0) menu.removeItem(R.id.delete_item);
+        if(receiptWrapper.getLocalId() < 0) menu.removeItem(R.id.delete_item);
         else menu.removeItem(R.id.save_receipt);
         ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
-                selectedReceipt.getTypeDescription(getActivity()));
+                receiptWrapper.getTypeDescription(getActivity()));
     }
 
     @Override public void onStart() {
@@ -320,7 +316,7 @@ public class ReceiptFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(selectedReceipt != null) outState.putSerializable(ContextVS.RECEIPT_KEY,selectedReceipt);
+        if(receiptWrapper != null) outState.putSerializable(ContextVS.RECEIPT_KEY,receiptWrapper);
     }
 
     @Override public void onPause() {
@@ -336,10 +332,10 @@ public class ReceiptFragment extends Fragment {
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         LOGD(TAG + ".onCreateOptionsMenu", " selected receipt type:" +
-                selectedReceipt.getTypeVS());
+                receiptWrapper.getTypeVS());
         this.menu = menu;
         menuInflater.inflate(R.menu.receipt_fragment, menu);
-        if(selectedReceipt != null) setActionBarMenu(menu);
+        if(receiptWrapper != null) setActionBarMenu(menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -350,17 +346,17 @@ public class ReceiptFragment extends Fragment {
                 case android.R.id.home:
                     break;
                 case R.id.show_signers_info:
-                    UIUtils.showSignersInfoDialog(selectedReceiptSMIME.getSigners(),
+                    UIUtils.showSignersInfoDialog(receiptWrapperSMIME.getSigners(),
                             getFragmentManager(), getActivity());
                     break;
                 case R.id.show_timestamp_info:
-                    UIUtils.showTimeStampInfoDialog(selectedReceiptSMIME.getSigner().getTimeStampToken(),
+                    UIUtils.showTimeStampInfoDialog(receiptWrapperSMIME.getSigner().getTimeStampToken(),
                             appVS.getTimeStampCert(), getFragmentManager(), getActivity());
                     break;
                 case R.id.share_receipt:
                     try {
                         Intent sendIntent = new Intent();
-                        String receiptStr = new String(selectedReceiptSMIME.getBytes());
+                        String receiptStr = new String(receiptWrapperSMIME.getBytes());
                         sendIntent.setAction(Intent.ACTION_SEND);
                         sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
                         sendIntent.setType(ContentTypeVS.TEXT.getName());
@@ -372,10 +368,10 @@ public class ReceiptFragment extends Fragment {
                 case R.id.save_receipt:
                     ContentValues values = new ContentValues();
                     values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
-                            ObjectUtils.serializeObject(selectedReceipt));
-                    values.put(ReceiptContentProvider.TYPE_COL, selectedReceipt.getTypeVS().toString());
-                    values.put(ReceiptContentProvider.URL_COL, selectedReceipt.getMessageId());
-                    values.put(ReceiptContentProvider.STATE_COL, ReceiptContainer.State.ACTIVE.toString());
+                            ObjectUtils.serializeObject(receiptWrapper));
+                    values.put(ReceiptContentProvider.TYPE_COL, receiptWrapper.getTypeVS().toString());
+                    values.put(ReceiptContentProvider.URL_COL, receiptWrapper.getMessageId());
+                    values.put(ReceiptContentProvider.STATE_COL, ReceiptWrapper.State.ACTIVE.toString());
                     Uri uri = getActivity().getContentResolver().insert(
                             ReceiptContentProvider.CONTENT_URI, values);
                     menu.removeItem(R.id.save_receipt);
@@ -383,23 +379,23 @@ public class ReceiptFragment extends Fragment {
                 case R.id.signature_content:
                     try {
                         MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(
-                                        R.string.signature_content), selectedReceiptSMIME.getSignedContent(),
+                                        R.string.signature_content), receiptWrapperSMIME.getSignedContent(),
                                 getFragmentManager());
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
                 case R.id.check_receipt:
-                    if(selectedReceipt instanceof VoteVS) {
-                        new VoteVSChecker().execute(((VoteVS)selectedReceipt).getHashCertVSBase64());
+                    if(receiptWrapper instanceof VoteVSHelper) {
+                        new VoteVSChecker().execute(((VoteVSHelper)receiptWrapper).getHashCertVSBase64());
                     }
                     return true;
                 case R.id.delete_item:
                     dialog = new AlertDialog.Builder(getActivity()).setTitle(
                             getString(R.string.delete_receipt_lbl)).setMessage(Html.fromHtml(
-                            getString(R.string.delete_receipt_msg, selectedReceipt.getSubject()))).
+                            getString(R.string.delete_receipt_msg, receiptWrapper.getSubject()))).
                             setPositiveButton(getString(R.string.ok_lbl), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     getActivity().getContentResolver().delete(ReceiptContentProvider.
-                                            getReceiptURI(selectedReceipt.getLocalId()), null, null);
+                                            getReceiptURI(receiptWrapper.getLocalId()), null, null);
                                     getActivity().onBackPressed();
                                 }
                             }).setNegativeButton(getString(R.string.cancel_lbl),
@@ -414,7 +410,7 @@ public class ReceiptFragment extends Fragment {
                 case R.id.cancel_vote:
                     dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
                             setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
-                                    ((VoteVS) selectedReceipt).getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
+                                    ((VoteVSHelper) receiptWrapper).getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
@@ -443,10 +439,10 @@ public class ReceiptFragment extends Fragment {
                     responseVS, getFragmentManager());
             else {
                 try {
-                    VoteVSDto voteVSDto = (VoteVSDto) responseVS.getMessage(VoteVSDto.class);
+                    org.votingsystem.dto.voting.VoteVSDto voteVSDtoDto = (org.votingsystem.dto.voting.VoteVSDto) responseVS.getMessage(org.votingsystem.dto.voting.VoteVSDto.class);
                     MessageDialogFragment.showDialog(ResponseVS.SC_OK,
-                            MsgUtils.getVoteVSStateMsg(voteVSDto.getState(), getActivity()),
-                            getString(R.string.votvs_value_msg, voteVSDto.getOptionSelected().getContent()),
+                            MsgUtils.getVoteVSStateMsg(voteVSDtoDto.getState(), getActivity()),
+                            getString(R.string.votvs_value_msg, voteVSDtoDto.getOptionSelected().getContent()),
                             getFragmentManager());
                 } catch (Exception ex) {ex.printStackTrace();}
             }
@@ -486,12 +482,12 @@ public class ReceiptFragment extends Fragment {
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    selectedReceipt.setReceiptBytes(responseVS.getMessageBytes());
+                    receiptWrapper.setReceiptBytes(responseVS.getMessageBytes());
                     if(transactionDto != null) {
                         transactionDto.setSmimeMessage(responseVS.getSMIME());
                         TransactionVSContentProvider.updateTransaction(appVS, transactionDto);
                     }
-                    initReceiptScreen(selectedReceipt);
+                    initReceiptScreen(receiptWrapper);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),

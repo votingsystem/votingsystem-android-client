@@ -60,7 +60,7 @@ public class CurrencyActivity extends ActionBarActivity {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             SocketMessageDto socketMsg = null;
             try {
-                socketMsg = JSON.getMapper().readValue(intent.getStringExtra(
+                socketMsg = JSON.readValue(intent.getStringExtra(
                         ContextVS.WEBSOCKET_MSG_KEY), SocketMessageDto.class);
             } catch (Exception ex) { ex.printStackTrace();}
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
@@ -108,7 +108,7 @@ public class CurrencyActivity extends ActionBarActivity {
                                 DeviceVSDto targetDevice = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
                                 SocketMessageDto dto = SocketMessageDto.getCurrencyWalletChangeRequest(
                                         targetDevice, Arrays.asList(currency));
-                                responseVS = new ResponseVS(ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(dto));
+                                responseVS = new ResponseVS(ResponseVS.SC_OK, JSON.writeValueAsString(dto));
                                 Intent startIntent = new Intent(CurrencyActivity.this, WebSocketService.class);
                                 startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                                 startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);

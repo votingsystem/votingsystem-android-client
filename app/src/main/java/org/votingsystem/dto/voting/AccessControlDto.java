@@ -135,7 +135,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getAnonymousDelegationRequestServiceURL() {
-        return getServerURL() + "/rest/representative/anonymousDelegationRequest";
+        return getServerURL() + "/representative/anonymousDelegationRequest";
     }
 
     public String getAnonymousDelegationServiceURL() {
@@ -150,8 +150,8 @@ public class AccessControlDto extends ActorDto implements Serializable {
         return getServerURL() + "/rest/voteVS/hash/" + hashHex;
     }
 
-    public String getCancelAnonymousDelegationServiceURL() {
-        return getServerURL() + "/rest/representative/cancelAnonymousDelegation";
+    public String getAnonymousDelegationCancelerServiceURL() {
+        return getServerURL() + "/representative/cancelAnonymousDelegation";
     }
 
 }

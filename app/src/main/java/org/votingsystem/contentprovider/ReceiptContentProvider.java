@@ -13,6 +13,10 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import org.votingsystem.signature.util.VoteVSHelper;
+import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.ReceiptWrapper;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -196,6 +200,19 @@ public class ReceiptContentProvider extends ContentProvider {
                 ex.printStackTrace();
             }
         }
+    }
+
+    public static ContentValues getContentValues(VoteVSHelper voteVSHelper, ReceiptWrapper.State state) {
+        ContentValues values = new ContentValues();
+        values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(voteVSHelper));
+        values.put(ReceiptContentProvider.URL_COL, voteVSHelper.getMessageId());
+        values.put(ReceiptContentProvider.TYPE_COL, voteVSHelper.getTypeVS().toString());
+        values.put(ReceiptContentProvider.STATE_COL, state.toString());
+        if(voteVSHelper.getLocalId() == null) {
+            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+        }
+        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        return values;
     }
 
 }

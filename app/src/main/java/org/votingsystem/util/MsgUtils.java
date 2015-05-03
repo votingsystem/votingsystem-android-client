@@ -8,8 +8,8 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.model.VoteVS;
 
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
@@ -122,7 +122,7 @@ public class MsgUtils {
     }
 
 
-    public static String getVoteVSStateMsg(VoteVS.State voteState, Context context) {
+    public static String getVoteVSStateMsg(VoteVSDto.State voteState, Context context) {
         switch (voteState) {
             case OK: return context.getString(R.string.votevs_ok_msg);
             case CANCELLED: return context.getString(R.string.votevs_cancelled_msg);

@@ -36,7 +36,6 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -77,7 +76,7 @@ public class PaymentService extends IntentService {
         String dtoStr = intent.getStringExtra(ContextVS.TRANSACTION_KEY);
         TransactionVSDto transactionDto = null;
         try {
-            if(dtoStr != null) transactionDto = JSON.getMapper().readValue(dtoStr, TransactionVSDto.class);
+            if(dtoStr != null) transactionDto = JSON.readValue(dtoStr, TransactionVSDto.class);
         } catch(Exception ex) { ex.printStackTrace();}
         try {
             switch(transactionDto.getOperation()) {
@@ -153,9 +152,9 @@ public class PaymentService extends IntentService {
                     MediaTypeVS.JSON_SIGNED;
             CurrencyRequestBatch requestBatch = CurrencyRequestBatch.createRequest(
                     transactionDto, currencyServer.getServerURL());
-            byte[] requestBytes = JSON.getMapper().writeValueAsString(
+            byte[] requestBytes = JSON.writeValueAsString(
                     requestBatch.getCurrencyCSRList()).getBytes();
-            String signatureContent =  JSON.getMapper().writeValueAsString(requestBatch.getRequestDto());
+            String signatureContent =  JSON.writeValueAsString(requestBatch.getRequestDto());
             SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
                     signatureContent, messageSubject);
             Map<String, Object> mapToSend = new HashMap<>();
@@ -190,7 +189,7 @@ public class PaymentService extends IntentService {
         try {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
             SMIMEMessage smimeMessage = appVS.signMessage(transactionDto.getToUserIBAN().get(0),
-                    JSON.getMapper().writeValueAsString(transactionDto), getString(R.string.FROM_USERVS_msg_subject));
+                    JSON.writeValueAsString(transactionDto), getString(R.string.FROM_USERVS_msg_subject));
             responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
                     ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionVSServiceURL());
         } catch(Exception ex) {
@@ -208,7 +207,7 @@ public class PaymentService extends IntentService {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
             CurrencyBundle currencyBundle = Wallet.getCurrencyBundleForTransaction(transactionDto);
             CurrencyBatchDto requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
-            responseVS = HttpHelper.sendData(JSON.getMapper().writeValueAsBytes(requestDto),
+            responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto) responseVS.getMessage(CurrencyBatchDto.class);
@@ -217,8 +216,7 @@ public class PaymentService extends IntentService {
                     leftOverCurrency = currencyBundle.getLeftOverCurrency();
                     leftOverCurrency.initSigner(responseDto.getLeftOverCoin().getBytes());
                 }
-                SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
-                        Base64.decode(responseDto.getReceipt())));
+                SMIMEMessage receipt = new SMIMEMessage(Base64.decode(responseDto.getReceipt()));
                 transactionDto.setReceipt(responseDto.getReceipt());
                 Set<Currency> currencyToRemove = currencyBundle.getCurrencySet();
                 Wallet.removeCurrencyCollection(currencyToRemove, appVS);
@@ -279,7 +277,7 @@ public class PaymentService extends IntentService {
             }
             Map<String, Currency.State> responseDto =  HttpHelper.sendData(
                     new TypeReference<Map<String, Currency.State>>() {},
-                    JSON.getMapper().writeValueAsBytes(hashCertVSList),
+                    JSON.writeValueAsBytes(hashCertVSList),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
                     MediaTypeVS.JSON);
             List<String> currencyWithErrorList = new ArrayList<>();

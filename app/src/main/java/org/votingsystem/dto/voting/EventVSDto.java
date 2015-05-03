@@ -3,7 +3,6 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.CommentVSDto;
-import org.votingsystem.model.VoteVS;
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
@@ -52,7 +51,7 @@ public class EventVSDto implements Serializable {
     private Date lastUpdated;
     private String[] tags;
     private State state;
-    private VoteVS vote;
+    private VoteVSDto vote;
     private String UUID;
 
     public EventVSDto() {}
@@ -221,11 +220,11 @@ public class EventVSDto implements Serializable {
     }
 
 
-    public void setVote(VoteVS vote) {
+    public void setVote(VoteVSDto vote) {
         this.vote = vote;
     }
 
-    public VoteVS getVote() {
+    public VoteVSDto getVote() {
         return vote;
     }
 

@@ -3,7 +3,6 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.model.CertificateVS;
 import org.votingsystem.signature.util.CertUtils;
 
 import java.io.IOException;
@@ -19,6 +18,11 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CertificateVSDto {
 
+    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
+        ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
+
+    public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}
+
     //SerialNumber as String to avoid Javascript problem handling such big numbers
     private String serialNumber;
     private String issuerSerialNumber;
@@ -29,8 +33,11 @@ public class CertificateVSDto {
     private String sigAlgName;
     private Date notBefore;
     private Date notAfter;
-    private CertificateVS.Type type;
-    private CertificateVS.State state;
+    private byte[] content;
+    private Date dateCreated;
+    private Date lastUpdated;
+    private Type type;
+    private State state;
     private boolean isRoot;
 
     public CertificateVSDto() {}
@@ -87,15 +94,48 @@ public class CertificateVSDto {
         return notAfter;
     }
 
-    public CertificateVS.Type getType() {
+    public org.votingsystem.dto.CertificateVSDto.Type getType() {
         return type;
     }
 
-    public CertificateVS.State getState() {
+    public org.votingsystem.dto.CertificateVSDto.State getState() {
         return state;
     }
 
     public boolean isRoot() {
         return isRoot;
     }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
 }

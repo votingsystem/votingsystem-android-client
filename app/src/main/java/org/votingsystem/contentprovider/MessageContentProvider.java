@@ -14,10 +14,10 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.JSON;
+
+import java.io.IOException;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -150,15 +150,15 @@ public class MessageContentProvider extends ContentProvider {
     }
 
     public static Uri insert(ContentResolver contentResolver, SocketMessageDto socketMsg) throws
-            JsonProcessingException {
+            IOException {
         return contentResolver.insert(CONTENT_URI, getContentValues(socketMsg, State.NOT_READED));
     }
 
     public static ContentValues getContentValues(SocketMessageDto socketMsg, State state)
-            throws JsonProcessingException {
+            throws IOException {
         ContentValues values = new ContentValues();
         values.put(MessageContentProvider.STATE_COL, state.toString());
-        String decryptedMsg = JSON.getMapper().writeValueAsString(socketMsg.getContent());
+        String decryptedMsg = JSON.writeValueAsString(socketMsg.getContent());
         values.put(MessageContentProvider.JSON_COL, decryptedMsg);
         values.put(MessageContentProvider.TYPE_COL, socketMsg.getOperation().toString());
         values.put(MessageContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());

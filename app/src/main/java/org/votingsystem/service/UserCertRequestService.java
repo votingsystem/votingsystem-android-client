@@ -40,7 +40,7 @@ public class UserCertRequestService extends IntentService {
         String serviceCaller = arguments.getString(CALLER_KEY);
         ResponseVS responseVS = null;
         try {
-            CertRequestDto dto = JSON.getMapper().readValue(arguments.getString(DTO_KEY),
+            CertRequestDto dto = JSON.readValue(arguments.getString(DTO_KEY),
                     CertRequestDto.class);
             String pin = arguments.getString(PIN_KEY);
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(

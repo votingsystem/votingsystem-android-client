@@ -71,7 +71,7 @@ public class EventVSStatsFragment extends Fragment {
                 EventVSContentProvider.JSON_DATA_COL));
         LOGD(TAG + ".onCreateView", "eventJSONData: " + eventJSONData);
         try {
-            eventVS = JSON.getMapper().readValue(eventJSONData, EventVSDto.class);
+            eventVS = JSON.readValue(eventJSONData, EventVSDto.class);
             eventVS.setAccessControlVS(appVS.getAccessControl());
         } catch(Exception ex) { ex.printStackTrace(); }
         rootView = inflater.inflate(R.layout.eventvs_stats, container, false);

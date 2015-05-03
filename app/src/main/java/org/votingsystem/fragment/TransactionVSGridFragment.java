@@ -261,7 +261,7 @@ public class TransactionVSGridFragment extends Fragment
                 if(null != null) {
                     TransactionVSDto transactionVS = null;
                     try {
-                        transactionVS = JSON.getMapper().readValue(jsonBytes, TransactionVSDto.class);
+                        transactionVS = JSON.readValue(jsonBytes, TransactionVSDto.class);
                     } catch (IOException e) { e.printStackTrace(); }
                     String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                             TransactionVSContentProvider.WEEK_LAPSE_COL));

@@ -126,13 +126,13 @@ public class WebSocketService extends Service {
                         LOGD(TAG + ".onStartCommand", "socketMsg: " + message);
                         switch(operationType) {
                             case MESSAGEVS:
-                                List<DeviceVSDto> targetDevicesDto = JSON.getMapper().readValue(
+                                List<DeviceVSDto> targetDevicesDto = JSON.readValue(
                                         dtoStr, new TypeReference<List<DeviceVSDto>>(){});
                                 for (DeviceVSDto deviceVSDto : targetDevicesDto) {
                                     SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
                                             deviceVSDto, null, message);
                                     session.getBasicRemote().sendText(
-                                            JSON.getMapper().writeValueAsString(messageDto));
+                                            JSON.writeValueAsString(messageDto));
                                 }
                                 break;
                             default:
@@ -157,10 +157,10 @@ public class WebSocketService extends Service {
                     SocketMessageDto messageDto = SocketMessageDto.INIT_SESSION_REQUEST();
                     String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
                     SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
-                            JSON.getMapper().writeValueAsString(messageDto), msgSubject,
+                            JSON.writeValueAsString(messageDto), msgSubject,
                             currencyServer.getTimeStampServiceURL());
                     messageDto.setSMIME(smimeMessage);
-                    session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
+                    session.getBasicRemote().sendText(JSON.writeValueAsString(messageDto));
                     LOGD(TAG + ".onStartCommand", "websocket session started");
                 } catch(Exception ex) {
                     ex.printStackTrace();
@@ -245,7 +245,7 @@ public class WebSocketService extends Service {
                             @Override public void onMessage(String message) {
                             try {
                                 sendWebSocketBroadcast(
-                                        JSON.getMapper().readValue(message, SocketMessageDto.class));
+                                        JSON.readValue(message, SocketMessageDto.class));
                             } catch (IOException e) { e.printStackTrace(); }
                             }
                         });
@@ -270,14 +270,14 @@ public class WebSocketService extends Service {
         try {
             if(socketSession == null && socketMsg.isEncrypted()) {
                 byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());
-                AESParamsDto aesDto = JSON.getMapper().readValue(decryptedBytes, AESParamsDto.class);
+                AESParamsDto aesDto = JSON.readValue(decryptedBytes, AESParamsDto.class);
                 AESParams aesParams = AESParams.load(aesDto);
                 socketMsg.decryptMessage(aesParams);
                 appVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(socketMsg));
             } else if (socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
-            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
+            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.writeValueAsString(socketMsg));
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
@@ -314,7 +314,7 @@ public class WebSocketService extends Service {
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.getMapper().writeValueAsString(socketMsg));
+                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.writeValueAsString(socketMsg));
                     startActivity(intent);
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
@@ -336,7 +336,7 @@ public class WebSocketService extends Service {
                     socketMsg.setOperation(socketSession.getTypeVS());
                     socketMsg.setStatusCode(ResponseVS.SC_CANCELED);
                     intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY,
-                            JSON.getMapper().writeValueAsString(socketMsg));
+                            JSON.writeValueAsString(socketMsg));
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 default: LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

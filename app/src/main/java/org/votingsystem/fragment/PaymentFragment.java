@@ -102,7 +102,7 @@ public class PaymentFragment extends Fragment {
         LOGD(TAG + ".launchSignedTransaction() ", "launchSignedTransaction");
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
         try {
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, JSON.getMapper().writeValueAsString(transactionDto));
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, JSON.writeValueAsString(transactionDto));
             startIntent.putExtra(CALLER_KEY, broadCastId);
             startIntent.putExtra(TYPEVS_KEY, transactionType);
             getActivity().startService(startIntent);
@@ -133,7 +133,7 @@ public class PaymentFragment extends Fragment {
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         payment_method_spinner.setAdapter(dataAdapter);
         try {
-            transactionDto = JSON.getMapper().readValue(
+            transactionDto = JSON.readValue(
                     getArguments().getString(ContextVS.TRANSACTION_KEY),
                     TransactionVSDto.class);
             receptor.setText(transactionDto.getToUser());
@@ -167,7 +167,7 @@ public class PaymentFragment extends Fragment {
         OperationVS operationVS = null;
         if(getArguments().getString(ContextVS.OPERATIONVS_KEY) != null) {
             try {
-                operationVS = JSON.getMapper().readValue(getArguments().getString(ContextVS.OPERATIONVS_KEY),
+                operationVS = JSON.readValue(getArguments().getString(ContextVS.OPERATIONVS_KEY),
                         OperationVS.class);
                 transactionVS = TransactionVSDto.fromOperationVS(operationVS);
             } catch (Exception e) { e.printStackTrace();  }

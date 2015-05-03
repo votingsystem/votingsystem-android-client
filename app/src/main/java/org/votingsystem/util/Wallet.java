@@ -155,7 +155,7 @@ public class Wallet {
     public static Set<CurrencyDto> getWallet(String pin, AppVS context) throws Exception {
         byte[] walletBytes = getWalletBytes(pin, context);
         if(walletBytes == null) return new HashSet<>();
-        else return JSON.getMapper().readValue(walletBytes, new TypeReference<Set<CurrencyDto>>(){});
+        else return JSON.readValue(walletBytes, new TypeReference<Set<CurrencyDto>>(){});
     }
 
     private static byte[] getWalletBytes(String pin, AppVS context) throws Exception {
@@ -187,7 +187,7 @@ public class Wallet {
         }
         if(currencyCollection != null) {
             Set<CurrencyDto> currencyDtoSet = CurrencyDto.serializeCollection(currencyCollection);
-            byte[] walletBytes = JSON.getMapper().writeValueAsBytes(currencyDtoSet);
+            byte[] walletBytes = JSON.writeValueAsBytes(currencyDtoSet);
             byte[] encryptedWalletBytes = Encryptor.encryptToCMS(walletBytes, context.getX509UserCert());
             PrefUtils.putWallet(encryptedWalletBytes, context);
             currencySet = new HashSet<>(currencyCollection);

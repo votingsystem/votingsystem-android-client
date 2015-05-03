@@ -30,7 +30,6 @@ import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -317,13 +316,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
                 SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
         SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNIF, toUser,
                 textToSign, subject);
-        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
-                timeStampServiceURL , this);
-        ResponseVS responseVS = timeStamper.call();
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            throw new ValidationExceptionVS(getString(R.string.timestamp_service_error_caption));
-        }
-        return timeStamper.getSMIME();
+        return new MessageTimeStamper(smimeMessage, timeStampServiceURL).call();
     }
 
     public SMIMEMessage signMessage(String toUser, String textToSign, String subject) throws Exception {

@@ -2,8 +2,6 @@ package org.votingsystem.signature.smime;
 
 import android.util.Log;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -32,12 +30,11 @@ import org.bouncycastle2.mail.smime.SMIMESigned;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Store;
-import org.json.JSONObject;
+import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.VoteVS;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -50,6 +47,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +59,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.activation.CommandMap;
@@ -102,12 +99,11 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         CommandMap.setDefaultCommandMap(mc);
     }
 
-    private ContentTypeVS contentTypeVS;
     private String signedContent;
     private SMIMESigned smimeSigned = null;
     private Set<UserVSDto> signers = null;
     private UserVSDto signerVS;
-    private VoteVS voteVS;
+    private VoteVSDto voteVS;
     private X509Certificate currencyCert;
     private SMIMEContentInfo contentInfo;
     private TimeStampToken timeStampToken;
@@ -151,7 +147,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
-        return JSON.getMapper().readValue(signedContent, type);
+        return JSON.readValue(signedContent, type);
     }
 
     public SMIMESigned getSmimeSigned() throws Exception {
@@ -270,7 +266,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return messageBytes;
     }
 
-    public VoteVS getVoteVS() {
+    public VoteVSDto getVoteVS() {
         return voteVS;
     }
 
@@ -319,6 +315,12 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return signerCerts;
     }
 
+    public String getContentDigestStr() throws Exception {
+        if(contentInfo == null) isValidSignature();
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        return new String(Base64.encode(messageDigest.digest(signedContent.getBytes())));
+    }
+
     public class SMIMEContentInfo {
 
         public SMIMEContentInfo(Object content, String[] headerValues) throws Exception {
@@ -348,7 +350,6 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 }
             } else throw new ExceptionVS("TODO - content instanceof String");
             checkSignature();
-            if(headerValues != null && headerValues.length > 0) contentTypeVS = ContentTypeVS.getByName(headerValues[0]);
         }
 
         /**
@@ -396,10 +397,8 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                    Map<String, Object> dataMap = JSON.getMapper().readValue(
-                            signedContent, new TypeReference<Map<String, Object>>() {});
-                    JSONObject voteJSON = new JSONObject(signedContent);
-                    voteVS = VoteVS.getInstance(dataMap, cert, timeStampToken);
+                    voteVS = JSON.readValue(signedContent, VoteVSDto.class);
+                    voteVS.loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}

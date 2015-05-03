@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
@@ -31,10 +32,12 @@ import org.votingsystem.service.RepresentativeService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -102,12 +105,18 @@ public class RepresentativeDelegationActivity extends ActivityBase {
     private void sendDelegation() {
         LOGD(TAG + ".sendDelegation", "sendDelegation");
         Intent startIntent = new Intent(this, RepresentativeService.class);
+        RepresentativeDelegationDto delegationDto = new RepresentativeDelegationDto();
+        delegationDto.setOperation(operationType);
+        delegationDto.setRepresentative(representative);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION == operationType) {
-            startIntent.putExtra(ContextVS.TIME_KEY, weeks_delegation.getText().toString());
+            delegationDto.setWeeksOperationActive(
+                    Integer.valueOf(weeks_delegation.getText().toString()));
         }
         startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.USER_KEY, representative);
+        try {
+            startIntent.putExtra(ContextVS.DTO_KEY, JSON.writeValueAsString(delegationDto));
+        } catch (IOException e) { e.printStackTrace(); }
         setProgressDialogVisible(
                 getString(R.string.sending_data_lbl), getString(R.string.wait_msg), true);
         startService(startIntent);

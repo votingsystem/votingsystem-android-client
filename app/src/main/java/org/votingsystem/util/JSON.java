@@ -2,6 +2,7 @@ package org.votingsystem.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -75,8 +76,20 @@ public class JSON {
         return mapper.readValue(src, valueTypeRef);
     }
 
-    public static String writeValueAsString(Object value)
+    public static <T> T readValue(String src, TypeReference valueTypeRef)
             throws IOException, JsonParseException, JsonMappingException {
+        return mapper.readValue(src, valueTypeRef);
+    }
+
+    public static <T> T readValue(byte[] src, Class<T> valueType) throws IOException {
+        return mapper.readValue(src, valueType);
+    }
+
+    public static byte[] writeValueAsBytes(Object value) throws JsonProcessingException {
+        return mapper.writeValueAsBytes(value);
+    }
+
+    public static String writeValueAsString(Object value) throws JsonProcessingException {
         return mapper.writeValueAsString(value);
     }
 }

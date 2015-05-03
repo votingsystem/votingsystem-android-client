@@ -188,7 +188,7 @@ public class CashRequestFormActivity extends ActionBarActivity {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);
         try {
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, JSON.getMapper().writeValueAsString(transactionDto));
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, JSON.writeValueAsString(transactionDto));
         } catch (Exception ex) { ex.printStackTrace();}
         setProgressDialogVisible(true, getString(R.string.currency_request_msg_subject),
                 MsgUtils.getCurrencyRequestMessage(transactionDto, this));

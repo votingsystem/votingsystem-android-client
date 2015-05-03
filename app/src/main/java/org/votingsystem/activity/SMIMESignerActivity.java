@@ -25,11 +25,11 @@ import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 
 import java.io.IOException;
 
@@ -55,7 +55,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         try {
             String dtoStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
             if(dtoStr != null) {
-                socketMessageResponse = JSON.getMapper().readValue(dtoStr, SocketMessageDto.class);
+                socketMessageResponse = JSON.readValue(dtoStr, SocketMessageDto.class);
             }
         } catch (Exception ex) { ex.printStackTrace();}
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
@@ -85,7 +85,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
             Intent startIntent = new Intent(this, WebSocketService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
             startIntent.putExtra(ContextVS.MESSAGE_KEY,
-                    JSON.getMapper().writeValueAsString(socketMessage));
+                    JSON.writeValueAsString(socketMessage));
             startService(startIntent);
         } catch (Exception ex) { ex.printStackTrace();}
     }
@@ -115,7 +115,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
         appVS = (AppVS) getApplicationContext();
         String dtoStr = getIntent().getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
-            socketMessage = JSON.getMapper().readValue(dtoStr, SocketMessageDto.class);
+            socketMessage = JSON.readValue(dtoStr, SocketMessageDto.class);
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
                     true).writeValueAsString(socketMessage.getTextToSign());
             webView.loadData(signatureContent, "application/json", "UTF-8");
@@ -145,7 +145,7 @@ public class SMIMESignerActivity extends ActionBarActivity {
                 try {
                     SocketMessageDto messageDto = socketMessage.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
-                                    DeviceUtils.getDeviceName()), TypeVS.OPERATION_CANCELED);
+                                    Utils.getDeviceName()), TypeVS.OPERATION_CANCELED);
                     sendSocketMessage(messageDto);
                     finish();
                 } catch(Exception ex) {ex.printStackTrace();}

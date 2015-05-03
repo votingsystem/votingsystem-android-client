@@ -18,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
@@ -27,11 +26,11 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Utils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -84,8 +83,8 @@ public class SelectDeviceDialogFragment extends DialogFragment {
                         selectedDeviceVSDto = deviceVSDto;
                 }
                 try {
-                    responseVS.setMessage(JSON.getMapper().writeValueAsString(selectedDeviceVSDto));
-                } catch (JsonProcessingException e) { e.printStackTrace(); }
+                    responseVS.setMessage(JSON.writeValueAsString(selectedDeviceVSDto));
+                } catch (IOException e) { e.printStackTrace(); }
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 dialog.dismiss();
@@ -103,8 +102,8 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         super.onSaveInstanceState(outState);
         outState.putString(ContextVS.CALLER_KEY, dialogCaller);
         try {
-            outState.putSerializable(ContextVS.DTO_KEY, JSON.getMapper().writeValueAsString(deviceListDto));
-        } catch (JsonProcessingException e) { e.printStackTrace(); }
+            outState.putSerializable(ContextVS.DTO_KEY, JSON.writeValueAsString(deviceListDto));
+        } catch (IOException e) { e.printStackTrace(); }
         outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) tagList);
     }
 
@@ -115,7 +114,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             String dtoStr = savedInstanceState.getString(ContextVS.DTO_KEY);
             if(dtoStr != null) {
                 try {
-                    deviceListDto = JSON.getMapper().readValue(dtoStr,
+                    deviceListDto = JSON.readValue(dtoStr,
                             new TypeReference<List<DeviceVSDto>>() {});
                 } catch (IOException e) { e.printStackTrace(); }
             }
@@ -162,7 +161,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
                     deviceListDto = ((ResultListDto<DeviceVSDto>) responseVS.getMessage(
                             new TypeReference<ResultListDto<DeviceVSDto>>() {})).getResultList();
                     for(DeviceVSDto deviceVSDto : deviceListDto) {
-                        if(!DeviceUtils.getDeviceName().equals(deviceVSDto.getDeviceName()))
+                        if(!Utils.getDeviceName().equals(deviceVSDto.getDeviceName()))
                             tagList.add(deviceVSDto.getDeviceName());
                     }
                 }

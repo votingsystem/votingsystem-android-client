@@ -115,7 +115,7 @@ public class BrowserVSActivity extends ActionBarActivity {
     @JavascriptInterface public void setMessage (String appMessage) {
         LOGD(TAG + ".setMessage", "appMessage: " + appMessage);
         try {
-            operationVS = JSON.getMapper().readValue(appMessage, OperationVS.class);
+            operationVS = JSON.readValue(appMessage, OperationVS.class);
             switch(operationVS.getTypeVS()) {
                 default:
                     processSignatureOperation(operationVS);

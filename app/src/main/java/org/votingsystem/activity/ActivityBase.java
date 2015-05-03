@@ -140,7 +140,7 @@ public abstract class ActivityBase extends ActionBarActivity implements
             String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
             if(socketMsgStr != null) {
                 try {
-                    socketMsg = JSON.getMapper().readValue(socketMsgStr, SocketMessageDto.class);
+                    socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
                 } catch (Exception ex) { ex.printStackTrace();}
             }
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {

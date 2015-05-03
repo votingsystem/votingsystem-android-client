@@ -8,10 +8,9 @@ import org.votingsystem.AppVS;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Locale;
@@ -50,7 +49,7 @@ public class SocketMessageContentDto {
             String textToSign, String subject) throws Exception {
         SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
-        messageContentDto.setDeviceFromName(DeviceUtils.getDeviceName());
+        messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setToUser(toUser);
         messageContentDto.setTextToSign(textToSign);
         messageContentDto.setSubject(subject);
@@ -71,7 +70,7 @@ public class SocketMessageContentDto {
             Collection<Currency> currencyList) throws Exception {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
-        messageContentDto.setDeviceFromName(DeviceUtils.getDeviceName());
+        messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
         return messageContentDto;
@@ -82,7 +81,7 @@ public class SocketMessageContentDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
         messageContentDto.setFrom(userVS.getFullName());
-        messageContentDto.setDeviceFromName(DeviceUtils.getDeviceName());
+        messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setToUser(toUser);
         messageContentDto.setMessage(message);
@@ -196,7 +195,7 @@ public class SocketMessageContentDto {
     @JsonIgnore
     SMIMEMessage getSMIME () throws Exception {
         byte[] smimeMessageBytes = Base64.decode(smimeMessage.getBytes());
-        return new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+        return new SMIMEMessage(smimeMessageBytes);
     }
 
     public String getDeviceToName() {

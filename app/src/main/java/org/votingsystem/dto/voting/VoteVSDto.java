@@ -1,32 +1,69 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.model.VoteVS;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle2.asn1.DERTaggedObject;
+import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.x509.extension.X509ExtensionUtil;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.cert.X509Certificate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VoteVSDto {
+public class VoteVSDto implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
+    public static final String TAG = VoteVSDto.class.getSimpleName();
+
+    public enum State {OK, CANCELLED, ERROR}
+
+    private TypeVS operation;
     private Long id;
     private Long cancelerId;
     private Long eventVSId;
     private String certificateURL;
+    private String originHashAccessRequest;
     private String hashAccessRequestBase64;
     private String hashAccessRequestHex;
+    private String originHashCertVote;
     private String hashCertVSBase64;
     private String hashCertVoteHex;
     private String messageSMIMEURL;
     private String cancelationMessageSMIMEURL;
     private String eventVSURL;
     private String UUID;
-    private VoteVS.State state;
+    private EventVSDto eventVS;
+    private State state;
     private FieldEventVSDto optionSelected;
+
+    private String accessControlURL;
+    private String representativeURL;
+    private Long accessControlEventVSId;
+
+    @JsonIgnore private transient Set<X509Certificate> serverCerts = new HashSet<>();
+    @JsonIgnore private transient TimeStampToken timeStampToken;
+    @JsonIgnore private X509Certificate x509Certificate;
+
 
     public VoteVSDto() {}
 
+
+    public VoteVSDto(EventVSDto eventVS, FieldEventVSDto optionSelected) {
+        this.eventVS = eventVS;
+        this.optionSelected = optionSelected;
+    }
 
     public Long getId() {
         return id;
@@ -116,11 +153,11 @@ public class VoteVSDto {
         this.eventVSURL = eventVSURL;
     }
 
-    public VoteVS.State getState() {
+    public State getState() {
         return state;
     }
 
-    public void setState(VoteVS.State state) {
+    public void setState(State state) {
         this.state = state;
     }
 
@@ -140,24 +177,102 @@ public class VoteVSDto {
         this.UUID = UUID;
     }
 
-
-    public AccessRequestDto getAccessRequestDto() {
-        AccessRequestDto accessRequestDto = new AccessRequestDto();
-        accessRequestDto.setEventId(eventVSId);
-        accessRequestDto.setEventURL(eventVSURL);
-        accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        accessRequestDto.setHashCertVSBase64(hashCertVSBase64);
-        accessRequestDto.setUUID(java.util.UUID.randomUUID().toString());
-        return accessRequestDto;
+    public TimeStampToken getTimeStampToken() {
+        return timeStampToken;
     }
 
-    public VoteVSCancelerDto getCancelVoteDto(String originHashAccessRequest, String originHashCertVote) {
-        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
-        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
-        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        cancelerDto.setOriginHashCertVote(originHashCertVote);
-        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
-        cancelerDto.setUUID(java.util.UUID.randomUUID().toString());
-        return cancelerDto;
+    public void setTimeStampToken(TimeStampToken timeStampToken) {
+        this.timeStampToken = timeStampToken;
     }
+
+    public X509Certificate getX509Certificate() {
+        return x509Certificate;
+    }
+
+    public void setX509Certificate(X509Certificate x509Certificate) {
+        this.x509Certificate = x509Certificate;
+    }
+
+    public String getAccessControlURL() {
+        return accessControlURL;
+    }
+
+    public void setAccessControlURL(String accessControlURL) {
+        this.accessControlURL = accessControlURL;
+    }
+
+    public String getRepresentativeURL() {
+        return representativeURL;
+    }
+
+    public Long getAccessControlEventVSId() {
+        return accessControlEventVSId;
+    }
+
+    public void setAccessControlEventVSId(Long accessControlEventVSId) {
+        this.accessControlEventVSId = accessControlEventVSId;
+    }
+
+    public String getOriginHashAccessRequest() {
+        return originHashAccessRequest;
+    }
+
+    public void setOriginHashAccessRequest(String originHashAccessRequest) {
+        this.originHashAccessRequest = originHashAccessRequest;
+    }
+
+    public String getOriginHashCertVote() {
+        return originHashCertVote;
+    }
+
+    public void setOriginHashCertVote(String originHashCertVote) {
+        this.originHashCertVote = originHashCertVote;
+    }
+
+    public void setServerCerts(Set<X509Certificate> serverCerts) {
+        this.serverCerts = serverCerts;
+    }
+
+    public VoteVSDto loadSignatureData(X509Certificate x509Certificate,
+                                       TimeStampToken timeStampToken) throws IOException {
+        this.timeStampToken = timeStampToken;
+        this.x509Certificate = x509Certificate;
+        byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
+        if(voteExtensionValue != null) {
+            DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
+            VoteCertExtensionDto certExtensionDto = JSON.readValue(((DERUTF8String) voteCertDataDER.getObject()).toString(),
+                    VoteCertExtensionDto.class);
+            this.accessControlEventVSId = certExtensionDto.getEventId();
+            this.accessControlURL = certExtensionDto.getAccessControlURL();
+            this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
+        }
+        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
+        if(representativeURLExtensionValue != null) {
+            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
+                    representativeURLExtensionValue);
+            setRepresentativeURL(((DERUTF8String) representativeURL_DER.getObject()).toString());
+        }
+        return this;
+    }
+
+    public void setRepresentativeURL(String representativeURL) {
+        this.representativeURL = representativeURL;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public EventVSDto getEventVS() {
+        return eventVS;
+    }
+
+    public void setEventVS(EventVSDto eventVS) {
+        this.eventVS = eventVS;
+    }
+
 }

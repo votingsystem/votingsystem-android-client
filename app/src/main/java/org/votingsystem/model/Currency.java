@@ -23,9 +23,9 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Payment;
+import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.TypeVS;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class Currency extends ReceiptContainer {
+public class Currency extends ReceiptWrapper {
 
     public static final String TAG = Currency.class.getSimpleName();
 
@@ -167,7 +167,7 @@ public class Currency extends ReceiptContainer {
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, ContextVS.CURRENCY_OID);
         initCertData(certExtensionDto, smimeMessage.getCurrencyCert().getSubjectDN().toString());
-        CurrencyBatchDto currencyBatchDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyBatchDto.class);
+        CurrencyBatchDto currencyBatchDto = JSON.readValue(smimeMessage.getSignedContent(), CurrencyBatchDto.class);
         if(amount.compareTo(currencyBatchDto.getCurrencyAmount()) != 0) throw new ExceptionVS("Currency amount '" + amount +
                 "' CurrencyBatchDto amount  '" + currencyBatchDto.getCurrencyAmount() + "'");
         this.batchAmount = currencyBatchDto.getBatchAmount();
@@ -211,7 +211,7 @@ public class Currency extends ReceiptContainer {
             switch(attribute.getTagNo()) {
                 case ContextVS.CURRENCY_TAG:
                     String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionDto = JSON.getMapper().readValue(certAttributeJSONStr, CurrencyCertExtensionDto.class);
+                    certExtensionDto = JSON.readValue(certAttributeJSONStr, CurrencyCertExtensionDto.class);
                     break;
             }
         }
@@ -359,14 +359,13 @@ public class Currency extends ReceiptContainer {
     }
 
     @Override public SMIMEMessage getReceipt() throws Exception {
-        if(receipt == null && receiptBytes != null) receipt =
-                new SMIMEMessage(new ByteArrayInputStream(receiptBytes));
+        if(receipt == null && receiptBytes != null) receipt = new SMIMEMessage(receiptBytes);
         return receipt;
     }
 
     public SMIMEMessage getCancellationReceipt() throws Exception {
         if(cancellationReceipt == null && cancellationReceiptBytes != null) cancellationReceipt =
-                new SMIMEMessage(new ByteArrayInputStream(cancellationReceiptBytes));
+                new SMIMEMessage(cancellationReceiptBytes);
         return cancellationReceipt;
     }
 
@@ -540,9 +539,7 @@ public class Currency extends ReceiptContainer {
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
         byte[] smimeMessageBytes = (byte[]) s.readObject();
-        if(smimeMessageBytes != null) {
-            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
-        }
+        if(smimeMessageBytes != null) smimeMessage = new SMIMEMessage(smimeMessageBytes);
         if(certificationRequest != null) fromCertificationRequestVS(certificationRequest);
     }
 

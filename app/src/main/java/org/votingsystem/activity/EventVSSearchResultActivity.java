@@ -94,7 +94,7 @@ public class EventVSSearchResultActivity extends ActionBarActivity {
         try {
             Intent intent = new Intent(this, FragmentContainerActivity.class);
             intent.putExtra(FRAGMENT_KEY, EventVSFragment.class.getName());
-            intent.putExtra(ContextVS.EVENTVS_KEY, JSON.getMapper().writeValueAsString(eventVS));
+            intent.putExtra(ContextVS.EVENTVS_KEY, JSON.writeValueAsString(eventVS));
             startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();

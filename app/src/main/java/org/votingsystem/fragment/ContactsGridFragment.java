@@ -136,7 +136,7 @@ public class ContactsGridFragment extends Fragment
             String dtoStr = savedInstanceState.getString(ContextVS.DTO_KEY);
             if(dtoStr != null) {
                 try {
-                    userVSList = JSON.getMapper().readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
+                    userVSList = JSON.readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
                     ContactListAdapter adapter = new ContactListAdapter(userVSList, appVS);
                     gridView.setAdapter(adapter);
                 } catch (Exception e) {
@@ -229,7 +229,7 @@ public class ContactsGridFragment extends Fragment
         outState.putSerializable(ContextVS.USER_KEY, contactUserVS);
         if(userVSList != null) {
             try {
-                outState.putString(ContextVS.DTO_KEY, JSON.getMapper().writeValueAsString(userVSList));
+                outState.putString(ContextVS.DTO_KEY, JSON.writeValueAsString(userVSList));
             } catch (Exception ex) { ex.printStackTrace();}
         }
     }
@@ -253,7 +253,7 @@ public class ContactsGridFragment extends Fragment
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         intent.putExtra(ContextVS.STATE_KEY, mode);
         try {
-            intent.putExtra(ContextVS.DTO_KEY, JSON.getMapper().writeValueAsString(userVSList));
+            intent.putExtra(ContextVS.DTO_KEY, JSON.writeValueAsString(userVSList));
         } catch (Exception ex) { ex.printStackTrace();}
         intent.putExtra(ContextVS.USER_KEY, userVS);
         startActivity(intent);

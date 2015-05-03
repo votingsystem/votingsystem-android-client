@@ -99,7 +99,7 @@ public class TransactionVSFragment extends Fragment {
         try {
             byte[] jsonBytes = cursor.getBlob(
                     cursor.getColumnIndex(TransactionVSContentProvider.JSON_COL));
-            selectedTransaction = JSON.getMapper().readValue(jsonBytes, TransactionVSDto.class);
+            selectedTransaction = JSON.readValue(jsonBytes, TransactionVSDto.class);
             selectedTransaction.setLocalId(transactionId);
         } catch (Exception ex) {ex.printStackTrace();}
         /*String weekLapseStr = cursor.getString(cursor.getColumnIndex(
@@ -125,7 +125,7 @@ public class TransactionVSFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             try {
-                selectedTransaction = JSON.getMapper().readValue(
+                selectedTransaction = JSON.readValue(
                         savedInstanceState.getString(ContextVS.TRANSACTION_KEY), TransactionVSDto.class);
             } catch (IOException e) { e.printStackTrace();  }
         }

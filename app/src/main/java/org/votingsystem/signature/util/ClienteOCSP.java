@@ -10,7 +10,7 @@ import org.bouncycastle2.ocsp.OCSPResp;
 import org.bouncycastle2.ocsp.RevokedStatus;
 import org.bouncycastle2.ocsp.SingleResp;
 import org.bouncycastle2.ocsp.UnknownStatus;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 
@@ -29,7 +29,7 @@ import java.util.Date;
 */
 public class ClienteOCSP {
 
-    public static CertificateVS.State validateCert(X509Certificate certificate, BigInteger serialNumber,
+    public static CertificateVSDto.State validateCert(X509Certificate certificate, BigInteger serialNumber,
                  Date checkDate) throws Exception {
         OCSPReqGenerator ocspReqGen = new OCSPReqGenerator();
         ocspReqGen.addRequest(new CertificateID(CertificateID.HASH_SHA1, certificate, serialNumber));
@@ -48,19 +48,19 @@ public class ClienteOCSP {
         OCSPResp ocspResponse = new OCSPResp(in);
         BasicOCSPResp basicOCSPResp ;
         if(ocspResponse.getStatus() == OCSPResponseStatus.SUCCESSFUL) {
-            CertificateVS.State certificateState = null;
+            CertificateVSDto.State certificateState = null;
             basicOCSPResp = (BasicOCSPResp) ocspResponse.getResponseObject();
             for(SingleResp singleResponse : basicOCSPResp.getResponses()){
                 Object stat = singleResponse.getCertStatus();
                 if (stat == CertificateStatus.GOOD) {
-                    certificateState = CertificateVS.State.OK;
+                    certificateState = CertificateVSDto.State.OK;
                 }else if (stat instanceof RevokedStatus) {
                     Date fechaRevocacion = ((RevokedStatus)stat).getRevocationTime();
                     if (checkDate.after(fechaRevocacion)) 
-                        certificateState = CertificateVS.State.CANCELLED;
-                    else certificateState = CertificateVS.State.OK;
+                        certificateState = CertificateVSDto.State.CANCELLED;
+                    else certificateState = CertificateVSDto.State.OK;
                 }else if (stat instanceof UnknownStatus) {
-                    certificateState = CertificateVS.State.UNKNOWN;
+                    certificateState = CertificateVSDto.State.UNKNOWN;
                 }
             }
             return certificateState;

@@ -46,7 +46,6 @@ public class ResponseVS<T> implements Parcelable {
 
 
     private int statusCode;
-    private StatusVS<?> status;
     private OperationVS operation;
     private String caption;
     private String notificationMessage;
@@ -75,7 +74,7 @@ public class ResponseVS<T> implements Parcelable {
         String operationStr = source.readString();
         if(operationStr != null) {
             try {
-                operation = JSON.getMapper().readValue(operationStr, OperationVS.class);
+                operation = JSON.readValue(operationStr, OperationVS.class);
             } catch (Exception ex) { ex.printStackTrace();}
         }
         typeVS = (TypeVS) source.readSerializable();
@@ -194,11 +193,11 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public <S> S getMessage(Class<S> type) throws Exception {
-        return JSON.getMapper().readValue(getMessage(), type);
+        return JSON.readValue(getMessage(), type);
     }
 
     public <T> T getMessage(TypeReference<T> type) throws Exception {
-        return JSON.getMapper().readValue(getMessage(), type);
+        return JSON.readValue(getMessage(), type);
     }
 
     public ResponseVS setMessage(String message) {
@@ -255,14 +254,6 @@ public class ResponseVS<T> implements Parcelable {
 	public void setSMIME(SMIMEMessage smimeMessage) {
 		this.smimeMessage = smimeMessage;
 	}
-
-    public <E> StatusVS<E> getStatus() {
-        return (StatusVS<E>)status;
-    }
-
-    public <E> void setStatus(StatusVS<E> status) {
-        this.status = status;
-    }
 
     public ContentTypeVS getContentType() {
         return contentType;
@@ -330,7 +321,7 @@ public class ResponseVS<T> implements Parcelable {
         parcel.writeString(message);
         if(operation != null) {
             try {
-                parcel.writeString(JSON.getMapper().writeValueAsString(operation));
+                parcel.writeString(JSON.writeValueAsString(operation));
             } catch (Exception ex) { ex.printStackTrace();}
         } else parcel.writeString(null);
         parcel.writeSerializable(typeVS);

@@ -48,7 +48,7 @@ public class ContactPagerActivity extends ActionBarActivity {
         String dtoStr = getIntent().getExtras().getParcelable(ContextVS.DTO_KEY);
         List<UserVSDto> userVSListDto = null;
         try {
-            if(dtoStr != null) userVSListDto = JSON.getMapper().readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
+            if(dtoStr != null) userVSListDto = JSON.readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
         } catch (Exception ex) { ex.printStackTrace();}
         UserVSDto userVS = (UserVSDto) getIntent().getExtras().getSerializable(ContextVS.USER_KEY);
         if(userVS != null) userVSListDto = Arrays.asList(userVS);

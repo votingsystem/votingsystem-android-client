@@ -33,7 +33,9 @@ public class ContextVS {
 
     public static final String WALLET_FILE_NAME = "wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
-    public static final String CSR_FILE_NAME                   = "csr";
+    public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentTypeVS.TEXT.getName();
+    public static final String SMIME_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String SMIME_ANONYMOUS_FILE_NAME       = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String IMAGE_FILE_NAME                 = "image";
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
@@ -100,7 +102,6 @@ public class ContextVS {
     public static final String STATE_KEY                   = "STATE";
     public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
     public static final String CSR_KEY                     = "csrKey";
-    public static final String TIME_KEY                    = "TIME_KEY";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
     public static final String QUERY_KEY                   = "QUERY_KEY";
     public static final String REFRESH_KEY                 = "REFRESH_KEY";

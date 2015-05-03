@@ -296,7 +296,7 @@ public class CertUtils {
         if(extensionValue == null) return null;
         DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
         String extensionData = ((DERUTF8String) derTaggedObject.getObject()).getString();
-        return JSON.getMapper().readValue(extensionData, type);
+        return JSON.readValue(extensionData, type);
     }
 
     public static DERObject toDERObject(byte[] data) throws IOException, IOException {

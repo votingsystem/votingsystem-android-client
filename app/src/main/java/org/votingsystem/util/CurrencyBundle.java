@@ -172,8 +172,8 @@ public class CurrencyBundle {
         for (Currency currency : transactionCurrencySet) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(
                     currency.getHashCertVS(), StringUtils.getNormalized(currency.getToUserName()),
-                    JSON.getMapper().writeValueAsString(dto), subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, AppVS.getInstance());
+                    JSON.writeValueAsString(dto), subject);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage);
             timeStamper.call();
             currency.setSmimeMessage(timeStamper.getSMIME());
             currencyTransactionBatch.add(new String(Base64.encode(currency.getSmimeMessage().getBytes())));

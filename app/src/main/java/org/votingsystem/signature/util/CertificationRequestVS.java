@@ -16,8 +16,8 @@ import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DeviceUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.Utils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -76,22 +76,22 @@ public class CertificationRequestVS implements java.io.Serializable {
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         VoteCertExtensionDto dto = new VoteCertExtensionDto(accessControlURL, hashCertVS, eventId);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.VOTE_TAG,
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
+                new DERUTF8String(JSON.writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getAnonymousDelegationRequest(
-           String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
-           Integer weeksOperationActive, Date validFrom, Date validTo) throws NoSuchAlgorithmException,
+    public static CertificationRequestVS getAnonymousDelegationRequest(int keySize, String keyName,
+            String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
+            Integer weeksOperationActive, Date validFrom, Date validTo) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
                 ", OU=AnonymousRepresentativeDelegation");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        AnonymousDelegationCertExtensionDto dto = new AnonymousDelegationCertExtensionDto(
-                accessControlURL, hashCertVS, weeksOperationActive, validFrom, validTo);
+        AnonymousDelegationCertExtensionDto dto = new AnonymousDelegationCertExtensionDto(accessControlURL, hashCertVS,
+                weeksOperationActive, validFrom, validTo);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG,
                 new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
@@ -111,7 +111,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, hashCertVS, currencyServerURL, tagVS);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.CURRENCY_TAG,
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
+                new DERUTF8String(JSON.writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -125,10 +125,10 @@ public class CertificationRequestVS implements java.io.Serializable {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        UserVSCertExtensionDto dto = new UserVSCertExtensionDto(deviceId, DeviceUtils.getDeviceName(),
+        UserVSCertExtensionDto dto = new UserVSCertExtensionDto(deviceId, Utils.getDeviceName(),
                 email, phone, deviceType);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
+                new DERUTF8String(JSON.writeValueAsString(dto))));
         X500Principal subject = new X500Principal(principal);
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
@@ -249,4 +249,5 @@ public class CertificationRequestVS implements java.io.Serializable {
     public void setHashPin(String hashPin) {
         this.hashPin = hashPin;
     }
+
 }

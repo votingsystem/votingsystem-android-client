@@ -69,7 +69,7 @@ public class ContactFragment extends Fragment {
         ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         SocketMessageDto socketMessageDto = null;
         try {
-            socketMessageDto = JSON.getMapper().readValue(intent.getStringExtra(
+            socketMessageDto = JSON.readValue(intent.getStringExtra(
                     ContextVS.WEBSOCKET_MSG_KEY), SocketMessageDto.class);
         } catch (Exception ex) { ex.printStackTrace();}
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
@@ -89,7 +89,7 @@ public class ContactFragment extends Fragment {
                     startIntent.putExtra(ContextVS.MESSAGE_KEY, responseVS.getMessage());
                     try {
                         startIntent.putExtra(ContextVS.DTO_KEY,
-                                JSON.getMapper().writeValueAsString(targetDevicesDto));
+                                JSON.writeValueAsString(targetDevicesDto));
                     } catch(Exception ex) { ex.printStackTrace();}
                     startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                     getActivity().startService(startIntent);
@@ -164,7 +164,7 @@ public class ContactFragment extends Fragment {
                 UUID.randomUUID().toString());
         if(savedInstanceState != null) {
             try {
-                targetDevicesDto = JSON.getMapper().readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
+                targetDevicesDto = JSON.readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
                         new TypeReference<ResultListDto<DeviceVSDto>>() {});
             } catch (Exception ex) {ex.printStackTrace();}
             isConnected = savedInstanceState.getBoolean(ContextVS.CONNECTED_KEY);
@@ -275,7 +275,7 @@ public class ContactFragment extends Fragment {
         super.onSaveInstanceState(outState);
         try {
             if(targetDevicesDto != null) outState.putString(ContextVS.DTO_KEY,
-                    JSON.getMapper().writeValueAsString(targetDevicesDto));
+                    JSON.writeValueAsString(targetDevicesDto));
         } catch (Exception ex) { ex.printStackTrace();}
         outState.putBoolean(ContextVS.CONNECTED_KEY, isConnected);
     }

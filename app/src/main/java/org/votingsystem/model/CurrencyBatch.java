@@ -14,7 +14,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -79,8 +78,7 @@ public class CurrencyBatch {
     }
 
     public void validateTransactionVSResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
-        SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
-                Base64.decode(((String) dataMap.get("receipt")).getBytes())));
+        SMIMEMessage receipt = new SMIMEMessage(Base64.decode(((String) dataMap.get("receipt")).getBytes()));
         if(dataMap.containsKey("leftOverCoin")) {
 
         }
@@ -93,8 +91,8 @@ public class CurrencyBatch {
             Map receiptData = (Map) dataMap.get(i);
             //TODO
             String hashCertVS = (String) receiptData.keySet().iterator().next();
-            SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.decode(((String) receiptData.get(hashCertVS)).getBytes())));
+            SMIMEMessage smimeReceipt = new SMIMEMessage(
+                    Base64.decode(((String) receiptData.get(hashCertVS)).getBytes()));
             CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     smimeReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
             Currency currency = currencyMap.remove(certExtensionDto.getHashCertVS());

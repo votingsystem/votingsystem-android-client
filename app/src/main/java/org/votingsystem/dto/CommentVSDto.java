@@ -2,12 +2,15 @@ package org.votingsystem.dto;
 
 import org.votingsystem.dto.voting.EventVSDto;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class CommentVSDto implements Comparable {
+public class CommentVSDto implements Comparable, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private Long messageSMIMEId;

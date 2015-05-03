@@ -19,7 +19,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -195,7 +194,7 @@ public class TransactionVSDto implements Serializable{
     public SMIMEMessage getSmimeMessage() throws Exception {
         if(smimeMessage == null && messageSMIME != null) {
             byte[] smimeMessageBytes = Base64.decode(messageSMIME.getBytes());
-            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+            smimeMessage = new SMIMEMessage(smimeMessageBytes);
         }
         return smimeMessage;
     }
@@ -208,7 +207,7 @@ public class TransactionVSDto implements Serializable{
     public SMIMEMessage getCancelationSmimeMessage() throws Exception {
         if(cancelationSmimeMessage == null && cancelationSmimeMessage != null) {
             byte[] smimeMessageBytes = Base64.decode(cancelationSmimeMessage.getBytes());
-            cancelationSmimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+            cancelationSmimeMessage = new SMIMEMessage(smimeMessageBytes);
         }
         return cancelationSmimeMessage;
     }
@@ -489,7 +488,7 @@ public class TransactionVSDto implements Serializable{
     }
 
     public void validateReceipt(SMIMEMessage smimeMessage) throws IOException, ValidationExceptionVS, ExceptionVS {
-        TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
+        TransactionVSDto receiptDto = JSON.readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
         if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
                 receiptDto.getType());
         if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
@@ -562,7 +561,7 @@ public class TransactionVSDto implements Serializable{
                         fromUser, subject, amount, currencyCode, getTagVS().getName());
                 break;
             default:
-                result = JSON.getMapper().writeValueAsString(this);
+                result = JSON.writeValueAsString(this);
         }
         return result;
     }

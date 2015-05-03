@@ -161,7 +161,7 @@ public class MessagesGridFragment extends Fragment implements
                 try {
                     String message = cursor.getString(cursor.getColumnIndex(
                             MessageContentProvider.JSON_COL));
-                    SocketMessageDto socketMessage = JSON.getMapper().readValue(
+                    SocketMessageDto socketMessage = JSON.readValue(
                             message, SocketMessageDto.class);
                     TypeVS typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
                             MessageContentProvider.TYPE_COL)));
