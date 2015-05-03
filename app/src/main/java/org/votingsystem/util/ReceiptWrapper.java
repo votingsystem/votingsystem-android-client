@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -111,10 +110,9 @@ public class ReceiptWrapper implements Serializable {
         if(receiptBytes != null) {
             receipt = new SMIMEMessage(receiptBytes);
             subject = receipt.getSubject();
-            receipt.isValidSignature();
-            JSONObject signedJSON = new JSONObject(receipt.getSignedContent());
-            if(signedJSON.has("operation"))
-                this.typeVS = TypeVS.valueOf(signedJSON.getString("operation"));
+            Map dataMap = receipt.getSignedContent(new TypeReference<Map<String, Object>>() { });
+            if(dataMap.containsKey("operation"))
+                this.typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
         }
     }
 

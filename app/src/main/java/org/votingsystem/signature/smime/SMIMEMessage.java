@@ -2,6 +2,8 @@ package org.votingsystem.signature.smime;
 
 import android.util.Log;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -147,6 +149,10 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
+        return JSON.readValue(signedContent, type);
+    }
+
+    public <T> T getSignedContent(TypeReference type) throws IOException {
         return JSON.readValue(signedContent, type);
     }
 

@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
@@ -20,7 +18,6 @@ import org.votingsystem.throwable.ExceptionVS;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -274,7 +271,7 @@ public class PrefUtils {
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         try {
-            editor.putString(ContextVS.ADDRESS_KEY, addressVS.toJSON().toString());
+            editor.putString(ContextVS.ADDRESS_KEY, JSON.writeValueAsString(addressVS));
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }
@@ -300,12 +297,12 @@ public class PrefUtils {
     }
 
 
-    public static AddressVS getAddressVS(Context context) throws JSONException, ParseException {
+    public static AddressVS getAddressVS(Context context) throws IOException {
         SharedPreferences settings = context.getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String addressVSJSONStr = settings.getString(ContextVS.ADDRESS_KEY, null);
-        if(addressVSJSONStr == null) return null;
-        return AddressVS.parse(new JSONObject(addressVSJSONStr));
+        String dtoStr = settings.getString(ContextVS.ADDRESS_KEY, null);
+        if(dtoStr == null) return null;
+        return JSON.readValue(dtoStr, AddressVS.class);
     }
 
     public static void putRepresentationState(RepresentationStateDto stateDto, Context context) {

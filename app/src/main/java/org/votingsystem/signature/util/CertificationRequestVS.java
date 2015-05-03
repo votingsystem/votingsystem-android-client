@@ -7,9 +7,9 @@ import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.UserVSCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
@@ -125,7 +125,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        UserVSCertExtensionDto dto = new UserVSCertExtensionDto(deviceId, Utils.getDeviceName(),
+        CertExtensionDto dto = new CertExtensionDto(deviceId, Utils.getDeviceName(),
                 email, phone, deviceType);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
                 new DERUTF8String(JSON.writeValueAsString(dto))));

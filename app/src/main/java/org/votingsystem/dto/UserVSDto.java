@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.util.encoders.Base64;
-import org.json.JSONObject;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 
@@ -94,11 +93,12 @@ public class UserVSDto implements Serializable {
         if (subjectDN.contains("CN="))
             userVS.setCn(subjectDN.split("CN=")[1]);
         try {
-            JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
-            if(deviceData != null) {
-                if(deviceData.has("email")) userVS.setEmail(deviceData.getString("email"));
-                if(deviceData.has("mobilePhone")) userVS.setPhone(deviceData.getString("mobilePhone"));
-                if(deviceData.has("deviceId")) userVS.setDeviceId(deviceData.getString("deviceId"));
+            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                    x509Cert, ContextVS.DEVICEVS_OID);
+            if(certExtensionDto != null) {
+                userVS.setEmail(certExtensionDto.getEmail());
+                userVS.setPhone(certExtensionDto.getMobilePhone());
+                userVS.setDeviceId(certExtensionDto.getDeviceId());
             }
         } catch(Exception ex) {ex.printStackTrace();}
         return userVS;

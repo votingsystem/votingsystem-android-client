@@ -1,19 +1,3 @@
-/*
- * Copyright 2014 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.util;
 
 import android.annotation.TargetApi;
@@ -70,7 +54,6 @@ import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
-import org.json.JSONException;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
@@ -80,9 +63,9 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -508,8 +491,7 @@ public class UIUtils  {
     }
 
 
-    public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws
-            JSONException, ParseException {
+    public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
         AddressVS addressVS = PrefUtils.getAddressVS(contex);
         ((TextView)linearLayout.findViewById(R.id.name)).setText(addressVS.getName());
         ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(addressVS.getPostalCode());

@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
@@ -73,22 +72,20 @@ public class RepresentativeService extends IntentService {
             case ITEM_REQUEST:
                 requestRepresentative(arguments.getLong(ContextVS.ITEM_ID_KEY), serviceCaller);
                 break;
-            case NIF_REQUEST:
-                String nif = arguments.getString(ContextVS.NIF_KEY);
-                requestRepresentativeByNif(nif, serviceCaller);
+            case STATE:
+                checkRepresentationState(serviceCaller);
+                break;
+            case REPRESENTATIVE_SELECTION:
+                try {
+                    processRepresentativeSelection(
+                            JSON.readValue(dtoStr, RepresentativeDelegationDto.class), serviceCaller);
+                } catch (IOException e) { e.printStackTrace(); }
                 break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 try {
                     processAnonymousRepresentativeSelection(
                             JSON.readValue(dtoStr, RepresentativeDelegationDto.class), serviceCaller);
                 } catch (IOException e) { e.printStackTrace(); }
-
-                break;
-            case STATE:
-                checkRepresentationState(serviceCaller);
-                break;
-            case REPRESENTATIVE_SELECTION:
-                publicDelegation(intent.getExtras(), serviceCaller);
                 break;
             case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
                 processAnonymousRepresentativeSelectionCancelation(serviceCaller);
@@ -164,26 +161,6 @@ public class RepresentativeService extends IntentService {
         appVS.broadcastResponse(responseVS);
     }
 
-
-    private void requestRepresentativeByNif(String nif, String serviceCaller) {
-        String serviceURL = appVS.getAccessControl().getRepresentativeURLByNif(nif);
-        ResponseVS responseVS = HttpHelper.getData(serviceURL, null);
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            responseVS.setCaption(getString(R.string.operation_error_msg));
-        } else {
-            try {
-                JSONObject jsonResponse = new JSONObject(responseVS.getMessage());
-                Long representativeId = jsonResponse.getLong("representativeId");
-                requestRepresentative(representativeId, serviceCaller);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                responseVS = ResponseVS.EXCEPTION(ex, this);
-            }
-        }
-        responseVS.setTypeVS(TypeVS.ITEM_REQUEST).setServiceCaller(serviceCaller);
-        appVS.broadcastResponse(responseVS);
-    }
-
     private void requestRepresentative(Long representativeId, String serviceCaller) {
         String serviceURL = appVS.getAccessControl().getRepresentativeURL(representativeId);
         String imageServiceURL = appVS.getAccessControl().
@@ -216,23 +193,17 @@ public class RepresentativeService extends IntentService {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
-    private void publicDelegation(Bundle arguments, String serviceCaller) {
+    private void processRepresentativeSelection(
+            RepresentativeDelegationDto delegationDto, String serviceCaller) {
         ResponseVS responseVS = null;
-        org.votingsystem.dto.UserVSDto representative = (org.votingsystem.dto.UserVSDto) arguments.getSerializable(ContextVS.USER_KEY);
-        String serviceURL = appVS.getAccessControl().getRepresentativeDelegationServiceURL();
-        String messageSubject = getString(R.string.representative_delegation_lbl);
         try {
-            Map signatureDataMap = new HashMap();
-            signatureDataMap.put("operation", TypeVS.REPRESENTATIVE_SELECTION.toString());
-            signatureDataMap.put("UUID", UUID.randomUUID().toString());
-            signatureDataMap.put("accessControlURL", appVS.getAccessControl().getServerURL());
-            signatureDataMap.put("representativeNif", representative.getNIF());
-            signatureDataMap.put("representativeName", representative.getName());
-            JSONObject signatureContent = new JSONObject(signatureDataMap);
+            delegationDto.setUUID(UUID.randomUUID().toString());
             SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
-                    signatureContent.toString(), messageSubject);
+                    JSON.writeValueAsString(delegationDto),
+                    getString(R.string.representative_delegation_lbl));
             responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
-                    ContentTypeVS.JSON_SIGNED, serviceURL);
+                    ContentTypeVS.JSON_SIGNED,
+                    appVS.getAccessControl().getRepresentativeDelegationServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 responseVS.setCaption(getString(R.string.error_lbl));
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {

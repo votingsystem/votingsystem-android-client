@@ -18,9 +18,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.CertRequestFormFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -150,8 +150,9 @@ public class CertResponseActivity extends ActionBarActivity {
                 Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
                         csrSigned.getBytes());
                 X509Certificate x509Cert = certificates.iterator().next();
-                JSONObject deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
-                PrefUtils.putApplicationId(deviceData.getString("deviceId"), this);
+                CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
+                        CertExtensionDto.class, x509Cert, ContextVS.DEVICEVS_OID);
+                PrefUtils.putApplicationId(certExtensionDto.getDeviceId(), this);
                 UserVSDto user = UserVSDto.getUserVS(x509Cert);
                 LOGD(TAG + ".updateKeyStore", "user: " + user.getNIF() +
                         " - certificates.size(): " + certificates.size());

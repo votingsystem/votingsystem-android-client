@@ -2,14 +2,10 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.Country;
-import org.votingsystem.util.DateUtils;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -117,33 +113,6 @@ public class AddressVS implements Serializable {
             throw new ExceptionVS("expected city " + address.getCity() + " found " + city);
         if(address.getCountry() != null) if(!address.getCountry().equals(country))
             throw new ExceptionVS("expected country " + address.getCountry() + " found " + country);
-    }
-
-    public static AddressVS parse(JSONObject jsonObject) throws ParseException, JSONException {
-        AddressVS result = new AddressVS();
-        if(jsonObject.has("id")) result.setId(jsonObject.getLong("id"));
-        if(jsonObject.has("name")) result.setName(jsonObject.getString("name"));
-        if(jsonObject.has("metaInf")) result.setMetaInf(jsonObject.getString("metaInf"));
-        if(jsonObject.has("postalCode")) result.setPostalCode(jsonObject.getString("postalCode"));
-        if(jsonObject.has("province")) result.setProvince(jsonObject.getString("province"));
-        if(jsonObject.has("city")) result.setCity(jsonObject.getString("city"));
-        if(jsonObject.has("country")) result.setCountry(Country.valueOf(jsonObject.getString("country")));
-        if(jsonObject.has("dateCreated")) result.setDateCreated(
-                DateUtils.getDateFromString(jsonObject.getString("dateCreated")));
-        return result;
-    }
-
-    public JSONObject toJSON() throws JSONException {
-        JSONObject result = new JSONObject();
-        if(id != null) result.put("id", id);
-        if(name != null) result.put("name", name);
-        if(metaInf != null) result.put("metaInf", metaInf);
-        if(postalCode != null) result.put("postalCode", postalCode);
-        if(province != null) result.put("province", province);
-        if(city != null) result.put("city", city);
-        if(dateCreated != null) result.put("dateCreated", dateCreated);
-        if(country != null) result.put("country", country.toString());
-        return result;
     }
 
 }

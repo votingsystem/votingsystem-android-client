@@ -26,8 +26,6 @@ import org.bouncycastle2.x509.X509V3CertificateGenerator;
 import org.bouncycastle2.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -280,14 +278,6 @@ public class CertUtils {
         X509Certificate x509Cert = certificateChain.iterator().next();
         inputStream.close();
         return x509Cert;
-    }
-
-    public static JSONObject getCertExtensionData(X509Certificate x509Certificate,
-                      String extensionOID) throws IOException, JSONException {
-        byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
-        if(extensionValue == null) return null;
-        DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
-        return new JSONObject(((DERUTF8String)derTaggedObject.getObject()).getString());
     }
 
     public static <T> T getCertExtensionData(Class<T> type, X509Certificate x509Certificate,

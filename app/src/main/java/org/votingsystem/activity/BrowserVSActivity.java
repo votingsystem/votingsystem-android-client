@@ -15,7 +15,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.json.JSONObject;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
@@ -158,16 +157,18 @@ public class BrowserVSActivity extends ActionBarActivity {
         finish();
     }
 
-    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction) {
+    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction)  {
         LOGD(TAG + ".sendMessageToBrowserApp", "statusCode: " + statusCode + " - message: " +
                 message + " - callbackFunction: " + callbackFunction);
-        Map resultMap = new HashMap();
-        resultMap.put("statusCode", statusCode);
-        resultMap.put("message", message);
-        JSONObject messageJSON = new JSONObject(resultMap);
-        String jsCommand = "javascript:" + callbackFunction + "(" + messageJSON.toString() + ")";
-        webView.loadUrl(jsCommand);
-        setProgressDialogVisible(false);
+        try {
+            Map resultMap = new HashMap();
+            resultMap.put("statusCode", statusCode);
+            resultMap.put("message", message);
+            String jsCommand = "javascript:" + callbackFunction + "(" +
+                    JSON.writeValueAsString(resultMap) + ")";
+            webView.loadUrl(jsCommand);
+            setProgressDialogVisible(false);
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
 
 

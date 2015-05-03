@@ -2,17 +2,9 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -82,51 +74,6 @@ public class TagVSDto implements Serializable {
 
     public Date getLastUpdated() {
         return lastUpdated;
-    }
-
-    public static Map<String, TagVSDto> parseTagVSBalanceMap(JSONObject jsonData) throws Exception {
-        Map<String, TagVSDto> result = new HashMap<String, TagVSDto>();
-        Iterator tagIterator = jsonData.keys();
-        while(tagIterator.hasNext()) {
-            String tagStr = (String) tagIterator.next();
-            Object tagData = jsonData.get(tagStr);
-            if(tagData instanceof String || tagData instanceof Double || tagData instanceof Integer) {
-                result.put(tagStr, new TagVSDto(tagStr, new BigDecimal(tagData.toString()), null));
-            } else {
-                BigDecimal tagTotal = null;
-                BigDecimal tagTimeLimited = null;
-                if(((JSONObject)tagData).has("total")) tagTotal =
-                        new BigDecimal(((JSONObject)tagData).getString("total"));
-                if(((JSONObject)tagData).has("timeLimited"))  tagTimeLimited =
-                        new BigDecimal(((JSONObject)tagData).getString("timeLimited"));
-                result.put(tagStr, new TagVSDto(tagStr, tagTotal, tagTimeLimited));
-            }
-        }
-        return result;
-    }
-
-    public static TagVSDto parse(JSONObject jsonData) throws Exception {
-        TagVSDto tagVS = new TagVSDto();
-        tagVS.setName(jsonData.getString("name"));
-        if(jsonData.has("id")) tagVS.setId(jsonData.getLong("id"));
-        return tagVS;
-    }
-
-    public JSONObject toJSON() throws Exception {
-        JSONObject jsonData = new JSONObject();
-        jsonData.put("id", id);
-        jsonData.put("name", name);
-        return jsonData;
-    }
-
-    public static List<TagVSDto> parse(JSONArray jsonArray) throws Exception {
-        List<TagVSDto> result = new ArrayList<TagVSDto>();
-        for(int i = 0; i < jsonArray.length(); i++) {
-            if(jsonArray.get(i) instanceof  JSONObject) {
-                result.add(parse((JSONObject) jsonArray.get(i)));
-            } else result.add(new TagVSDto((String) jsonArray.get(i)));
-        }
-        return result;
     }
 
     public BigDecimal getTotal() {
