@@ -44,7 +44,7 @@ public class VoteService extends IntentService {
         String eventSubject = null;
         Intent resultIntent = new Intent(serviceCaller);
         if(voteVSHelper.getVote() != null) {
-            eventSubject = voteVSHelper.getVote().getEventVS().getSubject();
+            eventSubject = voteVSHelper.getEventVS().getSubject();
             if(eventSubject.length() > 50) eventSubject = eventSubject.substring(0, 50) + "...";
         }
         try {
@@ -53,11 +53,10 @@ public class VoteService extends IntentService {
                 case VOTEVS:
                     if(appVS.getControlCenter() == null) {
                         ControlCenterDto controlCenter = appVS.getActorVS(ControlCenterDto.class,
-                                voteVSHelper.getVote().getEventVS().getControlCenter().getServerURL());
+                                voteVSHelper.getEventVS().getControlCenter().getServerURL());
                         appVS.setControlCenter(controlCenter);
                     }
-                    VoteSender voteSender = new VoteSender(voteVSHelper);
-                    responseVS = voteSender.call();
+                    responseVS = new VoteSender(voteVSHelper).call();
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         voteVSHelper = (VoteVSHelper)responseVS.getData();
                         responseVS.setCaption(getString(R.string.vote_ok_caption)).

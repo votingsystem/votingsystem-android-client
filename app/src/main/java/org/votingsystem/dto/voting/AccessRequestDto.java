@@ -4,11 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.util.TypeVS;
 
+import java.io.Serializable;
+
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AccessRequestDto {
+public class AccessRequestDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
 
     private TypeVS operation = TypeVS.ACCESS_REQUEST;
     private String eventURL;

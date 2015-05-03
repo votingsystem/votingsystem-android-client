@@ -235,16 +235,16 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         LOGD(TAG + ".showReceiptScreen", "showReceiptScreen");
         ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
-        String subject = voteVSHelper.getVote().getEventVS().getSubject();
+        String subject = voteVSHelper.getEventVS().getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
             subject = subject.substring(0, MAX_SUBJECT_SIZE) + " ...";
         subjectTextView.setText(subject);
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
-        contentTextView.setText(Html.fromHtml(voteVSHelper.getVote().getEventVS().getContent()) + "\n");
+        contentTextView.setText(Html.fromHtml(voteVSHelper.getEventVS().getContent()) + "\n");
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        Set<FieldEventVSDto> fieldsEventVS = voteVSHelper.getVote().getEventVS().getFieldsEventVS();
+        Set<FieldEventVSDto> fieldsEventVS = voteVSHelper.getEventVS().getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(voteOptionsButtonList == null) {
             voteOptionsButtonList = new ArrayList<Button>();

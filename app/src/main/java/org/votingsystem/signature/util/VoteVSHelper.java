@@ -1,11 +1,10 @@
 package org.votingsystem.signature.util;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.voting.AccessRequestDto;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -42,12 +41,13 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     private String originHashCertVote;
     private String hashCertVSBase64;
     private VoteVSDto voteVSDto;
+    private EventVSDto eventVS;
     private VoteVSCancelerDto cancelerDto;
     private AccessRequestDto accessRequestDto;
     private byte[] encryptedKey = null;
     private transient SMIMEMessage voteReceipt;
     private transient SMIMEMessage cancelVoteReceipt;
-    @JsonIgnore private transient CertificationRequestVS certificationRequest;
+    private CertificationRequestVS certificationRequest;
 
     public static VoteVSHelper load(VoteVSDto voteVSDto) throws Exception {
         VoteVSHelper voteVSHelper = new VoteVSHelper();
@@ -57,14 +57,15 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         voteVSHelper.originHashCertVote = UUID.randomUUID().toString();
         voteVSHelper.hashCertVSBase64 = CMSUtils.getHashBase64(
                 voteVSHelper.originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
-        voteVSHelper.eventVSId = voteVSDto.getEventVSId();
-        voteVSHelper.eventVSURL = voteVSDto.getEventVSURL();
+        voteVSHelper.eventVSId = voteVSDto.getEventVS().getId();
+        voteVSHelper.eventVSURL = voteVSDto.getEventVS().getURL();
+        voteVSHelper.eventVS = voteVSDto.getEventVS();
         voteVSHelper.genVote(voteVSDto.getOptionSelected());
         voteVSHelper.certificationRequest = CertificationRequestVS.getVoteRequest(
                 VOTE_SIGN_MECHANISM, PROVIDER,
-                voteVSHelper.getVote().getEventVS().getAccessControl().getServerURL(),
-                voteVSHelper.getVote().getEventVS().getEventVSId(),
-                voteVSHelper.getVote().getHashCertVSBase64());
+                voteVSDto.getEventVS().getAccessControl().getServerURL(),
+                voteVSDto.getEventVS().getId(),
+                voteVSHelper.hashCertVSBase64);
         byte[] base64EncodedKey = Base64.encode(
                 voteVSHelper.certificationRequest.getPrivateKey().getEncoded());
         byte[] encryptedKey = Encryptor.encryptMessage(
@@ -89,11 +90,10 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
 
     public SMIMEMessage getSMIMEVote() throws Exception {
         return certificationRequest.getSMIME(
-                hashAccessRequestBase64, voteVSDto.getEventVS().getControlCenter().getName(),
+                hashAccessRequestBase64, eventVS.getControlCenter().getName(),
                 JSON.writeValueAsString(voteVSDto),
                 AppVS.getInstance().getString(R.string.vote_msg_subject));
     }
-
 
     private void genVote(FieldEventVSDto optionSelected) {
         genAccessRequest();
@@ -113,6 +113,10 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         accessRequestDto.setEventURL(eventVSURL);
         accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
         accessRequestDto.setUUID(UUID.randomUUID().toString());
+    }
+
+    public EventVSDto getEventVS() {
+        return eventVS;
     }
 
     public VoteVSDto getVote() {

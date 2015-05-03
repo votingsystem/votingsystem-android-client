@@ -228,7 +228,7 @@ public class ReceiptFragment extends Fragment {
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime());
                     contentFormatted = getString(R.string.votevs_info_formatted, dateStr,
-                            voteVSHelper.getVote().getEventVS().getSubject(),
+                            voteVSHelper.getEventVS().getSubject(),
                             voteVSHelper.getVote().getOptionSelected().getContent(),
                             receiptWrapper.getReceipt().getSignedContent());
                     break;

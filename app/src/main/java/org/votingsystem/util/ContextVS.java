@@ -37,7 +37,7 @@ public class ContextVS {
     public static final String SMIME_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String SMIME_ANONYMOUS_FILE_NAME       = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String IMAGE_FILE_NAME                 = "image";
-    public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest";
+    public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
     public static final String CURRENCY_REQUEST_DATA_FILE_NAME   = "currencyRequestData";
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";

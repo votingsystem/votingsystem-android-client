@@ -58,14 +58,15 @@ public class CertificationRequestVS implements java.io.Serializable {
     private String signatureMechanism;
     private X509Certificate certificate;
     private byte[] signedCsr;
+    private byte[] csrPEM;
 
     private CertificationRequestVS(KeyPair keyPair, PKCS10CertificationRequest csr,
-            String signatureMechanism) {
+            String signatureMechanism) throws IOException {
         this.keyPair = keyPair;
         this.csr = csr;
+        this.csrPEM = CertUtils.getPEMEncoded(getCsr());
         this.signatureMechanism = signatureMechanism;
     }
-
 
     public static CertificationRequestVS getVoteRequest(String signatureMechanism,
             String provider, String accessControlURL, Long eventId, String hashCertVS) throws
@@ -185,19 +186,9 @@ public class CertificationRequestVS implements java.io.Serializable {
         return keyPair;
     }
 
-    public byte[] getCsrDER() {
-        if(getCsr() == null && signedCsr != null) {
-            csr = getCsr();
-        }
-        return getCsr().getEncoded();
-    }
 
     public byte[] getCsrPEM() throws Exception {
-        return CertUtils.getPEMEncoded(getCsr());
-    }
-
-    public byte[] getSignedCsr() {
-        return signedCsr;
+        return csrPEM;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

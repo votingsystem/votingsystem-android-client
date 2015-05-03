@@ -134,8 +134,10 @@ public class RepresentationStateFragment extends Fragment implements
                 representative.getDescription() + "</body></html>";
         ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
                 representativeDescription, "text/html; charset=UTF-8", "UTF-8");
-        UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
-                representative.getImageBytes(), getActivity());
+        if(representative.getImageBytes() != null) {
+            UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
+                    representative.getImageBytes(), getActivity());
+        }
         rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
     }
 

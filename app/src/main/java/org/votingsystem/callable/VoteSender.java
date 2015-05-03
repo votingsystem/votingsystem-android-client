@@ -10,7 +10,6 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.ResponseVS;
 
 import java.util.HashMap;
@@ -33,12 +32,11 @@ public class VoteSender implements Callable<ResponseVS> {
     }
 
     @Override public ResponseVS call() {
-        LOGD(TAG + ".call", "eventvs subject: " + voteVSHelper.getVote().getEventVS().getSubject());
+        LOGD(TAG + ".call", "eventvs subject: " + voteVSHelper.getEventVS().getSubject());
         ResponseVS responseVS = null;
         try {
-            String serviceURL = AppVS.getInstance().getControlCenter().getVoteServiceURL();
             String subject = AppVS.getInstance().getString(R.string.request_msg_subject,
-                    voteVSHelper.getVote().getEventVS().getEventVSId());
+                    voteVSHelper.getEventVS().getEventVSId());
             AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
             SMIMEMessage smimeMessage = AppVS.getInstance().signMessage(
                     AppVS.getInstance().getAccessControl().getName(),
@@ -48,27 +46,19 @@ public class VoteSender implements Callable<ResponseVS> {
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME,
                     voteVSHelper.getCertificationRequest().getCsrPEM());
-            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME + ":" + MediaTypeVS.JSON_SIGNED,
-                    smimeMessage.getBytes());
+            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, smimeMessage.getBytes());
             responseVS = HttpHelper.sendObjectMap(mapToSend,
                     AppVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             voteVSHelper.getCertificationRequest().initSigner(responseVS.getMessageBytes());
             SMIMEMessage signedVote = new MessageTimeStamper(voteVSHelper.getSMIMEVote()).call();
-            responseVS = HttpHelper.sendData(signedVote.getBytes(), ContentTypeVS.VOTE,serviceURL);
+            responseVS = HttpHelper.sendData(signedVote.getBytes(), ContentTypeVS.VOTE,
+                    AppVS.getInstance().getControlCenter().getVoteServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 cancelAccessRequest(); //AccesRequest OK and Vote error -> Cancel access request
                 return responseVS;
             } else {
-                SMIMEMessage voteReceipt = new SMIMEMessage(responseVS.getMessageBytes());
-                try {
-                    voteVSHelper.setVoteReceipt(voteReceipt);
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                    cancelAccessRequest();
-                    return new ResponseVS(ResponseVS.SC_ERROR,
-                            AppVS.getInstance().getString(R.string.vote_option_mismatch));
-                }
+                voteVSHelper.setVoteReceipt(responseVS.getSMIME());
                 responseVS.setData(voteVSHelper);
             }
         } catch(ExceptionVS ex) {

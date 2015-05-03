@@ -45,7 +45,7 @@ public class BootStrapService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "accessControlURL: " + accessControlURL +
                 " - currencyServerURL: " + currencyServerURL);
         ResponseVS responseVS = null;
-        if(appVS.getAccessControl() == null) {
+        if(!PrefUtils.isDataBootstrapDone(this)) {
             responseVS = HttpHelper.getData(AccessControlDto.getServerInfoURL(accessControlURL),
                     ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
