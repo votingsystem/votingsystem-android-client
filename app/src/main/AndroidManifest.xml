@@ -160,7 +160,6 @@
         <service android:name="org.votingsystem.service.PaymentService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.UserCertRequestService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.VoteService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.VotingAppService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.WebSocketService"  android:exported="false"/>
 
     </application>
