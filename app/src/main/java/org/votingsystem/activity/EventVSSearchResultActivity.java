@@ -3,7 +3,7 @@ package org.votingsystem.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -35,7 +35,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class EventVSSearchResultActivity extends ActionBarActivity {
+public class EventVSSearchResultActivity extends AppCompatActivity {
 
     public static final String TAG = EventVSSearchResultActivity.class.getSimpleName();
 

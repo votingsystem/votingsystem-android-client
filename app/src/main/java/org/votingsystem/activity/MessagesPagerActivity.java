@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
@@ -22,7 +22,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
  https://www.google.es/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=...%20sabeis%20que%20si%20hacen%20eso%20es%20porque%20no%20tienen%20absolutamente%20nada%20que%20merezca%20la%20pena
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MessagesPagerActivity extends ActionBarActivity {
+public class MessagesPagerActivity extends AppCompatActivity {
 
     public static final String TAG = MessagesPagerActivity.class.getSimpleName();
 

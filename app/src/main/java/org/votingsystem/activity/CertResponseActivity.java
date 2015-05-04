@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -53,7 +53,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CertResponseActivity extends ActionBarActivity {
+public class CertResponseActivity extends AppCompatActivity {
 	
 	public static final String TAG = CertResponseActivity.class.getSimpleName();
 

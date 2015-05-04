@@ -17,7 +17,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 
-public abstract class ActivityBase extends ActionBarActivity implements
+public abstract class ActivityBase extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = ActivityBase.class.getSimpleName();

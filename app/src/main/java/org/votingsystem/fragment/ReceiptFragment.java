@@ -13,7 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -270,9 +270,9 @@ public class ReceiptFragment extends Fragment {
             contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;font-size:1.2em;'>" +
                     contentFormatted + "</body></html>";
             receipt_content.loadData(contentFormatted, "text/html; charset=UTF-8", null);
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setLogo(
                     UIUtils.getEmptyLogo(getActivity()));
-            ((ActionBarActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
+            ((AppCompatActivity)getActivity()).setTitle(getString(R.string.receipt_lbl));
             setActionBarMenu(menu);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -308,7 +308,7 @@ public class ReceiptFragment extends Fragment {
         }
         if(receiptWrapper.getLocalId() < 0) menu.removeItem(R.id.delete_item);
         else menu.removeItem(R.id.save_receipt);
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setSubtitle(
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(
                 receiptWrapper.getTypeDescription(getActivity()));
     }
 

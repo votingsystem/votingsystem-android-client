@@ -8,7 +8,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -95,7 +95,7 @@ public class WalletFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        ((ActionBarActivity)getActivity()).setTitle(getString(R.string.wallet_lbl));
+        ((AppCompatActivity)getActivity()).setTitle(getString(R.string.wallet_lbl));
         rootView = inflater.inflate(R.layout.wallet_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {

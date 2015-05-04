@@ -259,7 +259,8 @@ public class UserVSDto implements Serializable {
     }
 
     public void setCertCollection(Collection<CertificateVSDto> certCollection) {
-        this.certCollection = new HashSet<>(certCollection);
+        if(certCollection == null) this.certCollection = null;
+        else this.certCollection = new HashSet<>(certCollection);
     }
 
     public org.votingsystem.dto.DeviceVSDto getDeviceVS() {

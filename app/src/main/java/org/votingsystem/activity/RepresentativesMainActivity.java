@@ -49,11 +49,12 @@ public class RepresentativesMainActivity extends ActivityBase {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
-            launchRepresentativeService((TypeVS) intent.getSerializableExtra(
-                    ContextVS.TYPEVS_KEY));
+            launchRepresentativeService(responseVS.getTypeVS());
         else {
             setProgressDialogVisible(null, null, false);
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION == responseVS.getTypeVS()) {
+                MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
             }
         }

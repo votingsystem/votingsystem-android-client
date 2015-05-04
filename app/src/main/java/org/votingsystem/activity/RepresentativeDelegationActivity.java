@@ -78,24 +78,27 @@ public class RepresentativeDelegationActivity extends ActivityBase {
                     getString(R.string.error_lbl),
                     responseVS.getNotificationMessage(), RepresentativeDelegationActivity.this).
                     setPositiveButton(getString(R.string.open_receipt_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
-                                    intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
-                                    intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
-                                    startActivity(intent);
-                                }
-                            });
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                            Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
+                            intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
+                            intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                            startActivity(intent);
+                            }
+                        });
                 UIUtils.showMessageDialog(builder);
             } else {
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(responseVS.getCaption(),
-                        responseVS.getNotificationMessage(),  RepresentativeDelegationActivity.this).
-                        setPositiveButton(getString(R.string.accept_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        RepresentativeDelegationActivity.this.onBackPressed();
-                                    }
-                                });
+                    responseVS.getNotificationMessage(),  RepresentativeDelegationActivity.this).
+                    setPositiveButton(getString(R.string.accept_lbl),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                Intent resultIntent = new Intent(
+                                    RepresentativeDelegationActivity.this, RepresentativesMainActivity.class);
+                                startActivity(resultIntent);
+                                RepresentativeDelegationActivity.this.finish();
+                            }
+                        });
                 UIUtils.showMessageDialog(builder);
             }
         }

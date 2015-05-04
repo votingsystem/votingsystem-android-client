@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.VoteSender;
@@ -18,6 +19,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**

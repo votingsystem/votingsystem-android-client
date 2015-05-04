@@ -8,7 +8,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,13 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.service.RepresentativeService;
@@ -31,8 +28,6 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.UIUtils;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -43,7 +38,6 @@ public class RepresentationStateFragment extends Fragment implements
 
     public static final String TAG = RepresentationStateFragment.class.getSimpleName();
 
-    private AppVS appVS;
     private RepresentationStateDto representation;
     private RepresentativeDelegationDto representativeDelegationDto;
     private View rootView;
@@ -71,13 +65,10 @@ public class RepresentationStateFragment extends Fragment implements
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.representative_state, container, false);
-        ((WebView)rootView.findViewById(R.id.representative_description)).setBackgroundColor(
-                getResources().getColor(R.color.bkg_screen_vs));
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(R.string.user_representative_lbl);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.user_representative_lbl);
         setRepresentationView(PrefUtils.getRepresentationState(getActivity()));
         setHasOptionsMenu(true);
         return rootView;
@@ -86,7 +77,7 @@ public class RepresentationStateFragment extends Fragment implements
     private void setRepresentationView(RepresentationStateDto representation) {
         this.representation = representation;
         if(representation == null) {
-            if(appVS.getUserVS() != null) launchRepresentativeService(TypeVS.STATE);
+            if(AppVS.getInstance().getUserVS() != null) launchRepresentativeService(TypeVS.STATE);
             rootView.setVisibility(View.GONE);
             return;
         } else {
@@ -99,53 +90,26 @@ public class RepresentationStateFragment extends Fragment implements
             case WITHOUT_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.without_representative_msg));
-                rootView.findViewById(R.id.representative_container).setVisibility(View.GONE);
                 break;
             case WITH_PUBLIC_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_public_representation_msg));
-                rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
-                printRepresentativeData(representation.getRepresentative());
                 break;
             case WITH_ANONYMOUS_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_anonymous_representation_msg, DateUtils.getDayWeekDateStr(
                                 representation.getDateTo())));
                 representativeDelegationDto = PrefUtils.getAnonymousDelegation(getActivity());
-                if(representativeDelegationDto != null) {
-                    printRepresentativeData(representativeDelegationDto.getRepresentative());
-                } else {
+                if(representativeDelegationDto == null) {
                     ((TextView)rootView.findViewById(R.id.representative_name)).setText(
                             getString(R.string.missing_anonymous_delegation_cancellation_data));
-                    rootView.findViewById(R.id.representative_image).setVisibility(View.GONE);
                 }
                 break;
             case REPRESENTATIVE:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.representative_msg));
-                printRepresentativeData(representation.getRepresentative());
                 break;
         }
-    }
-
-    private void printRepresentativeData(UserVSDto representative) {
-        ((TextView)rootView.findViewById(R.id.representative_name)).setText(
-                representative.getName());
-        String repDescription = "";
-        if(representative.getDescription() != null) {
-            try {
-                repDescription = new String(Base64.decode(representative.getDescription().getBytes()), "UTF-8");
-            } catch (Exception ex) { ex.printStackTrace(); }
-        }
-        String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;color:#888;font-size:1.3em;'>" +
-                repDescription + "</body></html>";
-        ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
-                representativeDescription, "text/html; charset=UTF-8", "UTF-8");
-        if (representative.getImageBytes() != null) {
-            UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
-                    representative.getImageBytes(), getActivity());
-        } else rootView.findViewById(R.id.representative_image).setVisibility(View.GONE);
-        rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {

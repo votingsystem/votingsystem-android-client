@@ -9,7 +9,7 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
@@ -33,7 +33,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class IntentFilterActivity extends ActionBarActivity {
+public class IntentFilterActivity extends AppCompatActivity {
 	
 	public static final String TAG = IntentFilterActivity.class.getSimpleName();
 

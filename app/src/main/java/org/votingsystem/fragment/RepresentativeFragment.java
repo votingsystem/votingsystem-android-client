@@ -21,6 +21,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.R;
@@ -133,15 +134,21 @@ public class RepresentativeFragment extends Fragment {
     }
 
     private void printRepresentativeData(UserVSDto representative) {
+        if(representative == null) {
+            LOGD(TAG + ".printRepresentativeData", "representative null");
+            return;
+        }
         this.representative = representative;
         if(representative.getImageBytes() != null)
             UIUtils.setImage(representative_image, representative.getImageBytes(), getActivity());
         else new ImageDownloaderTask(representativeId).execute();
         if(representative.getDescription() != null) {
-            String representativeDescription = "<html style='background-color:#eeeeee;'>" +
-                    representative.getDescription() + "</html>";
-            ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
-                    representativeDescription, "text/html; charset=UTF-8", "UTF-8");
+            try {
+                String representativeDescription = "<html style='background-color:#eeeeee;'>" +
+                        new String(Base64.decode(representative.getDescription().getBytes()), "UTF-8") + "</html>";
+                ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
+                        representativeDescription, "text/html; charset=UTF-8", "UTF-8");
+            } catch (Exception ex) { ex.printStackTrace(); }
         }
         selectButton.setVisibility(View.VISIBLE);
     }

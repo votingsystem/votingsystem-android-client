@@ -17,7 +17,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -93,7 +93,7 @@ public class RepresentativeGridFragment extends Fragment
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
                 getString(R.string.representative_list_lbl));
         rootView = inflater.inflate(R.layout.representative_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);

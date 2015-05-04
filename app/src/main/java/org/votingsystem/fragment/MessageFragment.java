@@ -10,7 +10,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -121,7 +121,7 @@ public class MessageFragment extends Fragment {
                     MessageContentProvider.TYPE_COL)));
             switch (typeVS) {
                 case MESSAGEVS:
-                     if(isVisibleToUser) ((ActionBarActivity)getActivity()).getSupportActionBar().
+                     if(isVisibleToUser) ((AppCompatActivity)getActivity()).getSupportActionBar().
                              setTitle(getString(R.string.message_lbl) +
                             " - " + socketMessage.getFrom());
                     message_content.setText(socketMessage.getMessage());
@@ -159,7 +159,7 @@ public class MessageFragment extends Fragment {
             if(isVisibleToUser && typeVS != null) {
                 switch (typeVS) {//to avoid problems with the pager
                     case MESSAGEVS:
-                        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
+                        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
                                 R.string.message_lbl) + " - " + socketMessage.getFrom());
                         break;
                     case CURRENCY_WALLET_CHANGE:
@@ -175,7 +175,7 @@ public class MessageFragment extends Fragment {
     private void loadCurrencyWalletChangeData() throws Exception {
         if(isVisibleToUser) {
             currency = socketMessage.getCurrencySet().iterator().next();
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(getString(
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
                     R.string.wallet_change_lbl));
             String fragmentTag = CurrencyFragment.class.getSimpleName() + messageId;
             message_content.setVisibility(View.GONE);

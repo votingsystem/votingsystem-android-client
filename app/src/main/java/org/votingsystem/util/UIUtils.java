@@ -22,7 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
@@ -415,7 +415,7 @@ public class UIUtils  {
     }
 
     public static boolean hasActionBar(Activity activity) {
-        return (((ActionBarActivity)activity).getSupportActionBar() != null);
+        return (((AppCompatActivity)activity).getSupportActionBar() != null);
     }
 
     public static void setStartPadding(final Context context, View view, int padding) {

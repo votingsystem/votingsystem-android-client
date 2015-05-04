@@ -32,6 +32,7 @@ import org.votingsystem.util.TypeVS;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,7 +206,15 @@ public class RepresentativeService extends IntentService {
             responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
                     ContentTypeVS.JSON_SIGNED,
                     appVS.getAccessControl().getRepresentativeDelegationServiceURL());
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                RepresentationStateDto stateDto = new RepresentationStateDto();
+                stateDto.setState(RepresentationStateDto.State.WITH_PUBLIC_REPRESENTATION);
+                stateDto.setLastCheckedDate(new Date());
+                stateDto.setRepresentative(delegationDto.getRepresentative());
+                responseVS = ResponseVS.OK().setCaption(getString(R.string.operation_ok_msg))
+                        .setMessage(getString(R.string.representative_selected_msg));
+                PrefUtils.putRepresentationState(stateDto, this);
+            } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
                     MessageDto messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
@@ -297,8 +306,7 @@ public class RepresentativeService extends IntentService {
                     appVS.getTimeStampServiceURL());
             delegationDto.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
             Map<String, Object> mapToSend = new HashMap<>();
-            mapToSend.put(ContextVS.CSR_FILE_NAME,
-                    anonymousCertRequest.getCertificationRequest().getCsrPEM());
+            mapToSend.put(ContextVS.CSR_FILE_NAME, delegationDto.getCertificationRequest().getCsrPEM());
             mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
             responseVS = HttpHelper.sendObjectMap(mapToSend,
                     AppVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());

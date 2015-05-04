@@ -21,7 +21,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -117,10 +117,10 @@ public class ContactsGridFragment extends Fragment
            Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         if(Mode.CONTACT == mode) {
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
                     getString(R.string.contacts_lbl));
         } else {
-            ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle(
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
                     getString(R.string.search_result));
         }
         rootView = inflater.inflate(R.layout.contacts_grid, container, false);
