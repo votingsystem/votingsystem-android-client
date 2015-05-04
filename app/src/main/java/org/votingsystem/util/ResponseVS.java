@@ -180,6 +180,11 @@ public class ResponseVS<T> implements Parcelable {
         return responseVS;
     }
 
+    public static ResponseVS OK() {
+        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
+        return responseVS;
+    }
+
     public String getMessage() {
         if(message == null && messageBytes != null) {
             try {

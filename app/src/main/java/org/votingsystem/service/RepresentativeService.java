@@ -123,6 +123,7 @@ public class RepresentativeService extends IntentService {
                     break;
             }
             PrefUtils.putRepresentationState(stateDto, this);
+            responseVS = ResponseVS.OK();
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);

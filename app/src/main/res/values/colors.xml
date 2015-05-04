@@ -2,11 +2,12 @@
 <resources>
     <color name="dialog_caption">#33b5e5</color>
     <color name="empty_field_form">#f00</color>
-    <color name="progress_text">#8e8e8e</color>
     <color name="event_progress_text_lbl">#FFF</color>
     <color name="white_background">#FFF</color>
     <color name="representative_progress_text_lbl">#FFF</color>
-    <color name="drawer_list_item">#8e8e8e</color>
+    <color name="drawer_list_item">#888</color>
+    <color name="msg_content_vs">#888</color>
+    <color name="progress_text">#888</color>
     <color name="drawer_list_header">#333333</color>
     <color name="event_subject">#005b92</color>
     <color name="loading_data">#33b5e5</color>
@@ -28,7 +29,7 @@
     <color name="frg_vs">#fefefe</color>
     <color name="white">#fff</color>
     <color name="bkg_screen_vs">#eeeeee</color>
-    <color name="msg_content_vs">#888</color>
+
     <color name="theme_accent_2">#e91e63</color>
     <color name="theme_accent_1">#00b0ff</color>
     <color name="theme_primary_light">#7986cb</color>

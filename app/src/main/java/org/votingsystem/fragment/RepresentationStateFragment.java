@@ -19,6 +19,7 @@ import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.UserVSDto;
@@ -130,14 +131,20 @@ public class RepresentationStateFragment extends Fragment implements
     private void printRepresentativeData(UserVSDto representative) {
         ((TextView)rootView.findViewById(R.id.representative_name)).setText(
                 representative.getName());
-        String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
-                representative.getDescription() + "</body></html>";
+        String repDescription = "";
+        if(representative.getDescription() != null) {
+            try {
+                repDescription = new String(Base64.decode(representative.getDescription().getBytes()), "UTF-8");
+            } catch (Exception ex) { ex.printStackTrace(); }
+        }
+        String representativeDescription = "<html><body style='background-color:#eeeeee;margin:0 auto;color:#888;font-size:1.3em;'>" +
+                repDescription + "</body></html>";
         ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
                 representativeDescription, "text/html; charset=UTF-8", "UTF-8");
-        if(representative.getImageBytes() != null) {
+        if (representative.getImageBytes() != null) {
             UIUtils.setImage(((ImageView)rootView.findViewById(R.id.representative_image)),
                     representative.getImageBytes(), getActivity());
-        }
+        } else rootView.findViewById(R.id.representative_image).setVisibility(View.GONE);
         rootView.findViewById(R.id.representative_container).setVisibility(View.VISIBLE);
     }
 

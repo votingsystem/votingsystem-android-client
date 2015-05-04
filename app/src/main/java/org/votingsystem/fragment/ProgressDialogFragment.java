@@ -50,6 +50,25 @@ public class ProgressDialogFragment extends DialogFragment {
         return dialog;
     }
 
+    public static ProgressDialogFragment showDialog(String caption, String progressMessage,
+                            String dialogTag, FragmentManager fragmentManager) {
+        ProgressDialogFragment dialog = new ProgressDialogFragment();
+        Bundle args = new Bundle();
+        args.putString(ContextVS.MESSAGE_KEY, progressMessage);
+        args.putString(ContextVS.CAPTION_KEY, caption);
+        dialog.setArguments(args);
+        dialog.show(fragmentManager, ProgressDialogFragment.TAG + dialogTag);
+        return dialog;
+    }
+
+    public static void hide(String dialogTag, FragmentManager fragmentManager) {
+        if(fragmentManager != null && fragmentManager.findFragmentByTag(
+                ProgressDialogFragment.TAG + dialogTag) != null) {
+            ((ProgressDialogFragment) fragmentManager.
+                    findFragmentByTag(ProgressDialogFragment.TAG + dialogTag)).dismiss();
+        } else LOGD(TAG +  ".hide", TAG + " not found");
+    }
+
     public static void hide(FragmentManager fragmentManager) {
         if(fragmentManager != null && fragmentManager.findFragmentByTag(
                 ProgressDialogFragment.TAG) != null) {

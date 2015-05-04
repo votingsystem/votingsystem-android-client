@@ -128,8 +128,8 @@ public class RepresentativeFragment extends Fragment {
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getFragmentManager());
-        } else ProgressDialogFragment.hide(getFragmentManager());
+                    getString(R.string.loading_info_msg), broadCastId, getFragmentManager());
+        } else ProgressDialogFragment.hide(broadCastId, getFragmentManager());
     }
 
     private void printRepresentativeData(UserVSDto representative) {
