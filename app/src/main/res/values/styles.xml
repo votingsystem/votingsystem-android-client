@@ -45,4 +45,10 @@
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
         <item name="android:textColor">@color/frg_vs</item>
     </style>
+
+    <style name="electionOptionText">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+
 </resources>

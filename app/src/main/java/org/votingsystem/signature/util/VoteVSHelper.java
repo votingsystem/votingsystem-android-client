@@ -78,7 +78,7 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
              Set<FieldEventVSDto> options) throws Exception {
         VoteVSDto voteVSDto =  new VoteVSDto();
         voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventVSURL(eventVSURL);
+        voteVSDto.setEventURL(eventVSURL);
         voteVSDto.setOptionSelected(getRandomOption(options));
         return VoteVSHelper.load(voteVSDto);
     }
@@ -101,7 +101,7 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         voteVSDto.setOperation(TypeVS.SEND_VOTE);
         voteVSDto.setHashCertVSBase64(hashCertVSBase64);
         voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventVSURL(eventVSURL);
+        voteVSDto.setEventURL(eventVSURL);
         voteVSDto.setOptionSelected(optionSelected);
         voteVSDto.setUUID(UUID.randomUUID().toString());
     }
@@ -210,6 +210,12 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
             } catch(Exception ex) { ex.printStackTrace(); }
         }
         return result;
+    }
+
+    @Override
+    public SMIMEMessage getReceipt() throws Exception {
+        if(cancelVoteReceipt != null) return cancelVoteReceipt;
+        else return voteReceipt;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

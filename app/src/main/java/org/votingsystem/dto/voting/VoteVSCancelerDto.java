@@ -7,13 +7,16 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VoteVSCancelerDto {
+public class VoteVSCancelerDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String originHashCertVote;
     private String hashCertVSBase64;

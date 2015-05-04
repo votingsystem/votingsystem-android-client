@@ -229,7 +229,7 @@ public class EventVSDto implements Serializable {
     }
 
     public String getStatsServiceURL() {
-        return accessControl.getServerURL() + "/eventVSElection/" + id + "/stats";
+        return accessControl.getServerURL() + "/rest/eventVSElection/id/" + id + "/stats";
     }
 
     public boolean isActive() {

@@ -42,7 +42,7 @@ public class VoteVSDto implements Serializable {
     private String hashCertVoteHex;
     private String messageSMIMEURL;
     private String cancelationMessageSMIMEURL;
-    private String eventVSURL;
+    private String eventURL;
     private String UUID;
     private EventVSDto eventVS;
     private State state;
@@ -145,12 +145,12 @@ public class VoteVSDto implements Serializable {
         this.cancelationMessageSMIMEURL = cancelationMessageSMIMEURL;
     }
 
-    public String getEventVSURL() {
-        return eventVSURL;
+    public String getEventURL() {
+        return eventURL;
     }
 
-    public void setEventVSURL(String eventVSURL) {
-        this.eventVSURL = eventVSURL;
+    public void setEventURL(String eventURL) {
+        this.eventURL = eventURL;
     }
 
     public State getState() {

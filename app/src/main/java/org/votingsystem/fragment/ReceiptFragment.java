@@ -33,6 +33,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.service.VoteService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.VoteVSHelper;
@@ -90,12 +91,11 @@ public class ReceiptFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            switch(typeVS) {
+            switch(responseVS.getTypeVS()) {
                 case CANCEL_VOTE:
-                    launchVoteCancellation((VoteVSHelper)receiptWrapper);
+                    launchVoteCancelation((VoteVSHelper)receiptWrapper);
                     break;
             }
         } else {
@@ -109,7 +109,7 @@ public class ReceiptFragment extends Fragment {
         }
     };
 
-    private void launchVoteCancellation(VoteVSHelper voteVSHelper) {
+    private void launchVoteCancelation(VoteVSHelper voteVSHelper) {
         Intent startIntent = new Intent(getActivity(), VoteService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
@@ -203,12 +203,11 @@ public class ReceiptFragment extends Fragment {
             String contentFormatted = "";
             String dateStr = null;
             receiptWrapperSMIME = receiptWrapper.getReceipt();
-            String receiptSubjectStr = receiptWrapperSMIME == null? null :
-                    receiptWrapperSMIME.getSubject();
+            String receiptSubjectStr = receiptWrapperSMIME == null? null : receiptWrapperSMIME.getSubject();
             switch(receiptWrapper.getTypeVS()) {
                 case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_SELECTION_CERT_REQUEST:
-                    org.votingsystem.dto.voting.RepresentativeDelegationDto delegationDto = receiptWrapper.getReceipt()
+                    RepresentativeDelegationDto delegationDto = receiptWrapper.getReceipt()
                             .getSignedContent(org.votingsystem.dto.voting.RepresentativeDelegationDto.class);
                     contentFormatted = getString(R.string.anonymous_representative_request_formatted,
                             delegationDto.getWeeksOperationActive(),
@@ -225,10 +224,10 @@ public class ReceiptFragment extends Fragment {
                     break;
                 case VOTEVS:
                     VoteVSHelper voteVSHelper = (VoteVSHelper) receiptWrapper;
+                    receiptSubjectStr = voteVSHelper.getEventVS().getSubject();
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime());
                     contentFormatted = getString(R.string.votevs_info_formatted, dateStr,
-                            voteVSHelper.getEventVS().getSubject(),
                             voteVSHelper.getVote().getOptionSelected().getContent(),
                             receiptWrapper.getReceipt().getSignedContent());
                     break;
@@ -259,8 +258,7 @@ public class ReceiptFragment extends Fragment {
 
             }
             receiptSubject.setText(receiptSubjectStr);
-            //Html.fromHtml(contentFormatted)
-            contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;'>" +
+            contentFormatted = "<html><body style='background-color:#eeeeee;margin:0 auto;font-size:1.2em;'>" +
                     contentFormatted + "</body></html>";
             receipt_content.loadData(contentFormatted, "text/html; charset=UTF-8", null);
             ((ActionBarActivity)getActivity()).getSupportActionBar().setLogo(
@@ -287,7 +285,7 @@ public class ReceiptFragment extends Fragment {
         }
         switch(receiptWrapper.getTypeVS()) {
             case VOTEVS:
-                if(((VoteVSHelper)receiptWrapper).getVote().getEventVS().getDateFinish().before(
+                if(((VoteVSHelper)receiptWrapper).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
@@ -410,13 +408,14 @@ public class ReceiptFragment extends Fragment {
                 case R.id.cancel_vote:
                     dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
                             setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
-                                    ((VoteVSHelper) receiptWrapper).getSubject()))).setPositiveButton(getString(R.string.ok_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                            getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
-                                }
-                            }).setNegativeButton(getString(R.string.cancel_lbl),
+                                    ((VoteVSHelper) receiptWrapper).getEventVS().getSubject())))
+                                    .setPositiveButton(getString(R.string.ok_lbl),
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int whichButton) {
+                                                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                                                            getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
+                                                }
+                                            }).setNegativeButton(getString(R.string.cancel_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     dialog.dismiss();
@@ -439,7 +438,7 @@ public class ReceiptFragment extends Fragment {
                     responseVS, getFragmentManager());
             else {
                 try {
-                    org.votingsystem.dto.voting.VoteVSDto voteVSDtoDto = (org.votingsystem.dto.voting.VoteVSDto) responseVS.getMessage(org.votingsystem.dto.voting.VoteVSDto.class);
+                    VoteVSDto voteVSDtoDto = (VoteVSDto) responseVS.getMessage(org.votingsystem.dto.voting.VoteVSDto.class);
                     MessageDialogFragment.showDialog(ResponseVS.SC_OK,
                             MsgUtils.getVoteVSStateMsg(voteVSDtoDto.getState(), getActivity()),
                             getString(R.string.votvs_value_msg, voteVSDtoDto.getOptionSelected().getContent()),

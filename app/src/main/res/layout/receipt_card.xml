@@ -6,12 +6,12 @@
     android:layout_height="wrap_content"
     android:background="@color/frg_vs"
     card_view:cardCornerRadius="4dp"
-    android:layout_margin="5dp">
+    android:layout_margin="7dp">
     <LinearLayout android:id="@+id/row"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:padding="5dp">
+        android:padding="7dp">
         <ImageView
             android:id="@+id/receipt_icon"
             android:layout_width="wrap_content"

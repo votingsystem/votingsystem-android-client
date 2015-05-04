@@ -197,7 +197,7 @@
     <string name="timestamp_info_lbl">datos del sello de tiempo</string>
     <string name="date_saved_lbl">guardado</string>
     <string name="date_updated_lbl">actualizado</string>
-    <string name="cancel_vote_from_receipt_msg"><![CDATA[si continua anulará el voto del asunto \'<b>%1$s</b>\'<br/> \n \
+    <string name="cancel_vote_from_receipt_msg"><![CDATA[si continua anulará el voto del asunto \'<b>%1$s</b>\' \n \
         una vez anulado el voto podrá volver a votar<br/>¿desea continuar?]]></string>
     <string name="delete_receipt_msg"><![CDATA[¿desea borrar el recibo con asunto \'<b>%1$s</b>\'?]]></string>
     <string name="show_all_receipts_lbl">mostrar todos los recibos</string>
@@ -402,8 +402,7 @@
     <string name="waiting_for_access_control_connection">esperando conexión con Control de Acceso</string>
     <string name="num_matches">\'%1$s\' coincidencias</string>
     <string name="date_election_lbl">fecha de la consulta</string>
-    <string name="votevs_info_formatted"><![CDATA[fecha de la firma: <b>\'%1$s\'</b><br/>
-        asunto de la votación: <b>\'%2$s\'</b><br/> opción seleccionada: <b>\'%3$s\'</b>]]></string>
+    <string name="votevs_info_formatted"><![CDATA[fecha de la firma: <b>%1$s</b><br/><br/> opción seleccionada: <b>%2$s</b>]]></string>
     <string name="access_request_info_formatted"><![CDATA[fecha de la firma: <b>\'%1$s\'</b><br/>
         asunto de la votación: <a href=\'%2$s\'>%2$s</a>]]></string>
     <string name="signature_content">contenido de la firma</string>

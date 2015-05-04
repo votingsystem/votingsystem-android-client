@@ -68,10 +68,7 @@ public class ReceiptWrapper implements Serializable {
     public String getCardSubject(Context context) {
         switch(getTypeVS()) {
             case VOTEVS:
-                try {
-                    return  context.getString(R.string.receipt_vote_subtitle) + " - " +
-                            receipt.getSubject();
-                } catch (Exception ex)  { ex.printStackTrace();}
+                return  context.getString(R.string.receipt_vote_subtitle);
             case CANCEL_VOTE:
             case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);

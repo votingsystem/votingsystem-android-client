@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -242,7 +243,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         cancelVoteButton.setEnabled(true);
         saveReceiptButton.setEnabled(true);
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
-        contentTextView.setText(Html.fromHtml(voteVSHelper.getEventVS().getContent()) + "\n");
+        try {
+            String eventContent = new String(Base64.decode(
+                    voteVSHelper.getEventVS().getContent().getBytes()), "UTF-8");
+            contentTextView.setText(Html.fromHtml(eventContent));
+        } catch (Exception ex) { ex.printStackTrace(); }
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
         Set<FieldEventVSDto> fieldsEventVS = voteVSHelper.getEventVS().getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
@@ -250,7 +255,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             voteOptionsButtonList = new ArrayList<Button>();
             FrameLayout.LayoutParams paramsButton = new
                     FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-            paramsButton.setMargins(15, 15, 15, 15);
+            paramsButton.setMargins(15, 15, 25, 15);
             for (final FieldEventVSDto option:fieldsEventVS) {
                 Button optionButton = new Button(getActivity());
                 optionButton.setText(option.getContent());
@@ -287,6 +292,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         for (final FieldEventVSDto option:fieldsEventVS) {
             Button optionButton = new Button(getActivity());
             optionButton.setText(option.getContent());
+            optionButton.setTextAppearance(getActivity(), R.style.electionOptionText);
             optionButton.setOnClickListener(new Button.OnClickListener() {
                 FieldEventVSDto optionSelected = option;
                 public void onClick(View v) {

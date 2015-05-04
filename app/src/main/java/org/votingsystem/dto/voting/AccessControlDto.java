@@ -56,7 +56,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getCancelVoteServiceURL() {
-        return getServerURL() + "/rest/voteVSCanceller";
+        return getServerURL() + "/rest/voteVS/cancel";
     }
 
     public String getSearchServiceURL (int offset, int max) {

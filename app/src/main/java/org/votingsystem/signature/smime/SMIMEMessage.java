@@ -284,7 +284,8 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         this.signers = signers;
     }
 
-    public UserVSDto getSigner() {
+    public UserVSDto getSigner() throws Exception {
+        if(contentInfo == null) isValidSignature();
         return signerVS;
     }
 
