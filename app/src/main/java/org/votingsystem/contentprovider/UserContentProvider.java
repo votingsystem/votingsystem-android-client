@@ -70,9 +70,8 @@ public class UserContentProvider extends ContentProvider {
     }
 
     @Override public boolean onCreate() {
-        //getContext().deleteDatabase(DB_NAME);//Delete previous session database
-        // If database file isn't found this will throw a  FileNotFoundException, and we will
-        // then create the database.
+        //Delete previous session database
+        getContext().deleteDatabase(DB_NAME);
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
         try{
             database = databaseHelper.getWritableDatabase();

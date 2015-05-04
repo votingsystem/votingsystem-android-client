@@ -64,9 +64,6 @@ public class ReceiptContentProvider extends ContentProvider {
     }
 
     @Override public boolean onCreate() {
-        // If database file isn't found this will throw a  FileNotFoundException, and we will
-        // then create the database.
-        //getContext().deleteDatabase(DB_NAME);
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
         try{
             database = databaseHelper.getWritableDatabase();

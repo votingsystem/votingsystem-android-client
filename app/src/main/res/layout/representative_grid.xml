@@ -32,6 +32,7 @@
             android:layout_height="fill_parent"
             android:columnWidth="250dp"
             android:numColumns="auto_fit"
+            android:padding="5dp"
             android:verticalSpacing="7dp"
             android:horizontalSpacing="7dp"
             android:stretchMode="columnWidth"

@@ -35,7 +35,7 @@ public class Wallet {
     private static Set<Currency> currencySet = null;
 
     public static Set<Currency> getCurrencySet() {
-        if(currencySet == null) return new HashSet<>();
+        if(currencySet == null) return null;
         else return new HashSet<>(currencySet);
     }
 

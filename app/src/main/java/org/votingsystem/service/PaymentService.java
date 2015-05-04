@@ -3,10 +3,7 @@ package org.votingsystem.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.WalletActivity;
@@ -35,7 +32,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -44,7 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -64,8 +59,8 @@ public class PaymentService extends IntentService {
         appVS = (AppVS) getApplicationContext();
         if(appVS.getCurrencyServer() == null) {
             LOGD(TAG + ".updateUserInfo", "missing connection to Currency Server");
-            Toast.makeText(appVS, getString(R.string.server_connection_error_msg,
-                    appVS.getCurrencyServerURL()), Toast.LENGTH_LONG).show();
+            appVS.broadcastResponse(ResponseVS.ERROR(getString(R.string.error_lbl),
+                    getString(R.string.server_connection_error_msg, appVS.getCurrencyServerURL())));
             return;
         }
         final Bundle arguments = intent.getExtras();
