@@ -50,7 +50,7 @@ public class QRGeneratorFormFragment extends Fragment {
     private EditText amount_text;
     private Handler handler;
     private static final TypeVS[] OPERATION_ARRAY =
-            new TypeVS[]{TypeVS.CURRENCY_USERVS_CHANGE, TypeVS.TRANSACTIONVS};
+            new TypeVS[]{TypeVS.CURRENCY_CHANGE, TypeVS.TRANSACTIONVS};
     private AtomicBoolean isLongPressed = new AtomicBoolean(false);
 
     final Runnable incrementRunnable = new Runnable(){
@@ -176,7 +176,7 @@ public class QRGeneratorFormFragment extends Fragment {
         public void onItemSelected(AdapterView<?> parent, View view, int pos,long id) {
             TypeVS selectedOperation = OPERATION_ARRAY[pos];
             switch (selectedOperation) {
-                case CURRENCY_USERVS_CHANGE:
+                case CURRENCY_CHANGE:
 
                     break;
                 case TRANSACTIONVS:

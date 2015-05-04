@@ -19,6 +19,7 @@ public class QRMessageVS {
     private String URL;
     private String UUID;
 
+    //operation=CURRENCY_USERVS_CHANGE;;;amount=10_EUR_WILDTAG;
     public QRMessageVS(String qrMessage) throws ExceptionVS {
         if(qrMessage.toLowerCase().contains("http://") ||
                 qrMessage.toLowerCase().contains("https://")) {

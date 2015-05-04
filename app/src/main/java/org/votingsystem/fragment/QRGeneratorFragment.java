@@ -78,7 +78,7 @@ public class QRGeneratorFragment extends Fragment {
 
     private String getOperationMessage(QRMessageVS qrMessageVS) {
         switch(qrMessageVS.getOperation()) {
-            case CURRENCY_USERVS_CHANGE:
+            case CURRENCY_CHANGE:
                 return getString(R.string.currency_ticket_request_qr_msg) + " - " +
                         qrMessageVS.getAmount().toPlainString() + " " + qrMessageVS.getCurrencyCode() +
                         " " + qrMessageVS.getTag();
