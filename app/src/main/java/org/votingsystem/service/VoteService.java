@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.VoteSender;
@@ -17,10 +16,8 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -41,16 +38,12 @@ public class VoteService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVSHelper voteVSHelper = (VoteVSHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
-        String eventSubject = null;
+        String eventSubject = voteVSHelper.getTruncatedSubject();
         Intent resultIntent = new Intent(serviceCaller);
-        if(voteVSHelper.getVote() != null) {
-            eventSubject = voteVSHelper.getEventVS().getSubject();
-            if(eventSubject.length() > 50) eventSubject = eventSubject.substring(0, 50) + "...";
-        }
         try {
             LOGD(TAG + ".onHandleIntent", "operation: " + operation);
             switch(operation) {
-                case VOTEVS:
+                case SEND_VOTE:
                     if(appVS.getControlCenter() == null) {
                         ControlCenterDto controlCenter = appVS.getActorVS(ControlCenterDto.class,
                                 voteVSHelper.getEventVS().getControlCenter().getServerURL());
@@ -64,7 +57,6 @@ public class VoteService extends IntentService {
                                         R.string.vote_ok_msg, eventSubject,
                                         voteVSHelper.getVote().getOptionSelected().getContent()));
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                        responseVS.setUrl(responseVS.getMessage());
                         responseVS.setCaption(getString(R.string.access_request_repeated_caption)).
                                 setNotificationMessage(getString( R.string.access_request_repeated_msg,
                                 eventSubject));
@@ -84,11 +76,9 @@ public class VoteService extends IntentService {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         voteVSHelper.setCancelVoteReceipt(responseVS.getSMIME());
                         if(voteVSHelper.getLocalId() > 0) {//Update local receipt database
-                            voteVSHelper.setTypeVS(TypeVS.VOTEVS_CANCELLED);
-                            getContentResolver().update(ReceiptContentProvider.getReceiptURI(
-                                    voteVSHelper.getLocalId()),
-                                    ReceiptContentProvider.getContentValues(voteVSHelper, ReceiptWrapper.State.ACTIVE),
-                                    null, null);
+                            voteVSHelper.setTypeVS(TypeVS.CANCEL_VOTE);
+                            getContentResolver().delete(ReceiptContentProvider.getReceiptURI(
+                                    voteVSHelper.getLocalId()), null, null);
                         }
                         responseVS.setCaption(getString(R.string.cancel_vote_ok_caption)).
                                 setNotificationMessage(getString(R.string.cancel_vote_result_msg,

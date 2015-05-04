@@ -95,13 +95,22 @@ public class ReceiptFragment extends Fragment {
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case CANCEL_VOTE:
-                    launchVoteCancelation((VoteVSHelper)receiptWrapper);
+                    launchVoteCancelation((VoteVSHelper) receiptWrapper);
                     break;
             }
         } else {
             if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) { }
-                getActivity().onBackPressed();
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        responseVS.getCaption(), responseVS.getNotificationMessage(), getActivity());
+                    builder.setPositiveButton(getString(R.string.accept_lbl),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                getActivity().onBackPressed();
+                            }
+                        });
+                    UIUtils.showMessageDialog(builder);
+                }
             }
             setProgressDialogVisible(null, null, false);
             MessageDialogFragment.showDialog(responseVS, getFragmentManager());
@@ -222,7 +231,7 @@ public class ReceiptFragment extends Fragment {
                             currencyDto.getAmount(), currencyDto.getCurrencyCode(),
                             currencyDto.getCurrencyServerURL());
                     break;
-                case VOTEVS:
+                case SEND_VOTE:
                     VoteVSHelper voteVSHelper = (VoteVSHelper) receiptWrapper;
                     receiptSubjectStr = voteVSHelper.getEventVS().getSubject();
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
@@ -279,12 +288,12 @@ public class ReceiptFragment extends Fragment {
             LOGD(TAG + ".receiptWrapper", "receiptWrapper undefined");
             return;
         }
-        if(TypeVS.VOTEVS != receiptWrapper.getTypeVS()) {
+        if(TypeVS.SEND_VOTE != receiptWrapper.getTypeVS()) {
             menu.removeItem(R.id.cancel_vote);
             menu.removeItem(R.id.check_receipt);
         }
         switch(receiptWrapper.getTypeVS()) {
-            case VOTEVS:
+            case SEND_VOTE:
                 if(((VoteVSHelper)receiptWrapper).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
@@ -292,9 +301,6 @@ public class ReceiptFragment extends Fragment {
                 menu.setGroupVisible(R.id.vote_items, true);
                 break;
             case CANCEL_VOTE:
-            case VOTEVS_CANCELLED:
-                MenuItem checkReceiptMenuItem = menu.findItem(R.id.check_receipt);
-                checkReceiptMenuItem.setTitle(R.string.check_vote_Cancellation_lbl);
                 menu.removeItem(R.id.cancel_vote);
                 break;
             default: LOGD(TAG + ".setActionBarMenu", "unprocessed type: " +

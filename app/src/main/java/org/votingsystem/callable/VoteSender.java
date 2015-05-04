@@ -36,7 +36,7 @@ public class VoteSender implements Callable<ResponseVS> {
         ResponseVS responseVS = null;
         try {
             String subject = AppVS.getInstance().getString(R.string.request_msg_subject,
-                    voteVSHelper.getEventVS().getEventVSId());
+                    voteVSHelper.getEventVS().getId());
             AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
             SMIMEMessage smimeMessage = AppVS.getInstance().signMessage(
                     AppVS.getInstance().getAccessControl().getName(),

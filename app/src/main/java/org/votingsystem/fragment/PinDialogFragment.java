@@ -136,7 +136,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         AppVS appVS = (AppVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        final ContextVS.State appState = appVS.getState();
         AlertDialog.Builder builder = null;
         if(!ContextVS.State.WITH_CERTIFICATE.equals(appVS.getState()) && isWithCertValidation) {
             builder = UIUtils.getMessageDialogBuilder(
@@ -145,7 +144,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                     R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialogInterface, int i) {
                     Intent intent = null;
-                    switch(appState) {
+                    switch(AppVS.getInstance().getState()) {
                         case WITH_CSR:
                             intent = new Intent(getActivity(), CertResponseActivity.class);
                             break;

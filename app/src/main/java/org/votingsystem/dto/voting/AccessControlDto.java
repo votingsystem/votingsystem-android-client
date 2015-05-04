@@ -65,12 +65,12 @@ public class AccessControlDto extends ActorDto implements Serializable {
 
     public String getSearchServiceURL (Integer offset, Integer max, String searchText,
             EventVSDto.Type eventType, EventVSDto.State state) {
-        String offsetStr = (offset != null? offset.toString():"");
-        String maxStr = (max != null? max.toString():"");
-        String stateStr = (state != null? state.toString():"");
-        String typeStr = (eventType != null? eventType.toString():"");
-        return getServerURL() + "/rest/search/eventVS?max=" + maxStr + "&offset=" + offsetStr +
-                "&eventVSState=" + stateStr + "&eventvsType=" + typeStr + "&searchText=" + searchText;
+        String offsetStr = (offset != null? "offset=" + offset.toString():"");
+        String maxStr = (max != null? "max=" + max.toString(): "");
+        String stateStr = (state != null? "eventVSState=" + state.toString():"");
+        String typeStr = (eventType != null? "eventvsType=" + eventType.toString():"");
+        return getServerURL() + "/rest/search/eventVS?" + maxStr + "&" + offsetStr +
+                "&" + stateStr + "&" + typeStr + "&searchText=" + searchText;
     }
 
     public String getEventVSURL () {

@@ -51,7 +51,6 @@ public class ResponseVS<T> implements Parcelable {
     private String notificationMessage;
     private String message;
     private String serviceCaller;
-    private String url;
     private T data;
     private TypeVS typeVS;
     private SMIMEMessage smimeMessage;
@@ -364,14 +363,6 @@ public class ResponseVS<T> implements Parcelable {
 
     public void setOperation(OperationVS operation) {
         this.operation = operation;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     @Override public String toString() {

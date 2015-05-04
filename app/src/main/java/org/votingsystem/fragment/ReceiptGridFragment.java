@@ -158,6 +158,10 @@ public class ReceiptGridFragment extends Fragment implements
             if(cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
+                /*Uri itemUri = ReceiptContentProvider.getReceiptURI(cursor.getLong(
+                        cursor.getColumnIndex(ReceiptContentProvider.ID_COL)));
+                LOGD(TAG + ".bindView", "deleting item with errors: " + itemUri);
+                getActivity().getContentResolver().delete(itemUri, null, null);*/
                 ReceiptWrapper receiptWrapper = (ReceiptWrapper) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
                 if(receiptWrapper.getTypeVS() == null) {

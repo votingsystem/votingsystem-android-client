@@ -8,6 +8,9 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -44,10 +47,9 @@ public class ReceiptWrapper implements Serializable {
 
     public String getTypeDescription(Context context) {
         switch(getTypeVS()) {
-            case VOTEVS:
+            case SEND_VOTE:
                 return context.getString(R.string.receipt_vote_subtitle);
             case CANCEL_VOTE:
-            case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
             case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
@@ -67,10 +69,11 @@ public class ReceiptWrapper implements Serializable {
 
     public String getCardSubject(Context context) {
         switch(getTypeVS()) {
-            case VOTEVS:
+            case ACCESS_REQUEST:
+                return  context.getString(R.string.access_request_lbl);
+            case SEND_VOTE:
                 return  context.getString(R.string.receipt_vote_subtitle);
             case CANCEL_VOTE:
-            case VOTEVS_CANCELLED:
                 return context.getString(R.string.receipt_cancel_vote_subtitle);
             case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
@@ -87,9 +90,8 @@ public class ReceiptWrapper implements Serializable {
 
     public int getLogoId() {
         switch(getTypeVS()) {
-            case VOTEVS:
+            case SEND_VOTE:
             case CANCEL_VOTE:
-            case VOTEVS_CANCELLED:
                 return R.drawable.poll_32;
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_SELECTION_CERT_REQUEST:
@@ -176,6 +178,22 @@ public class ReceiptWrapper implements Serializable {
 
     public void setLocalId(Long localId) {
         this.localId = localId;
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(receipt != null) s.writeObject(receipt.getBytes());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws Exception {
+        s.defaultReadObject();
+        byte[] receiptBytes = (byte[]) s.readObject();
+        if(receiptBytes != null) receipt = new SMIMEMessage(receiptBytes);
     }
 
 }

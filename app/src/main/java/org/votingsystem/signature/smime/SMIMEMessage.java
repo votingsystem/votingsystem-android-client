@@ -149,11 +149,11 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
-        return JSON.readValue(signedContent, type);
+        return JSON.readValue(getSignedContent(), type);
     }
 
-    public <T> T getSignedContent(TypeReference type) throws IOException {
-        return JSON.readValue(signedContent, type);
+    public <T> T getSignedContent(TypeReference type) throws IOException, ExceptionVS {
+        return JSON.readValue(getSignedContent(), type);
     }
 
     public SMIMESigned getSmimeSigned() throws Exception {
@@ -272,11 +272,13 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
         return messageBytes;
     }
 
-    public VoteVSDto getVoteVS() {
+    public VoteVSDto getVoteVS() throws Exception {
+        if(contentInfo == null) isValidSignature();
         return voteVS;
     }
 
-    public Set<UserVSDto> getSigners() {
+    public Set<UserVSDto> getSigners() throws Exception {
+        if(contentInfo == null) isValidSignature();
         return signers;
     }
 
@@ -423,8 +425,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             if (!dcv.isValidOn(signingTime.getDate()))  {
                 throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");
             }
-            // RFC 3852 11.1 Check the content-type attribute is correct -> missing
-            //verify digest
+            // RFC 3852 11.1 Check the content-type attribute is correct -> missing verify digest
             DigestCalculator calc = verifier.getDigestCalculator(signer.getDigestAlgorithmID());
             OutputStream digOut = calc.getOutputStream();
             smimeSigned.getSignedContent().write(digOut);

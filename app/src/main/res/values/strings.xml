@@ -205,7 +205,6 @@
     <string name="show_vote_receipts_lbl">mostrar sólo recibos de voto</string>
     <string name="show_cancellations_vote_receipts_lbl">mostrar sólo cancelaciones de voto</string>
     <string name="cancellations_vote_receipts_lbl">recibos de cancelaciones de voto</string>
-    <string name="check_vote_Cancellation_lbl">comprobar la cancelación</string>
     <string name="send_msg_lbl">enviar mensaje</string>
     <string name="save_editor_lbl">guardar</string>
     <string name="add_option_lbl">añadir opción</string>
