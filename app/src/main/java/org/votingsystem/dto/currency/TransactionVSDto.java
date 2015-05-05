@@ -41,7 +41,8 @@ public class TransactionVSDto implements Serializable{
 
 
     public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, FROM_BANKVS, FROM_USERVS,
-        FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS, CURRENCY_INIT_PERIOD;}
+        FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS,
+        CURRENCY_PERIOD_INIT;}
 
     private TypeVS operation;
     private Long id;
