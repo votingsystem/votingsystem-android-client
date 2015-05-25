@@ -78,13 +78,12 @@ public class TransactionVSDto implements Serializable{
     private List<Payment> paymentOptions;
     private Date date;
     private TransactionVSDetailsDto details;
-    @JsonIgnore private SMIMEMessage smimeMessage;
-    @JsonIgnore private SMIMEMessage cancelationSmimeMessage;
-
-
     private Type transactionType;
     private UserVSDto.Type userToType;
     private TagVSDto tagVS;
+
+    @JsonIgnore private SMIMEMessage smimeMessage;
+    @JsonIgnore private SMIMEMessage cancelationSmimeMessage;
     @JsonIgnore private List<UserVSDto> toUserVSList;
     @JsonIgnore private UserVSDto signer;
     @JsonIgnore private UserVSDto receptor;

@@ -7,6 +7,7 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ObjectUtils;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
@@ -17,7 +18,9 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CurrencyDto {
+public class CurrencyDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private BigDecimal amount;
     private String currencyCode;

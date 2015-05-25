@@ -56,7 +56,8 @@ public class Wallet {
 
     public static void saveCurrencyCollection(Collection<Currency> currencyCollection, String pin,
              AppVS context) throws Exception {
-        Set<Currency> newCurrencySet = new HashSet<>(currencySet);
+        Set<Currency> newCurrencySet = new HashSet<>();
+        if(currencySet != null) newCurrencySet.addAll(currencySet);
         newCurrencySet.addAll(currencyCollection);
         Wallet.saveWallet(newCurrencySet, pin, context);
     }

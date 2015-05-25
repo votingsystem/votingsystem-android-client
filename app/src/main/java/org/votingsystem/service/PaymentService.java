@@ -165,7 +165,7 @@ public class PaymentService extends IntentService {
                 Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin, appVS);
                 responseVS.setCaption(getString(R.string.currency_request_ok_caption)).setNotificationMessage(
                         getString(R.string.currency_request_ok_msg, requestDto.getTotalAmount(),
-                                requestDto.getCurrencyCode()));
+                        requestDto.getCurrencyCode()));
                 Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin, appVS);
                 updateUserInfo(serviceCaller);
             } else responseVS.setCaption(getString(
@@ -257,7 +257,6 @@ public class PaymentService extends IntentService {
                 responseVS.setNotificationMessage(getString(R.string.currency_accounts_updated));
             responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.CURRENCY_ACCOUNTS_INFO);
             appVS.broadcastResponse(responseVS);
-            Utils.showAccountsUpdatedNotification(appVS);
         }
     }
 

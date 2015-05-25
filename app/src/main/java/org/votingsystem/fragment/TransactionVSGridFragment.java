@@ -28,7 +28,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.TransactionVSPagerActivity;
 import org.votingsystem.android.R;
@@ -41,13 +40,10 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-
 import static org.votingsystem.util.LogUtils.LOGD;
-
 
 public class TransactionVSGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
@@ -57,7 +53,6 @@ public class TransactionVSGridFragment extends Fragment
     private View rootView;
     private GridView gridView;
     private TransactionVSListAdapter adapter = null;
-    private String queryStr = null;
     private AppVS appVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
@@ -106,7 +101,6 @@ public class TransactionVSGridFragment extends Fragment
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appVS = (AppVS) getActivity().getApplicationContext();
-        queryStr = getArguments().getString(SearchManager.QUERY);
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
@@ -182,7 +176,6 @@ public class TransactionVSGridFragment extends Fragment
                 }
             });
         }
-
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -258,7 +251,7 @@ public class TransactionVSGridFragment extends Fragment
             if(cursor != null) {
                 byte[] jsonBytes = cursor.getBlob(cursor.getColumnIndex(
                         TransactionVSContentProvider.JSON_COL));
-                if(null != null) {
+                if(jsonBytes != null) {
                     TransactionVSDto transactionVS = null;
                     try {
                         transactionVS = JSON.readValue(jsonBytes, TransactionVSDto.class);

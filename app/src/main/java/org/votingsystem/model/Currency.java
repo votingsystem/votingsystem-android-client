@@ -54,11 +54,14 @@ public class Currency extends ReceiptWrapper {
     public enum State { OK, EXPENDED, LAPSED;}
 
     private Long localId = -1L;
+    private TypeVS operation;
+    private BigDecimal batchAmount;
     private TransactionVSDto transaction;
     private transient SMIMEMessage receipt;
     private transient SMIMEMessage cancellationReceipt;
     private transient SMIMEMessage smimeMessage;
     private transient X509Certificate x509AnonymousCert;
+    private transient PKCS10CertificationRequest csr;
     private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
     private byte[] cancellationReceiptBytes;
@@ -81,12 +84,9 @@ public class Currency extends ReceiptWrapper {
     private String batchUUID;
     private Payment paymentMethod;
 
-    private PKCS10CertificationRequest csr;
     private CurrencyCertExtensionDto certExtensionDto;
     private CurrencyDto certSubjectDto;
 
-    private TypeVS operation;
-    private BigDecimal batchAmount;
 
     public Currency() {}
 

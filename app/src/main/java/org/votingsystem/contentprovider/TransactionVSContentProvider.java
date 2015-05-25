@@ -256,6 +256,7 @@ public class TransactionVSContentProvider extends ContentProvider {
 
 
     public static void updateUserVSTransactionVSList(Context context, BalancesDto userInfo) {
+
         for(TransactionVSDto transactionVS : userInfo.getTransactionList()) {
             addTransaction(context, transactionVS,
                     DateUtils.getPath(userInfo.getTimePeriod().getDateFrom()));

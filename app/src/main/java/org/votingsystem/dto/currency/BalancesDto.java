@@ -9,6 +9,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TimePeriod;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ public class BalancesDto {
 
     private UserVSDto userVS;
     private TimePeriod timePeriod;
-    private List<TransactionVSDto> transactionList;
     private List<TransactionVSDto> transactionFromList;
     private List<TransactionVSDto> transactionToList;
     private Map<String, Map> balances;
@@ -162,11 +162,9 @@ public class BalancesDto {
     }
 
     public List<TransactionVSDto> getTransactionList() {
-        return transactionList;
-    }
-
-    public void setTransactionList(List<TransactionVSDto> transactionList) {
-        this.transactionList = transactionList;
+        List<TransactionVSDto> result = new ArrayList<>(transactionToList);
+        result.addAll(transactionFromList);
+        return result;
     }
 
     public Map<String, Map> getBalances() {

@@ -53,7 +53,7 @@ public class CurrencyRequestDto {
         currencyRequestDto.totalAmount = transactionVSDto.getAmount();
         currencyRequestDto.currencyCode = transactionVSDto.getCurrencyCode();
         currencyRequestDto.timeLimited = transactionVSDto.isTimeLimited();
-        currencyRequestDto.tagVS = new TagVSDto(transactionVSDto.getTagName());;
+        currencyRequestDto.tagVS = transactionVSDto.getTagVS();
         currencyRequestDto.UUID = java.util.UUID.randomUUID().toString();
 
         Map<String, Currency> currencyMap = new HashMap<>();
@@ -177,4 +177,11 @@ public class CurrencyRequestDto {
         return currencyMap;
     }
 
+    public TagVSDto getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(TagVSDto tagVS) {
+        this.tagVS = tagVS;
+    }
 }

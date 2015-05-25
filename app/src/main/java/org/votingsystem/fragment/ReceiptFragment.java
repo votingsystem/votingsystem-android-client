@@ -150,11 +150,8 @@ public class ReceiptFragment extends Fragment {
         TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         receiptURL = getArguments().getString(ContextVS.URL_KEY);
         receiptWrapper = (ReceiptWrapper) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
-        String transactionStr = getArguments().getString(ContextVS.TRANSACTION_KEY);
-        if(transactionStr != null) {
-            if(transactionDto != null) receiptWrapper = new ReceiptWrapper(transactionDto);
-
-        }
+        transactionDto = (TransactionVSDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+        if(transactionDto != null) receiptWrapper = new ReceiptWrapper(transactionDto);
         if(receiptWrapper != null) {
             if(receiptWrapper.hashReceipt()) initReceiptScreen(receiptWrapper);
             else receiptURL = receiptWrapper.getURL();

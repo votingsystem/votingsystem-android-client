@@ -33,8 +33,6 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 
-import java.io.IOException;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -124,10 +122,8 @@ public class TransactionVSFragment extends Fragment {
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            try {
-                selectedTransaction = JSON.readValue(
-                        savedInstanceState.getString(ContextVS.TRANSACTION_KEY), TransactionVSDto.class);
-            } catch (IOException e) { e.printStackTrace();  }
+            selectedTransaction = (TransactionVSDto) savedInstanceState.getSerializable(
+                    ContextVS.TRANSACTION_KEY);
         }
         if(selectedTransaction != null) initTransactionVSScreen(selectedTransaction);
     }
