@@ -29,7 +29,6 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_ERROR_REQUEST_REPEATED   = 409;
     public static final int SC_EXCEPTION                = 490;
     public static final int SC_NULL_REQUEST             = 472;
-    public static final int SC_CURRENCY_EXPENDED           = 473;
     public static final int SC_ERROR                    = 500;
     public static final int SC_CONNECTION_TIMEOUT       = 522;
     public static final int SC_ERROR_TIMESTAMP          = 570;
@@ -40,10 +39,13 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_WS_MESSAGE_ENCRYPTED     = 810;
     public static final int SC_WS_CONNECTION_INIT_ERROR = 840;
     public static final int SC_WS_CONNECTION_NOT_FOUND  = 841;
-    public static final int SC_CANCELED                = 0;
+    public static final int SC_CANCELED                 = 0;
     public static final int SC_INITIALIZED              = 1;
     public static final int SC_PAUSED                   = 10;
 
+    public static final int SC_CURRENCY_OK              = 290;
+    public static final int SC_CURRENCY_EXPENDED        = 491;
+    public static final int SC_CURRENCY_LAPSED          = 492;
 
     private int statusCode;
     private OperationVS operation;
