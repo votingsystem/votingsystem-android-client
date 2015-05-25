@@ -240,11 +240,11 @@ public class Wallet {
     public static CurrencyBundle getCurrencyBundleForTransaction(
             TransactionVSDto transactionDto) throws ExceptionVS {
         return getCurrencyBundleForTransaction(transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                transactionDto.getTagVS().getName());
+                transactionDto.isTimeLimited(), transactionDto.getTagVS().getName());
     }
 
     public static CurrencyBundle getCurrencyBundleForTransaction(BigDecimal requestAmount,
-            String currencyCode, String tagVS) throws ExceptionVS {
+            String currencyCode, Boolean isTimeLimited, String tagVS) throws ExceptionVS {
         CurrencyBundle tagBundle = getCurrencyBundleForTag(currencyCode, tagVS);
         CurrencyBundle result = null;
         BigDecimal remaining = null;

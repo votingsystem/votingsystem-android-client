@@ -31,7 +31,7 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
     }
 
     public String getUserInfoServiceURL(String nif) {
-        return getServerURL() + "/rest/userVS/userInfo/" + nif;
+        return getServerURL() + "/rest/userVS/nif/" + nif;
     }
 
     public String getTagVSSearchServiceURL(String searchParam) {

@@ -90,16 +90,19 @@ public class Currency extends ReceiptWrapper {
 
     public Currency() {}
 
-    public Currency(String currencyServerURL, BigDecimal amount, String currencyCode, String tag) {
+    public Currency(String currencyServerURL, BigDecimal amount, String currencyCode,
+                    Boolean timeLimited, String tag) {
         this.amount = amount;
         this.currencyServerURL = currencyServerURL;
         this.currencyCode = currencyCode;
         this.tag = tag;
+        this.timeLimited = timeLimited;
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
             this.hashCertVS = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
-            certificationRequest = CertificationRequestVS.getCurrencyRequest(ContextVS.VOTE_SIGN_MECHANISM,
-                    ContextVS.PROVIDER, currencyServerURL, hashCertVS, amount, this.currencyCode, tag);
+            certificationRequest = CertificationRequestVS.getCurrencyRequest(
+                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
+                    currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
 

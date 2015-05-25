@@ -39,7 +39,7 @@ public class ContextVS {
     public static final String IMAGE_FILE_NAME                 = "image";
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
-    public static final String CURRENCY_REQUEST_DATA_FILE_NAME   = "currencyRequestData";
+    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
     public static final String ANDROID_PROVIDER                = "AndroidOpenSSL";

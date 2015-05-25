@@ -6,6 +6,35 @@
 
     <include layout="@layout/toolbar_vs" />
 
+    <TextView android:id="@+id/msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/msg_content_vs"
+        android:layout_margin="10dp"
+        android:layout_gravity="center"
+        android:textSize="21sp" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <EditText android:id="@+id/amount"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:gravity="center">
+            <requestFocus />
+        </EditText>
+
+        <TextView android:id="@+id/currency_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"/>
+
+    </LinearLayout>
+
     <Button android:id="@+id/add_tag_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,14 +71,6 @@
         android:text="@string/min_withdrawal_msg"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView android:id="@+id/msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/msg_content_vs"
-        android:layout_margin="20dp"
-        android:layout_gravity="center"
-        android:textSize="21sp" />
-
     <CheckBox android:id="@+id/time_limited_checkbox"
         android:textSize="16sp"
         android:layout_width="wrap_content"
@@ -57,26 +78,5 @@
         android:textColor="@color/msg_content_vs"
         android:layout_gravity="center"
         android:text="@string/time_limited_checkbox_msg"/>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal" >
-
-        <EditText android:id="@+id/amount"
-            android:layout_width="75dp"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:gravity="center">
-            <requestFocus />
-        </EditText>
-
-        <TextView android:id="@+id/currency_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="5dp"/>
-
-    </LinearLayout>
 
 </LinearLayout>

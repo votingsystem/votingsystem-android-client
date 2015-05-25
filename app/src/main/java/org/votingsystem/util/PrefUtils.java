@@ -49,6 +49,7 @@ public class PrefUtils {
         //initialize listened keys
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, false).commit();
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
+        sp.edit().remove(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY).commit();
         new Thread(new Runnable() {
             @Override public void run() { getRepresentationState(context); }
         }).start();

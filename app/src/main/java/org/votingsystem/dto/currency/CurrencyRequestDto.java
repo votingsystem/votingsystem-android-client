@@ -1,17 +1,34 @@
 package org.votingsystem.dto.currency;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.model.Currency;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
+import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyRequestDto {
+
+    private static Logger log = Logger.getLogger(CurrencyRequestDto.class.getSimpleName());
 
     private TypeVS operation = TypeVS.CURRENCY_REQUEST;
     private String subject;
@@ -20,19 +37,64 @@ public class CurrencyRequestDto {
     private TagVSDto tagVS;
     private String UUID;
     private BigDecimal totalAmount;
-    private Boolean isTimeLimited;
+    private Boolean timeLimited;
+
+    @JsonIgnore private Map<String, CurrencyDto> currencyDtoMap;
+    @JsonIgnore private Map<String, Currency> currencyMap;
+    @JsonIgnore private Set<String> requestCSRSet;
 
     public CurrencyRequestDto() {}
 
-    public CurrencyRequestDto(String subject, BigDecimal totalAmount, String currencyCode, boolean isTimeLimited,
-              String serverURL, TagVSDto tagVS) {
-        this.subject = subject;
-        this.serverURL = serverURL;
-        this.totalAmount = totalAmount;
-        this.currencyCode = currencyCode;
-        this.isTimeLimited = isTimeLimited;
-        this.tagVS = tagVS;
-        this.UUID = java.util.UUID.randomUUID().toString();
+    public static CurrencyRequestDto CREATE_REQUEST(TransactionVSDto transactionVSDto,
+            BigDecimal currencyValue, String serverURL) throws Exception {
+        CurrencyRequestDto currencyRequestDto = new CurrencyRequestDto();
+        currencyRequestDto.serverURL = serverURL;
+        currencyRequestDto.subject = transactionVSDto.getSubject();
+        currencyRequestDto.totalAmount = transactionVSDto.getAmount();
+        currencyRequestDto.currencyCode = transactionVSDto.getCurrencyCode();
+        currencyRequestDto.timeLimited = transactionVSDto.isTimeLimited();
+        currencyRequestDto.tagVS = new TagVSDto(transactionVSDto.getTagName());;
+        currencyRequestDto.UUID = java.util.UUID.randomUUID().toString();
+
+        Map<String, Currency> currencyMap = new HashMap<>();
+        Set<String> requestCSRSet = new HashSet<>();
+        BigDecimal divideAndRemainder[] = transactionVSDto.getAmount().divideAndRemainder(currencyValue);
+        if(divideAndRemainder[1].compareTo(BigDecimal.ZERO) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+                "request with remainder - requestAmount ''{0}''  currencyValue ''{{1}}'' remainder ''{{2}}''",
+                transactionVSDto.getAmount(), currencyValue, divideAndRemainder[1]));
+        for(int i = 0; i < divideAndRemainder[0].intValue(); i++) {
+            Currency currency = new Currency(serverURL, currencyValue, transactionVSDto.getCurrencyCode(),
+                    transactionVSDto.isTimeLimited(), currencyRequestDto.tagVS.getName());
+            requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
+            currencyMap.put(currency.getHashCertVS(), currency);
+        }
+        currencyRequestDto.requestCSRSet = requestCSRSet;
+        currencyRequestDto.setCurrencyMap(currencyMap);
+        return currencyRequestDto;
+    }
+
+
+    public void loadCurrencyCerts(Collection<String> currencyCerts) throws Exception {
+        log.info("loadCurrencyCerts - Num IssuedCurrency: " + currencyCerts.size());
+        if(currencyCerts.size() != currencyMap.size()) {
+            log.log(Level.SEVERE, "Num currency requested: " + currencyMap.size() +
+                    " - num. currency received: " + currencyCerts.size());
+        }
+        for(String pemCert:currencyCerts) {
+            Currency currency = loadCurrencyCert(pemCert);
+            currencyMap.put(currency.getHashCertVS(), currency);
+        }
+    }
+
+    public Currency loadCurrencyCert(String pemCert) throws Exception {
+        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes());
+        if(certificates.isEmpty()) throw new ExceptionVS("Unable to init Currency. Certs not found on signed CSR");
+        X509Certificate x509Certificate = certificates.iterator().next();
+        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                x509Certificate, ContextVS.CURRENCY_OID);
+        Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(Currency.State.OK);
+        currency.initSigner(pemCert.getBytes());
+        return currency;
     }
 
     public TypeVS getOperation() {
@@ -83,19 +145,36 @@ public class CurrencyRequestDto {
         this.totalAmount = totalAmount;
     }
 
-    public Boolean isTimeLimited() {
-        return isTimeLimited;
+    public Boolean getTimeLimited() {
+        return timeLimited;
     }
 
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
+    public void setTimeLimited(Boolean timeLimited) {
+        this.timeLimited = timeLimited;
     }
 
-    public TagVSDto getTagVS() {
-        return tagVS;
+    public Set<String> getRequestCSRSet() {
+        return requestCSRSet;
     }
 
-    public void setTagVS(TagVSDto tagVS) {
-        this.tagVS = tagVS;
+    public void setRequestCSRSet(Set<String> requestCSRSet) {
+        this.requestCSRSet = requestCSRSet;
     }
+
+    public Map<String, CurrencyDto> getCurrencyDtoMap() {
+        return currencyDtoMap;
+    }
+
+    public void setCurrencyDtoMap(Map<String, CurrencyDto> currencyDtoMap) {
+        this.currencyDtoMap = currencyDtoMap;
+    }
+
+    public void setCurrencyMap(Map<String, Currency> currencyMap) {
+        this.currencyMap = currencyMap;
+    }
+
+    public Map<String, Currency> getCurrencyMap() {
+        return currencyMap;
+    }
+
 }

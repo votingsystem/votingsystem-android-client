@@ -100,9 +100,9 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getCurrencyRequest(
+    public static CertificationRequestVS getCurrencyRequest(int keySize, String keyName,
             String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
-            BigDecimal amount, String currencyCode, String tagVS) throws NoSuchAlgorithmException,
+            BigDecimal amount, String currencyCode, Boolean timeLimited, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         tagVS = (tagVS == null)? TagVSDto.WILDTAG:tagVS;
@@ -110,9 +110,10 @@ public class CertificationRequestVS implements java.io.Serializable {
                 ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, hashCertVS, currencyServerURL, tagVS);
+        CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, hashCertVS,
+                currencyServerURL, timeLimited, tagVS);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.CURRENCY_TAG,
-                new DERUTF8String(JSON.writeValueAsString(dto))));
+                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);

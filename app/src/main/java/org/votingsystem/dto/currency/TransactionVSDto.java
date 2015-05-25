@@ -84,10 +84,10 @@ public class TransactionVSDto implements Serializable{
 
     private Type transactionType;
     private UserVSDto.Type userToType;
+    private TagVSDto tagVS;
     @JsonIgnore private List<UserVSDto> toUserVSList;
     @JsonIgnore private UserVSDto signer;
     @JsonIgnore private UserVSDto receptor;
-    @JsonIgnore private TagVSDto tagVS;
 
 
     public TransactionVSDto() {}
@@ -225,6 +225,12 @@ public class TransactionVSDto implements Serializable{
 
     public void setCancelationMessageSMIME(String cancelationMessageSMIME) {
         this.cancelationMessageSMIME = cancelationMessageSMIME;
+    }
+
+    public String getTagName() {
+        if(tagVS != null) return tagVS.getName();
+        else if (tags != null && !tags.isEmpty()) return tags.iterator().next();
+        return null;
     }
 
     public UserVSDto getFromUserVS() {

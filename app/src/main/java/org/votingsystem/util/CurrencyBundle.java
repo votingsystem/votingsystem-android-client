@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
@@ -29,6 +30,7 @@ public class CurrencyBundle {
 
     private BigDecimal amount;
     private BigDecimal wildTagAmount;
+    private BigDecimal timeLimitedAmount;
     private List<Currency> tagCurrencyList;
     private List<Currency> wildTagCurrencyList;
     private String currencyCode;
@@ -44,7 +46,7 @@ public class CurrencyBundle {
     }
 
     public CurrencyBundle(BigDecimal amount, String currencyCode, List<Currency> tagCurrencyList,
-                          String tag) {
+              String tag) {
         this.tagVS = tag;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -131,13 +133,16 @@ public class CurrencyBundle {
         } else return BigDecimal.ZERO;
     }
 
-    private Currency getLeftOverCurrency(BigDecimal requestAmount)
+    private Currency getLeftOverCurrency(BigDecimal requestAmount, BigDecimal wildTagAmount)
             throws Exception {
         BigDecimal bundleAmount = getTotalAmount();
         if(bundleAmount.compareTo(requestAmount) == 0) return null;
         else if(requestAmount.compareTo(bundleAmount) < 0) {
-            return new Currency( AppVS.getInstance().getCurrencyServer().getServerURL(),
-                    bundleAmount.subtract(requestAmount), currencyCode, tagVS);
+            BigDecimal leftOverAmount = bundleAmount.subtract(requestAmount);
+            //make sure don't ask time free from timelimited
+            Boolean timeLimited = wildTagAmount.compareTo(leftOverAmount) < 0;
+            return new Currency(AppVS.getInstance().getCurrencyServer().getServerURL(),
+                    leftOverAmount, currencyCode, timeLimited, tagVS);
         } else throw new ValidationExceptionVS(MessageFormat.format(
                 "requestAmount ''{0}'' exceeds bundle amount ''{1}''", requestAmount, bundleAmount));
 
@@ -155,7 +160,7 @@ public class CurrencyBundle {
                 AppVS.getInstance().getTimeStampServiceURL());
     }
     
-    public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, Payment paymentMethod, String subject, 
+    public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, Payment paymentMethod, String subject,
             String toUserIBAN, BigDecimal batchAmount, String currencyCode, String tag, 
             Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
         CurrencyBatchDto dto = new CurrencyBatchDto();
@@ -169,7 +174,9 @@ public class CurrencyBundle {
         dto.setBatchUUID(UUID.randomUUID().toString());
         Set<Currency> transactionCurrencySet = getCurrencySet();
         List<String> currencyTransactionBatch = new ArrayList<>();
+        BigDecimal wildTagAmount = BigDecimal.ZERO;
         for (Currency currency : transactionCurrencySet) {
+            if(TagVSDto.WILDTAG.equals(currency.getTag())) wildTagAmount = wildTagAmount.add(currency.getAmount());
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(
                     currency.getHashCertVS(), StringUtils.getNormalized(currency.getToUserName()),
                     JSON.writeValueAsString(dto), subject);
@@ -178,7 +185,7 @@ public class CurrencyBundle {
             currency.setSmimeMessage(timeStamper.getSMIME());
             currencyTransactionBatch.add(new String(Base64.encode(currency.getSmimeMessage().getBytes())));
         }
-        leftOverCurrency = getLeftOverCurrency(batchAmount);
+        leftOverCurrency = getLeftOverCurrency(batchAmount, wildTagAmount);
         if (leftOverCurrency != null) dto.setCsrCurrency(new String(
                 leftOverCurrency.getCertificationRequest().getCsrPEM(), "UTF-8"));
         dto.setCurrency(currencyTransactionBatch);

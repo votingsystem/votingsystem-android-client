@@ -46,7 +46,6 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class WalletFragment extends Fragment {
 
     public static final String TAG = WalletFragment.class.getSimpleName();
-    public static final String AUTHENTICATED_KEY = "AUTHENTICATED_KEY";
 
     private View rootView;
     private GridView gridView;
@@ -117,10 +116,7 @@ public class WalletFragment extends Fragment {
             currencyList = new ArrayList<>();
         } else {
             currencyList = new ArrayList<>(Wallet.getCurrencySet());
-            adapter = new CurrencyListAdapter(currencyList, getActivity());
-            gridView.setAdapter(adapter);
             printSummary();
-            walletLoaded = true;
         }
         setHasOptionsMenu(true);
         ResponseVS responseVS = (getArguments() != null)? (ResponseVS) getArguments().getParcelable(
@@ -134,6 +130,8 @@ public class WalletFragment extends Fragment {
     }
 
     private void printSummary() {
+        adapter = new CurrencyListAdapter(currencyList, getActivity());
+        gridView.setAdapter(adapter);
         adapter.setItemList(currencyList);
         adapter.notifyDataSetChanged();
         if(menu != null) menu.removeItem(R.id.open_wallet);
@@ -161,6 +159,7 @@ public class WalletFragment extends Fragment {
             }
             ((LinearLayout)rootView.findViewById(R.id.summary)).addView(currencyData);
         }
+        walletLoaded = true;
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
