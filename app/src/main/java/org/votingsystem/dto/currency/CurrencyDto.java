@@ -1,9 +1,11 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ObjectUtils;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;

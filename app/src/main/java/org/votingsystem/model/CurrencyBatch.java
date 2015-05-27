@@ -11,7 +11,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
@@ -39,7 +38,6 @@ public class CurrencyBatch {
     private BigDecimal currencyAmount = null;
     private String tagVS;
     private Boolean isTimeLimited = Boolean.FALSE;
-    private Payment paymentMethod;
     private String batchUUID;
     private String subject;
 
@@ -212,14 +210,6 @@ public class CurrencyBatch {
 
     public void setIsTimeLimited(Boolean isTimeLimited) {
         this.isTimeLimited = isTimeLimited;
-    }
-
-    public Payment getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(Payment paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     public String getBatchUUID() {

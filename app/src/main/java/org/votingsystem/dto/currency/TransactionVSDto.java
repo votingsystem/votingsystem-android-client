@@ -16,7 +16,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class TransactionVSDto implements Serializable{
     private static final long serialVersionUID = 1L;
 
 
-    public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, FROM_BANKVS, FROM_USERVS,
+    public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE, FROM_BANKVS, FROM_USERVS,
         FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS,
         CURRENCY_PERIOD_INIT;}
 
@@ -74,11 +73,9 @@ public class TransactionVSDto implements Serializable{
     private Long numChildTransactions;
 
     private String infoURL;
-    private Payment paymentMethod;
-    private List<Payment> paymentOptions;
+    private List<Type> paymentOptions;
     private Date date;
     private TransactionVSDetailsDto details;
-    private Type transactionType;
     private UserVSDto.Type userToType;
     private TagVSDto tagVS;
 
@@ -95,7 +92,7 @@ public class TransactionVSDto implements Serializable{
     public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVSDto.Type userToType, BigDecimal amount,
                String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionVSDto dto = new TransactionVSDto();
-        dto.setOperation(TypeVS.CURRENCY_SEND_REQUEST);
+        dto.setOperation(TypeVS.TRANSACTIONVS_INFO);
         dto.setUserToType(userToType);
         dto.setToUser(toUser);
         dto.setAmount(amount);
@@ -136,7 +133,7 @@ public class TransactionVSDto implements Serializable{
 
     public void validate() throws ValidationExceptionVS {
         if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        transactionType = Type.valueOf(operation.toString());
+        type = Type.valueOf(operation.toString());
         if(amount == null) throw new ValidationExceptionVS("missing param 'amount'");
         if(getCurrencyCode() == null) throw new ValidationExceptionVS("missing param 'currencyCode'");
         if(subject == null) throw new ValidationExceptionVS("missing param 'subject'");
@@ -152,14 +149,6 @@ public class TransactionVSDto implements Serializable{
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public Payment getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(Payment paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     public Long getId() {
@@ -378,14 +367,6 @@ public class TransactionVSDto implements Serializable{
         this.numReceptors = numReceptors;
     }
 
-    public Type getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(Type transactionType) {
-        this.transactionType = transactionType;
-    }
-
     public List<UserVSDto> getToUserVSList() {
         return toUserVSList;
     }
@@ -485,12 +466,37 @@ public class TransactionVSDto implements Serializable{
         this.userToType = userToType;
     }
 
-    public List<Payment> getPaymentOptions() {
+    public List<Type> getPaymentOptions() {
         return paymentOptions;
     }
 
-    public void setPaymentOptions(List<Payment> paymentOptions) {
+    public void setPaymentOptions(List<Type> paymentOptions) {
         this.paymentOptions = paymentOptions;
+    }
+
+    public static List<String> getPaymentMethods(Context context) {
+        //preserve the same order
+        List<String> result = Arrays.asList(
+                context.getString(R.string.signed_transaction_lbl),
+                context.getString(R.string.anonymous_signed_transaction_lbl),
+                context.getString(R.string.currency_send_lbl));
+        return result;
+    }
+
+    public static Type getByPosition(int position) {
+        if(position == 0) return Type.FROM_USERVS;
+        if(position == 1) return Type.CURRENCY_SEND;
+        if(position == 2) return Type.CURRENCY_CHANGE;
+        return null;
+    }
+
+    public String getDescription(Context context) {
+        switch(type) {
+            case FROM_USERVS: return context.getString(R.string.signed_transaction_lbl);
+            case CURRENCY_SEND: return context.getString(R.string.anonymous_signed_transaction_lbl);
+            case CURRENCY_CHANGE: return context.getString(R.string.currency_send_lbl);
+        }
+        return null;
     }
 
     public void validateReceipt(SMIMEMessage smimeMessage) throws IOException, ValidationExceptionVS, ExceptionVS {

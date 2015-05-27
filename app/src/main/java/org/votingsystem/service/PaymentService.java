@@ -3,9 +3,7 @@ package org.votingsystem.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.WalletActivity;
@@ -34,7 +32,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -43,7 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -112,15 +108,15 @@ public class PaymentService extends IntentService {
         if(transactionDto.getDate() != null && DateUtils.inRange(transactionDto.getDate(),
                 Calendar.getInstance().getTime(), FOUR_MINUTES)) {
             try {
-                switch (transactionDto.getPaymentMethod()) {
-                    case SIGNED_TRANSACTION:
+                switch (transactionDto.getType()) {
+                    case FROM_USERVS:
                         responseVS = sendTransactionVS(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                                     ContentTypeVS.TEXT, transactionDto.getPaymentConfirmURL());
                         }
                         break;
-                    case CURRENCY_BATCH:
+                    case CURRENCY_SEND:
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
@@ -129,7 +125,7 @@ public class PaymentService extends IntentService {
                                     transactionDto, this));
                         }
                         break;
-                    case CASH_SEND:
+                    case CURRENCY_CHANGE:
                         break;
                 }
             } catch (Exception ex) {

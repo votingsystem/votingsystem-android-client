@@ -116,7 +116,7 @@ public class MsgUtils {
 
     public static String getTransactionVSConfirmMessage(TransactionVSDto transactionDto, Context context) {
         return context.getString(R.string.transaction_request_confirm_msg,
-                transactionDto.getPaymentMethod().getDescription(context),
+                transactionDto.getDescription(context),
                 transactionDto.getAmount().toString() + " " + transactionDto.getCurrencyCode(),
                 transactionDto.getToUser());
     }

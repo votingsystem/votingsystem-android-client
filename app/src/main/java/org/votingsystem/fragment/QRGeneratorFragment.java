@@ -82,7 +82,7 @@ public class QRGeneratorFragment extends Fragment {
                 return getString(R.string.currency_ticket_request_qr_msg) + " - " +
                         qrMessageVS.getAmount().toPlainString() + " " + qrMessageVS.getCurrencyCode() +
                         " " + qrMessageVS.getTag();
-            case TRANSACTIONVS:
+            case FROM_USERVS:
                 return getString(R.string.transactionvs_qr_msg);
             default: return qrMessageVS.getOperation().toString();
         }

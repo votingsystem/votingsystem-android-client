@@ -153,19 +153,18 @@ public class CurrencyBundle {
     }
 
     public CurrencyBatchDto getCurrencyBatchDto(TransactionVSDto transactionDto) throws Exception {
-        return getCurrencyBatchDto(transactionDto.getOperation(), transactionDto.getPaymentMethod(),
+        return getCurrencyBatchDto(transactionDto.getOperation(),
                 transactionDto.getSubject(), transactionDto.getToUserIBAN().get(0),
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                 transactionDto.getTagVS().getName(), transactionDto.isTimeLimited(),
                 AppVS.getInstance().getTimeStampServiceURL());
     }
     
-    public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, Payment paymentMethod, String subject,
+    public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, String subject,
             String toUserIBAN, BigDecimal batchAmount, String currencyCode, String tag, 
             Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
         CurrencyBatchDto dto = new CurrencyBatchDto();
         dto.setOperation(operation);
-        dto.setPaymentMethod(paymentMethod);
         dto.setSubject(subject);
         dto.setToUserIBAN(toUserIBAN);
         dto.setBatchAmount(batchAmount);

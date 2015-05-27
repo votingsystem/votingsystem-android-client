@@ -56,8 +56,7 @@ public class IntentFilterActivity extends AppCompatActivity {
                             LOGD(TAG + ".onStartCommand", " _ TODO _ Fetch option selected");
                             operationVS.setEventVS(selectedEvent);
                         }
-                    } else if(operationVS.getTypeVS() == TypeVS.TRANSACTIONVS ||
-                            operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
+                    } else if(operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
                         Intent newIntent = new Intent(getBaseContext(), CurrencyAccountsMainActivity.class);
                         newIntent.putExtra(ContextVS.OPERATIONVS_KEY, JSON.writeValueAsString(operationVS));
                         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

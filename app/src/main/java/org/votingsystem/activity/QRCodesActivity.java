@@ -6,10 +6,8 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
-
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -22,7 +20,6 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.Utils;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -116,7 +113,7 @@ public class QRCodesActivity extends ActivityBase {
                     TransactionVSDto dto = (TransactionVSDto) responseVS.getMessage(TransactionVSDto.class);
                     dto.setInfoURL(infoURL);
                     switch (dto.getOperation()) {
-                        case CURRENCY_SEND_REQUEST:
+                        case TRANSACTIONVS_INFO:
                         case DELIVERY_WITHOUT_PAYMENT:
                         case DELIVERY_WITH_PAYMENT:
                         case REQUEST_FORM:

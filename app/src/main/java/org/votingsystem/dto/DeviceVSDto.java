@@ -2,7 +2,9 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.votingsystem.signature.util.CertUtils;
+
 import java.security.cert.X509Certificate;
 
 /**

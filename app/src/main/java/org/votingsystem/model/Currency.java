@@ -2,11 +2,11 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
-import org.json.JSONObject;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
@@ -21,9 +21,9 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.Payment;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.TypeVS;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -34,8 +34,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -79,8 +77,6 @@ public class Currency extends ReceiptWrapper {
     private String toUserIBAN;
     private String toUserName;
     private String batchUUID;
-    private Payment paymentMethod;
-
     private CurrencyCertExtensionDto certExtensionDto;
     private CurrencyDto certSubjectDto;
 
@@ -127,14 +123,6 @@ public class Currency extends ReceiptWrapper {
         this.batchUUID = batchUUID;
     }
 
-    public Payment getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(Payment paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
     public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor)
             throws Exception {
         if(!smimeMessage.getSigner().getSignedContentDigestBase64().equals(
@@ -172,7 +160,6 @@ public class Currency extends ReceiptWrapper {
                 "' CurrencyBatchDto amount  '" + currencyBatchDto.getCurrencyAmount() + "'");
         this.batchAmount = currencyBatchDto.getBatchAmount();
         this.batchUUID = currencyBatchDto.getBatchUUID();
-        this.paymentMethod = currencyBatchDto.getPaymentMethod();
         this.operation = currencyBatchDto.getOperation();
         if(TypeVS.CURRENCY_SEND != operation)
             throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + currencyBatchDto.getOperation() + "'");

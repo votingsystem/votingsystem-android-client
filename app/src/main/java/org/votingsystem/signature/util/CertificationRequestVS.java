@@ -1,6 +1,7 @@
 package org.votingsystem.signature.util;
 
 import android.util.Log;
+
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.DERTaggedObject;
@@ -17,6 +18,7 @@ import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Utils;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -34,7 +36,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.security.auth.x500.X500Principal;
+
 import static org.votingsystem.util.ContextVS.ANDROID_PROVIDER;
 
 /**

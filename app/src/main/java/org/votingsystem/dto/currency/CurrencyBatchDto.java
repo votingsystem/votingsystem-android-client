@@ -11,7 +11,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
@@ -33,7 +32,6 @@ public class CurrencyBatchDto {
     private List<String> hashCertVSCurrency;
     private String toUserIBAN;
     private String toUserName;
-    private Payment paymentMethod;
     private String subject;
     private String currencyCode;
     private String tag;
@@ -51,7 +49,6 @@ public class CurrencyBatchDto {
 
     public CurrencyBatchDto(CurrencyBatch currencyBatch) {
         this.operation = currencyBatch.getOperation();
-        this.paymentMethod = currencyBatch.getPaymentMethod();
         this.subject = currencyBatch.getSubject();
         this.toUserIBAN = currencyBatch.getToUserIBAN();
         this.batchAmount = currencyBatch.getBatchAmount();
@@ -82,7 +79,6 @@ public class CurrencyBatchDto {
                 currencyList.add(currency);
                 if(!initialized.get()) {
                     this.operation = currency.getOperation();
-                    this.paymentMethod = currency.getPaymentMethod();
                     this.subject = currency.getSubject();
                     this.toUserIBAN = currency.getToUserIBAN();
                     this.batchAmount = currency.getBatchAmount();
@@ -109,7 +105,6 @@ public class CurrencyBatchDto {
     public CurrencyBatch getCurrencyBatch() throws Exception {
         CurrencyBatch currencyBatch = new CurrencyBatch();
         currencyBatch.setOperation(operation);
-        currencyBatch.setPaymentMethod(paymentMethod);
         currencyBatch.setSubject(subject);
         currencyBatch.setToUserIBAN(toUserIBAN);
         currencyBatch.setBatchAmount(batchAmount);
@@ -127,8 +122,6 @@ public class CurrencyBatchDto {
         String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
         if(getOperation() != currency.getOperation()) throw new ValidationExceptionVS(
                 currencyData + "expected operation " + getOperation() + " found " + currency.getOperation());
-        if(getPaymentMethod() != currency.getPaymentMethod()) throw new ValidationExceptionVS(
-                currencyData + "expected paymentOption " + getPaymentMethod() + " found " + currency.getPaymentMethod());
         if(!getSubject().equals(currency.getSubject())) throw new ValidationExceptionVS(
                 currencyData + "expected subject " + getSubject() + " found " + currency.getSubject());
         if(!getToUserIBAN().equals(currency.getToUserIBAN())) throw new ValidationExceptionVS(
@@ -190,14 +183,6 @@ public class CurrencyBatchDto {
 
     public void setLeftOverCurrency(Currency leftOverCurrency) {
         this.leftOverCurrency = leftOverCurrency;
-    }
-
-    public Payment getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(Payment paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     public String getSubject() {

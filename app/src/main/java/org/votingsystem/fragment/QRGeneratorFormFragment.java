@@ -49,8 +49,7 @@ public class QRGeneratorFormFragment extends Fragment {
     private Spinner currencySpinner;
     private EditText amount_text;
     private Handler handler;
-    private static final TypeVS[] OPERATION_ARRAY =
-            new TypeVS[]{TypeVS.CURRENCY_CHANGE, TypeVS.TRANSACTIONVS};
+    private static final TypeVS[] OPERATION_ARRAY = new TypeVS[]{TypeVS.CURRENCY_CHANGE, TypeVS.FROM_USERVS};
     private AtomicBoolean isLongPressed = new AtomicBoolean(false);
 
     final Runnable incrementRunnable = new Runnable(){
@@ -179,7 +178,8 @@ public class QRGeneratorFormFragment extends Fragment {
                 case CURRENCY_CHANGE:
 
                     break;
-                case TRANSACTIONVS:
+                case FROM_USERVS:
+
                     break;
             }
 

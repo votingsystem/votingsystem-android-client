@@ -34,7 +34,6 @@ import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.Payment;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -129,7 +128,8 @@ public class PaymentFragment extends Fragment {
         currency= (TextView)rootView.findViewById(R.id.currency);
         payment_method_spinner = (Spinner)rootView.findViewById(R.id.payment_method_spinner);
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.transaction_request_spinner_item, Payment.getPaymentMethods(getActivity()));
+                R.layout.transaction_request_spinner_item,
+                TransactionVSDto.getPaymentMethods(getActivity()));
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         payment_method_spinner.setAdapter(dataAdapter);
         try {
@@ -206,13 +206,13 @@ public class PaymentFragment extends Fragment {
 
     private void submitForm() {
         try {
-            transactionDto.setPaymentMethod(Payment.getByPosition(
+            transactionDto.setType(TransactionVSDto.getByPosition(
                     payment_method_spinner.getSelectedItemPosition()));
             BalancesDto userInfo = PrefUtils.getBalances(getActivity());
             final BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
                     transactionDto.getCurrencyCode(), transactionDto.getTagVS().getName());
-            switch (transactionDto.getPaymentMethod()) {
-                case SIGNED_TRANSACTION:
+            switch (transactionDto.getType()) {
+                case FROM_USERVS:
                     try {
                         if(availableForTagVS.compareTo(transactionDto.getAmount()) < 0) {
                             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
@@ -239,7 +239,7 @@ public class PaymentFragment extends Fragment {
                                 false, TypeVS.SIGNED_TRANSACTION);
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
-                case CURRENCY_BATCH:
+                case CURRENCY_SEND:
                     if(Wallet.getCurrencySet() == null) {
                         PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
                                 getString(R.string.enter_wallet_pin_msg), false,
@@ -304,7 +304,7 @@ public class PaymentFragment extends Fragment {
                         launchTransactionVS(TypeVS.CURRENCY_BATCH);
                     }
                     break;
-                case CASH_SEND:
+                case CURRENCY_CHANGE:
                     break;
             }
         } catch(Exception ex) { ex.printStackTrace();}
