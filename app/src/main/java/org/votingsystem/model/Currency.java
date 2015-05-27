@@ -2,7 +2,6 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
@@ -25,7 +24,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.Payment;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.TypeVS;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -452,40 +450,6 @@ public class Currency extends ReceiptWrapper {
 
     public void setTransaction(TransactionVSDto transaction) {
         this.transaction = transaction;
-    }
-
-    public static JSONObject getCurrencyAccountInfoRequest(String nif) {
-        Map mapToSend = new HashMap();
-        mapToSend.put("NIF", nif);
-        mapToSend.put("operation", TypeVS.CURRENCY_ACCOUNTS_INFO.toString());
-        mapToSend.put("UUID", UUID.randomUUID().toString());
-        return new JSONObject(mapToSend);
-    }
-
-    public JSONObject getCancellationRequest() {
-        Map dataMap = new HashMap();
-        dataMap.put("UUID", UUID.randomUUID().toString());
-        dataMap.put("operation", TypeVS.CURRENCY_CANCEL.toString());
-        dataMap.put("hashCertVS", getHashCertVS());
-        dataMap.put("originHashCertVS", getOriginHashCertVS());
-        dataMap.put("currencyCertSerialNumber", getCertificationRequest().
-                getCertificate().getSerialNumber().longValue());
-        return new JSONObject(dataMap);
-    }
-
-    public JSONObject getTransaction(String toUserName,
-            String toUserIBAN, String tag, Boolean isTimeLimited) {
-        Map dataMap = new HashMap();
-        dataMap.put("operation", TypeVS.CURRENCY.toString());
-        dataMap.put("subject", subject);
-        dataMap.put("toUser", toUserName);
-        dataMap.put("toUserIBAN", toUserIBAN);
-        dataMap.put("tagVS", tag);
-        dataMap.put("amount", amount.toString());
-        dataMap.put("currencyCode", currencyCode);
-        if(isTimeLimited != null) dataMap.put("isTimeLimited", isTimeLimited.booleanValue());
-        dataMap.put("UUID", UUID.randomUUID().toString());
-        return new JSONObject(dataMap);
     }
 
     public Currency initCertData(CurrencyCertExtensionDto certExtensionDto, String subjectDN) throws ExceptionVS {

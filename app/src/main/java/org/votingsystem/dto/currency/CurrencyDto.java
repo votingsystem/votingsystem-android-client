@@ -1,12 +1,9 @@
 package org.votingsystem.dto.currency;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ObjectUtils;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -29,7 +26,6 @@ public class CurrencyDto implements Serializable {
     private String tag;
     private Boolean timeLimited;
     private String object;
-    private String certificationRequest;
     private Date notBefore;
     private Date notAfter;
 
@@ -47,9 +43,8 @@ public class CurrencyDto implements Serializable {
         currencyDto.setHashCertVS(currency.getHashCertVS());
         currencyDto.setTag(currency.getTag());
         currencyDto.setTimeLimited(currency.isTimeLimited());
-        currencyDto.setObject(ObjectUtils.serializeObjectToString(currency));
-        if(currency.getCertificationRequest() != null)
-            currencyDto.setCertificationRequest(new String(currency.getCertificationRequest().getCsrPEM()));
+        //CertificationRequestVS instead of Currency to make it easier deserialization on JavaFX
+        currencyDto.setObject(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
         return currencyDto;
     }
 
@@ -62,14 +57,13 @@ public class CurrencyDto implements Serializable {
     }
 
     public Currency deSerialize() throws Exception {
-        /*if(certificationRequest != null) {
-            CertificationRequestVS certificationRequestVS = (CertificationRequestVS) ObjectUtils.deSerializeObject(
-                    certificationRequest.getBytes());
+        try {
+            CertificationRequestVS certificationRequestVS =
+                    (CertificationRequestVS) ObjectUtils.deSerializeObject(object.getBytes());
             return Currency.fromCertificationRequestVS(certificationRequestVS);
-        } else {
+        }catch (Exception ex) {
             return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
-        }*/
-        return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
+        }
     }
 
     public static Set<Currency> deSerializeCollection(Collection<CurrencyDto> currencyCollection) throws Exception {
@@ -87,8 +81,6 @@ public class CurrencyDto implements Serializable {
         }
         return currencySet;
     }
-
-
 
     public Boolean isTimeLimited() {
         return timeLimited;
@@ -112,14 +104,6 @@ public class CurrencyDto implements Serializable {
 
     public void setHashCertVS(String hashCertVS) {
         this.hashCertVS = hashCertVS;
-    }
-
-    public String getCertificationRequest() {
-        return certificationRequest;
-    }
-
-    public void setCertificationRequest(String certificationRequest) {
-        this.certificationRequest = certificationRequest;
     }
 
     public String getCurrencyCode() {
