@@ -45,6 +45,7 @@ public class SocketMessageDto implements Serializable {
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private TypeVS operation;
+    private TypeVS messageType;
     private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
@@ -130,6 +131,14 @@ public class SocketMessageDto implements Serializable {
         messageDto.setDeviceId(PrefUtils.getApplicationId());
         messageDto.setUUID(socketSession.getUUID());
         return messageDto;
+    }
+
+    public TypeVS getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(TypeVS messageType) {
+        this.messageType = messageType;
     }
 
     public String getToUser() {
@@ -489,7 +498,10 @@ public class SocketMessageDto implements Serializable {
         this.aesEncryptParams = aesParams;
         content = JSON.readValue(Encryptor.decryptAES(encryptedMessage, aesParams),
                 SocketMessageContentDto.class);
-        if(content.getOperation() != null) operation = content.getOperation();
+        if(content.getOperation() != null) {
+            this.messageType = operation;
+            operation = content.getOperation();
+        }
         if(content.getStatusCode() != null) statusCode = content.getStatusCode();
         if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
         if(content.getFrom() != null) from = content.getFrom();

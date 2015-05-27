@@ -146,11 +146,9 @@ public class WalletFragment extends Fragment {
                         (tagInfoMap.get(tag).getTotal()).toPlainString(), currency,
                         MsgUtils.getTagVSMessage(tag, getActivity()));
                 if((tagInfoMap.get(tag).getTimeLimited()).compareTo(BigDecimal.ZERO) > 0) {
-                    contentFormatted = contentFormatted + " " + getString(R.string.tag_info_time_limited,
-                            (tagInfoMap.get(tag).getTimeLimited()).toPlainString(), currency);
+                        contentFormatted = contentFormatted + " - " + getString(R.string.tag_info_time_limited,
+                        (tagInfoMap.get(tag).getTimeLimited()).toPlainString(), currency);
                 }
-                contentFormatted = "<div style='text-align:center; margin:0px;font-size:1.1em;color:#005b92;'>" +
-                        contentFormatted + "</div>";
                 TextView tagDataTextView = new TextView(getActivity());
                 tagDataTextView.setGravity(Gravity.CENTER);
                 tagDataTextView.setText(Html.fromHtml(contentFormatted));

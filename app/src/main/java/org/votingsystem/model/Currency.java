@@ -468,6 +468,7 @@ public class Currency extends ReceiptWrapper {
             throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getTag().equals(certExtensionDto.getTag()))
             throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+        tag = certExtensionDto.getTag();
         return this;
     }
 

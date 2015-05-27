@@ -316,12 +316,12 @@ public class WebSocketService extends Service {
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case CURRENCY_WALLET_CHANGE:
-                    if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_DEVICE) {
+                    if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_FROM_DEVICE) {
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
                             Wallet.removeCurrencyCollection((Collection<Currency>) socketSession.getData(), appVS);
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                         }
-                    } else if(socketMsg.getOperation() == TypeVS.MESSAGEVS_TO_DEVICE) {
+                    } else if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_TO_DEVICE) {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
                         PrefUtils.addNumMessagesNotReaded(appVS, 1);
                         Utils.showNewMessageNotification(appVS);

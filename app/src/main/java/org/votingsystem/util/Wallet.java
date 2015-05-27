@@ -124,25 +124,24 @@ public class Wallet {
 
     public static Map<String, Map<String, IncomesDto>> getCurrencyTagMap() {
         Map<String, Map<String, IncomesDto>> result = new HashMap<>();
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         for(Currency currency : currencySet) {
             if(result.containsKey(currency.getCurrencyCode())) {
                 Map<String, IncomesDto> tagMap = result.get(currency.getCurrencyCode());
                 if(tagMap.containsKey(currency.getTag())) {
                     IncomesDto incomesDto = tagMap.get(currency.getTag());
                     incomesDto.addTotal(currency.getAmount());
-                    incomesDto.addTimeLimited(currency.getAmount());
+                    if(currency.isTimeLimited()) incomesDto.addTimeLimited(currency.getAmount());
                 } else {
                     IncomesDto incomesDto = new IncomesDto();
                     incomesDto.addTotal(currency.getAmount());
-                    incomesDto.addTimeLimited(currency.getAmount());
+                    if(currency.isTimeLimited()) incomesDto.addTimeLimited(currency.getAmount());
                     tagMap.put(currency.getTag(), incomesDto);
                 }
             } else {
                 Map<String, IncomesDto> tagMap = new HashMap<>();
                 IncomesDto incomesDto = new IncomesDto();
                 incomesDto.addTotal(currency.getAmount());
-                incomesDto.addTimeLimited(currency.getAmount());
+                if(currency.isTimeLimited()) incomesDto.addTimeLimited(currency.getAmount());
                 tagMap.put(currency.getTag(), incomesDto);
                 result.put(currency.getCurrencyCode(), tagMap);
             }

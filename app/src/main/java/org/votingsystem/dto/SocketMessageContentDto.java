@@ -22,6 +22,7 @@ import javax.mail.MessagingException;
 public class SocketMessageContentDto {
 
     private TypeVS operation;
+    private TypeVS step;
     private Integer statusCode;
     private String subject;
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
@@ -204,5 +205,13 @@ public class SocketMessageContentDto {
 
     public void setDeviceToName(String deviceToName) {
         this.deviceToName = deviceToName;
+    }
+
+    public TypeVS getStep() {
+        return step;
+    }
+
+    public void setStep(TypeVS step) {
+        this.step = step;
     }
 }

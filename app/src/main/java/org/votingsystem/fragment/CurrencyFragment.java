@@ -26,7 +26,7 @@ public class CurrencyFragment extends Fragment {
 
     private AppVS appVS;
     private Currency currency;
-    private TextView currency_amount, currency_state, currency_currency, date_info, hash_cert;
+    private TextView currency_amount, currency_state, currency_currency, date_info, hash_cert, tag_info;
 
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,6 +41,7 @@ public class CurrencyFragment extends Fragment {
         currency_currency = (TextView)rootView.findViewById(R.id.currency_currency);
         date_info = (TextView)rootView.findViewById(R.id.date_info);
         hash_cert = (TextView)rootView.findViewById(R.id.hash_cert);
+        tag_info = (TextView)rootView.findViewById(R.id.tag_info);
         if(getArguments() != null && getArguments().containsKey(ContextVS.CURRENCY_KEY)) {
             currency = (Currency) getArguments().getSerializable(ContextVS.CURRENCY_KEY);
             initCurrencyScreen(currency);
@@ -57,6 +58,7 @@ public class CurrencyFragment extends Fragment {
             date_info.setText(getString(R.string.currency_date_info,
                     DateUtils.getDateStr(currency.getDateFrom(), "dd MMM yyyy' 'HH:mm"),
                     DateUtils.getDateStr(currency.getDateTo(), "dd MMM yyyy' 'HH:mm")));
+            tag_info.setText(MsgUtils.getTagVSMessage(currency.getTag(), AppVS.getInstance()));
             if(currency.getState() != null && Currency.State.OK != currency.getState()) {
                 currency_state.setText(MsgUtils.getCurrencyStateMessage(currency, getActivity()));
                 currency_state.setVisibility(View.VISIBLE);
