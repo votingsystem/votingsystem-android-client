@@ -8,9 +8,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -34,7 +32,6 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -45,7 +42,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
@@ -53,7 +49,6 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.util.LogUtils.LOGE;
 
@@ -123,7 +118,7 @@ public class WebSocketService extends Service {
             new Thread(null, new Runnable() {
                 @Override public void run() {
                     try {
-                        LOGD(TAG + ".onStartCommand", "socketMsg: " + message);
+                        LOGD(TAG + ".onStartCommand", "operation: " + operationType +  "socketMsg: " + message);
                         switch(operationType) {
                             case MESSAGEVS:
                                 List<DeviceVSDto> targetDevicesDto = JSON.readValue(

@@ -68,7 +68,6 @@ public class Currency extends ReceiptWrapper {
     private String originHashCertVS;
     private String hashCertVS;
     private BigDecimal amount;
-    private String signedTagVS;
     private String subject;
     private State state;
     private Date cancellationDate;
@@ -429,14 +428,6 @@ public class Currency extends ReceiptWrapper {
 
     public void setOriginHashCertVS(String originHashCertVS) {
         this.originHashCertVS = originHashCertVS;
-    }
-
-    public String getSignedTagVS() {
-        return signedTagVS;
-    }
-
-    public void setSignedTagVS(String signedTagVS) {
-        this.signedTagVS = signedTagVS;
     }
 
     public String getHashCertVS() {

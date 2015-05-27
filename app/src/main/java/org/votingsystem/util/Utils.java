@@ -170,7 +170,7 @@ public class Utils {
         if (model.startsWith(manufacturer)) {
             return model.toLowerCase();
         } else {
-            return (manufacturer + " " + model).toLowerCase();
+            return (manufacturer + " " + model);
         }
     }
 

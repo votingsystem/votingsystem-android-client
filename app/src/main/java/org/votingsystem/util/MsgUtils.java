@@ -68,7 +68,7 @@ public class MsgUtils {
     public static String getCurrencyDescriptionMessage(Currency currency, Context context) {
         return currency.getAmount().toPlainString() + " " + currency.getCurrencyCode() +
                 " " + context.getString(R.string.for_lbl ) + " '" +
-                getTagVSMessage(currency.getSignedTagVS(), context) + "'";
+                getTagVSMessage(currency.getTag(), context) + "'";
     }
 
     public static String getCertInfoMessage(X509Certificate certificate, Context context) {
@@ -141,16 +141,16 @@ public class MsgUtils {
                         Map<String, BigDecimal> tagInfo = lapsedMap.get(currency.getCurrencyCode());
                         if(tagInfo == null) {
                             tagInfo = new HashMap<>();
-                            tagInfo.put(currency.getSignedTagVS(), currency.getAmount());
+                            tagInfo.put(currency.getTag(), currency.getAmount());
                         } else {
-                            BigDecimal tagAccumulated = tagInfo.get(currency.getSignedTagVS()).add(
+                            BigDecimal tagAccumulated = tagInfo.get(currency.getTag()).add(
                                     currency.getAmount());
-                            tagInfo.put(currency.getSignedTagVS(), currency.getAmount());
+                            tagInfo.put(currency.getTag(), currency.getAmount());
                         }
                         lapsedMap.put(currency.getCurrencyCode(), tagInfo);
                     } else {
                         Map<String, BigDecimal> tagInfo = new HashMap<>();
-                        tagInfo.put(currency.getSignedTagVS(), currency.getAmount());
+                        tagInfo.put(currency.getTag(), currency.getAmount());
                         lapsedMap.put(currency.getCurrencyCode(), tagInfo);
                     }
                     break;
@@ -159,16 +159,16 @@ public class MsgUtils {
                         Map<String, BigDecimal> tagInfo = expendedMap.get(currency.getCurrencyCode());
                         if(tagInfo == null) {
                             tagInfo = new HashMap<>();
-                            tagInfo.put(currency.getSignedTagVS(), currency.getAmount());
+                            tagInfo.put(currency.getTag(), currency.getAmount());
                         } else {
-                            BigDecimal tagAccumulated = tagInfo.get(currency.getSignedTagVS()).add(
+                            BigDecimal tagAccumulated = tagInfo.get(currency.getTag()).add(
                                     currency.getAmount());
-                            tagInfo.put(currency.getSignedTagVS(), currency.getAmount());
+                            tagInfo.put(currency.getTag(), currency.getAmount());
                         }
                         expendedMap.put(currency.getCurrencyCode(), tagInfo);
                     } else {
                         Map<String, BigDecimal> tagInfo = new HashMap<>();
-                        tagInfo.put(currency.getSignedTagVS(), currency.getAmount());
+                        tagInfo.put(currency.getTag(), currency.getAmount());
                         expendedMap.put(currency.getCurrencyCode(), tagInfo);
                     }
                     break;

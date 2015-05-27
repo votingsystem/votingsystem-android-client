@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
@@ -13,7 +12,6 @@ import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -131,22 +128,22 @@ public class Wallet {
         for(Currency currency : currencySet) {
             if(result.containsKey(currency.getCurrencyCode())) {
                 Map<String, IncomesDto> tagMap = result.get(currency.getCurrencyCode());
-                if(tagMap.containsKey(currency.getSignedTagVS())) {
-                    IncomesDto incomesDto = tagMap.get(currency.getSignedTagVS());
+                if(tagMap.containsKey(currency.getTag())) {
+                    IncomesDto incomesDto = tagMap.get(currency.getTag());
                     incomesDto.addTotal(currency.getAmount());
                     incomesDto.addTimeLimited(currency.getAmount());
                 } else {
                     IncomesDto incomesDto = new IncomesDto();
                     incomesDto.addTotal(currency.getAmount());
                     incomesDto.addTimeLimited(currency.getAmount());
-                    tagMap.put(currency.getSignedTagVS(), incomesDto);
+                    tagMap.put(currency.getTag(), incomesDto);
                 }
             } else {
                 Map<String, IncomesDto> tagMap = new HashMap<>();
                 IncomesDto incomesDto = new IncomesDto();
                 incomesDto.addTotal(currency.getAmount());
                 incomesDto.addTimeLimited(currency.getAmount());
-                tagMap.put(currency.getSignedTagVS(), incomesDto);
+                tagMap.put(currency.getTag(), incomesDto);
                 result.put(currency.getCurrencyCode(), tagMap);
             }
         }
@@ -230,7 +227,7 @@ public class Wallet {
         BigDecimal sumTotal = BigDecimal.ZERO;
         List<Currency> result = new ArrayList<>();
         for(Currency currency : currencySet) {
-            if(currency.getCurrencyCode().equals(currencyCode) && tagVS.equals(currency.getSignedTagVS())) {
+            if(currency.getCurrencyCode().equals(currencyCode) && tagVS.equals(currency.getTag())) {
                 result.add(currency);
                 sumTotal = sumTotal.add(currency.getAmount());
             }

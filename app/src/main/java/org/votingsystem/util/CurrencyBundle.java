@@ -65,9 +65,9 @@ public class CurrencyBundle {
         String currencyCode = null;
         BigDecimal amount = BigDecimal.ZERO;
         for(Currency currency : currencyList) {
-            if(tagVS == null) tagVS = currency.getSignedTagVS();
-            else if(!tagVS.equals(currency.getSignedTagVS())) throw new ExceptionVS("bundle with mixed" +
-                    "tags: " + tagVS + ", " + currency.getSignedTagVS());
+            if(tagVS == null) tagVS = currency.getTag();
+            else if(!tagVS.equals(currency.getTag())) throw new ExceptionVS("bundle with mixed" +
+                    "tags: " + tagVS + ", " + currency.getTag());
             if(currencyCode == null) currencyCode = currency.getCurrencyCode();
             else if(!currencyCode.equals(currency.getCurrencyCode())) throw new ExceptionVS(
                     "bundle with mixed curency codes : " + currencyCode + ", " + currency.getCurrencyCode());

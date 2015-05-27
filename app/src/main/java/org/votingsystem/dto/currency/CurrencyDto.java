@@ -45,7 +45,7 @@ public class CurrencyDto implements Serializable {
         currencyDto.setAmount(currency.getAmount());
         currencyDto.setCurrencyCode(currency.getCurrencyCode());
         currencyDto.setHashCertVS(currency.getHashCertVS());
-        currencyDto.setTag(currency.getSignedTagVS());
+        currencyDto.setTag(currency.getTag());
         currencyDto.setTimeLimited(currency.isTimeLimited());
         currencyDto.setObject(ObjectUtils.serializeObjectToString(currency));
         if(currency.getCertificationRequest() != null)
@@ -62,13 +62,14 @@ public class CurrencyDto implements Serializable {
     }
 
     public Currency deSerialize() throws Exception {
-        if(certificationRequest != null) {
+        /*if(certificationRequest != null) {
             CertificationRequestVS certificationRequestVS = (CertificationRequestVS) ObjectUtils.deSerializeObject(
                     certificationRequest.getBytes());
             return Currency.fromCertificationRequestVS(certificationRequestVS);
         } else {
             return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
-        }
+        }*/
+        return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
     }
 
     public static Set<Currency> deSerializeCollection(Collection<CurrencyDto> currencyCollection) throws Exception {

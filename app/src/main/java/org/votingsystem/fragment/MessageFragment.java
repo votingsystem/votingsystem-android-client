@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
@@ -36,13 +35,11 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Wallet;
-
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -184,7 +181,7 @@ public class MessageFragment extends Fragment {
                 LinearLayout tempView = new LinearLayout(getActivity());
                 tempView.setId(CONTENT_VIEW_ID + messageId.intValue());
                 fragment_container.addView(tempView);
-                currencyRef = new WeakReference<CurrencyFragment>(new CurrencyFragment());
+                currencyRef = new WeakReference<>(new CurrencyFragment());
                 Bundle args = new Bundle();
                 args.putSerializable(ContextVS.CURRENCY_KEY, currency);
                 currencyRef.get().setArguments(args);
@@ -247,7 +244,7 @@ public class MessageFragment extends Fragment {
                     Wallet.updateWallet(new HashSet(Arrays.asList(currency)), appVS);
                     String msg = getString(R.string.save_to_wallet_ok_msg, currency.getAmount().toString() + " " +
                             currency.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
-                            MsgUtils.getTagVSMessage(currency.getSignedTagVS(), appVS);
+                            MsgUtils.getTagVSMessage(currency.getTag(), appVS);
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             getString(R.string.save_to_wallet_lbl), msg, getActivity());
                     builder.setPositiveButton(getString(R.string.accept_lbl),

@@ -2,7 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import org.votingsystem.signature.util.CertUtils;
 import java.security.cert.X509Certificate;
 
 /**
@@ -45,7 +45,6 @@ public class DeviceVSDto {
     public void setId(Long id) {
         this.id = id;
     }
-
 
     public String getDeviceId() {
         return deviceId;
@@ -127,11 +126,14 @@ public class DeviceVSDto {
         this.deviceType = deviceType;
     }
 
-    public X509Certificate getX509Certificate() {
+    public X509Certificate getX509Certificate() throws Exception {
+        if(x509Certificate == null && certPEM != null) x509Certificate =
+                CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
         return x509Certificate;
     }
 
     public void setX509Certificate(X509Certificate x509Certificate) {
         this.x509Certificate = x509Certificate;
     }
+
 }

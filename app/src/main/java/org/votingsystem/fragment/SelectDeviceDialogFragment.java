@@ -51,7 +51,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
     private String dialogCaller;
     private List<DeviceVSDto> deviceListDto;
     private TextView msg_text;
-    private List<String> tagList = new ArrayList<String>();
+    private List<String> connectedDeviceList = new ArrayList<>();
     private DeviceLoader deviceLoader;
 
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
@@ -79,7 +79,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
                 ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, TypeVS.DEVICE_SELECT);
                 DeviceVSDto selectedDeviceVSDto = null;
                 for(DeviceVSDto deviceVSDto : deviceListDto) {
-                    if(tagList.get(position).equals(deviceVSDto.getDeviceName()))
+                    if(connectedDeviceList.get(position).equals(deviceVSDto.getDeviceName()))
                         selectedDeviceVSDto = deviceVSDto;
                 }
                 try {
@@ -104,7 +104,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         try {
             outState.putSerializable(ContextVS.DTO_KEY, JSON.writeValueAsString(deviceListDto));
         } catch (IOException e) { e.printStackTrace(); }
-        outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) tagList);
+        outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) connectedDeviceList);
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -118,11 +118,11 @@ public class SelectDeviceDialogFragment extends DialogFragment {
                             new TypeReference<List<DeviceVSDto>>() {});
                 } catch (IOException e) { e.printStackTrace(); }
             }
-            tagList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
-            if(tagList.size() > 0) {
+            connectedDeviceList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
+            if(connectedDeviceList.size() > 0) {
                 msg_text.setText(getString(R.string.select_connected_device_msg));
             }
-            simpleAdapter.setItemList(tagList);
+            simpleAdapter.setItemList(connectedDeviceList);
             simpleAdapter.notifyDataSetChanged();
         } else {
             deviceLoader = new DeviceLoader();
@@ -139,7 +139,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         @Override protected void onPostExecute(List<String> result) {
             super.onPostExecute(result);
             LOGD(TAG + ".DeviceLoader", "onPostExecute");
-            if(tagList.size() > 0) {
+            if(connectedDeviceList.size() > 0) {
                 msg_text.setText(getString(R.string.select_connected_device_msg));
             }
             dialog.dismiss();
@@ -154,21 +154,22 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         }
 
         @Override protected List<String> doInBackground(String... params) {
-            tagList.clear();
+            connectedDeviceList.clear();
             try {
                 ResponseVS responseVS  = HttpHelper.getData(params[0], ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     deviceListDto = ((ResultListDto<DeviceVSDto>) responseVS.getMessage(
                             new TypeReference<ResultListDto<DeviceVSDto>>() {})).getResultList();
                     for(DeviceVSDto deviceVSDto : deviceListDto) {
-                        if(!Utils.getDeviceName().equals(deviceVSDto.getDeviceName()))
-                            tagList.add(deviceVSDto.getDeviceName());
+                        if(!Utils.getDeviceName().toLowerCase().equals(
+                                deviceVSDto.getDeviceName().toLowerCase()))
+                                connectedDeviceList.add(deviceVSDto.getDeviceName());
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return tagList;
+            return connectedDeviceList;
         }
     }
 

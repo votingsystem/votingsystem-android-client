@@ -19,6 +19,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
 
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Date;
@@ -34,7 +35,9 @@ import javax.websocket.Session;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SocketMessageDto {
+public class SocketMessageDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     public static final String TAG = SocketMessageDto.class.getSimpleName();
 

@@ -60,8 +60,8 @@ public class CurrencyActivity extends AppCompatActivity {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             SocketMessageDto socketMsg = null;
             try {
-                socketMsg = JSON.readValue(intent.getStringExtra(
-                        ContextVS.WEBSOCKET_MSG_KEY), SocketMessageDto.class);
+                String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
+                if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
             } catch (Exception ex) { ex.printStackTrace();}
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
@@ -106,12 +106,12 @@ public class CurrencyActivity extends AppCompatActivity {
                         try {
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                                 DeviceVSDto targetDevice = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
-                                SocketMessageDto dto = SocketMessageDto.getCurrencyWalletChangeRequest(
+                                SocketMessageDto socketMessage = SocketMessageDto.getCurrencyWalletChangeRequest(
                                         targetDevice, Arrays.asList(currency));
-                                responseVS = new ResponseVS(ResponseVS.SC_OK, JSON.writeValueAsString(dto));
                                 Intent startIntent = new Intent(CurrencyActivity.this, WebSocketService.class);
-                                startIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                                startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
                                 startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_WALLET_CHANGE);
                                 setProgressDialogVisible(true, getString(R.string.send_to_wallet),
                                         getString(R.string.connecting_lbl));
                                 startService(startIntent);
@@ -140,7 +140,7 @@ public class CurrencyActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if(savedInstanceState == null) {
-            currencyRef = new WeakReference<CurrencyFragment>(new CurrencyFragment());
+            currencyRef = new WeakReference<>(new CurrencyFragment());
             currencyRef.get().setArguments(Utils.intentToFragmentArguments(getIntent()));
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currencyRef.get(),
                     CurrencyFragment.class.getSimpleName()).commit();

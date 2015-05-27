@@ -94,7 +94,7 @@ public class WalletFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        ((AppCompatActivity)getActivity()).setTitle(getString(R.string.wallet_lbl));
+        getActivity().setTitle(getString(R.string.wallet_lbl));
         rootView = inflater.inflate(R.layout.wallet_fragment, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -143,12 +143,11 @@ public class WalletFragment extends Fragment {
             Map<String, IncomesDto> tagInfoMap = currencyMap.get(currency);
             for(String tag : tagInfoMap.keySet()) {
                 String contentFormatted = getString(R.string.tag_info,
-                        ((BigDecimal)tagInfoMap.get(tag).getTotal()).toPlainString(), currency,
+                        (tagInfoMap.get(tag).getTotal()).toPlainString(), currency,
                         MsgUtils.getTagVSMessage(tag, getActivity()));
                 if((tagInfoMap.get(tag).getTimeLimited()).compareTo(BigDecimal.ZERO) > 0) {
                     contentFormatted = contentFormatted + " " + getString(R.string.tag_info_time_limited,
-                            ((BigDecimal)tagInfoMap.get(tag).getTimeLimited()).toPlainString(),
-                            currency);
+                            (tagInfoMap.get(tag).getTimeLimited()).toPlainString(), currency);
                 }
                 contentFormatted = "<div style='text-align:center; margin:0px;font-size:1.1em;color:#005b92;'>" +
                         contentFormatted + "</div>";
@@ -236,14 +235,13 @@ public class WalletFragment extends Fragment {
             currencyTextView.setText(currency.getCurrencyCode().toString());
             currencyTextView.setTextColor(currency.getStateColor(getActivity()));
 
-
             if(DateUtils.getCurrentWeekPeriod().inRange(currency.getDateTo())) {
                 TextView time_limited_msg = (TextView) view.findViewById(R.id.time_limited_msg);
                 time_limited_msg.setText(getString(R.string.lapse_lbl,
                         DateUtils.getDayWeekDateStr(currency.getDateTo())));
             }
             ((TextView) view.findViewById(R.id.tag_data)).setText(MsgUtils.getTagVSMessage(
-                    currency.getSignedTagVS(), getActivity()));
+                    currency.getTag(), getActivity()));
             return view;
         }
 
