@@ -113,16 +113,23 @@ public class PaymentService extends IntentService {
                 switch (transactionDto.getType()) {
                     case FROM_USERVS:
                         responseVS = sendTransactionVS(transactionDto);
-                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                                    ContentTypeVS.TEXT, transactionDto.getPaymentConfirmURL());
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
+                                transactionDto.getPaymentConfirmURL() != null) {
+                            ResultListDto<TransactionVSDto> resultList =
+                                    (ResultListDto<TransactionVSDto>) responseVS.getMessage(
+                                    new TypeReference<ResultListDto<TransactionVSDto>>() {});
+                            String base64Receipt = resultList.getResultList().iterator().next().getMessageSMIME();
+                            SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt));
+                            receipt.isValidSignature();
+                            responseVS = HttpHelper.sendData(receipt.getBytes(),
+                                    ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                         }
                         break;
                     case CURRENCY_SEND:
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                                    ContentTypeVS.TEXT, transactionDto.getPaymentConfirmURL());
+                                    ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             responseVS.setMessage(MsgUtils.getAnonymousSignedTransactionOKMsg(
                                     transactionDto, this));
                         }
