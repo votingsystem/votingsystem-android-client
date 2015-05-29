@@ -16,6 +16,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -67,8 +68,12 @@ public class BootStrapService extends IntentService {
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    CurrencyServerDto currencyServer = (CurrencyServerDto) responseVS.getMessage(CurrencyServerDto.class);
+                    CurrencyServerDto currencyServer = (CurrencyServerDto) responseVS.getMessage(
+                            CurrencyServerDto.class);
                     appVS.setCurrencyServerDto(currencyServer);
+                    Intent startIntent = new Intent(this, PaymentService.class);
+                    startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_ACCOUNTS_INFO);
+                    startService(startIntent);
                 } catch(Exception ex) {ex.printStackTrace();}
             } else {
                 runOnUiThread(new Runnable() {

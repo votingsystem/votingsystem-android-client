@@ -560,7 +560,7 @@
     <string name="lapsed_lbl">caducado</string>
     <string name="signed_transaction_lbl">ingreso en cuenta</string>
     <string name="anonymous_signed_transaction_lbl">ingreso anónimo en cuenta</string>
-    <string name="currency_send_lbl">envío de currencies</string>
+    <string name="currency_send_lbl">envío anónimo</string>
     <string name="transaction_request_confirm_msg">va a realizar un \'%1$s\' por valor de %2$s a %3$s</string>
     <string name="anonymous_signed_transaction_ok_msg">ha realizado un ingreso anónimo de \'%1$s\' a \'%2$s\'</string>
 </resources>

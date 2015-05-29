@@ -72,11 +72,11 @@ public class PaymentFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(pin != null) {
                 switch(responseVS.getTypeVS()) {
-                    case SIGNED_TRANSACTION:
-                        launchTransactionVS(TypeVS.SIGNED_TRANSACTION);
+                    case FROM_USERVS:
+                        launchTransactionVS(TransactionVSDto.Type.FROM_USERVS);
                         break;
-                    case CURRENCY_BATCH:
-                        launchTransactionVS(TypeVS.CURRENCY_BATCH);
+                    case CURRENCY_SEND:
+                        launchTransactionVS(TransactionVSDto.Type.CURRENCY_SEND);
                         break;
                     case CURRENCY:
                         try {
@@ -97,13 +97,15 @@ public class PaymentFragment extends Fragment {
         }
     };
 
-    private void launchTransactionVS(TypeVS transactionType) {
+    private void launchTransactionVS(TransactionVSDto.Type transactionType) {
         LOGD(TAG + ".launchSignedTransaction() ", "launchSignedTransaction");
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
         try {
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, JSON.writeValueAsString(transactionDto));
+            transactionDto.setType(transactionType);
+            transactionDto.setOperation(TypeVS.valueOf(transactionType.toString()));
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionDto);
             startIntent.putExtra(CALLER_KEY, broadCastId);
-            startIntent.putExtra(TYPEVS_KEY, transactionType);
+            startIntent.putExtra(TYPEVS_KEY, transactionDto.getOperation());
             getActivity().startService(startIntent);
             setProgressDialogVisible(true);
         } catch (Exception ex) { ex.printStackTrace(); }
@@ -236,7 +238,7 @@ public class PaymentFragment extends Fragment {
                             return;
                         } else  PinDialogFragment.showPinScreen(getActivity().getSupportFragmentManager(),
                                 broadCastId, MsgUtils.getTransactionVSConfirmMessage(transactionDto, getActivity()),
-                                false, TypeVS.SIGNED_TRANSACTION);
+                                false, TypeVS.FROM_USERVS);
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
                 case CURRENCY_SEND:
@@ -301,7 +303,7 @@ public class PaymentFragment extends Fragment {
                             UIUtils.showMessageDialog(builder);
                         }
                     } else {
-                        launchTransactionVS(TypeVS.CURRENCY_BATCH);
+                        launchTransactionVS(TransactionVSDto.Type.CURRENCY_SEND);
                     }
                     break;
                 case CURRENCY_CHANGE:

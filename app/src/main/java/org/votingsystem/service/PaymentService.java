@@ -68,14 +68,14 @@ public class PaymentService extends IntentService {
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         String pin = arguments.getString(ContextVS.PIN_KEY);
         String hashCertVS = arguments.getString(ContextVS.HASH_CERTVS_KEY);
-        String dtoStr = intent.getStringExtra(ContextVS.TRANSACTION_KEY);
-        TransactionVSDto transactionDto = null;
-        try {
+        //String dtoStr = intent.getStringExtra(ContextVS.TRANSACTION_KEY);
+        TransactionVSDto transactionDto = (TransactionVSDto) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
+        /*try {
             if(dtoStr != null) {
                 transactionDto = JSON.readValue(dtoStr, TransactionVSDto.class);
                 operation = transactionDto.getOperation();
             }
-        } catch(Exception ex) { ex.printStackTrace();}
+        } catch(Exception ex) { ex.printStackTrace();}*/
         try {
             switch(operation) {
                 case CURRENCY_ACCOUNTS_INFO:
@@ -87,12 +87,14 @@ public class PaymentService extends IntentService {
                 case CURRENCY_REQUEST:
                     currencyRequest(serviceCaller, transactionDto, pin);
                     break;
-                case SIGNED_TRANSACTION:
+                case FROM_USERVS:
                 case CURRENCY_BATCH:
                     processTransaction(serviceCaller, transactionDto);
                     break;
                 case CASH_SEND:
                     break;
+                default:
+                    LOGD(TAG + ".onHandleIntent", "unknown operation: " + operation);
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -105,7 +107,7 @@ public class PaymentService extends IntentService {
         LOGD(TAG + ".processTransaction", "processTransaction - operation: " + transactionDto.getOperation());
         UserVSDto userVS = PrefUtils.getSessionUserVS(this);
         ResponseVS responseVS = null;
-        if(transactionDto.getDate() != null && DateUtils.inRange(transactionDto.getDate(),
+        if(transactionDto.getDateCreated() != null && DateUtils.inRange(transactionDto.getDateCreated(),
                 Calendar.getInstance().getTime(), FOUR_MINUTES)) {
             try {
                 switch (transactionDto.getType()) {
@@ -127,6 +129,8 @@ public class PaymentService extends IntentService {
                         break;
                     case CURRENCY_CHANGE:
                         break;
+                    default:
+                        LOGD(TAG + ".processTransaction", "unknown operation: " + transactionDto.getType());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();

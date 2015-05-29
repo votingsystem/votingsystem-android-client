@@ -41,7 +41,7 @@ public class TransactionVSDto implements Serializable{
 
     public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE, FROM_BANKVS, FROM_USERVS,
         FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS,
-        CURRENCY_PERIOD_INIT;}
+        CURRENCY_PERIOD_INIT, TRANSACTIONVS_INFO;}
 
     private TypeVS operation;
     private Long id;
@@ -74,7 +74,6 @@ public class TransactionVSDto implements Serializable{
 
     private String infoURL;
     private List<Type> paymentOptions;
-    private Date date;
     private TransactionVSDetailsDto details;
     private UserVSDto.Type userToType;
     private TagVSDto tagVS;
@@ -141,14 +140,6 @@ public class TransactionVSDto implements Serializable{
         if (tags.size() != 1) { //for now transactions can only have one tag associated
             throw new ValidationExceptionVS("invalid number of tags:" + tags.size());
         }
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public Long getId() {
