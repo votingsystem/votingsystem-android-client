@@ -1,13 +1,19 @@
 package org.votingsystem.dto.currency;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.bouncycastle2.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -19,23 +25,64 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyDto implements Serializable {
 
-    public static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
+    private TypeVS operation = TypeVS.CURRENCY_SEND;
+    private Long id;
     private BigDecimal amount;
+    private BigDecimal batchAmount;
     private String currencyCode;
     private String currencyServerURL;
     private String hashCertVS;
+    private String subject;
+    private String toUserIBAN;
+    private String toUserName;
     private String tag;
     private Boolean timeLimited;
+    private String batchUUID;
     private String object;
     private Date notBefore;
     private Date notAfter;
+    private Date dateCreated;
+
+    @JsonIgnore private PKCS10CertificationRequest csrPKCS10;
 
     public CurrencyDto() {}
+
+    public CurrencyDto(Currency currency) {
+        this.id = currency.getId();
+        this.hashCertVS = currency.getHashCertVS();
+        this.amount = currency.getAmount();
+        this.currencyCode = currency.getCurrencyCode();
+        this.tag = currency.getTag();
+        this.timeLimited = currency.isTimeLimited();
+        this.dateCreated = currency.getDateCreated();
+        this.notBefore = currency.getValidFrom();
+        this.notAfter = currency.getValidTo();
+    }
 
     public CurrencyDto(Boolean timeLimited, String object) {
         this.timeLimited = timeLimited;
         this.object = object;
+    }
+
+    public static CurrencyDto BATCH_ITEM(CurrencyBatchDto currencyBatchDto, Currency currency) throws ValidationExceptionVS {
+        if(!currencyBatchDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
+                "CurrencyBatch currencyCode: " + currencyBatchDto.getCurrencyCode()
+                        + " - Currency currencyCode: " + currency.getCurrencyCode());
+        if(currency.isTimeLimited() && !currencyBatchDto.getTimeLimited()) throw new ValidationExceptionVS(
+                "TimeLimited currency cannot go inside NOT TimeLimited CurrencyBatch");
+        if(!TagVSDto.WILDTAG.equals(currency.getTag()) && !currency.getTag().equals(
+                currencyBatchDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
+                "''{0}'' Currency  cannot go inside ''{1}'' CurrencyBatch", currency.getTag(),
+                currencyBatchDto.getTag()));
+        CurrencyDto currencyDto = new CurrencyDto(currency);
+        currencyDto.subject = currencyBatchDto.getSubject();
+        currencyDto.toUserIBAN = currencyBatchDto.getToUserIBAN();
+        currencyDto.toUserName = currencyBatchDto.getToUserName();
+        currencyDto.batchAmount = currencyBatchDto.getBatchAmount();
+        currencyDto.batchUUID = currencyBatchDto.getBatchUUID();
+        return currencyDto;
     }
 
     public static CurrencyDto serialize(Currency currency) throws Exception {
@@ -56,6 +103,10 @@ public class CurrencyDto implements Serializable {
             result.add(CurrencyDto.serialize(currency));
         }
         return result;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
     public Currency deSerialize() throws Exception {
@@ -155,4 +206,94 @@ public class CurrencyDto implements Serializable {
     public void setNotAfter(Date notAfter) {
         this.notAfter = notAfter;
     }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public BigDecimal getBatchAmount() {
+        return batchAmount;
+    }
+
+    public void setBatchAmount(BigDecimal batchAmount) {
+        this.batchAmount = batchAmount;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getToUserIBAN() {
+        return toUserIBAN;
+    }
+
+    public void setToUserIBAN(String toUserIBAN) {
+        this.toUserIBAN = toUserIBAN;
+    }
+
+    public String getToUserName() {
+        return toUserName;
+    }
+
+    public void setToUserName(String toUserName) {
+        this.toUserName = toUserName;
+    }
+
+    public Boolean getTimeLimited() {
+        return timeLimited;
+    }
+
+    public String getBatchUUID() {
+        return batchUUID;
+    }
+
+    public void setBatchUUID(String batchUUID) {
+        this.batchUUID = batchUUID;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public PKCS10CertificationRequest getCsrPKCS10() {
+        return csrPKCS10;
+    }
+
+    public void setCsrPKCS10(PKCS10CertificationRequest csrPKCS10) {
+        this.csrPKCS10 = csrPKCS10;
+    }
+
+    public static CurrencyDto getCertSubjectDto(String subjectDN, String hashCertVS) {
+        CurrencyDto currencyDto = new CurrencyDto();
+        if (subjectDN.contains("CURRENCY_CODE:"))
+            currencyDto.setCurrencyCode(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]);
+        if (subjectDN.contains("CURRENCY_VALUE:"))
+            currencyDto.setAmount(new BigDecimal(subjectDN.split("CURRENCY_VALUE:")[1].split(",")[0]));
+        if (subjectDN.contains("TAG:")) currencyDto.setTag(subjectDN.split("TAG:")[1].split(",")[0]);
+        if (subjectDN.contains("currencyServerURL:"))
+            currencyDto.setCurrencyServerURL(subjectDN.split("currencyServerURL:")[1].split(",")[0]);
+        currencyDto.setHashCertVS(hashCertVS);
+        return currencyDto;
+    }
+
 }

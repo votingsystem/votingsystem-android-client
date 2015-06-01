@@ -242,4 +242,11 @@ public class CertificationRequestVS implements java.io.Serializable {
         this.hashPin = hashPin;
     }
 
+    public byte[] getSignedCsr() {
+        return signedCsr;
+    }
+
+    public void setSignedCsr(byte[] signedCsr) {
+        this.signedCsr = signedCsr;
+    }
 }

@@ -103,22 +103,6 @@ public class TransactionVSDto implements Serializable{
         return dto;
     }
 
-    public static TransactionVSDto CURRENCY_SEND(String toUser, String subject, BigDecimal amount,
-                   String currencyCode, String toUserIBAN, boolean isTimeLimited, String tag) {
-        TransactionVSDto dto = new TransactionVSDto();
-        dto.setOperation(TypeVS.CURRENCY_SEND);
-        dto.setSubject(subject);
-        dto.setToUser(toUser);
-        dto.setAmount(amount);
-        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
-        dto.setTags(new HashSet<>(Arrays.asList(tag)));
-        dto.setCurrencyCode(currencyCode);
-        dto.setTimeLimited(isTimeLimited);
-        dto.setUUID(java.util.UUID.randomUUID().toString());
-        return dto;
-    }
-
-
     public static TransactionVSDto CURRENCY_REQUEST(BigDecimal amount, String currencyCode,
             TagVSDto tagVS, boolean timeLimited) {
         TransactionVSDto dto = new TransactionVSDto();
@@ -403,14 +387,6 @@ public class TransactionVSDto implements Serializable{
 
     public String getUUID() {
         return UUID;
-    }
-
-    public void loadBankVSTransaction(String UUID) {
-        setUUID(UUID);
-        if(toUserIBAN.isEmpty() && toUserVS != null) {
-            toUserIBAN = Arrays.asList(toUserVS.getIBAN());
-            toUserVS = null;
-        }
     }
 
     public void setUUID(String UUID) {

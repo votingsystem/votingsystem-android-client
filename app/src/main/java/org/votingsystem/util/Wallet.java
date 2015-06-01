@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.IncomesDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
@@ -15,8 +15,9 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,16 +55,15 @@ public class Wallet {
         return new HashSet<>(currencySet);
     }
 
-    public static void saveCurrencyCollection(Collection<Currency> currencyCollection, String pin,
-             AppVS context) throws Exception {
+    public static void saveCurrencyCollection(Collection<Currency> currencyCollection, String pin)
+            throws Exception {
         Set<Currency> newCurrencySet = new HashSet<>();
         if(currencySet != null) newCurrencySet.addAll(currencySet);
         newCurrencySet.addAll(currencyCollection);
-        Wallet.saveWallet(newCurrencySet, pin, context);
+        Wallet.saveWallet(newCurrencySet, pin);
     }
 
-    public static void removeCurrencyCollection(
-            Collection<Currency> currencyCollection, AppVS context) throws Exception {
+    public static void removeCurrencyCollection(Collection<Currency> currencyCollection) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
             currencyMap.put(currency.getHashCertVS(), currency);
@@ -73,32 +73,32 @@ public class Wallet {
                     TAG +  ".removeCurrencyCollection", "removed currency: " + currency.getHashCertVS());
         }
         currencySet = new HashSet<>(currencyMap.values());
-        Wallet.saveWallet(currencySet, null, context);
+        Wallet.saveWallet(currencySet, null);
     }
 
 
-    public static Currency removeExpendedCurrency(String hashCertVS, AppVS context) throws Exception {
-        Map<String, Currency> currencyMap = new HashMap<String, Currency>();
+    public static Currency removeExpendedCurrency(String hashCertVS) throws Exception {
+        Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         Currency expendedCurrency = null;
         if((expendedCurrency = currencyMap.remove(hashCertVS)) != null)  LOGD(TAG +  ".removeCurrencyList",
                 "removed currency: " + hashCertVS);
-        Wallet.saveWallet(currencySet, null, context);
+        Wallet.saveWallet(currencySet, null);
         return expendedCurrency;
     }
 
     public static Map<String, Currency> getCurrencyMap() {
-        Map<String, Currency> currencyMap = new HashMap<String, Currency>();
+        Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         return currencyMap;
     }
 
-    public static Set<Currency> updateCurrencyWithErrors(List<String> currencySetToRemove,
-            AppVS appVS) throws Exception {
+    public static Set<Currency> updateCurrencyWithErrors(List<String> currencySetToRemove)
+            throws Exception {
         Set<Currency> errorList = new HashSet<>();
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetToRemove) {
@@ -108,12 +108,12 @@ public class Wallet {
                 errorList.add(removedCurrency);
             }
         }
-        Wallet.saveWallet(currencySet, null, appVS);
+        Wallet.saveWallet(currencySet, null);
         return errorList;
     }
 
-    public static void updateCurrencyState(List<String> currencySetOK, Currency.State state,
-                AppVS appVS) throws Exception {
+    public static void updateCurrencyState(List<String> currencySetOK, Currency.State state)
+            throws Exception {
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetOK) {
             Currency currency = currencyMap.get(hashCertVS);
@@ -122,7 +122,7 @@ public class Wallet {
                 currency.setState(Currency.State.OK);
             }
         }
-        Wallet.saveWallet(currencySet, null, appVS);
+        Wallet.saveWallet(currencySet, null);
     }
 
     public static Map<String, Map<String, IncomesDto>> getCurrencyTagMap() {
@@ -176,8 +176,8 @@ public class Wallet {
         }
     }
 
-    public static void saveWallet(Collection<Currency> currencyCollection, String pin,
-                                  AppVS context) throws Exception {
+    public static void saveWallet(Collection<Currency> currencyCollection, String pin) throws Exception {
+        AppVS context = AppVS.getInstance();
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash(context);
             String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
@@ -195,19 +195,18 @@ public class Wallet {
 
     }
 
-    public static void updateWallet(Collection<Currency> currencyCollection,
-                                    AppVS appVS) throws Exception {
+    public static void updateWallet(Collection<Currency> currencyCollection) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<String, Currency>();
         for(Currency currency : currencyCollection) {
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         for(Currency currency : currencySet) {
             if(currencyMap.containsKey(currency.getHashCertVS())) throw new ValidationExceptionVS(
-                    appVS.getString(R.string.currency_repeated_wallet_error_msg, currency.getAmount().toString() +
-                    " " + currency.getCurrencyCode()));
+                    AppVS.getInstance().getString(R.string.currency_repeated_wallet_error_msg,
+                            currency.getAmount().toString() + " " + currency.getCurrencyCode()));
             else currencyMap.put(currency.getHashCertVS(), currency);
         }
-        Wallet.saveWallet(currencyMap.values(), null, appVS);
+        Wallet.saveWallet(currencyMap.values(), null);
     }
 
     public static BigDecimal getAvailableForTagVS(String currencyCode, String tagVS) {
@@ -219,84 +218,35 @@ public class Wallet {
                     (BigDecimal) currencyMap.get(TagVSDto.WILDTAG).getTotal());
             if(!TagVSDto.WILDTAG.equals(tagVS)) {
                 if(currencyMap.containsKey(tagVS)) cash =
-                        cash.add((BigDecimal) currencyMap.get(tagVS).getTotal());
+                        cash.add(currencyMap.get(tagVS).getTotal());
             }
         }
         return cash;
     }
 
-    public static CurrencyBundle getCurrencyBundleForTag(String currencyCode, String tagVS) {
-        BigDecimal sumTotal = BigDecimal.ZERO;
-        List<Currency> result = new ArrayList<>();
+    public static CurrencyBundle getCurrencyBundleForTag(String currencyCode, String tagVS)
+            throws ValidationExceptionVS {
+        CurrencyBundle currencyBundle = new CurrencyBundle(currencyCode, tagVS);
         for(Currency currency : currencySet) {
-            if(currency.getCurrencyCode().equals(currencyCode) && tagVS.equals(currency.getTag())) {
-                result.add(currency);
-                sumTotal = sumTotal.add(currency.getAmount());
+            if(currency.getCurrencyCode().equals(currencyCode)) {
+                if(tagVS.equals(currency.getTag()) || TagVSDto.WILDTAG.equals(currency.getTag())) {
+                    currencyBundle.addCurrency(currency);
+                }
             }
         }
-        return new CurrencyBundle(sumTotal, currencyCode, result, tagVS);
+        return currencyBundle;
     }
 
-    public static CurrencyBundle getCurrencyBundleForTransaction(
-            TransactionVSDto transactionDto) throws ExceptionVS {
-        return getCurrencyBundleForTransaction(transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                transactionDto.isTimeLimited(), transactionDto.getTagVS().getName());
+    public static void updateWallet(CurrencyBatchDto currencyBatchDto) throws Exception {
+        Wallet.removeCurrencyCollection(currencyBatchDto.getCurrencyCollection());
+        if(currencyBatchDto.getLeftOverCurrency() != null) Wallet.updateWallet(
+                Arrays.asList(currencyBatchDto.getLeftOverCurrency()));
     }
 
-    public static CurrencyBundle getCurrencyBundleForTransaction(BigDecimal requestAmount,
-            String currencyCode, Boolean isTimeLimited, String tagVS) throws ExceptionVS {
-        CurrencyBundle tagBundle = getCurrencyBundleForTag(currencyCode, tagVS);
-        CurrencyBundle result = null;
-        BigDecimal remaining = null;
-        if(tagBundle.getAmount().compareTo(requestAmount) < 0) {
-            result = tagBundle;
-            remaining = requestAmount.subtract(result.getAmount());
-            BigDecimal wildtagAccumulated = BigDecimal.ZERO;
-            CurrencyBundle wildtagBundle =  getCurrencyBundleForTag(currencyCode, TagVSDto.WILDTAG);
-            if(wildtagBundle.getAmount().compareTo(remaining) < 0) throw new ExceptionVS(
-                "insufficient cash for request: " + requestAmount + " " + currencyCode + " - " +
-                tagVS);
-            List<Currency> wildtagCurrencies = new ArrayList<>();
-            while(wildtagAccumulated.compareTo(remaining) < 0) {
-                Currency newCurrency = wildtagBundle.getTagCurrencyList().remove(0);
-                wildtagAccumulated = wildtagAccumulated.add(newCurrency.getAmount());
-                wildtagCurrencies.add(newCurrency);
-            }
-            if(wildtagAccumulated.compareTo(remaining) > 0) {
-                Currency lastRemoved = null;
-                while(wildtagAccumulated.compareTo(remaining) > 0) {
-                    lastRemoved = wildtagCurrencies.remove(0);
-                    wildtagAccumulated = wildtagAccumulated.subtract(lastRemoved.getAmount());
-                }
-                if(wildtagAccumulated.compareTo(remaining) < 0) {
-                    wildtagCurrencies.add(0, lastRemoved);
-                    wildtagAccumulated = wildtagAccumulated.add(lastRemoved.getAmount());
-                }
-                result.setWildTagAmount(wildtagAccumulated);
-                result.setWildTagCurrencyList(wildtagCurrencies);
-            }
-        } else {
-            BigDecimal accumulated = BigDecimal.ZERO;
-            List<Currency> tagCurrencies = new ArrayList<>();
-            while(accumulated.compareTo(requestAmount) < 0) {
-                Currency newCurrency = tagBundle.getTagCurrencyList().remove(0);
-                accumulated = accumulated.add(newCurrency.getAmount());
-                tagCurrencies.add(newCurrency);
-            }
-            if(accumulated.compareTo(requestAmount) > 0) {
-                Currency lastRemoved = null;
-                while(accumulated.compareTo(requestAmount) > 0) {
-                    lastRemoved = tagCurrencies.remove(0);
-                    accumulated = accumulated.subtract(lastRemoved.getAmount());
-                }
-                if(accumulated.compareTo(requestAmount) < 0) {
-                    tagCurrencies.add(0, lastRemoved);
-                    accumulated = accumulated.add(lastRemoved.getAmount());
-                }
-            }
-            result = new CurrencyBundle(accumulated, tagCurrencies, currencyCode, tagVS);
+    private static Comparator<Currency> currencyComparator = new Comparator<Currency>() {
+        public int compare(Currency c1, Currency c2) {
+            return c1.getAmount().compareTo(c2.getAmount());
         }
-        return result;
-    }
+    };
 
 }

@@ -177,7 +177,7 @@ public class MessagesGridFragment extends Fragment implements
                                     socketMessage.getCurrencySet());
                             logoId = R.drawable.fa_money_24;
                             messageSubject = getString(R.string.wallet_change_lbl) + " - " +
-                                    currencyBundle.getAmount().toPlainString() + " " +
+                                    currencyBundle.getTotalAmount().toPlainString() + " " +
                                     currencyBundle.getCurrencyCode();
                             break;
                     }

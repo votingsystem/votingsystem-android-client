@@ -2,6 +2,7 @@ package org.votingsystem.util;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
+import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
@@ -12,9 +13,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,69 +26,39 @@ import java.util.UUID;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class CurrencyBundle {
-
-    private BigDecimal amount;
-    private BigDecimal wildTagAmount;
-    private BigDecimal timeLimitedAmount;
-    private List<Currency> tagCurrencyList;
-    private List<Currency> wildTagCurrencyList;
+    
+    
+    private List<Currency> tagTimeUnlimitedCurrencyList;
+    private List<Currency> tagTimeLimitedCurrencyList;
+    private List<Currency> wildTagTimeUnlimitedCurrencyList;
+    private List<Currency> wildTagTimeLimitedCurrencyList;
     private String currencyCode;
     private String tagVS;
-    private Currency leftOverCurrency;
 
-    public CurrencyBundle(BigDecimal amount, Collection<Currency> tagCurrencyList,
-              String currencyCode, String tagVS) {
-        this.amount = amount;
-        this.tagCurrencyList = new ArrayList<>(tagCurrencyList);
+
+    public CurrencyBundle(String currencyCode, String tagVS) {
         this.currencyCode = currencyCode;
         this.tagVS = tagVS;
+        tagTimeUnlimitedCurrencyList = new ArrayList<>();
+        tagTimeLimitedCurrencyList = new ArrayList<>();
+        wildTagTimeUnlimitedCurrencyList = new ArrayList<>();
+        wildTagTimeLimitedCurrencyList = new ArrayList<>();
     }
 
-    public CurrencyBundle(BigDecimal amount, String currencyCode, List<Currency> tagCurrencyList,
-              String tag) {
-        this.tagVS = tag;
-        this.amount = amount;
-        this.currencyCode = currencyCode;
-        this.tagCurrencyList = tagCurrencyList;
-        Collections.sort(this.tagCurrencyList, currencyComparator);
-    }
-
-    public Set<Currency> getCurrencySet() {
-        Set<Currency> result = new HashSet<>(tagCurrencyList);
-        if(wildTagCurrencyList != null) result.addAll(wildTagCurrencyList);
-        return result;
-    }
-
-    public static CurrencyBundle load(Collection<Currency> currencyList) throws ExceptionVS {
-        String tagVS = null;
-        String currencyCode = null;
-        BigDecimal amount = BigDecimal.ZERO;
-        for(Currency currency : currencyList) {
-            if(tagVS == null) tagVS = currency.getTag();
-            else if(!tagVS.equals(currency.getTag())) throw new ExceptionVS("bundle with mixed" +
-                    "tags: " + tagVS + ", " + currency.getTag());
-            if(currencyCode == null) currencyCode = currency.getCurrencyCode();
-            else if(!currencyCode.equals(currency.getCurrencyCode())) throw new ExceptionVS(
-                    "bundle with mixed curency codes : " + currencyCode + ", " + currency.getCurrencyCode());
-            amount = amount.add(currency.getAmount());
+    public void addCurrency(Currency currency) throws ValidationExceptionVS {
+        if(!currency.getTag().equals(tagVS) || !TagVSDto.WILDTAG.equals(currency.getTag()))
+            throw new ValidationExceptionVS("CurrencyBundle for Tag: " + tagVS + " - can't have " +
+                    "items with tag: " + currency.getTag());
+        if(!currency.getCurrencyCode().equals(currencyCode))
+            throw new ValidationExceptionVS("CurrencyBundle for currencyCode: " + currencyCode +
+                    " - can't have items with currencyCode: " + currency.getCurrencyCode());
+        if(currency.getTag().equals(tagVS)) {
+            if(currency.isTimeLimited()) tagTimeLimitedCurrencyList.add(currency);
+            else tagTimeUnlimitedCurrencyList.add(currency);
+        } else {
+            if(currency.isTimeLimited()) wildTagTimeLimitedCurrencyList.add(currency);
+            else wildTagTimeUnlimitedCurrencyList.add(currency);
         }
-        return new CurrencyBundle(amount, currencyList, currencyCode, tagVS);
-    }
-
-    public List<Currency> getTagCurrencyList() {
-        return tagCurrencyList;
-    }
-
-    public void setTagCurrencyList(List<Currency> tagCurrencyList) {
-        this.tagCurrencyList = tagCurrencyList;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
     }
 
     public String getTagVS() {
@@ -108,61 +77,32 @@ public class CurrencyBundle {
         return currencyCode;
     }
 
-    public List<Currency> getWildTagCurrencyList() {
-        return wildTagCurrencyList;
+    public static CurrencyBundle load(Collection<Currency> currencyList) throws ExceptionVS {
+        CurrencyBundle currencyBundle = null;
+        for(Currency currency : currencyList) {
+            if(currencyBundle == null)  {
+                currencyBundle = new CurrencyBundle(currency.getCurrencyCode(), currency.getTag());
+            }
+            currencyBundle.addCurrency(currency);
+        }
+        return currencyBundle;
     }
 
-    public void setWildTagCurrencyList(List<Currency> wildTagCurrencyList) {
-        this.wildTagCurrencyList = wildTagCurrencyList;
-    }
-
-    public BigDecimal getWildTagAmount() {
-        return wildTagAmount;
-    }
-
-    public void setWildTagAmount(BigDecimal wildTagAmount) {
-        this.wildTagAmount = wildTagAmount;
-    }
-
-    public BigDecimal getTotalAmount() {
-        if(amount != null) {
-            if(wildTagAmount != null) return amount.add(wildTagAmount);
-            else return amount;
-        } else if(wildTagAmount != null) {
-            return wildTagAmount;
-        } else return BigDecimal.ZERO;
-    }
-
-    private Currency getLeftOverCurrency(BigDecimal requestAmount, BigDecimal wildTagAmount)
-            throws Exception {
-        BigDecimal bundleAmount = getTotalAmount();
-        if(bundleAmount.compareTo(requestAmount) == 0) return null;
-        else if(requestAmount.compareTo(bundleAmount) < 0) {
-            BigDecimal leftOverAmount = bundleAmount.subtract(requestAmount);
-            //make sure don't ask time free from timelimited
-            Boolean timeLimited = wildTagAmount.compareTo(leftOverAmount) < 0;
-            return new Currency(AppVS.getInstance().getCurrencyServer().getServerURL(),
-                    leftOverAmount, currencyCode, timeLimited, tagVS);
-        } else throw new ValidationExceptionVS(MessageFormat.format(
-                "requestAmount ''{0}'' exceeds bundle amount ''{1}''", requestAmount, bundleAmount));
-
-    }
-
-    public Currency getLeftOverCurrency() {
-        return leftOverCurrency;
-    }
 
     public CurrencyBatchDto getCurrencyBatchDto(TransactionVSDto transactionDto) throws Exception {
         return getCurrencyBatchDto(transactionDto.getOperation(),
                 transactionDto.getSubject(), transactionDto.getToUserIBAN().get(0),
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                transactionDto.getTagVS().getName(), transactionDto.isTimeLimited(),
-                AppVS.getInstance().getTimeStampServiceURL());
+                transactionDto.getTagVS().getName(), transactionDto.isTimeLimited());
     }
     
     public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, String subject,
             String toUserIBAN, BigDecimal batchAmount, String currencyCode, String tag, 
-            Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
+            Boolean timeLimited) throws Exception {
+        if(!currencyCode.equals(this.currencyCode)) throw new ValidationExceptionVS(
+                "Bundle with currencyCode: " + this.currencyCode + " can't handle currencyCode: " + currencyCode);
+        if(!tag.equals(this.tagVS)) throw new ValidationExceptionVS(
+                "Bundle with tag: " + this.tagVS + " can't handle tag: " + tag);
         CurrencyBatchDto dto = new CurrencyBatchDto();
         dto.setOperation(operation);
         dto.setSubject(subject);
@@ -170,32 +110,102 @@ public class CurrencyBundle {
         dto.setBatchAmount(batchAmount);
         dto.setCurrencyCode(currencyCode);
         dto.setTag(tag);
+        dto.setTimeLimited(timeLimited);
         dto.setBatchUUID(UUID.randomUUID().toString());
-        Set<Currency> transactionCurrencySet = getCurrencySet();
-        List<String> currencyTransactionBatch = new ArrayList<>();
-        BigDecimal wildTagAmount = BigDecimal.ZERO;
-        for (Currency currency : transactionCurrencySet) {
-            if(TagVSDto.WILDTAG.equals(currency.getTag())) wildTagAmount = wildTagAmount.add(currency.getAmount());
+        Set<String> currencySetSignatures = new HashSet<>();
+        Set<Currency> currencySet = new HashSet<>();
+
+        List<Currency> wildTagTimeLimitedCurrencyList = new ArrayList<>(this.wildTagTimeLimitedCurrencyList);
+        List<Currency> wildTagTimeUnlimitedCurrencyList = new ArrayList<>(this.wildTagTimeUnlimitedCurrencyList);
+        List<Currency> tagTimeLimitedCurrencyList = new ArrayList<>(this.tagTimeLimitedCurrencyList);
+        List<Currency> tagTimeUnlimitedCurrencyList = new ArrayList<>(this.tagTimeUnlimitedCurrencyList);
+
+        Collections.sort(wildTagTimeLimitedCurrencyList, currencyComparator);
+        Collections.sort(wildTagTimeUnlimitedCurrencyList, currencyComparator);
+        Collections.sort(tagTimeLimitedCurrencyList, currencyComparator);
+        Collections.sort(tagTimeUnlimitedCurrencyList, currencyComparator);
+        BigDecimal wildTagTimeLimitedAmount = getTotalAmount(wildTagTimeLimitedCurrencyList);
+        BigDecimal wildTagTimeUnlimitedAmount = getTotalAmount(wildTagTimeUnlimitedCurrencyList);
+        BigDecimal wildTagAmount = wildTagTimeLimitedAmount.add(wildTagTimeUnlimitedAmount);
+        BigDecimal tagTimeLimitedAmount = getTotalAmount(tagTimeLimitedCurrencyList);
+        BigDecimal tagTimeUnlimitedAmount = getTotalAmount(tagTimeUnlimitedCurrencyList);
+        BigDecimal tagAmount = tagTimeLimitedAmount.add(tagTimeUnlimitedAmount);
+        BigDecimal tagAmountPlusWiltagLimited = tagAmount.add(wildTagTimeLimitedAmount);
+        BigDecimal totalAmount = tagAmount.add(wildTagAmount);
+        BigDecimal bundleAccumulated = BigDecimal.ZERO;
+        Currency lastCurrencyAdded = null;
+        if(batchAmount.compareTo(tagTimeLimitedAmount) < 0) {
+            while(bundleAccumulated.compareTo(batchAmount) < 0) {
+                lastCurrencyAdded = wildTagTimeLimitedCurrencyList.remove(0);
+                currencySet.add(lastCurrencyAdded);
+                bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
+            }
+        } else if(batchAmount.compareTo(tagAmount) < 0) {
+            List<Currency> tagCurrencyList = new ArrayList<>(tagTimeLimitedCurrencyList);
+            tagCurrencyList.addAll(tagTimeUnlimitedCurrencyList);
+            Collections.sort(tagCurrencyList, currencyComparator);
+            while(bundleAccumulated.compareTo(batchAmount) < 0) {
+                lastCurrencyAdded = tagCurrencyList.remove(0);
+                currencySet.add(lastCurrencyAdded);
+                bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
+            }
+        } else if(batchAmount.compareTo(tagAmountPlusWiltagLimited) < 0) {
+            List<Currency> tagCurrencyList = new ArrayList<>(tagTimeLimitedCurrencyList);
+            tagCurrencyList.addAll(tagTimeUnlimitedCurrencyList);
+            tagCurrencyList.addAll(wildTagTimeLimitedCurrencyList);
+            Collections.sort(tagCurrencyList, currencyComparator);
+            while(bundleAccumulated.compareTo(batchAmount) < 0) {
+                lastCurrencyAdded = tagCurrencyList.remove(0);
+                currencySet.add(lastCurrencyAdded);
+                bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
+            }
+        } else if(batchAmount.compareTo(totalAmount) < 0) {
+            List<Currency> tagCurrencyList = new ArrayList<>(tagTimeLimitedCurrencyList);
+            tagCurrencyList.addAll(tagTimeUnlimitedCurrencyList);
+            tagCurrencyList.addAll(wildTagTimeLimitedCurrencyList);
+            tagCurrencyList.addAll(wildTagTimeUnlimitedCurrencyList);
+            Collections.sort(tagCurrencyList, currencyComparator);
+            while(bundleAccumulated.compareTo(batchAmount) < 0) {
+                lastCurrencyAdded = tagCurrencyList.remove(0);
+                currencySet.add(lastCurrencyAdded);
+                bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
+            }
+        } else throw new ValidationExceptionVS(AppVS.getInstance().getString(R.string.tagAmountErrorMsg,
+                batchAmount + " " + currencyCode, tag, totalAmount  + " " + currencyCode ));
+        if(bundleAccumulated.compareTo(batchAmount) > 0) {
+            BigDecimal leftOverAmount = bundleAccumulated.subtract(batchAmount);
+            dto.setLeftOverCurrency(new Currency(AppVS.getInstance().getCurrencyServerURL(),
+                    leftOverAmount, lastCurrencyAdded.getCurrencyCode(),
+                    lastCurrencyAdded.isTimeLimited(), lastCurrencyAdded.getTag()));
+        }
+
+        for (Currency currency : currencySet) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(
-                    currency.getHashCertVS(), StringUtils.getNormalized(currency.getToUserName()),
-                    JSON.writeValueAsString(dto), subject);
+                    currency.getHashCertVS(), toUserIBAN, JSON.writeValueAsString(dto), subject);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage);
             timeStamper.call();
-            currency.setSmimeMessage(timeStamper.getSMIME());
-            currencyTransactionBatch.add(new String(Base64.encode(currency.getSmimeMessage().getBytes())));
+            currency.setSMIME(timeStamper.getSMIME());
+            currencySetSignatures.add(new String(Base64.encode(currency.getSMIME().getBytes())));
         }
-        leftOverCurrency = getLeftOverCurrency(batchAmount, wildTagAmount);
-        if (leftOverCurrency != null) dto.setCsrCurrency(new String(
-                leftOverCurrency.getCertificationRequest().getCsrPEM(), "UTF-8"));
-        dto.setCurrency(currencyTransactionBatch);
+        dto.setCurrencySet(currencySetSignatures);
+        dto.setCurrencyCollection(currencySet);
         return dto;
     }
 
-    public void updateWallet(Currency leftOverCurrency, AppVS appVS) throws Exception {
-        Set<Currency> currencyListToRemove = getCurrencySet();
-        Wallet.removeCurrencyCollection(currencyListToRemove, appVS);
-        if(leftOverCurrency != null) Wallet.updateWallet(
-                new HashSet<Currency>(Arrays.asList(leftOverCurrency)),appVS);
+    public static BigDecimal getTotalAmount(Collection<Currency> currencyCollection) {
+        BigDecimal result = BigDecimal.ZERO;
+        for(Currency currency : currencyCollection) {
+            result = result.add(currency.getAmount());
+        }
+        return result;
+    }
+
+    public BigDecimal getTotalAmount() {
+        BigDecimal result = getTotalAmount(tagTimeUnlimitedCurrencyList);
+        result = result.add(getTotalAmount(tagTimeLimitedCurrencyList));
+        result = result.add(getTotalAmount(wildTagTimeUnlimitedCurrencyList));
+        result = result.add(getTotalAmount(wildTagTimeLimitedCurrencyList));
+        return result;
     }
 
     private static Comparator<Currency> currencyComparator = new Comparator<Currency>() {
@@ -203,4 +213,5 @@ public class CurrencyBundle {
             return c1.getAmount().compareTo(c2.getAmount());
         }
     };
+
 }

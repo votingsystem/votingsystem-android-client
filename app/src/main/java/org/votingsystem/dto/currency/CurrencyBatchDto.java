@@ -3,7 +3,6 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.model.Currency;
 import org.votingsystem.model.CurrencyBatch;
@@ -14,9 +13,11 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
+import java.security.cert.TrustAnchor;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -24,100 +25,36 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyBatchDto {
 
-    private BigDecimal currencyAmount = BigDecimal.ZERO;
-
-    private TypeVS operation;
-    private List<String> currency;
-    private String csrCurrency;
-    private List<String> hashCertVSCurrency;
+    private TypeVS operation = TypeVS.CURRENCY_SEND;
+    private Set<String> currencySet;
+    private String leftOverCSR;
     private String toUserIBAN;
     private String toUserName;
     private String subject;
     private String currencyCode;
     private String tag;
     private String batchUUID;
-    private Boolean isTimeLimited = Boolean.FALSE;
+    private Boolean timeLimited = Boolean.FALSE;
     private BigDecimal batchAmount;
-    private BigDecimal leftOver;
-    private AtomicBoolean initialized = new AtomicBoolean(Boolean.FALSE);
+    private BigDecimal leftOver = BigDecimal.ZERO;
     @JsonIgnore private Currency leftOverCurrency;
-    @JsonIgnore private List<Currency> currencyList = new ArrayList<>();
+    @JsonIgnore private Collection<Currency> currencyCollection;
 
 
     public CurrencyBatchDto() {}
 
 
     public CurrencyBatchDto(CurrencyBatch currencyBatch) {
-        this.operation = currencyBatch.getOperation();
         this.subject = currencyBatch.getSubject();
-        this.toUserIBAN = currencyBatch.getToUserIBAN();
+        this.toUserIBAN = currencyBatch.getToUserVS().getIBAN();
         this.batchAmount = currencyBatch.getBatchAmount();
-        this.currencyAmount = currencyBatch.getCurrencyAmount();
         this.currencyCode = currencyBatch.getCurrencyCode();
         this.tag = currencyBatch.getTag();
-        this.currencyList = currencyBatch.getCurrencyList();
-        hashCertVSCurrency = new ArrayList<>();
-        for(Currency currency : currencyBatch.getCurrencyList()) {
-            hashCertVSCurrency.add(currency.getHashCertVS());
-        }
-        this.isTimeLimited = currencyBatch.isTimeLimited();
+        this.timeLimited = currencyBatch.isTimeLimited();
         this.batchUUID  = currencyBatch.getBatchUUID();
     }
 
     @JsonIgnore
-    public CurrencyBatch loadCurrencyBatch() throws Exception {
-        if(getCsrCurrency() != null) {
-            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrCurrency.getBytes());
-            setLeftOverCurrency(new Currency(csr));
-        }
-        for(String currencyItem : getCurrency()) {
-            SMIMEMessage smimeMessage = new SMIMEMessage(Base64.decode(currencyItem.getBytes()));
-            smimeMessage.isValidSignature();
-            try {
-                Currency currency = new Currency(smimeMessage);
-                this.currencyAmount = this.currencyAmount.add(currency.getAmount());
-                currencyList.add(currency);
-                if(!initialized.get()) {
-                    this.operation = currency.getOperation();
-                    this.subject = currency.getSubject();
-                    this.toUserIBAN = currency.getToUserIBAN();
-                    this.batchAmount = currency.getBatchAmount();
-                    this.currencyCode = currency.getCurrencyCode();
-                    this.tag = currency.getTag();
-                    this.isTimeLimited = currency.isTimeLimited();
-                    this.batchUUID = currency.getBatchUUID();
-                    initialized.set(Boolean.TRUE);
-                } else checkCurrencyData(currency);
-            } catch(Exception ex) {
-                throw new ExceptionVS("Error with currency : " + ex.getMessage(), ex);
-            }
-        }
-        setLeftOver(getCurrencyAmount().subtract(getBatchAmount()));
-        if(getLeftOver().compareTo(BigDecimal.ZERO) < 0) new ValidationExceptionVS(
-                "CurrencyTransactionBatch insufficientCash - required '" + getBatchAmount().toString() + "' " + "found '" +
-                        getCurrencyAmount().toString() + "'");
-        if(getLeftOverCurrency() != null && getLeftOver().compareTo(getLeftOverCurrency().getAmount()) != 0) new ValidationExceptionVS(
-                "CurrencyTransactionBatch leftOverMissMatch, expected '" + getLeftOver().toString() +
-                        "found '" + getLeftOverCurrency().getAmount().toString() + "'");
-        return getCurrencyBatch();
-    }
-
-    public CurrencyBatch getCurrencyBatch() throws Exception {
-        CurrencyBatch currencyBatch = new CurrencyBatch();
-        currencyBatch.setOperation(operation);
-        currencyBatch.setSubject(subject);
-        currencyBatch.setToUserIBAN(toUserIBAN);
-        currencyBatch.setBatchAmount(batchAmount);
-        currencyBatch.setCurrencyAmount(currencyAmount);
-        currencyBatch.setCurrencyCode(currencyCode);
-        currencyBatch.setTag(tag);
-        currencyBatch.setCurrencyList(currencyList);
-        currencyBatch.setIsTimeLimited(isTimeLimited);
-        currencyBatch.setBatchUUID(batchUUID);
-        return currencyBatch;
-    }
-
-
     public void checkCurrencyData(Currency currency) throws ExceptionVS {
         String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
         if(getOperation() != currency.getOperation()) throw new ValidationExceptionVS(
@@ -136,13 +73,25 @@ public class CurrencyBatchDto {
                 currencyData + "expected batchUUID " + getBatchUUID() + " found " + currency.getBatchUUID());
     }
 
-
-    public BigDecimal getCurrencyAmount() {
-        return currencyAmount;
-    }
-
-    public void setCurrencyAmount(BigDecimal currencyAmount) {
-        this.currencyAmount = currencyAmount;
+    @JsonIgnore
+    public void validateResponse(CurrencyBatchResponseDto responseDto, Set<TrustAnchor> trustAnchor)
+            throws Exception {
+        SMIMEMessage receipt = new SMIMEMessage(Base64.decode(responseDto.getReceipt().getBytes()));
+        receipt.isValidSignature();
+        CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
+        if(responseDto.getLeftOverCert() != null) {
+            leftOverCurrency.initSigner(responseDto.getLeftOverCert().getBytes());
+        }
+        CurrencyBatchDto signedDto = receipt.getSignedContent(CurrencyBatchDto.class);
+        if(signedDto.getBatchAmount().compareTo(batchAmount) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+                "ERROR - batchAmount ''{0}'' - receipt amount ''{1}''", batchAmount, signedDto.getBatchAmount()));
+        if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationExceptionVS(MessageFormat.format(
+                "ERROR - batch currencyCode ''{0}'' - receipt currencyCode ''{1}''",  currencyCode, signedDto.getCurrencyCode()));
+        if(timeLimited != signedDto.timeLimited()) throw new ValidationExceptionVS(MessageFormat.format(
+                "ERROR - batch timeLimited ''{0}'' - receipt timeLimited ''{1}''",  timeLimited, signedDto.timeLimited()));
+        if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
+                "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
+        if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationExceptionVS("ERROR - currencySet mismatch");
     }
 
     public TypeVS getOperation() {
@@ -151,22 +100,6 @@ public class CurrencyBatchDto {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
-    }
-
-    public List<String> getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(List<String> currency) {
-        this.currency = currency;
-    }
-
-    public String getCsrCurrency() {
-        return csrCurrency;
-    }
-
-    public void setCsrCurrency(String csrCurrency) {
-        this.csrCurrency = csrCurrency;
     }
 
     public String getToUserIBAN() {
@@ -181,8 +114,9 @@ public class CurrencyBatchDto {
         return leftOverCurrency;
     }
 
-    public void setLeftOverCurrency(Currency leftOverCurrency) {
+    public void setLeftOverCurrency(Currency leftOverCurrency) throws Exception {
         this.leftOverCurrency = leftOverCurrency;
+        this.leftOverCSR = new String(leftOverCurrency.getCertificationRequest().getCsrPEM(), "UTF-8");
     }
 
     public String getSubject() {
@@ -217,12 +151,12 @@ public class CurrencyBatchDto {
         this.batchUUID = batchUUID;
     }
 
-    public Boolean isTimeLimited() {
-        return isTimeLimited;
+    public Boolean timeLimited() {
+        return timeLimited;
     }
 
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
+    public void setIsTimeLimited(Boolean timeLimited) {
+        this.timeLimited = timeLimited;
     }
 
     public BigDecimal getBatchAmount() {
@@ -241,28 +175,44 @@ public class CurrencyBatchDto {
         this.leftOver = leftOver;
     }
 
-    public AtomicBoolean getInitialized() {
-        return initialized;
-    }
-
-    public void setInitialized(AtomicBoolean initialized) {
-        this.initialized = initialized;
-    }
-
-    public List<Currency> getCurrencyList() {
-        return currencyList;
-    }
-
-    public void setCurrencyList(List<Currency> currencyList) {
-        this.currencyList = currencyList;
-    }
-
     public String getToUserName() {
         return toUserName;
     }
 
     public void setToUserName(String toUserName) {
         this.toUserName = toUserName;
+    }
+
+    public Set<String> getCurrencySet() {
+        return currencySet;
+    }
+
+    public void setCurrencySet(Set<String> currencySet) {
+        this.currencySet = currencySet;
+    }
+
+    public String getLeftOverCSR() {
+        return leftOverCSR;
+    }
+
+    public void setLeftOverCSR(String leftOverCSR) {
+        this.leftOverCSR = leftOverCSR;
+    }
+
+    public Boolean getTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(Boolean timeLimited) {
+        this.timeLimited = timeLimited;
+    }
+
+    public Collection<Currency> getCurrencyCollection() {
+        return currencyCollection;
+    }
+
+    public void setCurrencyCollection(Collection<Currency> currencyCollection) {
+        this.currencyCollection = currencyCollection;
     }
 
 }

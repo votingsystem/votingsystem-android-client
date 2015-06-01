@@ -3,13 +3,9 @@ package org.votingsystem.model;
 import android.content.Context;
 import android.util.Log;
 
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -31,9 +27,7 @@ import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +44,7 @@ public class Currency extends ReceiptWrapper {
     public enum State { OK, EXPENDED, LAPSED;}
 
     private Long localId = -1L;
+    private Long id;
     private TypeVS operation;
     private BigDecimal batchAmount;
     private TransactionVSDto transaction;
@@ -74,11 +69,13 @@ public class Currency extends ReceiptWrapper {
     private Boolean timeLimited = Boolean.FALSE;
     private Date validFrom;
     private Date validTo;
+    private Date dateCreated;
     private String toUserIBAN;
     private String toUserName;
     private String batchUUID;
     private CurrencyCertExtensionDto certExtensionDto;
-    private CurrencyDto certSubjectDto;
+    private Long serialNumber;
+    private byte[] content;
 
 
     public Currency() {}
@@ -97,6 +94,46 @@ public class Currency extends ReceiptWrapper {
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public Date getValidTo() {
+        return validTo;
+    }
+
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
+    }
+
+    public Long getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(Long serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public BigDecimal getBatchAmount() {
@@ -136,82 +173,52 @@ public class Currency extends ReceiptWrapper {
         this.smimeMessage = smimeReceipt;
     }
 
-    public TransactionVSDto getSendRequest(String toUserName, String toUserIBAN, String subject,
-                                           Boolean isTimeLimited) throws ExceptionVS {
-        this.toUserName = toUserName;
-        this.toUserIBAN = toUserIBAN;
-        this.subject = subject;
-        if(isTimeLimited == false && checkIfTimeLimited(x509AnonymousCert.getNotBefore(),
-                x509AnonymousCert.getNotAfter())) {
-            throw new ExceptionVS("Time limited Currency with 'isTimeLimited' signature param set to false");
-        }
-        return TransactionVSDto.CURRENCY_SEND(toUserName, subject, amount, currencyCode, toUserIBAN,
-                isTimeLimited, tag);
-    }
-
     public Currency(SMIMEMessage smimeMessage) throws Exception {
+        smimeMessage.isValidSignature();
         this.smimeMessage = smimeMessage;
-        x509AnonymousCert = smimeMessage.getCurrencyCert();
-        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                x509AnonymousCert, ContextVS.CURRENCY_OID);
-        initCertData(certExtensionDto, smimeMessage.getCurrencyCert().getSubjectDN().toString());
-        CurrencyBatchDto currencyBatchDto = JSON.readValue(smimeMessage.getSignedContent(), CurrencyBatchDto.class);
-        if(amount.compareTo(currencyBatchDto.getCurrencyAmount()) != 0) throw new ExceptionVS("Currency amount '" + amount +
-                "' CurrencyBatchDto amount  '" + currencyBatchDto.getCurrencyAmount() + "'");
-        this.batchAmount = currencyBatchDto.getBatchAmount();
-        this.batchUUID = currencyBatchDto.getBatchUUID();
-        this.operation = currencyBatchDto.getOperation();
-        if(TypeVS.CURRENCY_SEND != operation)
-            throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + currencyBatchDto.getOperation() + "'");
-        if(!this.currencyCode.equals(currencyBatchDto.getCurrencyCode())) {
+        initCertData(smimeMessage.getCurrencyCert());
+        CurrencyDto batchItemDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
+        this.batchUUID = batchItemDto.getBatchUUID();
+        this.batchAmount = batchItemDto.getBatchAmount();
+        if(TypeVS.CURRENCY_SEND != batchItemDto.getOperation())
+            throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + batchItemDto.getOperation() + "'");
+        if(!this.currencyCode.equals(batchItemDto.getCurrencyCode())) {
             throw new ExceptionVS(getErrorPrefix() +
-                    "expected currencyCode '" + currencyCode + "' - found: '" + currencyBatchDto.getCurrencyCode());
+                    "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());
         }
-        tag = currencyBatchDto.getTag();
+        tag = batchItemDto.getTag();
         if(!TagVSDto.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(tag))
             throw new ExceptionVS("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
-                    currencyBatchDto.getTag());
-        Date signatureTime = smimeMessage.getTimeStampToken(x509AnonymousCert).getTimeStampInfo().getGenTime();
+                    batchItemDto.getTag());
+
+        Date signatureTime = smimeMessage.getTimeStampToken(smimeMessage.getCurrencyCert())
+                .getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
-        this.subject = currencyBatchDto.getSubject();
-        this.toUserIBAN = currencyBatchDto.getToUserIBAN();
-        this.toUserName = currencyBatchDto.getToUserName();
-        this.timeLimited = currencyBatchDto.isTimeLimited();
+        this.subject = batchItemDto.getSubject();
+        this.toUserIBAN = batchItemDto.getToUserIBAN();
+        this.toUserName = batchItemDto.getToUserName();
+        this.timeLimited = batchItemDto.isTimeLimited();
     }
 
-    public SMIMEMessage getSmimeMessage() {
+
+    public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
 
-    public void setSmimeMessage(SMIMEMessage smimeMessage) {
+    public void setSMIME(SMIMEMessage smimeMessage) {
         this.smimeMessage = smimeMessage;
-    }
-
-    public Currency(PKCS10CertificationRequest csr) throws ExceptionVS, IOException {
-        this.csr = csr;
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        Enumeration csrAttributes = info.getAttributes().getObjects();
-        CurrencyCertExtensionDto certExtensionDto = null;
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            switch(attribute.getTagNo()) {
-                case ContextVS.CURRENCY_TAG:
-                    String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionDto = JSON.readValue(certAttributeJSONStr, CurrencyCertExtensionDto.class);
-                    break;
-            }
-        }
-        initCertData(certExtensionDto, info.getSubject().toString());
     }
 
     public void initSigner(byte[] csrBytes) throws Exception {
         setCertificationRequest(certificationRequest.initSigner(csrBytes));
     }
 
-    public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest) throws Exception {
+    public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest)
+            throws Exception {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
+        currency.initSigner(certificationRequest.getSignedCsr());
         return currency;
     }
 
@@ -243,23 +250,8 @@ public class Currency extends ReceiptWrapper {
         this.timeLimited = timeLimited;
     }
 
-    public void setCertificationRequest(CertificationRequestVS certificationRequest)
-            throws Exception {
+    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
         this.certificationRequest = certificationRequest;
-        x509AnonymousCert = certificationRequest.getCertificate();
-        if(x509AnonymousCert != null) {
-            validFrom = x509AnonymousCert.getNotBefore();
-            validTo = x509AnonymousCert.getNotAfter();
-            if(Calendar.getInstance().getTime().after(validTo) && state == State.OK) {
-                state = State.LAPSED;
-            }
-        }
-        CurrencyCertExtensionDto certExtensionData = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                x509AnonymousCert, ContextVS.CURRENCY_OID);
-        initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
-        certSubjectDto.setNotBefore(x509AnonymousCert.getNotBefore());
-        certSubjectDto.setNotAfter(x509AnonymousCert.getNotAfter());
-        state = State.OK;
     }
 
     public String getStateMsg(Context context) {
@@ -439,37 +431,32 @@ public class Currency extends ReceiptWrapper {
         this.transaction = transaction;
     }
 
-    public Currency initCertData(CurrencyCertExtensionDto certExtensionDto, String subjectDN) throws ExceptionVS {
+    public Currency initCertData(X509Certificate x509AnonymousCert) throws Exception {
+        this.x509AnonymousCert = x509AnonymousCert;
+        content = x509AnonymousCert.getEncoded();
+        serialNumber = x509AnonymousCert.getSerialNumber().longValue();
+        certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                x509AnonymousCert, ContextVS.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
-        this.certExtensionDto = certExtensionDto;
-        certSubjectDto = getCertSubjectDto(subjectDN, hashCertVS);
+        amount = certExtensionDto.getAmount();
+        currencyCode = certExtensionDto.getCurrencyCode();
         hashCertVS = certExtensionDto.getHashCertVS();
+        timeLimited = certExtensionDto.getTimeLimited();
+        tag = certExtensionDto.getTag();
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
+        validFrom = x509AnonymousCert.getNotBefore();
+        validTo = x509AnonymousCert.getNotAfter();
+        String subjectDN = x509AnonymousCert.getSubjectDN().toString();
+        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
         if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
             throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
-        amount = certExtensionDto.getAmount();
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
             throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + subjectDN);
-        currencyCode = certExtensionDto.getCurrencyCode();
         if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
             throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getTag().equals(certExtensionDto.getTag()))
             throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
-        tag = certExtensionDto.getTag();
         return this;
-    }
-
-    private CurrencyDto getCertSubjectDto(String subjectDN, String hashCertVS) {
-        CurrencyDto currencyDto = new CurrencyDto();
-        if (subjectDN.contains("CURRENCY_CODE:"))
-            currencyDto.setCurrencyCode(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]);
-        if (subjectDN.contains("CURRENCY_VALUE:"))
-            currencyDto.setAmount(new BigDecimal(subjectDN.split("CURRENCY_VALUE:")[1].split(",")[0]));
-        if (subjectDN.contains("TAG:")) currencyDto.setTag(subjectDN.split("TAG:")[1].split(",")[0]);
-        if (subjectDN.contains("currencyServerURL:"))
-            currencyDto.setCurrencyServerURL(subjectDN.split("currencyServerURL:")[1].split(",")[0]);
-        currencyDto.setHashCertVS(hashCertVS);
-        return currencyDto;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

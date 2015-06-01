@@ -244,7 +244,7 @@ public class MessageFragment extends Fragment {
             try {
                 SocketMessageDto socketMessageDto = null;
                 try {
-                    Wallet.updateWallet(new HashSet(Arrays.asList(currency)), appVS);
+                    Wallet.updateWallet(new HashSet(Arrays.asList(currency)));
                     String msg = getString(R.string.save_to_wallet_ok_msg, currency.getAmount().toString() + " " +
                             currency.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
                             MsgUtils.getTagVSMessage(currency.getTag(), appVS);

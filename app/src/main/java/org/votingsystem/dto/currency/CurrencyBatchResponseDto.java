@@ -2,29 +2,24 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.bouncycastle2.util.encoders.Base64;
+import org.votingsystem.signature.smime.SMIMEMessage;
+
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyBatchResponseDto {
 
-    private String leftOverCoin;
+    private String leftOverCert;
     private String receipt;
-
+    private String message;
 
     public CurrencyBatchResponseDto() {};
 
-    public CurrencyBatchResponseDto(String receipt, String leftOverCoin) {
-        this.receipt = receipt;
-        this.leftOverCoin = leftOverCoin;
-    }
-
-    public String getLeftOverCoin() {
-        return leftOverCoin;
-    }
-
-    public void setLeftOverCoin(String leftOverCoin) {
-        this.leftOverCoin = leftOverCoin;
+    public CurrencyBatchResponseDto(SMIMEMessage receipt, String leftOverCert) throws Exception {
+        this.receipt = new String(Base64.encode(receipt.getBytes()));
+        this.leftOverCert = leftOverCert;
     }
 
     public String getReceipt() {
@@ -34,4 +29,21 @@ public class CurrencyBatchResponseDto {
     public void setReceipt(String receipt) {
         this.receipt = receipt;
     }
+
+    public String getLeftOverCert() {
+        return leftOverCert;
+    }
+
+    public void setLeftOverCert(String leftOverCert) {
+        this.leftOverCert = leftOverCert;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 }

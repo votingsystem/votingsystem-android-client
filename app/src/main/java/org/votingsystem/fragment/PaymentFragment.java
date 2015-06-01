@@ -135,9 +135,7 @@ public class PaymentFragment extends Fragment {
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         payment_method_spinner.setAdapter(dataAdapter);
         try {
-            transactionDto = JSON.readValue(
-                    getArguments().getString(ContextVS.TRANSACTION_KEY),
-                    TransactionVSDto.class);
+            transactionDto = (TransactionVSDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
             receptor.setText(transactionDto.getToUser());
             subject.setText(transactionDto.getSubject());
             amount.setText(transactionDto.getAmount().toString());

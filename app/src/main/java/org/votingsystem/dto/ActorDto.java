@@ -1,16 +1,17 @@
 package org.votingsystem.dto;
 
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
 
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -44,6 +45,8 @@ public class ActorDto implements java.io.Serializable {
     private X509Certificate certificate;
     private Collection<X509Certificate> certChain;
     private X509Certificate timeStampCert = null;
+    private Set<TrustAnchor> trustAnchors;
+
 
     public String getWebSocketURL() {
         return webSocketURL;
@@ -211,6 +214,17 @@ public class ActorDto implements java.io.Serializable {
 
     public static String getServerInfoURL (String serverURL) {
         return StringUtils.checkURL(serverURL) + "/rest/serverInfo";
+    }
+
+    public Set<TrustAnchor> getTrustAnchors() throws Exception {
+        if(trustAnchors != null) return trustAnchors;
+        if(certChainPEM == null) return null;
+        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        trustAnchors = new HashSet<>();
+        for (X509Certificate cert:certChain) {
+            trustAnchors.add(new TrustAnchor(cert, null));
+        }
+        return trustAnchors;
     }
 
 }

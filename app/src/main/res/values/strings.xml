@@ -563,4 +563,5 @@
     <string name="currency_send_lbl">envío anónimo</string>
     <string name="transaction_request_confirm_msg">va a realizar un \'%1$s\' por valor de %2$s a %3$s</string>
     <string name="anonymous_signed_transaction_ok_msg">ha realizado un ingreso anónimo de \'%1$s\' a \'%2$s\'</string>
+    <string name="tagAmountErrorMsg">No dispone de dinero suficiente para hacer una transacción de \'%1$s\' con la etiqueta \'%2$s\'. Su máximo para la etiqueta \'%2$s\' es de \'%3$s\'</string>
 </resources>

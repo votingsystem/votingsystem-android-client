@@ -3,7 +3,9 @@ package org.votingsystem.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.WalletActivity;
@@ -32,6 +34,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -40,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -68,14 +72,8 @@ public class PaymentService extends IntentService {
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         String pin = arguments.getString(ContextVS.PIN_KEY);
         String hashCertVS = arguments.getString(ContextVS.HASH_CERTVS_KEY);
-        //String dtoStr = intent.getStringExtra(ContextVS.TRANSACTION_KEY);
-        TransactionVSDto transactionDto = (TransactionVSDto) intent.getSerializableExtra(ContextVS.TRANSACTION_KEY);
-        /*try {
-            if(dtoStr != null) {
-                transactionDto = JSON.readValue(dtoStr, TransactionVSDto.class);
-                operation = transactionDto.getOperation();
-            }
-        } catch(Exception ex) { ex.printStackTrace();}*/
+        TransactionVSDto transactionDto = (TransactionVSDto) intent.getSerializableExtra(
+                ContextVS.TRANSACTION_KEY);
         try {
             switch(operation) {
                 case CURRENCY_ACCOUNTS_INFO:
@@ -88,7 +86,7 @@ public class PaymentService extends IntentService {
                     currencyRequest(serviceCaller, transactionDto, pin);
                     break;
                 case FROM_USERVS:
-                case CURRENCY_BATCH:
+                case CURRENCY_SEND:
                     processTransaction(serviceCaller, transactionDto);
                     break;
                 case CASH_SEND:
@@ -104,7 +102,7 @@ public class PaymentService extends IntentService {
     }
 
     private void processTransaction(String serviceCaller, TransactionVSDto transactionDto) {
-        LOGD(TAG + ".processTransaction", "processTransaction - operation: " + transactionDto.getOperation());
+        LOGD(TAG + ".processTransaction", "operation: " + transactionDto.getOperation());
         UserVSDto userVS = PrefUtils.getSessionUserVS(this);
         ResponseVS responseVS = null;
         if(transactionDto.getDateCreated() != null && DateUtils.inRange(transactionDto.getDateCreated(),
@@ -169,11 +167,11 @@ public class PaymentService extends IntentService {
                 ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
                         new TypeReference<ResultListDto<String>>(){});
                 requestDto.loadCurrencyCerts(resultListDto.getResultList());
-                Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin, appVS);
+                Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin);
                 responseVS.setCaption(getString(R.string.currency_request_ok_caption)).setNotificationMessage(
                         getString(R.string.currency_request_ok_msg, requestDto.getTotalAmount(),
                         requestDto.getCurrencyCode()));
-                Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin, appVS);
+                Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin);
                 updateUserInfo(serviceCaller);
             } else responseVS.setCaption(getString(
                     R.string.currency_request_error_caption));
@@ -209,25 +207,19 @@ public class PaymentService extends IntentService {
         ResponseVS responseVS = null;
         try {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
-            CurrencyBundle currencyBundle = Wallet.getCurrencyBundleForTransaction(transactionDto);
+            CurrencyBundle currencyBundle = Wallet.getCurrencyBundleForTag(
+                    transactionDto.getCurrencyCode(), transactionDto.getTagName());
             CurrencyBatchDto requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto) responseVS.getMessage(CurrencyBatchDto.class);
-                Currency leftOverCurrency = null;
-                if(currencyBundle.getLeftOverCurrency() != null && responseDto.getLeftOverCoin() != null) {
-                    leftOverCurrency = currencyBundle.getLeftOverCurrency();
-                    leftOverCurrency.initSigner(responseDto.getLeftOverCoin().getBytes());
-                }
-                SMIMEMessage receipt = new SMIMEMessage(Base64.decode(responseDto.getReceipt()));
-                transactionDto.setReceipt(responseDto.getReceipt());
-                Set<Currency> currencyToRemove = currencyBundle.getCurrencySet();
-                Wallet.removeCurrencyCollection(currencyToRemove, appVS);
-                if(leftOverCurrency != null) Wallet.updateWallet(Arrays.asList(leftOverCurrency), appVS);
-                responseVS.setSMIME(receipt);
+                CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto)
+                        responseVS.getMessage(CurrencyBatchDto.class);
+                requestDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
+                Wallet.updateWallet(requestDto);
+
             } else if(ResponseVS.SC_CURRENCY_EXPENDED == responseVS.getStatusCode()) {
-                Currency expendedCurrency = Wallet.removeExpendedCurrency(responseVS.getMessage(), appVS);
+                Currency expendedCurrency = Wallet.removeExpendedCurrency(responseVS.getMessage());
                 responseVS.setMessage(getString(R.string.expended_currency_error_msg, expendedCurrency.
                         getAmount().toString() + " " + expendedCurrency.getCurrencyCode()));
             }
@@ -292,7 +284,7 @@ public class PaymentService extends IntentService {
                 } else currencyWithErrorList.add(responseHashCertVS);
             }
             if(currencyWithErrorList.size() > 0) {
-                currencyFromWalletWithErrors = Wallet.updateCurrencyWithErrors(currencyWithErrorList, appVS);
+                currencyFromWalletWithErrors = Wallet.updateCurrencyWithErrors(currencyWithErrorList);
             }
             if(currencyFromWalletWithErrors != null && !currencyFromWalletWithErrors.isEmpty()) {
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR, MsgUtils.getUpdateCurrencyWithErrorMsg(
@@ -304,7 +296,7 @@ public class PaymentService extends IntentService {
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 startActivity(intent);
             } else if(!currencyOKList.isEmpty()) {
-                Wallet.updateCurrencyState(currencyOKList, Currency.State.OK, appVS);
+                Wallet.updateCurrencyState(currencyOKList, Currency.State.OK);
                 responseVS = new ResponseVS(ResponseVS.SC_OK);
                 responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
                 appVS.broadcastResponse(responseVS);

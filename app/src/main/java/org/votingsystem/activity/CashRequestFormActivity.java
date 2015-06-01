@@ -32,7 +32,6 @@ import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectTagVSDialogFragment;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -188,7 +187,7 @@ public class CashRequestFormActivity extends AppCompatActivity {
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.PIN_KEY, pin);
         try {
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, JSON.writeValueAsString(transactionDto));
+            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionDto);
         } catch (Exception ex) { ex.printStackTrace();}
         setProgressDialogVisible(true, getString(R.string.currency_request_msg_subject),
                 MsgUtils.getCurrencyRequestMessage(transactionDto, this));
