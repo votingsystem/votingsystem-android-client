@@ -22,7 +22,6 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.activity.CurrencyActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.IncomesDto;
@@ -56,38 +55,37 @@ public class WalletFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                switch(responseVS.getTypeVS()) {
-                    case CURRENCY:
-                        try {
-                            currencyList = new ArrayList<>(Wallet.getCurrencySet((String) responseVS.getData(),
-                                    (AppVS) getActivity().getApplicationContext()));
-                            Utils.launchCurrencyStatusCheck(broadCastId, null, getActivity());
-                            printSummary();
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                    getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
-                        }
-                        break;
-                }
-            } else {
-                switch(responseVS.getTypeVS()) {
-                    case CURRENCY_CHECK:
-                        currencyList = new ArrayList<>(Wallet.getCurrencySet());
+        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            switch(responseVS.getTypeVS()) {
+                case CURRENCY:
+                    try {
+                        currencyList = new ArrayList<>(Wallet.getCurrencySet((String) responseVS.getData()));
+                        Utils.launchCurrencyStatusCheck(broadCastId, null, getActivity());
                         printSummary();
-                        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                    getString(R.string.error_lbl), responseVS.getMessage(),
-                                    getFragmentManager());
-                        }
-                        break;
-                    case CURRENCY_ACCOUNTS_INFO:
-                        break;
-                }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+                    }
+                    break;
             }
+        } else {
+            switch(responseVS.getTypeVS()) {
+                case CURRENCY_CHECK:
+                    currencyList = new ArrayList<>(Wallet.getCurrencySet());
+                    printSummary();
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                getString(R.string.error_lbl), responseVS.getMessage(),
+                                getFragmentManager());
+                    }
+                    break;
+                case CURRENCY_ACCOUNTS_INFO:
+                    break;
+            }
+        }
         }
     };
 

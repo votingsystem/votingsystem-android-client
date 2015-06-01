@@ -49,9 +49,9 @@ public class Wallet {
         return result;
     }
 
-    public static Set<Currency> getCurrencySet(String pin, AppVS context) throws Exception {
-        Set<CurrencyDto> currencyDtoList = getWallet(pin, context);
-        currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
+    public static Set<Currency> getCurrencySet(String pin) throws Exception {
+        Set<CurrencyDto> currencyDtoSet = getWallet(pin);
+        currencySet = CurrencyDto.deSerializeCollection(currencyDtoSet);
         return new HashSet<>(currencySet);
     }
 
@@ -152,24 +152,24 @@ public class Wallet {
         return result;
     }
 
-    public static Set<CurrencyDto> getWallet(String pin, AppVS context) throws Exception {
-        byte[] walletBytes = getWalletBytes(pin, context);
+    public static Set<CurrencyDto> getWallet(String pin) throws Exception {
+        byte[] walletBytes = getWalletBytes(pin);
         if(walletBytes == null) return new HashSet<>();
         else return JSON.readValue(walletBytes, new TypeReference<Set<CurrencyDto>>(){});
     }
 
-    private static byte[] getWalletBytes(String pin, AppVS context) throws Exception {
+    private static byte[] getWalletBytes(String pin) throws Exception {
         if(pin != null) {
-            String storedPinHash = PrefUtils.getPinHash(context);
+            String storedPinHash = PrefUtils.getPinHash(AppVS.getInstance());
             String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
-                throw new ExceptionVS(context.getString(R.string.pin_error_msg));
+                throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
             }
         }
         try {
-            String walletBase64 = PrefUtils.getWallet(context);
+            String walletBase64 = PrefUtils.getWallet(AppVS.getInstance());
             if(walletBase64 == null) return null;
-            else return context.decryptMessage(walletBase64.getBytes());
+            else return AppVS.getInstance().decryptMessage(walletBase64.getBytes());
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

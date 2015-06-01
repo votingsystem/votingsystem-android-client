@@ -22,7 +22,6 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.activity.CashRequestFormActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
@@ -80,8 +79,7 @@ public class PaymentFragment extends Fragment {
                         break;
                     case CURRENCY:
                         try {
-                            Set<Currency> currencySet = Wallet.getCurrencySet((String) responseVS.getData(),
-                                    (AppVS) getActivity().getApplicationContext());
+                            Set<Currency> currencySet = Wallet.getCurrencySet((String) responseVS.getData());
                             submitForm();
                         } catch(Exception ex) { ex.printStackTrace(); }
                         break;

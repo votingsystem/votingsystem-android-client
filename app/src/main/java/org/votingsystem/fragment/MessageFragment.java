@@ -84,8 +84,7 @@ public class MessageFragment extends Fragment {
             switch(responseVS.getTypeVS()) {
                 case CURRENCY:
                     try {
-                        Set<Currency> currencyList = Wallet.getCurrencySet((String) responseVS.getData(),
-                                (AppVS) getActivity().getApplicationContext());
+                        Set<Currency> currencyList = Wallet.getCurrencySet((String) responseVS.getData());
                         if(currencyList != null) updateWallet();
                     } catch (Exception ex) {
                         ex.printStackTrace();

@@ -2,13 +2,11 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
@@ -19,7 +17,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.TypeVS;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -47,7 +44,6 @@ public class Currency extends ReceiptWrapper {
     private Long id;
     private TypeVS operation;
     private BigDecimal batchAmount;
-    private TransactionVSDto transaction;
     private transient SMIMEMessage receipt;
     private transient SMIMEMessage cancellationReceipt;
     private transient SMIMEMessage smimeMessage;
@@ -210,8 +206,9 @@ public class Currency extends ReceiptWrapper {
         this.smimeMessage = smimeMessage;
     }
 
-    public void initSigner(byte[] csrBytes) throws Exception {
-        setCertificationRequest(certificationRequest.initSigner(csrBytes));
+    public void initSigner (byte[] signedCsr) throws Exception {
+        certificationRequest.initSigner(signedCsr);
+        initCertData(certificationRequest.getCertificate());
     }
 
     public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest)
@@ -421,14 +418,6 @@ public class Currency extends ReceiptWrapper {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
-    }
-
-    public TransactionVSDto getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(TransactionVSDto transaction) {
-        this.transaction = transaction;
     }
 
     public Currency initCertData(X509Certificate x509AnonymousCert) throws Exception {
