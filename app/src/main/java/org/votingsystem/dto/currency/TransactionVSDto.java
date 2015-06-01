@@ -69,7 +69,7 @@ public class TransactionVSDto implements Serializable{
     private Integer numReceptors;
     private Type type;
     private Set<String> tags;
-    private List<String> toUserIBAN = new ArrayList<>();
+    private Set<String> toUserIBAN = new HashSet<>();
     private Long numChildTransactions;
 
     private String infoURL;
@@ -97,7 +97,7 @@ public class TransactionVSDto implements Serializable{
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setToUserIBAN(new HashSet<String>(Arrays.asList(toUserIBAN)));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
@@ -361,11 +361,11 @@ public class TransactionVSDto implements Serializable{
         this.tagVS = tagVS;
     }
 
-    public List<String> getToUserIBAN() {
+    public Set<String> getToUserIBAN() {
         return toUserIBAN;
     }
 
-    public void setToUserIBAN(List<String> toUserIBAN) {
+    public void setToUserIBAN(Set<String> toUserIBAN) {
         this.toUserIBAN = toUserIBAN;
     }
 

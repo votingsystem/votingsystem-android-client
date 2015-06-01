@@ -74,13 +74,14 @@ public class CurrencyBatchDto {
     }
 
     @JsonIgnore
-    public void validateResponse(CurrencyBatchResponseDto responseDto, Set<TrustAnchor> trustAnchor)
-            throws Exception {
+    public SMIMEMessage validateResponse(CurrencyBatchResponseDto responseDto,
+            Set<TrustAnchor> trustAnchor) throws Exception {
         SMIMEMessage receipt = new SMIMEMessage(Base64.decode(responseDto.getReceipt().getBytes()));
         receipt.isValidSignature();
         CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
         if(responseDto.getLeftOverCert() != null) {
             leftOverCurrency.initSigner(responseDto.getLeftOverCert().getBytes());
+            leftOverCurrency.setState(Currency.State.OK);
         }
         CurrencyBatchDto signedDto = receipt.getSignedContent(CurrencyBatchDto.class);
         if(signedDto.getBatchAmount().compareTo(batchAmount) != 0) throw new ValidationExceptionVS(MessageFormat.format(
@@ -92,6 +93,8 @@ public class CurrencyBatchDto {
         if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
         if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationExceptionVS("ERROR - currencySet mismatch");
+        receipt.setHeader("TypeVS", signedDto.getOperation().toString());
+        return receipt;
     }
 
     public TypeVS getOperation() {

@@ -190,7 +190,7 @@ public class PaymentService extends IntentService {
         ResponseVS responseVS = null;
         try {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
-            SMIMEMessage smimeMessage = appVS.signMessage(transactionDto.getToUserIBAN().get(0),
+            SMIMEMessage smimeMessage = appVS.signMessage(transactionDto.getToUserIBAN().iterator().next(),
                     JSON.writeValueAsString(transactionDto), getString(R.string.FROM_USERVS_msg_subject));
             responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
                     ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionVSServiceURL());
@@ -215,9 +215,10 @@ public class PaymentService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto)
                         responseVS.getMessage(CurrencyBatchResponseDto.class);
-                requestDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
+                SMIMEMessage smimeMessage = requestDto.validateResponse(responseDto,
+                        currencyServer.getTrustAnchors());
+                responseVS.setSMIME(smimeMessage);
                 Wallet.updateWallet(requestDto);
-
             } else if(ResponseVS.SC_CURRENCY_EXPENDED == responseVS.getStatusCode()) {
                 Currency expendedCurrency = Wallet.removeExpendedCurrency(responseVS.getMessage());
                 responseVS.setMessage(getString(R.string.expended_currency_error_msg, expendedCurrency.

@@ -102,7 +102,7 @@ public class MsgUtils {
     public static String getAnonymousSignedTransactionOKMsg(TransactionVSDto transactionRequest,
                  Context context) {
         String toUser = transactionRequest.getToUser() != null?
-                transactionRequest.getToUser(): transactionRequest.getToUserIBAN().get(0);
+                transactionRequest.getToUser(): transactionRequest.getToUserIBAN().iterator().next();
         return context.getString(R.string.anonymous_signed_transaction_ok_msg,
                 transactionRequest.getAmount().toString() + " " + transactionRequest.getCurrencyCode(),
                 toUser);

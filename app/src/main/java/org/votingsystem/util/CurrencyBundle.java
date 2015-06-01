@@ -91,14 +91,15 @@ public class CurrencyBundle {
 
     public CurrencyBatchDto getCurrencyBatchDto(TransactionVSDto transactionDto) throws Exception {
         return getCurrencyBatchDto(transactionDto.getOperation(),
-                transactionDto.getSubject(), transactionDto.getToUserIBAN().get(0),
+                transactionDto.getSubject(), transactionDto.getToUserIBAN().iterator().next(),
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                transactionDto.getTagVS().getName(), transactionDto.isTimeLimited());
+                transactionDto.getTagVS().getName(), transactionDto.isTimeLimited(),
+                transactionDto.getUUID());
     }
     
     public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, String subject,
             String toUserIBAN, BigDecimal batchAmount, String currencyCode, String tag, 
-            Boolean timeLimited) throws Exception {
+            Boolean timeLimited, String uuid) throws Exception {
         if(!currencyCode.equals(this.currencyCode)) throw new ValidationExceptionVS(
                 "Bundle with currencyCode: " + this.currencyCode + " can't handle currencyCode: " + currencyCode);
         if(!tag.equals(this.tagVS)) throw new ValidationExceptionVS(
@@ -111,7 +112,8 @@ public class CurrencyBundle {
         dto.setCurrencyCode(currencyCode);
         dto.setTag(tag);
         dto.setTimeLimited(timeLimited);
-        dto.setBatchUUID(UUID.randomUUID().toString());
+        if(uuid == null) dto.setBatchUUID(UUID.randomUUID().toString());
+        else dto.setBatchUUID(uuid);
         Set<String> currencySetSignatures = new HashSet<>();
         Set<Currency> currencySet = new HashSet<>();
 
