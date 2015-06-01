@@ -97,19 +97,19 @@ public class Wallet {
         return currencyMap;
     }
 
-    public static Set<Currency> updateCurrencyWithErrors(List<String> currencySetToRemove)
+    public static Set<Currency> updateCurrencyWithErrors(Collection<String> currencyColToRemove)
             throws Exception {
-        Set<Currency> errorList = new HashSet<>();
+        Set<Currency> removedSet = new HashSet<>();
         Map<String, Currency> currencyMap = getCurrencyMap();
-        for(String hashCertVS : currencySetToRemove) {
+        for(String hashCertVS : currencyColToRemove) {
             Currency removedCurrency = currencyMap.remove(hashCertVS);
             if(removedCurrency != null)  {
                 LOGD(TAG +  ".updateCurrencyWithErrors", "removed currency: " + hashCertVS);
-                errorList.add(removedCurrency);
+                removedSet.add(removedCurrency);
             }
         }
-        Wallet.saveWallet(currencySet, null);
-        return errorList;
+        Wallet.saveWallet(currencyMap.values(), null);
+        return removedSet;
     }
 
     public static void updateCurrencyState(List<String> currencySetOK, Currency.State state)
@@ -122,7 +122,7 @@ public class Wallet {
                 currency.setState(Currency.State.OK);
             }
         }
-        Wallet.saveWallet(currencySet, null);
+        Wallet.saveWallet(currencyMap.values(), null);
     }
 
     public static Map<String, Map<String, IncomesDto>> getCurrencyTagMap() {

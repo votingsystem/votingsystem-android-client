@@ -217,7 +217,7 @@ public class WalletFragment extends Fragment {
             LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);
             linearLayout.setBackgroundColor(Color.WHITE);
             TextView date_data = (TextView)view.findViewById(R.id.date_data);
-            date_data.setText(DateUtils.getDayWeekDateStr(currency.getDateFrom()));
+            date_data.setText(DateUtils.getDayWeekDateSimpleStr(currency.getDateFrom()));
 
             TextView currency_state = (TextView) view.findViewById(R.id.currency_state);
             currency_state.setText(currency.getStateMsg(getActivity()));

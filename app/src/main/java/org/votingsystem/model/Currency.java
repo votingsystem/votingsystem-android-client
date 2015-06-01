@@ -197,7 +197,6 @@ public class Currency extends ReceiptWrapper {
         this.timeLimited = batchItemDto.isTimeLimited();
     }
 
-
     public SMIMEMessage getSMIME() {
         return smimeMessage;
     }

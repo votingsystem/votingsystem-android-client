@@ -31,6 +31,7 @@ public class CurrencyDto implements Serializable {
     private Long id;
     private BigDecimal amount;
     private BigDecimal batchAmount;
+    private Currency.State state;
     private String currencyCode;
     private String currencyServerURL;
     private String hashCertVS;
@@ -91,6 +92,7 @@ public class CurrencyDto implements Serializable {
         currencyDto.setCurrencyCode(currency.getCurrencyCode());
         currencyDto.setHashCertVS(currency.getHashCertVS());
         currencyDto.setTag(currency.getTag());
+        currencyDto.setState(currency.getState());
         currencyDto.setTimeLimited(currency.isTimeLimited());
         //CertificationRequestVS instead of Currency to make it easier deserialization on JavaFX
         currencyDto.setObject(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
@@ -113,7 +115,9 @@ public class CurrencyDto implements Serializable {
         try {
             CertificationRequestVS certificationRequestVS =
                     (CertificationRequestVS) ObjectUtils.deSerializeObject(object.getBytes());
-            return Currency.fromCertificationRequestVS(certificationRequestVS);
+            Currency currency = Currency.fromCertificationRequestVS(certificationRequestVS);
+            currency.setState(state);
+            return currency;
         }catch (Exception ex) {
             return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
         }
@@ -296,4 +300,11 @@ public class CurrencyDto implements Serializable {
         return currencyDto;
     }
 
+    public Currency.State getState() {
+        return state;
+    }
+
+    public void setState(Currency.State state) {
+        this.state = state;
+    }
 }

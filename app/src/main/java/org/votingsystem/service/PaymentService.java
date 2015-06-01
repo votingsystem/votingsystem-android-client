@@ -214,7 +214,7 @@ public class PaymentService extends IntentService {
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto)
-                        responseVS.getMessage(CurrencyBatchDto.class);
+                        responseVS.getMessage(CurrencyBatchResponseDto.class);
                 requestDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
                 Wallet.updateWallet(requestDto);
 
@@ -263,39 +263,42 @@ public class PaymentService extends IntentService {
         LOGD(TAG + ".checkCurrency", "checkCurrency");
         ResponseVS responseVS = null;
         try {
-            Set<String> hashCertVSList = null;
-            if(hashCertVS != null) hashCertVSList = new HashSet<>(Arrays.asList(hashCertVS));
-            else hashCertVSList = Wallet.getHashCertVSSet();
-            if(hashCertVSList == null) {
-                LOGD(TAG + ".checkCurrency", "empty hashCertVSList");
+            Set<String> hashCertVSSet = null;
+            if(hashCertVS != null) hashCertVSSet = new HashSet<>(Arrays.asList(hashCertVS));
+            else hashCertVSSet = Wallet.getHashCertVSSet();
+            if(hashCertVSSet == null) {
+                LOGD(TAG + ".checkCurrency", "empty hashCertVSSet");
                 return;
             }
             Map<String, Currency.State> responseDto =  HttpHelper.sendData(
                     new TypeReference<Map<String, Currency.State>>() {},
-                    JSON.writeValueAsBytes(hashCertVSList),
+                    JSON.writeValueAsBytes(hashCertVSSet),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
                     MediaTypeVS.JSON);
             List<String> currencyWithErrorList = new ArrayList<>();
             List<String> currencyOKList = new ArrayList<>();
-            Set<Currency> currencyFromWalletWithErrors = null;
+            Set<Currency> removedSet = null;
             for(String responseHashCertVS: responseDto.keySet()) {
                 if(Currency.State.OK == responseDto.get(responseHashCertVS)) {
                     currencyOKList.add(responseHashCertVS);
                 } else currencyWithErrorList.add(responseHashCertVS);
             }
             if(currencyWithErrorList.size() > 0) {
-                currencyFromWalletWithErrors = Wallet.updateCurrencyWithErrors(currencyWithErrorList);
+                removedSet = Wallet.updateCurrencyWithErrors(currencyWithErrorList);
             }
-            if(currencyFromWalletWithErrors != null && !currencyFromWalletWithErrors.isEmpty()) {
+            if(removedSet != null && !removedSet.isEmpty()) {
+                for(Currency currency : removedSet) {
+                    currency.setState(responseDto.get(currency.getHashCertVS()));
+                }
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR, MsgUtils.getUpdateCurrencyWithErrorMsg(
-                        currencyFromWalletWithErrors, appVS));
+                        removedSet, appVS));
                 responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
                         serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
                 Intent intent = new Intent(this, WalletActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 startActivity(intent);
-            } else if(!currencyOKList.isEmpty()) {
+            } else {
                 Wallet.updateCurrencyState(currencyOKList, Currency.State.OK);
                 responseVS = new ResponseVS(ResponseVS.SC_OK);
                 responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);

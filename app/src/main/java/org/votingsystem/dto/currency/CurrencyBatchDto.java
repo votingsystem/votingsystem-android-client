@@ -87,7 +87,7 @@ public class CurrencyBatchDto {
                 "ERROR - batchAmount ''{0}'' - receipt amount ''{1}''", batchAmount, signedDto.getBatchAmount()));
         if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch currencyCode ''{0}'' - receipt currencyCode ''{1}''",  currencyCode, signedDto.getCurrencyCode()));
-        if(timeLimited != signedDto.timeLimited()) throw new ValidationExceptionVS(MessageFormat.format(
+        if(timeLimited.booleanValue() != signedDto.timeLimited().booleanValue()) throw new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch timeLimited ''{0}'' - receipt timeLimited ''{1}''",  timeLimited, signedDto.timeLimited()));
         if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
@@ -115,6 +115,7 @@ public class CurrencyBatchDto {
     }
 
     public void setLeftOverCurrency(Currency leftOverCurrency) throws Exception {
+        this.leftOver = leftOverCurrency.getAmount();
         this.leftOverCurrency = leftOverCurrency;
         this.leftOverCSR = new String(leftOverCurrency.getCertificationRequest().getCsrPEM(), "UTF-8");
     }
