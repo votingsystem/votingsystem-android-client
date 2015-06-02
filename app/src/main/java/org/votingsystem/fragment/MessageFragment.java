@@ -246,7 +246,7 @@ public class MessageFragment extends Fragment {
                     Wallet.updateWallet(new HashSet(Arrays.asList(currency)));
                     String msg = getString(R.string.save_to_wallet_ok_msg, currency.getAmount().toString() + " " +
                             currency.getCurrencyCode()) + " " + getString(R.string.for_lbl)  + " " +
-                            MsgUtils.getTagVSMessage(currency.getTag(), appVS);
+                            MsgUtils.getTagVSMessage(currency.getTag());
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                             getString(R.string.save_to_wallet_lbl), msg, getActivity());
                     builder.setPositiveButton(getString(R.string.accept_lbl),
@@ -267,8 +267,8 @@ public class MessageFragment extends Fragment {
                 }
                 if(socketMessageDto != null) {
                     Intent startIntent = new Intent(getActivity(), WebSocketService.class);
-                    startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_RESPONSE);
-                    startIntent.putExtra(ContextVS.WEBSOCKET_MSG_KEY,
+                    startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessageDto.getOperation());
+                    startIntent.putExtra(ContextVS.MESSAGE_KEY,
                             JSON.writeValueAsString(socketMessageDto));
                     startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                     getActivity().startService(startIntent);

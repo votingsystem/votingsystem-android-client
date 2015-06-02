@@ -18,6 +18,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.voting.AccessControlDto;
@@ -80,8 +81,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
 
     private State state = State.WITHOUT_CSR;
     private boolean withSocketConnection;
-    private static final Map<String, ActorDto> serverMap = new HashMap<String, ActorDto>();
-    private static final Map<String, WebSocketSession> sessionsMap = new HashMap<String, WebSocketSession>();
+    private static final Map<String, ActorDto> serverMap = new HashMap<>();
+    private static final Map<String, WebSocketSession> sessionsMap = new HashMap<>();
+    private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
     private AccessControlDto accessControl;
     private String accessControlURL;
     private ControlCenterDto controlCenter;
@@ -90,7 +92,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private UserVSDto userVS;
     private DeviceVSDto connectedDevice;
     private X509Certificate sslServerCert;
-    private Map<String, X509Certificate> certsMap = new HashMap<String, X509Certificate>();
+    private Map<String, X509Certificate> certsMap = new HashMap<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
 
     private static AppVS INSTANCE;
@@ -281,6 +283,18 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         } catch(Exception ex) {
             LOGE(TAG + ".getActorDtoFromURL", "ERROR fetching: " + serverURL);
         } finally { return targetServer; }
+    }
+
+    public void putQRMessage(QRMessageDto messageDto) {
+        qrMessagesMap.put(messageDto.getUUID(), messageDto);
+    }
+
+    public QRMessageDto getQRMessage(String uuid) {
+        return qrMessagesMap.get(uuid);
+    }
+
+    public QRMessageDto removeQRMessage(String uuid) {
+        return qrMessagesMap.remove(uuid);
     }
 
     public void putWSSession(String UUID, WebSocketSession session) {

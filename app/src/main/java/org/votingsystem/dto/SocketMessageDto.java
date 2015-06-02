@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
@@ -247,6 +248,14 @@ public class SocketMessageDto implements Serializable {
 
     public String getMessage() {
         return message;
+    }
+
+    public <S> S getMessage(Class<S> type) throws Exception {
+        return JSON.readValue(message, type);
+    }
+
+    public <T> T getMessage(TypeReference<T> type) throws Exception {
+        return JSON.readValue(message, type);
     }
 
     public void setMessage(String message) {

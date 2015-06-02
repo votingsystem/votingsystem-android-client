@@ -21,6 +21,8 @@ import android.widget.Spinner;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -142,11 +144,11 @@ public class QRGeneratorFormFragment extends Fragment {
             return;
         }
         Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-        String qrMessage = String.format("operation=%s;;;amount=%s_%s_WILDTAG;",
-                OPERATION_ARRAY[operationSpinner.getSelectedItemPosition()].toString() ,
-                amount_text.getText(), currencySpinner.getSelectedItem());
-        LOGD(TAG + ".generateQR", "qrMessage: " + qrMessage);
-        intent.putExtra(ContextVS.MESSAGE_KEY, qrMessage);
+        TransactionVSDto dto = new TransactionVSDto();
+        dto.setAmount(new BigDecimal(amount_text.getText().toString()));
+        dto.setCurrencyCode(currencySpinner.getSelectedItem().toString());
+        dto.setTagVS(new TagVSDto(TagVSDto.WILDTAG));
+        intent.putExtra(ContextVS.TRANSACTION_KEY, dto);
         intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFragment.class.getName());
         startActivity(intent);
     }

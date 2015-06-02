@@ -15,13 +15,17 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.SMIMESignerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
@@ -34,7 +38,6 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -45,7 +48,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
@@ -53,7 +55,6 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.util.LogUtils.LOGE;
 
@@ -334,6 +335,64 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case TRANSACTIONVS_INFO:
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
+                        dto.setSocketMessageDto(socketMsg);
+                        Intent resultIntent = new Intent(this, FragmentContainerActivity.class);
+                        resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
+                        resultIntent.putExtra(ContextVS.TRANSACTION_KEY, dto);
+                        resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(resultIntent);
+                    } else {
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                                getString(R.string.error_lbl));
+                    }
+                    break;
+                case QR_MESSAGE_INFO:
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        SocketMessageDto msgDto = null;
+                        try {
+                            QRMessageDto<TransactionVSDto> qrDto = AppVS.getInstance().getQRMessage(
+                                    socketMsg.getMessage());
+
+                            //socketMsg.getContent().getHashCertVS();
+
+                            TransactionVSDto transactionDto = qrDto.getData();
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
+                                    JSON.writeValueAsString(transactionDto), TypeVS.TRANSACTIONVS_INFO);
+                            socketSession.setData(qrDto);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
+                                    ex.getMessage(), TypeVS.QR_MESSAGE_INFO);
+                        } finally {
+                            session.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
+                        }
+                    } else {
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                                getString(R.string.error_lbl));
+                    }
+                    break;
+                case TRANSACTIONVS_RESPONSE:
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        try {
+                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
+                            QRMessageDto<TransactionVSDto> qrDto =
+                                    (QRMessageDto<TransactionVSDto>) socketSession.getData();
+                            TransactionVSDto transactionDto = qrDto.getData();
+                            String result = transactionDto.validateReceipt(smimeMessage);
+                            UIUtils.launchMessageActivity(ResponseVS.SC_OK, result,
+                                    getString(R.string.error_lbl));
+                            AppVS.getInstance().removeQRMessage(qrDto.getUUID());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
+                                    getString(R.string.error_lbl));
+                        }
+                    } else {
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                                getString(R.string.error_lbl));
+                    }
                     break;
                 case OPERATION_CANCELED:
                     socketMsg.setOperation(socketSession.getTypeVS());

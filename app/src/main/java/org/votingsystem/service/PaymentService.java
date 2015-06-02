@@ -12,6 +12,7 @@ import org.votingsystem.activity.WalletActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
@@ -119,15 +120,29 @@ public class PaymentService extends IntentService {
                             String base64Receipt = resultList.getResultList().iterator().next().getMessageSMIME();
                             SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt));
                             receipt.isValidSignature();
-                            responseVS = HttpHelper.sendData(receipt.getBytes(),
-                                    ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                            if(transactionDto.getSocketMessageDto() != null) {
+                                SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
+                                        .getResponse(ResponseVS.SC_OK, null, TypeVS.TRANSACTIONVS_RESPONSE);
+                                socketRespDto.setSMIME(receipt);
+                                sendSocketMessage(socketRespDto);
+                            } else {
+                                responseVS = HttpHelper.sendData(receipt.getBytes(),
+                                        ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                            }
                         }
                         break;
                     case CURRENCY_SEND:
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
-                                    ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                            if(transactionDto.getSocketMessageDto() != null) {
+                                SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
+                                        .getResponse(ResponseVS.SC_OK, null, TypeVS.TRANSACTIONVS_RESPONSE);
+                                socketRespDto.setSMIME(responseVS.getSMIME());
+                                sendSocketMessage(socketRespDto);
+                            } else {
+                                responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                                        ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                            }
                             responseVS.setMessage(MsgUtils.getAnonymousSignedTransactionOKMsg(
                                     transactionDto, this));
                         }
@@ -145,6 +160,17 @@ public class PaymentService extends IntentService {
                 getString(R.string.payment_session_expired_msg));
         appVS.broadcastResponse(Utils.getBroadcastResponse(transactionDto.getOperation(),
                 serviceCaller, responseVS, appVS));
+    }
+
+    private void sendSocketMessage(SocketMessageDto socketMessage) {
+        LOGD(TAG + ".sendSocketMessage() ", "sendSocketMessage");
+        try {
+            Intent startIntent = new Intent(this, WebSocketService.class);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
+            startIntent.putExtra(ContextVS.MESSAGE_KEY,
+                    JSON.writeValueAsString(socketMessage));
+            startService(startIntent);
+        } catch (Exception ex) { ex.printStackTrace();}
     }
 
     private ResponseVS currencyRequest(String serviceCaller, TransactionVSDto transactionDto,

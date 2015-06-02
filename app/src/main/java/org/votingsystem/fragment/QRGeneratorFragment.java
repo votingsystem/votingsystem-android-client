@@ -11,16 +11,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
-import com.google.zxing.WriterException;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.QRMessageVS;
+import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.QRUtils;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+
+import java.util.Arrays;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -34,7 +36,7 @@ public class QRGeneratorFragment extends Fragment {
     private AppVS appVS;
     private String broadCastId = QRGeneratorFragment.class.getSimpleName();
     private View rootView;
-    private QRMessageVS qrMessageVS;
+    private QRMessageDto qrDto;
 
     @Override public View onCreateView(LayoutInflater inflater,
                ViewGroup container, Bundle savedInstanceState) {
@@ -43,25 +45,26 @@ public class QRGeneratorFragment extends Fragment {
         appVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.qr_generator_fragment, container, false);
         Intent intent = getActivity().getIntent();
-        String qrMessage = intent.getStringExtra(ContextVS.MESSAGE_KEY);
-        try {
-            qrMessageVS = new QRMessageVS(qrMessage);
-        } catch (ExceptionVS ex) {
-            ex.printStackTrace();
-        }
-        LOGD(TAG + ".onCreateView", "qrMessage: " + qrMessage);
+        TransactionVSDto dto = (TransactionVSDto) intent.getSerializableExtra(
+                ContextVS.TRANSACTION_KEY);
+        dto.setPaymentOptions(Arrays.asList(TransactionVSDto.Type.FROM_USERVS,
+                TransactionVSDto.Type.CURRENCY_SEND, TransactionVSDto.Type.CURRENCY_CHANGE));
+        qrDto = new QRMessageDto(AppVS.getInstance().getConnectedDevice(), TypeVS.TRANSACTIONVS_INFO);
+        qrDto.setData(dto);
         Bitmap bitmap = null;
         try {
-            bitmap = QRUtils.encodeAsBitmap(qrMessage, getActivity());
-        } catch (WriterException ex) {
+            bitmap = QRUtils.encodeAsBitmap(JSON.writeValueAsString(qrDto), getActivity());
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         ImageView view = (ImageView) rootView.findViewById(R.id.image_view);
         view.setImageBitmap(bitmap);
         setHasOptionsMenu(true);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_code_lbl));
+        AppVS.getInstance().putQRMessage(qrDto);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_code_lbl));
         ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(
-                getOperationMessage(qrMessageVS));
+                getString(R.string.qr_transactionvs_request_msg, dto.getAmount() + " " + dto.getCurrencyCode(),
+                MsgUtils.getTagVSMessage(dto.getTagName())));
         if(!appVS.isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.qr_code_lbl), getString(R.string.qr_connection_required_msg),
@@ -74,18 +77,6 @@ public class QRGeneratorFragment extends Fragment {
             UIUtils.showMessageDialog(builder);
         }
         return rootView;
-    }
-
-    private String getOperationMessage(QRMessageVS qrMessageVS) {
-        switch(qrMessageVS.getOperation()) {
-            case CURRENCY_CHANGE:
-                return getString(R.string.currency_ticket_request_qr_msg) + " - " +
-                        qrMessageVS.getAmount().toPlainString() + " " + qrMessageVS.getCurrencyCode() +
-                        " " + qrMessageVS.getTag();
-            case FROM_USERVS:
-                return getString(R.string.transactionvs_qr_msg);
-            default: return qrMessageVS.getOperation().toString();
-        }
     }
 
 }

@@ -2,13 +2,13 @@ package org.votingsystem.dto.currency;
 
 import android.content.Context;
 import android.net.Uri;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.bouncycastle2.util.encoders.Base64;
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -16,18 +16,16 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.TypeVS;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.mail.MessagingException;
 
 /**
@@ -37,7 +35,6 @@ import javax.mail.MessagingException;
 public class TransactionVSDto implements Serializable{
 
     private static final long serialVersionUID = 1L;
-
 
     public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE, FROM_BANKVS, FROM_USERVS,
         FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS,
@@ -81,6 +78,7 @@ public class TransactionVSDto implements Serializable{
     @JsonIgnore private SMIMEMessage smimeMessage;
     @JsonIgnore private SMIMEMessage cancelationSmimeMessage;
     @JsonIgnore private List<UserVSDto> toUserVSList;
+    @JsonIgnore private SocketMessageDto socketMessageDto;
     @JsonIgnore private UserVSDto signer;
     @JsonIgnore private UserVSDto receptor;
 
@@ -141,6 +139,14 @@ public class TransactionVSDto implements Serializable{
     @JsonIgnore
     public String getPaymentConfirmURL() {
         return infoURL + "/" + "payment";
+    }
+
+    public SocketMessageDto getSocketMessageDto() {
+        return socketMessageDto;
+    }
+
+    public void setSocketMessageDto(SocketMessageDto socketMessageDto) {
+        this.socketMessageDto = socketMessageDto;
     }
 
     public void setInfoURL(String infoURL) {
@@ -466,14 +472,55 @@ public class TransactionVSDto implements Serializable{
         return null;
     }
 
-    public void validateReceipt(SMIMEMessage smimeMessage) throws IOException, ValidationExceptionVS, ExceptionVS {
-        TransactionVSDto receiptDto = JSON.readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
-        if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
+    public String validateReceipt(SMIMEMessage smimeMessage) throws Exception {
+        TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
+        switch(typeVS) {
+            case FROM_USERVS:
+                return validateFromUserVSReceipt(smimeMessage);
+            case CURRENCY_SEND:
+                return validateCurrencySendReceipt(smimeMessage);
+            default: throw new ValidationExceptionVS("unknown receipt type: " + typeVS);
+        }
+    }
+
+    private String validateCurrencySendReceipt(SMIMEMessage smimeMessage) throws Exception {
+        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+        if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
+                TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
+        if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
+            if(!paymentOptions.contains(TransactionVSDto.Type.CURRENCY_SEND)) throw new ValidationExceptionVS(
+                    "unexpected type: " + receiptDto.getOperation());
+        }
+        Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
+        if(!toUserIBAN.equals(receptorsSet)) throw new ValidationExceptionVS(
+                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
+        if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationExceptionVS(
+                "expected amount " + amount + " amount " + receiptDto.getBatchAmount());
+        if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
+                "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
+        if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
+                "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
+        String result = AppVS.getInstance().getString(R.string.currency_send_receipt_ok_msg,
+                receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
+                MsgUtils.getTagVSMessage(receiptDto.getTag()));
+        if(receiptDto.timeLimited()) {
+            result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
+        }
+        return result;
+    }
+
+    private String validateFromUserVSReceipt(SMIMEMessage smimeMessage) throws Exception {
+        TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
+        if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
+            if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
+                    receiptDto.getType());
+        } else if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
                 receiptDto.getType());
         if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
                 " found " + receiptDto.getUserToType());
-        if(!toUserIBAN.equals(receiptDto.getToUserIBAN())) throw new ValidationExceptionVS("expected toUserIBAN " + toUserIBAN +
-                " found " + receiptDto.getToUserIBAN());
+        if(!new HashSet<>(toUserIBAN).equals(new HashSet<>(receiptDto.getToUserIBAN())) ||
+                toUserIBAN.size() != receiptDto.getToUserIBAN().size()) throw new ValidationExceptionVS(
+                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
         if(!subject.equals(receiptDto.getSubject())) throw new ValidationExceptionVS("expected subject " + subject +
                 " found " + receiptDto.getSubject());
         if(!toUser.equals(receiptDto.getToUser())) throw new ValidationExceptionVS(
@@ -482,10 +529,18 @@ public class TransactionVSDto implements Serializable{
                 "expected amount " + amount + " amount " + receiptDto.getAmount());
         if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
-        if(UUID.equals(receiptDto.getUUID())) throw new ValidationExceptionVS(
+        if(!UUID.equals(receiptDto.getUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
-        if(!details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
-                "expected details " + details + " found " + receiptDto.getDetails());}
+        if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
+                "expected details " + details + " found " + receiptDto.getDetails());
+        String result = AppVS.getInstance().getString(R.string.from_uservs_receipt_ok_msg,
+                receiptDto.getAmount() + " " + receiptDto.getCurrencyCode(),
+                MsgUtils.getTagVSMessage(receiptDto.getTagName()));
+        if(receiptDto.isTimeLimited()) {
+            result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
+        }
+        return result;
+    }
 
     public TransactionVSDetailsDto getDetails() {
         return details;

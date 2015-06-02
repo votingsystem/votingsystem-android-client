@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -60,15 +61,15 @@ public class MsgUtils {
         return prefix + context.getString(R.string.messages_lbl);
     }
 
-    public static String getTagVSMessage(String tag, Context context) {
-        if(TagVSDto.WILDTAG.equals(tag)) return context.getString(R.string.wildtag_lbl);
+    public static String getTagVSMessage(String tag) {
+        if(TagVSDto.WILDTAG.equals(tag)) return AppVS.getInstance().getString(R.string.wildtag_lbl);
         else return tag;
     }
 
     public static String getCurrencyDescriptionMessage(Currency currency, Context context) {
         return currency.getAmount().toPlainString() + " " + currency.getCurrencyCode() +
                 " " + context.getString(R.string.for_lbl ) + " '" +
-                getTagVSMessage(currency.getTag(), context) + "'";
+                getTagVSMessage(currency.getTag()) + "'";
     }
 
     public static String getCertInfoMessage(X509Certificate certificate, Context context) {
@@ -109,7 +110,7 @@ public class MsgUtils {
     }
 
     public static String getCurrencyRequestMessage(TransactionVSDto transactionDto, Context context) {
-        String tagMessage = getTagVSMessage(transactionDto.getTagVS().getName(), context);
+        String tagMessage = getTagVSMessage(transactionDto.getTagVS().getName());
         return context.getString(R.string.currency_request_msg, transactionDto.getAmount().toPlainString(),
                 transactionDto.getCurrencyCode(), tagMessage);
     }
@@ -180,7 +181,7 @@ public class MsgUtils {
                 Map<String, BigDecimal> tagInfo = expendedMap.get(currency);
                 for(String tagVS: tagInfo.keySet()) {
                     sb.append(context.getString(R.string.currency_expended_msg, tagInfo.get(tagVS).
-                            toString() + " " + currency, getTagVSMessage(tagVS, context)) + "<br/>");
+                            toString() + " " + currency, getTagVSMessage(tagVS)) + "<br/>");
                 }
 
             }
@@ -191,7 +192,7 @@ public class MsgUtils {
                 Map<String, BigDecimal> tagInfo = lapsedMap.get(currency);
                 for(String tagVS: tagInfo.keySet()) {
                     sb.append(context.getString(R.string.currency_lapsed_msg, tagInfo.get(tagVS).
-                            toString() + " " + currency, getTagVSMessage(tagVS, context)) + "<br/>");
+                            toString() + " " + currency, getTagVSMessage(tagVS)) + "<br/>");
 
                 }
             }

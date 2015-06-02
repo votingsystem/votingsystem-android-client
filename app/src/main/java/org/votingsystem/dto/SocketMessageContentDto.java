@@ -33,6 +33,7 @@ public class SocketMessageContentDto {
     private String textToSign;
     private String toUser;
     private String deviceToName;
+    private String hashCertVS;
     private String smimeMessage;
     private Set<CurrencyDto> currencyList;
     private String URL;
@@ -213,5 +214,13 @@ public class SocketMessageContentDto {
 
     public void setStep(TypeVS step) {
         this.step = step;
+    }
+
+    public String getHashCertVS() {
+        return hashCertVS;
+    }
+
+    public void setHashCertVS(String hashCertVS) {
+        this.hashCertVS = hashCertVS;
     }
 }

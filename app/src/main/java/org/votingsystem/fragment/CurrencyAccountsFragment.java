@@ -257,7 +257,7 @@ public class CurrencyAccountsFragment extends Fragment {
             } else request_button.setVisibility(View.GONE);
 
             TextView tag_text = (TextView)accountView.findViewById(R.id.tag_text);
-            String tag_text_msg = "'" + MsgUtils.getTagVSMessage(selectedTag.getName(), getActivity()) +
+            String tag_text_msg = "'" + MsgUtils.getTagVSMessage(selectedTag.getName()) +
                     "' " + getString(R.string.currency_lbl) + " " + currencyCode;
             tag_text.setText(tag_text_msg);
             TextView cash_info = (TextView)accountView.findViewById(R.id.cash_info);

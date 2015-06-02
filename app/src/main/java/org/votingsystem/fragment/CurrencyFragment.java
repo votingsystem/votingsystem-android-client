@@ -58,7 +58,7 @@ public class CurrencyFragment extends Fragment {
             date_info.setText(getString(R.string.currency_date_info,
                     DateUtils.getDateStr(currency.getDateFrom(), "dd MMM yyyy' 'HH:mm"),
                     DateUtils.getDateStr(currency.getDateTo(), "dd MMM yyyy' 'HH:mm")));
-            tag_info.setText(MsgUtils.getTagVSMessage(currency.getTag(), AppVS.getInstance()));
+            tag_info.setText(MsgUtils.getTagVSMessage(currency.getTag()));
             if(currency.getState() != null && Currency.State.OK != currency.getState()) {
                 currency_state.setText(MsgUtils.getCurrencyStateMessage(currency, getActivity()));
                 currency_state.setVisibility(View.VISIBLE);

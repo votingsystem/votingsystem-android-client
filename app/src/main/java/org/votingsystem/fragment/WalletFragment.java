@@ -141,7 +141,7 @@ public class WalletFragment extends Fragment {
             for(String tag : tagInfoMap.keySet()) {
                 String contentFormatted = getString(R.string.tag_info,
                         (tagInfoMap.get(tag).getTotal()).toPlainString(), currency,
-                        MsgUtils.getTagVSMessage(tag, getActivity()));
+                        MsgUtils.getTagVSMessage(tag));
                 if((tagInfoMap.get(tag).getTimeLimited()).compareTo(BigDecimal.ZERO) > 0) {
                         contentFormatted = contentFormatted + " - " + getString(R.string.tag_info_time_limited,
                         (tagInfoMap.get(tag).getTimeLimited()).toPlainString(), currency);
@@ -236,7 +236,7 @@ public class WalletFragment extends Fragment {
                         DateUtils.getDayWeekDateStr(currency.getDateTo())));
             }
             ((TextView) view.findViewById(R.id.tag_data)).setText(MsgUtils.getTagVSMessage(
-                    currency.getTag(), getActivity()));
+                    currency.getTag()));
             return view;
         }
 
