@@ -11,11 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.QRUtils;

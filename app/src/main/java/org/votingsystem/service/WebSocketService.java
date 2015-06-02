@@ -38,6 +38,7 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -48,6 +49,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
@@ -55,6 +57,7 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.util.LogUtils.LOGE;
 
@@ -335,6 +338,7 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case TRANSACTIONVS_INFO:
+                    //response we get after asking for the details of a QR code
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
                         dto.setSocketMessageDto(socketMsg);
@@ -349,6 +353,7 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case QR_MESSAGE_INFO:
+                    //the payer has read our QR code and ask for details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         SocketMessageDto msgDto = null;
                         try {
@@ -374,6 +379,7 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case TRANSACTIONVS_RESPONSE:
+                    //the payer has completed the payment and send the details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         try {
                             SMIMEMessage smimeMessage = socketMsg.getSMIME();

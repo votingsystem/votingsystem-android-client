@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
@@ -17,6 +18,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.TypeVS;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

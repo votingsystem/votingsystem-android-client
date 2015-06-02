@@ -2,8 +2,10 @@ package org.votingsystem.dto.currency;
 
 import android.content.Context;
 import android.net.Uri;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
@@ -18,6 +20,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.TypeVS;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -26,6 +29,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.mail.MessagingException;
 
 /**
