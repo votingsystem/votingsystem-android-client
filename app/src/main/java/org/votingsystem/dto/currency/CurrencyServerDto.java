@@ -62,4 +62,8 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
         return getServerURL() + "/rest/currency/bundleState";
     }
 
+    public String getDeviceVSByIdServiceURL(Long deviceId) {
+        return getServerURL() + "/rest/deviceVS/id/" + deviceId;
+    }
+
 }

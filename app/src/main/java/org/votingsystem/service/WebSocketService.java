@@ -296,6 +296,7 @@ public class WebSocketService extends Service {
                                 } else appVS.setWithSocketConnection(false);
                                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                                 break;
+                            case QR_MESSAGE_INFO:
                             case OPERATION_CANCELED: break;
                             default: sendWebSocketBroadcast(socketMsg);
                         }
@@ -338,7 +339,7 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case TRANSACTIONVS_INFO:
-                    //response we get after asking for the details of a QR code
+                    //response after asking for the details of a QR code
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
                         dto.setSocketMessageDto(socketMsg);

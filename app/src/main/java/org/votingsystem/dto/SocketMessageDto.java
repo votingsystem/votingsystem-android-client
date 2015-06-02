@@ -433,10 +433,28 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(
-                deviceVS, toUser, textToSign, subject);
+                toUser, textToSign, subject);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Certificate());
+        byte[] base64EncryptedAESDataRequestBytes = Base64.encode(Encryptor.encryptToCMS(
+                aesParams.getBytes(), deviceVS.getX509Certificate()));
+        socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
+        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
+                socketSession.getAESParams()));
+        return socketMessageDto;
+    }
+
+    public static SocketMessageDto getQRInfoRequest(DeviceVSDto deviceVS, String uuid) throws Exception {
+        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.QR_MESSAGE_INFO);
+        SocketMessageDto socketMessageDto = new SocketMessageDto();
+        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        socketMessageDto.setDeviceToId(deviceVS.getId());
+        socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
+        socketMessageDto.setUUID(socketSession.getUUID());
+        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getQRInfoRequest(uuid);
+        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
+        byte[] base64EncryptedAESDataRequestBytes = Base64.encode(Encryptor.encryptToCMS(
+                aesParams.getBytes(), deviceVS.getX509Certificate()));
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));

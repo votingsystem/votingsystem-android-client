@@ -2,10 +2,9 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.votingsystem.util.TypeVS;
-
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -16,6 +15,7 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
     private Long deviceId;
+    private Date dateCreated;
     private String UUID;
 
     public QRMessageDto() {}
@@ -23,6 +23,7 @@ public class QRMessageDto<T> implements Serializable {
     public QRMessageDto(DeviceVSDto deviceVSDto, TypeVS typeVS) {
         this.typeVS = typeVS;
         this.deviceId = deviceVSDto.getId();
+        dateCreated = new Date();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }
 
@@ -56,5 +57,13 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setTypeVS(TypeVS typeVS) {
         this.typeVS = typeVS;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }

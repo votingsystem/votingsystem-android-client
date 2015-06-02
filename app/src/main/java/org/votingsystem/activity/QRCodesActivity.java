@@ -10,17 +10,26 @@ import android.widget.Button;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRGeneratorFormFragment;
+import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
+
+import java.io.IOException;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -68,8 +77,29 @@ public class QRCodesActivity extends ActivityBase {
                 new GetDataTask(null).execute(result.getContents());
             } else {
                 LOGD(TAG, "QR reader - onActivityResult - socket operation UUID: " + result.getContents());
+                try {
+                    QRMessageDto qrMessageDto = JSON.readValue(result.getContents(), QRMessageDto.class);
+                    if(AppVS.getInstance().getWSSession(qrMessageDto.getDeviceId()) == null) {
+                        new GetDeviceVSDataTask(qrMessageDto).execute();
+                    } else {
+                        sendQRRequestInfo(AppVS.getInstance().getWSSession(
+                                qrMessageDto.getDeviceId()).getDeviceVS(), qrMessageDto);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         }
+    }
+
+    private void sendQRRequestInfo(DeviceVSDto deviceVSDto, QRMessageDto qrMessageDto) throws Exception {
+        SocketMessageDto socketMessage = SocketMessageDto.getQRInfoRequest(
+                deviceVSDto, qrMessageDto.getUUID());
+        Intent startIntent = new Intent(QRCodesActivity.this, WebSocketService.class);
+        startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.QR_MESSAGE_INFO);
+        startService(startIntent);
     }
 
     @Override protected int getSelfNavDrawerItem() {
@@ -82,6 +112,43 @@ public class QRCodesActivity extends ActivityBase {
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
+    }
+
+    public class GetDeviceVSDataTask extends AsyncTask<String, Void, ResponseVS> {
+
+        public final String TAG = GetDeviceVSDataTask.class.getSimpleName();
+
+        private QRMessageDto qrMessageDto;
+
+        public GetDeviceVSDataTask(QRMessageDto qrMessageDto) {
+            this.qrMessageDto = qrMessageDto;
+        }
+
+        @Override protected void onPreExecute() {
+            setProgressDialogVisible(true);
+        }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            setProgressDialogVisible(true);
+            return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
+                    .getDeviceVSByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
+        }
+
+        protected void onProgressUpdate(Integer... progress) {}
+
+        @Override  protected void onPostExecute(ResponseVS responseVS) {
+            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            setProgressDialogVisible(false);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    DeviceVSDto deviceVSDto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
+                    sendQRRequestInfo(deviceVSDto, qrMessageDto);
+                } catch (Exception e) { e.printStackTrace();}
+            } else {
+                MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                        responseVS.getMessage(), getSupportFragmentManager());
+            }
+        }
     }
 
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {

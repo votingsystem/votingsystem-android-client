@@ -47,7 +47,7 @@ public class SocketMessageContentDto {
         this.URL = URL;
     }
 
-    public static SocketMessageContentDto getSignRequest(DeviceVSDto deviceVS, String toUser,
+    public static SocketMessageContentDto getSignRequest(String toUser,
             String textToSign, String subject) throws Exception {
         SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
@@ -55,6 +55,14 @@ public class SocketMessageContentDto {
         messageContentDto.setToUser(toUser);
         messageContentDto.setTextToSign(textToSign);
         messageContentDto.setSubject(subject);
+        return messageContentDto;
+    }
+
+    public static SocketMessageContentDto getQRInfoRequest(String uuid) throws Exception {
+        SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
+        messageContentDto.setOperation(TypeVS.QR_MESSAGE_INFO);
+        messageContentDto.setDeviceFromName(Utils.getDeviceName());
+        messageContentDto.setMessage(uuid);
         return messageContentDto;
     }
 
