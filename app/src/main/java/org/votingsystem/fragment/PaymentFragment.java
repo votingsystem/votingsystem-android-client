@@ -60,7 +60,7 @@ public class PaymentFragment extends Fragment {
     private TextView receptor;
     private TextView subject;
     private TextView amount;
-    private TextView currency;
+    private TextView tagvs;
     private TransactionVSDto transactionDto;
     private Spinner payment_method_spinner;
 
@@ -120,24 +120,28 @@ public class PaymentFragment extends Fragment {
            Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "onCreateView");
         super.onCreate(savedInstanceState);
-        View rootView = inflater.inflate(R.layout.transaction_request_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.payment_fragment, container, false);
         getActivity().setTitle(getString(R.string.payment_lbl));
         receptor = (TextView)rootView.findViewById(R.id.receptor);
         subject = (TextView)rootView.findViewById(R.id.subject);
         amount= (TextView)rootView.findViewById(R.id.amount);
-        currency= (TextView)rootView.findViewById(R.id.currency);
+        tagvs= (TextView)rootView.findViewById(R.id.tagvs);
         payment_method_spinner = (Spinner)rootView.findViewById(R.id.payment_method_spinner);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.transaction_request_spinner_item,
-                TransactionVSDto.getPaymentMethods(getActivity()));
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        payment_method_spinner.setAdapter(dataAdapter);
         try {
             transactionDto = (TransactionVSDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
+                    R.layout.payment_spinner_item,
+                    TransactionVSDto.getPaymentMethods(transactionDto.getPaymentOptions()));
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            payment_method_spinner.setAdapter(dataAdapter);
             receptor.setText(transactionDto.getToUser());
             subject.setText(transactionDto.getSubject());
-            amount.setText(transactionDto.getAmount().toString());
-            currency.setText(transactionDto.getCurrencyCode());
+            amount.setText(transactionDto.getAmount().toString() + " " + transactionDto.getCurrencyCode());
+            String tagvsInfo = getString(R.string.selected_tag_lbl,
+                    MsgUtils.getTagVSMessage(transactionDto.getTagName()));
+            if(transactionDto.isTimeLimited()) tagvsInfo = tagvsInfo + " " +
+                    getString(R.string.time_remaining_tagvs_info_lbl);
+            tagvs.setText(tagvsInfo);
             switch(transactionDto.getOperation()) {
                 case DELIVERY_WITH_PAYMENT:
                 case DELIVERY_WITHOUT_PAYMENT:
@@ -204,8 +208,8 @@ public class PaymentFragment extends Fragment {
 
     private void submitForm() {
         try {
-            transactionDto.setType(TransactionVSDto.getByPosition(
-                    payment_method_spinner.getSelectedItemPosition()));
+            transactionDto.setType(TransactionVSDto.getByDescription(
+                    (String) payment_method_spinner.getSelectedItem()));
             BalancesDto userInfo = PrefUtils.getBalances(getActivity());
             final BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
                     transactionDto.getCurrencyCode(), transactionDto.getTagVS().getName());

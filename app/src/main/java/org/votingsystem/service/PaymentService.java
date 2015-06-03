@@ -119,7 +119,7 @@ public class PaymentService extends IntentService {
                                     new TypeReference<ResultListDto<TransactionVSDto>>() {});
                             String base64Receipt = resultList.getResultList().iterator().next().getMessageSMIME();
                             SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt));
-                            String message = transactionDto.validateReceipt(receipt);
+                            String message = transactionDto.validateReceipt(receipt, false);
                             receipt.isValidSignature();
                             if(transactionDto.getSocketMessageDto() != null) {
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
@@ -127,6 +127,9 @@ public class PaymentService extends IntentService {
                                         AppVS.getInstance().getConnectedDevice().getId(),
                                         TypeVS.TRANSACTIONVS_RESPONSE);
                                 socketRespDto.setSmimeMessage(base64Receipt);
+                                //backup to recover from fails
+                                transactionDto.setSocketMessageDto(socketRespDto);
+                                AppVS.getInstance().getWSSession(socketRespDto.getUUID()).setData(transactionDto);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
@@ -139,7 +142,7 @@ public class PaymentService extends IntentService {
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             if(transactionDto.getSocketMessageDto() != null) {
-                                String message = transactionDto.validateReceipt(responseVS.getSMIME());
+                                String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,
                                         AppVS.getInstance().getConnectedDevice().getId(),

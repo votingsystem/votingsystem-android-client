@@ -24,6 +24,7 @@ import org.votingsystem.util.TypeVS;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -455,9 +456,28 @@ public class TransactionVSDto implements Serializable {
         //preserve the same order
         List<String> result = Arrays.asList(
                 context.getString(R.string.signed_transaction_lbl),
-                context.getString(R.string.anonymous_signed_transaction_lbl),
-                context.getString(R.string.currency_send_lbl));
+                context.getString(R.string.currency_send_lbl),
+                context.getString(R.string.currency_change_lbl));
         return result;
+    }
+
+    public static List<String> getPaymentMethods(List<Type> paymentOptions) {
+        //preserve the same order
+        List<String> result = new ArrayList<>();
+        if(paymentOptions.contains(Type.FROM_USERVS)) result.add(AppVS.getInstance()
+                .getString(R.string.signed_transaction_lbl));
+        if(paymentOptions.contains(Type.CURRENCY_SEND)) result.add(AppVS.getInstance()
+                .getString(R.string.currency_send_lbl));
+        if(paymentOptions.contains(Type.CURRENCY_CHANGE)) result.add(AppVS.getInstance()
+                .getString(R.string.currency_change_lbl));
+        return result;
+    }
+
+    public static Type getByDescription(String description) throws ValidationExceptionVS {
+        if(AppVS.getInstance().getString(R.string.signed_transaction_lbl).equals(description)) return Type.FROM_USERVS;
+        if(AppVS.getInstance().getString(R.string.currency_send_lbl).equals(description)) return Type.CURRENCY_SEND;
+        if(AppVS.getInstance().getString(R.string.currency_change_lbl).equals(description)) return Type.CURRENCY_CHANGE;
+        throw new ValidationExceptionVS("type not found for description: " + description);
     }
 
     public static Type getByPosition(int position) {
@@ -470,24 +490,24 @@ public class TransactionVSDto implements Serializable {
     public String getDescription(Context context) {
         switch(type) {
             case FROM_USERVS: return context.getString(R.string.signed_transaction_lbl);
-            case CURRENCY_SEND: return context.getString(R.string.anonymous_signed_transaction_lbl);
-            case CURRENCY_CHANGE: return context.getString(R.string.currency_send_lbl);
+            case CURRENCY_SEND: return context.getString(R.string.currency_send_lbl);
+            case CURRENCY_CHANGE: return context.getString(R.string.currency_change_lbl);
         }
         return null;
     }
 
-    public String validateReceipt(SMIMEMessage smimeMessage) throws Exception {
+    public String validateReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
         TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
         switch(typeVS) {
             case FROM_USERVS:
-                return validateFromUserVSReceipt(smimeMessage);
+                return validateFromUserVSReceipt(smimeMessage, isIncome);
             case CURRENCY_SEND:
-                return validateCurrencySendReceipt(smimeMessage);
+                return validateCurrencySendReceipt(smimeMessage, isIncome);
             default: throw new ValidationExceptionVS("unknown receipt type: " + typeVS);
         }
     }
 
-    private String validateCurrencySendReceipt(SMIMEMessage smimeMessage) throws Exception {
+    private String validateCurrencySendReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
         CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
@@ -504,8 +524,10 @@ public class TransactionVSDto implements Serializable {
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
         if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
+        String action = isIncome?AppVS.getInstance().getString(R.string.income_lbl):
+                AppVS.getInstance().getString(R.string.expense_lbl);
         String result = AppVS.getInstance().getString(R.string.currency_send_receipt_ok_msg,
-                receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
+                action, receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
                 MsgUtils.getTagVSMessage(receiptDto.getTag()));
         if(receiptDto.timeLimited()) {
             result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
@@ -513,7 +535,7 @@ public class TransactionVSDto implements Serializable {
         return result;
     }
 
-    private String validateFromUserVSReceipt(SMIMEMessage smimeMessage) throws Exception {
+    private String validateFromUserVSReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
         TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
         if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
@@ -537,8 +559,10 @@ public class TransactionVSDto implements Serializable {
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());
+        String action = isIncome?AppVS.getInstance().getString(R.string.income_lbl):
+                AppVS.getInstance().getString(R.string.expense_lbl);
         String result = AppVS.getInstance().getString(R.string.from_uservs_receipt_ok_msg,
-                receiptDto.getAmount() + " " + receiptDto.getCurrencyCode(),
+                action, receiptDto.getAmount() + " " + receiptDto.getCurrencyCode(),
                 MsgUtils.getTagVSMessage(receiptDto.getTagName()));
         if(receiptDto.isTimeLimited()) {
             result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);

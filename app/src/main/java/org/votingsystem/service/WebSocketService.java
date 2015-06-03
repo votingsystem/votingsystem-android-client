@@ -398,7 +398,7 @@ public class WebSocketService extends Service {
                             QRMessageDto<TransactionVSDto> qrDto =
                                     (QRMessageDto<TransactionVSDto>) socketSession.getData();
                             TransactionVSDto transactionDto = qrDto.getData();
-                            String result = transactionDto.validateReceipt(smimeMessage);
+                            String result = transactionDto.validateReceipt(smimeMessage, true);
                             UIUtils.launchMessageActivity(ResponseVS.SC_OK, result,
                                     getString(R.string.error_lbl));
                             AppVS.getInstance().removeQRMessage(qrDto.getUUID());

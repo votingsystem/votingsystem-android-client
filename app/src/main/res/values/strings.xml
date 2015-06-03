@@ -265,7 +265,8 @@
     <string name="currency_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
     <string name="currency_last_request_info_lbl"><![CDATA[última actualización el <u><b>%1$s</b></u>]]></string>
     <string name="time_remaining_info_lbl">tienes que gastar \'%1$s\' antes del domingo a las 24:00 horas</string>
-    <string name="time_remaining_lbl">si no lo gastas antes del domingo a las 24:00 horas el ingreso pasará al sistema</string>
+    <string name="time_remaining_tagvs_info_lbl">antes del domingo a las 24:00 horas</string>
+    <string name="time_remaining_lbl">si no lo gastas antes del domingo a las 24:00 horas el importe pasará al sistema</string>
     <string name="cash_request_dialog_caption">retirar efectivo</string>
     <string name="cash_send_dialog_caption">realizar pago</string>
     <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$s]]></string>
@@ -560,11 +561,13 @@
     <string name="active_lbl">activo</string>
     <string name="lapsed_lbl">caducado</string>
     <string name="signed_transaction_lbl">ingreso en cuenta</string>
-    <string name="anonymous_signed_transaction_lbl">ingreso anónimo en cuenta</string>
-    <string name="currency_send_lbl">envío anónimo</string>
+    <string name="currency_send_lbl">ingreso anónimo en cuenta</string>
+    <string name="currency_change_lbl">envío anónimo</string>
     <string name="transaction_request_confirm_msg">va a realizar un \'%1$s\' por valor de %2$s a %3$s</string>
     <string name="anonymous_signed_transaction_ok_msg">ha realizado un ingreso anónimo de \'%1$s\' a \'%2$s\'</string>
     <string name="tagAmountErrorMsg">No dispone de dinero suficiente para hacer una transacción de \'%1$s\' con la etiqueta \'%2$s\'. Su máximo para la etiqueta \'%2$s\' es de \'%3$s\'</string>
-    <string name="currency_send_receipt_ok_msg">ha recibido un ingreso anónimo de \'%1$s\' para \'%2$s\'</string>
-    <string name="from_uservs_receipt_ok_msg">ha recibido un ingreso de \'%1$s\' para \'%2$s\'</string>
+    <string name="currency_send_receipt_ok_msg">ha \'%1$s\' un ingreso anónimo de \'%2$s\' para \'%3$s\'</string>
+    <string name="from_uservs_receipt_ok_msg">ha \'%1$s\' un ingreso de \'%2$s\' para \'%3$s\'</string>
+    <string name="income_lbl">recibido</string>
+    <string name="expense_lbl">realizado</string>
 </resources>
