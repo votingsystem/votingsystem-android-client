@@ -68,7 +68,7 @@ public class CurrencyActivity extends AppCompatActivity {
                     case WEB_SOCKET_INIT:
                         setProgressDialogVisible(true, getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg));
-                        Utils.toggleWebSocketServiceConnection(appVS);
+                        Utils.toggleWebSocketServiceConnection();
                         break;
                 }
             } else if(socketMsg != null){

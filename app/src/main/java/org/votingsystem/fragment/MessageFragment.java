@@ -257,12 +257,14 @@ public class MessageFragment extends Fragment {
                             });
                     UIUtils.showMessageDialog(builder);
                     socketMessageDto = socketMessage.getResponse(ResponseVS.SC_OK, currency.getHashCertVS(),
+                            AppVS.getInstance().getConnectedDevice().getId(),
                             TypeVS.CURRENCY_WALLET_CHANGE);
                 } catch (ValidationExceptionVS ex) {
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                             getString(R.string.error_lbl), ex.getMessage(),
                             getFragmentManager());
                     socketMessageDto = socketMessage.getResponse(ResponseVS.SC_ERROR, ex.getMessage(),
+                            AppVS.getInstance().getConnectedDevice().getId(),
                             TypeVS.CURRENCY_WALLET_CHANGE);
                 }
                 if(socketMessageDto != null) {

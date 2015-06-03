@@ -43,7 +43,6 @@ public class SocketMessageDto implements Serializable {
     public static final String TAG = SocketMessageDto.class.getSimpleName();
 
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
-    public enum ConnectionStatus {OPEN, CLOSED}
 
     private TypeVS operation;
     private TypeVS messageType;
@@ -92,7 +91,7 @@ public class SocketMessageDto implements Serializable {
     }
 
     public SocketMessageDto getResponse(Integer statusCode, String message,
-                                TypeVS operation) throws Exception {
+                            Long deviceFromId, TypeVS operation) throws Exception {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
@@ -101,6 +100,7 @@ public class SocketMessageDto implements Serializable {
         messageDto.setSessionId(sessionId);
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setStatusCode(statusCode);
+        messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setMessage(message);
         messageContentDto.setOperation(operation);
         messageDto.setEncryptedMessage(Encryptor.encryptAES(

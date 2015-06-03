@@ -66,7 +66,7 @@ public class ContactFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = (ResponseVS) intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         SocketMessageDto socketMessageDto = null;
         try {
             socketMessageDto = JSON.readValue(intent.getStringExtra(
@@ -77,7 +77,7 @@ public class ContactFragment extends Fragment {
                 case WEB_SOCKET_INIT:
                     setProgressDialogVisible(true, getString(R.string.connecting_caption),
                             getString(R.string.connecting_to_service_msg));
-                    Utils.toggleWebSocketServiceConnection(appVS);
+                    Utils.toggleWebSocketServiceConnection();
                     break;
             }
         } else setProgressDialogVisible(false, null, null);

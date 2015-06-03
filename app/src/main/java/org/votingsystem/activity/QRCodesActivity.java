@@ -1,7 +1,9 @@
 package org.votingsystem.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
@@ -22,6 +24,7 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PaymentFragment;
+import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRGeneratorFormFragment;
 import org.votingsystem.service.WebSocketService;
@@ -31,9 +34,8 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
-
-import java.io.IOException;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -52,18 +54,21 @@ public class QRCodesActivity extends ActivityBase {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             SocketMessageDto socketMsg = null;
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             try {
                 String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
                 if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
             } catch (Exception ex) { ex.printStackTrace();}
-            if(socketMsg != null){
-                switch(socketMsg.getOperation()) {
-                    case TRANSACTIONVS_INFO:
-                        setProgressDialogVisible(false);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                switch(responseVS.getTypeVS()) {
+                    case WEB_SOCKET_INIT:
+                        setProgressDialogVisible(true, getString(R.string.connecting_caption),
+                                getString(R.string.connecting_to_service_msg));
+                        Utils.toggleWebSocketServiceConnection();
                         break;
-                    default:
-                        LOGD(TAG + ".broadcastReceiver", "socketMsg: " + socketMsg.getOperation());
                 }
+            } else if(socketMsg != null){
+                setProgressDialogVisible(false, null, null);
             }
         }
     };
@@ -78,7 +83,19 @@ public class QRCodesActivity extends ActivityBase {
         read_qr_btn = (Button) findViewById(R.id.read_qr_btn);
         read_qr_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Utils.launchQRScanner(QRCodesActivity.this);
+                if(!AppVS.getInstance().isWithSocketConnection()) {
+                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                            getString(R.string.qr_create_lbl), getString(R.string.qr_connection_required_msg),
+                            QRCodesActivity.this).setPositiveButton(getString(R.string.connect_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    PinDialogFragment.showPinScreen(getSupportFragmentManager(),
+                                            broadCastId, getString(R.string.init_authenticated_session_pin_msg),
+                                            false, TypeVS.WEB_SOCKET_INIT);
+                                }
+                            }).setNegativeButton(getString(R.string.cancel_lbl), null);;
+                    UIUtils.showMessageDialog(builder);
+                } else Utils.launchQRScanner(QRCodesActivity.this);
             }
         });
         gen_qr_btn = (Button) findViewById(R.id.gen_qr_btn);
@@ -132,10 +149,9 @@ public class QRCodesActivity extends ActivityBase {
         return NAVDRAWER_ITEM_QR_CODES;
     }
 
-    private void setProgressDialogVisible(final boolean isVisible) {
+    private void setProgressDialogVisible(final boolean isVisible, String caption, String message) {
         if (isVisible) {
-            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), broadCastId, getSupportFragmentManager());
+            ProgressDialogFragment.showDialog(caption, message, broadCastId, getSupportFragmentManager());
         } else ProgressDialogFragment.hide(broadCastId, getSupportFragmentManager());
     }
 
@@ -146,6 +162,8 @@ public class QRCodesActivity extends ActivityBase {
 
     @Override public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
@@ -161,11 +179,13 @@ public class QRCodesActivity extends ActivityBase {
         }
 
         @Override protected void onPreExecute() {
-            setProgressDialogVisible(true);
+            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg));
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            setProgressDialogVisible(true);
+            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg));
             try {
                 return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
                         .getDeviceVSByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
@@ -178,7 +198,7 @@ public class QRCodesActivity extends ActivityBase {
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-            setProgressDialogVisible(false);
+            setProgressDialogVisible(false, null, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     DeviceVSDto deviceVSDto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
@@ -203,7 +223,8 @@ public class QRCodesActivity extends ActivityBase {
         }
 
         @Override protected void onPreExecute() {
-            setProgressDialogVisible(true);
+            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg));
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
@@ -216,7 +237,7 @@ public class QRCodesActivity extends ActivityBase {
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-            setProgressDialogVisible(false);
+            setProgressDialogVisible(false, null, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     TransactionVSDto dto = (TransactionVSDto) responseVS.getMessage(TransactionVSDto.class);

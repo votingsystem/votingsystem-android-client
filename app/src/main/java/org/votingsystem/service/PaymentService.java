@@ -119,12 +119,16 @@ public class PaymentService extends IntentService {
                                     new TypeReference<ResultListDto<TransactionVSDto>>() {});
                             String base64Receipt = resultList.getResultList().iterator().next().getMessageSMIME();
                             SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt));
+                            String message = transactionDto.validateReceipt(receipt);
                             receipt.isValidSignature();
                             if(transactionDto.getSocketMessageDto() != null) {
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
-                                        .getResponse(ResponseVS.SC_OK, null, TypeVS.TRANSACTIONVS_RESPONSE);
-                                socketRespDto.setSMIME(receipt);
+                                        .getResponse(ResponseVS.SC_OK, null,
+                                        AppVS.getInstance().getConnectedDevice().getId(),
+                                        TypeVS.TRANSACTIONVS_RESPONSE);
+                                socketRespDto.setSmimeMessage(base64Receipt);
                                 sendSocketMessage(socketRespDto);
+                                responseVS.setMessage(message);
                             } else {
                                 responseVS = HttpHelper.sendData(receipt.getBytes(),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
@@ -135,10 +139,14 @@ public class PaymentService extends IntentService {
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             if(transactionDto.getSocketMessageDto() != null) {
+                                String message = transactionDto.validateReceipt(responseVS.getSMIME());
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
-                                        .getResponse(ResponseVS.SC_OK, null, TypeVS.TRANSACTIONVS_RESPONSE);
+                                        .getResponse(ResponseVS.SC_OK, null,
+                                        AppVS.getInstance().getConnectedDevice().getId(),
+                                        TypeVS.TRANSACTIONVS_RESPONSE);
                                 socketRespDto.setSMIME(responseVS.getSMIME());
                                 sendSocketMessage(socketRespDto);
+                                responseVS.setMessage(message);
                             } else {
                                 responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());

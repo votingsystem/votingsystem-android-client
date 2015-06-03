@@ -70,7 +70,7 @@ public class QRGeneratorFormFragment extends Fragment {
         super.onCreate(savedInstanceState);
         appVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.qr_generator_form_fragment, container, false);
-        ((Button) rootView.findViewById(R.id.request_button)).setOnClickListener(
+        rootView.findViewById(R.id.request_button).setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
                         generateQR();

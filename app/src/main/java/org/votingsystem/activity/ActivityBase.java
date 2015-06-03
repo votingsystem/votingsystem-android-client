@@ -150,7 +150,7 @@ public abstract class ActivityBase extends AppCompatActivity implements
                                 getString(R.string.connecting_to_service_msg),
                                 getSupportFragmentManager());
                         new Thread(new Runnable() {@Override public void run() {
-                                Utils.toggleWebSocketServiceConnection(appVS); }}).start();
+                                Utils.toggleWebSocketServiceConnection(); }}).start();
                         break;
                 }
             } else if(socketMsg != null) {
@@ -528,7 +528,7 @@ public abstract class ActivityBase extends AppCompatActivity implements
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Utils.toggleWebSocketServiceConnection(appVS);
+                        Utils.toggleWebSocketServiceConnection();
                         dialog.dismiss();
                     }
                 });

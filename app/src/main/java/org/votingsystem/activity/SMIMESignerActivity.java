@@ -145,7 +145,8 @@ public class SMIMESignerActivity extends AppCompatActivity {
                 try {
                     SocketMessageDto messageDto = socketMessage.getResponse(ResponseVS.SC_ERROR,
                             getString(R.string.reject_websocket_request_msg,
-                                    Utils.getDeviceName()), TypeVS.OPERATION_CANCELED);
+                            Utils.getDeviceName()),AppVS.getInstance().getConnectedDevice().getId(),
+                            TypeVS.OPERATION_CANCELED);
                     sendSocketMessage(messageDto);
                     finish();
                 } catch(Exception ex) {ex.printStackTrace();}

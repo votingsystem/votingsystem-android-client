@@ -93,7 +93,6 @@ public class CurrencyBatchDto {
         if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
         if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationExceptionVS("ERROR - currencySet mismatch");
-        receipt.setHeader("TypeVS", signedDto.getOperation().toString());
         return receipt;
     }
 

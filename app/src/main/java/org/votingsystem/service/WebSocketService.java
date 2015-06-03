@@ -286,7 +286,7 @@ public class WebSocketService extends Service {
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
-                        LOGD(TAG , "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
+                        LOGD(TAG , "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
                         socketMsg.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_SIGNED_SESSION:
@@ -296,10 +296,16 @@ public class WebSocketService extends Service {
                                 } else appVS.setWithSocketConnection(false);
                                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                                 break;
-                            case QR_MESSAGE_INFO:
-                            case OPERATION_CANCELED: break;
-                            default: sendWebSocketBroadcast(socketMsg);
+                            default:LOGD(TAG, "MESSAGEVS_FROM_VS unprocessed");
                         }
+                    }
+                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
+                            ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                        String message = socketMsg.getMessage();
+                        if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode())
+                            message = getString(R.string.device_not_found_error_msg);
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                                getString(R.string.error_lbl));
                     }
                     break;
                 case WEB_SOCKET_CLOSE:
@@ -366,12 +372,16 @@ public class WebSocketService extends Service {
 
                             TransactionVSDto transactionDto = qrDto.getData();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
-                                    JSON.writeValueAsString(transactionDto), TypeVS.TRANSACTIONVS_INFO);
+                                    JSON.writeValueAsString(transactionDto),
+                                    AppVS.getInstance().getConnectedDevice().getId(),
+                                    TypeVS.TRANSACTIONVS_INFO);
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
-                                    ex.getMessage(), TypeVS.QR_MESSAGE_INFO);
+                                    ex.getMessage(),
+                                    AppVS.getInstance().getConnectedDevice().getId(),
+                                    TypeVS.QR_MESSAGE_INFO);
                         } finally {
                             session.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
                         }
