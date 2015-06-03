@@ -415,6 +415,7 @@ public class SocketMessageDto implements Serializable {
         this.deviceToName = deviceToName;
     }
 
+    @JsonIgnore
     public AESParams getAesEncryptParams() {
         return aesEncryptParams;
     }

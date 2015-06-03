@@ -38,6 +38,7 @@ public class ProgressDialogFragment extends DialogFragment {
     private TextView progress_text;
     private String progressMessage = null;
     private String caption = null;
+    private String dialogTag = null;
 
     public static ProgressDialogFragment showDialog(String caption, String progressMessage,
             FragmentManager fragmentManager) {
@@ -56,6 +57,7 @@ public class ProgressDialogFragment extends DialogFragment {
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, progressMessage);
         args.putString(ContextVS.CAPTION_KEY, caption);
+        args.putString(ContextVS.TAG_KEY, dialogTag);
         dialog.setArguments(args);
         dialog.show(fragmentManager, ProgressDialogFragment.TAG + dialogTag);
         return dialog;
@@ -80,6 +82,9 @@ public class ProgressDialogFragment extends DialogFragment {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         progressMessage = getArguments().getString(ContextVS.MESSAGE_KEY);
         caption = getArguments().getString(ContextVS.CAPTION_KEY);
+        dialogTag = getArguments().getString(ContextVS.TAG_KEY);
+        if(dialogTag == null) dialogTag = ProgressDialogFragment.TAG;
+        else dialogTag = ProgressDialogFragment.TAG + dialogTag;
         View view = getActivity().getLayoutInflater().inflate(R.layout.progress_dialog, null);
         progress_text = (TextView) view.findViewById(R.id.progress_text);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
@@ -90,7 +95,7 @@ public class ProgressDialogFragment extends DialogFragment {
             @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     ((ProgressDialogFragment) getFragmentManager().
-                            findFragmentByTag(ProgressDialogFragment.TAG)).dismiss();
+                            findFragmentByTag(dialogTag)).dismiss();
                     return true;
                 } else return false;
             }

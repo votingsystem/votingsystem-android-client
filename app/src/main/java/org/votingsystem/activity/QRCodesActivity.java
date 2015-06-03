@@ -1,8 +1,12 @@
 package org.votingsystem.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
@@ -43,6 +47,26 @@ public class QRCodesActivity extends ActivityBase {
     private String broadCastId = QRCodesActivity.class.getSimpleName();
     private Button read_qr_btn;
     private Button gen_qr_btn;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            SocketMessageDto socketMsg = null;
+            try {
+                String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
+                if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
+            } catch (Exception ex) { ex.printStackTrace();}
+            if(socketMsg != null){
+                switch(socketMsg.getOperation()) {
+                    case TRANSACTIONVS_INFO:
+                        setProgressDialogVisible(false);
+                        break;
+                    default:
+                        LOGD(TAG + ".broadcastReceiver", "socketMsg: " + socketMsg.getOperation());
+                }
+            }
+        }
+    };
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
@@ -113,6 +137,17 @@ public class QRCodesActivity extends ActivityBase {
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), broadCastId, getSupportFragmentManager());
         } else ProgressDialogFragment.hide(broadCastId, getSupportFragmentManager());
+    }
+
+    @Override public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
     public class GetDeviceVSDataTask extends AsyncTask<String, Void, ResponseVS> {

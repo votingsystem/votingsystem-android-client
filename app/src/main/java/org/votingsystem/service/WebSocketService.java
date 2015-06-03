@@ -339,7 +339,8 @@ public class WebSocketService extends Service {
                     }
                     break;
                 case TRANSACTIONVS_INFO:
-                    //response after asking for the details of a QR code
+                    //response received after asking for the details of a QR code
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
                         dto.setSocketMessageDto(socketMsg);
