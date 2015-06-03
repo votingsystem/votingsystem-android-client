@@ -36,7 +36,7 @@ import javax.mail.MessagingException;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TransactionVSDto implements Serializable{
+public class TransactionVSDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

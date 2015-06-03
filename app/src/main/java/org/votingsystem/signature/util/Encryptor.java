@@ -178,7 +178,7 @@ public class Encryptor {
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
-        return bOut.toByteArray();
+        return Base64.encode(bOut.toByteArray());
     }
 
     /**

@@ -12,6 +12,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
@@ -19,7 +20,9 @@ import java.util.Set;
 import javax.mail.MessagingException;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SocketMessageContentDto {
+public class SocketMessageContentDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private TypeVS operation;
     private TypeVS step;

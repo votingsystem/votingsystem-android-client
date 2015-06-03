@@ -188,8 +188,8 @@ public class Wallet {
         if(currencyCollection != null) {
             Set<CurrencyDto> currencyDtoSet = CurrencyDto.serializeCollection(currencyCollection);
             byte[] walletBytes = JSON.writeValueAsBytes(currencyDtoSet);
-            byte[] encryptedWalletBytes = Encryptor.encryptToCMS(walletBytes, context.getX509UserCert());
-            PrefUtils.putWallet(encryptedWalletBytes, context);
+            byte[] encryptedWalletBytesBase64 = Encryptor.encryptToCMS(walletBytes, context.getX509UserCert());
+            PrefUtils.putWallet(encryptedWalletBytesBase64, context);
             currencySet = new HashSet<>(currencyCollection);
         } else PrefUtils.putWallet(null, context);
 

@@ -78,7 +78,7 @@ public class SocketMessageDto implements Serializable {
 
     @JsonIgnore private UserVSDto userVS;
     @JsonIgnore private Set<Currency> currencySet;
-    @JsonIgnore private AESParams aesEncryptParams;
+    @JsonIgnore private transient AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
     @JsonIgnore private SMIMEMessage smime;
@@ -435,8 +435,8 @@ public class SocketMessageDto implements Serializable {
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(
                 toUser, textToSign, subject);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] base64EncryptedAESDataRequestBytes = Base64.encode(Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Certificate()));
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
+                aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
@@ -453,8 +453,8 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getQRInfoRequest(uuid);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] base64EncryptedAESDataRequestBytes = Base64.encode(Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Certificate()));
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
+                aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
@@ -477,7 +477,7 @@ public class SocketMessageDto implements Serializable {
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
                 deviceVS.getX509Certificate());
-        socketMessageDto.setAesParams(new String(Base64.encode(encryptedAESDataRequestBytes)));
+        socketMessageDto.setAesParams(new String(encryptedAESDataRequestBytes));
 
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON
                 .writeValueAsString(messageContentDto), socketSession.getAESParams()));
@@ -507,7 +507,7 @@ public class SocketMessageDto implements Serializable {
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
                 deviceVS.getX509Certificate());
-        socketMessageDto.setAesParams(new String(Base64.encode(encryptedAESDataRequestBytes)));
+        socketMessageDto.setAesParams(new String(encryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
         return socketMessageDto;

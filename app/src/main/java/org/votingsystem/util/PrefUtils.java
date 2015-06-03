@@ -188,14 +188,13 @@ public class PrefUtils {
         return settings.getString(ContextVS.PIN_KEY, null);
     }
 
-    public static void putWallet(byte[] encryptedWalletBytes, Context context) {
+    public static void putWallet(byte[] encryptedWalletBytesBase64, Context context) {
         try {
             SharedPreferences settings = context.getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            if(encryptedWalletBytes == null) editor.putString(ContextVS.WALLET_FILE_NAME, null);
-            else editor.putString(ContextVS.WALLET_FILE_NAME,
-                    Base64.encodeToString(encryptedWalletBytes, Base64.DEFAULT));
+            if(encryptedWalletBytesBase64 == null) editor.putString(ContextVS.WALLET_FILE_NAME, null);
+            else editor.putString(ContextVS.WALLET_FILE_NAME, new String(encryptedWalletBytesBase64));
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }

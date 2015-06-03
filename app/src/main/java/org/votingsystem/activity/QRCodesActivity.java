@@ -130,8 +130,12 @@ public class QRCodesActivity extends ActivityBase {
 
         @Override protected ResponseVS doInBackground(String... urls) {
             setProgressDialogVisible(true);
-            return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
-                    .getDeviceVSByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
+            try {
+                return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
+                        .getDeviceVSByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
+            } catch (Exception ex) {
+                return ResponseVS.ERROR(getString(R.string.connection_error_msg), ex.getMessage());
+            }
         }
 
         protected void onProgressUpdate(Integer... progress) {}
