@@ -24,6 +24,7 @@ public class DeviceVSDto {
     private String certPEM;
     private String firstName;
     private String lastName;
+    private String IBAN;
     private String NIF;
     private Type deviceType;
     @JsonIgnore private X509Certificate x509Certificate;
@@ -126,6 +127,14 @@ public class DeviceVSDto {
 
     public void setDeviceType(Type deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public String getIBAN() {
+        return IBAN;
+    }
+
+    public void setIBAN(String IBAN) {
+        this.IBAN = IBAN;
     }
 
     public X509Certificate getX509Certificate() throws Exception {

@@ -40,8 +40,9 @@ public class QRCodesActivity extends ActivityBase {
 
 	public static final String TAG = QRCodesActivity.class.getSimpleName();
 
-    Button read_qr_btn;
-    Button gen_qr_btn;
+    private String broadCastId = QRCodesActivity.class.getSimpleName();
+    private Button read_qr_btn;
+    private Button gen_qr_btn;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
@@ -110,8 +111,8 @@ public class QRCodesActivity extends ActivityBase {
     private void setProgressDialogVisible(final boolean isVisible) {
         if (isVisible) {
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getSupportFragmentManager());
-        } else ProgressDialogFragment.hide(getSupportFragmentManager());
+                    getString(R.string.loading_info_msg), broadCastId, getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(broadCastId, getSupportFragmentManager());
     }
 
     public class GetDeviceVSDataTask extends AsyncTask<String, Void, ResponseVS> {
@@ -141,7 +142,7 @@ public class QRCodesActivity extends ActivityBase {
         protected void onProgressUpdate(Integer... progress) {}
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
             setProgressDialogVisible(false);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
@@ -179,7 +180,7 @@ public class QRCodesActivity extends ActivityBase {
         protected void onProgressUpdate(Integer... progress) {}
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {
-            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
             setProgressDialogVisible(false);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
