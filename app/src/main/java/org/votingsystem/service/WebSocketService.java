@@ -268,8 +268,6 @@ public class WebSocketService extends Service {
     }
 
     public void sendWebSocketBroadcast(SocketMessageDto socketMsg) {
-        LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
-                " - type: " + socketMsg.getOperation());
         Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
         WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
         try {
@@ -282,6 +280,8 @@ public class WebSocketService extends Service {
             } else if (socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
+            LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
+                    " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
             intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.writeValueAsString(socketMsg));
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS_FROM_VS:

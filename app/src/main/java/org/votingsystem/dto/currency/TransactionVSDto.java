@@ -78,8 +78,8 @@ public class TransactionVSDto implements Serializable {
     private List<Type> paymentOptions;
     private TransactionVSDetailsDto details;
     private UserVSDto.Type userToType;
-    private TagVSDto tagVS;
 
+    @JsonIgnore private TagVSDto tagVS;
     @JsonIgnore private SMIMEMessage smimeMessage;
     @JsonIgnore private SMIMEMessage cancelationSmimeMessage;
     @JsonIgnore private List<UserVSDto> toUserVSList;
@@ -201,7 +201,7 @@ public class TransactionVSDto implements Serializable {
         this.cancelationMessageSMIME = cancelationMessageSMIME;
     }
 
-    public String getTagName() {
+    @JsonIgnore public String getTagName() {
         if(tagVS != null) return tagVS.getName();
         else if (tags != null && !tags.isEmpty()) return tags.iterator().next();
         return null;

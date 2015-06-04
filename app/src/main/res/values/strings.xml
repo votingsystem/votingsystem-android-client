@@ -378,7 +378,7 @@
     <string name="currency_accounts_updated">cuentas actualizadas</string>
     <string name="time_limited_checkbox_msg">gastar antes del domingo a las 24:00</string>
     <string name="add_tag_lbl">añadir etiqueta</string>
-    <string name="selected_tag_lbl">para gastar en \'%1$s\'</string>
+    <string name="selected_tag_lbl">para emplear en \'%1$s\'</string>
     <string name="search_lbl">buscar</string>
     <string name="search_tag_lbl">buscar etiquetas</string>
     <string name="add_tag_advice_msg">si añade una etiqueta el ingreso sólo se podrá emplear en servicios asociados a esa etiqueta</string>
