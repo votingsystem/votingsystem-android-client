@@ -61,11 +61,12 @@ public class SocketMessageContentDto implements Serializable {
         return messageContentDto;
     }
 
-    public static SocketMessageContentDto getQRInfoRequest(String uuid) throws Exception {
+    public static SocketMessageContentDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
         SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.QR_MESSAGE_INFO);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
-        messageContentDto.setMessage(uuid);
+        messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
+        messageContentDto.setMessage(qrMessageDto.getUUID());
         return messageContentDto;
     }
 

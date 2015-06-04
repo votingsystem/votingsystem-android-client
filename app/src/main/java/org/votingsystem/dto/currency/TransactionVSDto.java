@@ -10,6 +10,7 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
@@ -86,6 +87,7 @@ public class TransactionVSDto implements Serializable {
     @JsonIgnore private SocketMessageDto socketMessageDto;
     @JsonIgnore private UserVSDto signer;
     @JsonIgnore private UserVSDto receptor;
+    @JsonIgnore private QRMessageDto qrMessageDto;
 
 
     public TransactionVSDto() {}
@@ -156,6 +158,15 @@ public class TransactionVSDto implements Serializable {
 
     public void setInfoURL(String infoURL) {
         this.infoURL = infoURL;
+    }
+
+    public QRMessageDto getQrMessageDto() {
+        return qrMessageDto;
+    }
+
+    public void setQrMessageDto(QRMessageDto qrMessageDto) {
+        this.infoURL = qrMessageDto.getUrl();
+        this.qrMessageDto = qrMessageDto;
     }
 
     public Long getLocalId() {

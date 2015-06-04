@@ -367,9 +367,7 @@ public class WebSocketService extends Service {
                         try {
                             QRMessageDto<TransactionVSDto> qrDto = AppVS.getInstance().getQRMessage(
                                     socketMsg.getMessage());
-
-                            //socketMsg.getContent().getHashCertVS();
-
+                            qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
                                     JSON.writeValueAsString(transactionDto),

@@ -55,7 +55,7 @@ public class MessageActivity extends AppCompatActivity {
         ((TextView) view.findViewById(R.id.message_text)).setText(Html.fromHtml(
                 responseVS.getNotificationMessage()));
         AlertDialog.Builder builder = new AlertDialog.Builder(this).setView(view);
-        builder.setPositiveButton(getString(R.string.accept_lbl),
+        builder.setCancelable(false).setPositiveButton(getString(R.string.accept_lbl),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         onBackPressed();

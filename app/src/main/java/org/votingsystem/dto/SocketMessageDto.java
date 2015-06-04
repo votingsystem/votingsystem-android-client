@@ -444,15 +444,19 @@ public class SocketMessageDto implements Serializable {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getQRInfoRequest(DeviceVSDto deviceVS, String uuid) throws Exception {
+    public static SocketMessageDto getQRInfoRequest(
+            DeviceVSDto deviceVS, QRMessageDto qrMessageDto) throws Exception {
+        qrMessageDto.createRequest();
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.QR_MESSAGE_INFO);
+        socketSession.setData(qrMessageDto);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getQRInfoRequest(uuid);
+        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getQRInfoRequest(
+                qrMessageDto);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 aesParams.getBytes(), deviceVS.getX509Certificate());

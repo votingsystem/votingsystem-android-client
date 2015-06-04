@@ -37,6 +37,8 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
+import java.security.NoSuchAlgorithmException;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -116,7 +118,7 @@ public class QRCodesActivity extends ActivityBase {
         if (result != null && result.getContents() != null) {
             if(result.getContents().toLowerCase().contains("http://") ||
                     result.getContents().toLowerCase().contains("https://")) {
-                new GetDataTask(null).execute(result.getContents());
+                new GetDataTask().execute(result.getContents());
             } else {
                 LOGD(TAG, "QR reader - onActivityResult - socket operation UUID: " + result.getContents());
                 try {
@@ -137,7 +139,7 @@ public class QRCodesActivity extends ActivityBase {
 
     private void sendQRRequestInfo(DeviceVSDto deviceVSDto, QRMessageDto qrMessageDto) throws Exception {
         SocketMessageDto socketMessage = SocketMessageDto.getQRInfoRequest(
-                deviceVSDto, qrMessageDto.getUUID());
+                deviceVSDto, qrMessageDto);
         Intent startIntent = new Intent(QRCodesActivity.this, WebSocketService.class);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.QR_MESSAGE_INFO);
@@ -215,12 +217,9 @@ public class QRCodesActivity extends ActivityBase {
 
         public final String TAG = GetDataTask.class.getSimpleName();
 
-        private ContentTypeVS contentType = null;
-        private String infoURL;
+        private QRMessageDto qrMessageDto;
 
-        public GetDataTask(ContentTypeVS contentType) {
-            this.contentType = contentType;
-        }
+        public GetDataTask() { }
 
         @Override protected void onPreExecute() {
             setProgressDialogVisible(true, getString(R.string.loading_data_msg),
@@ -229,8 +228,13 @@ public class QRCodesActivity extends ActivityBase {
 
         @Override protected ResponseVS doInBackground(String... urls) {
             LOGD(TAG + ".doInBackground", "url: " + urls[0]);
-            infoURL = urls[0];
-            return  HttpHelper.getData(urls[0], contentType);
+            try {
+                qrMessageDto = QRMessageDto.FROM_URL(urls[0]);
+                return  HttpHelper.sendData(qrMessageDto.getHashCertVS().getBytes(), null, urls[0]);
+            } catch (NoSuchAlgorithmException ex) {
+                ex.printStackTrace();
+                return ResponseVS.ERROR(null, ex.getMessage());
+            }
         }
 
         protected void onProgressUpdate(Integer... progress) {}
@@ -241,7 +245,7 @@ public class QRCodesActivity extends ActivityBase {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     TransactionVSDto dto = (TransactionVSDto) responseVS.getMessage(TransactionVSDto.class);
-                    dto.setInfoURL(infoURL);
+                    dto.setQrMessageDto(qrMessageDto);
                     switch (dto.getOperation()) {
                         case TRANSACTIONVS_INFO:
                         case DELIVERY_WITHOUT_PAYMENT:

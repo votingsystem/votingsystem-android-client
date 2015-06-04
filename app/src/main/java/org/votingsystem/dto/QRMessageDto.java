@@ -2,8 +2,12 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.votingsystem.signature.smime.CMSUtils;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 /**
@@ -12,19 +16,36 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QRMessageDto<T> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
+    @JsonIgnore private String origingHashCertVS;
     private Long deviceId;
     private Date dateCreated;
+    private String hashCertVS;
+    private String url;
     private String UUID;
 
     public QRMessageDto() {}
 
-    public QRMessageDto(DeviceVSDto deviceVSDto, TypeVS typeVS) {
+    public QRMessageDto(DeviceVSDto deviceVSDto, TypeVS typeVS){
         this.typeVS = typeVS;
         this.deviceId = deviceVSDto.getId();
-        dateCreated = new Date();
+        this.dateCreated = new Date();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
+    }
+
+    public static QRMessageDto FROM_URL(String url) throws NoSuchAlgorithmException {
+        QRMessageDto result = new QRMessageDto();
+        result.setUrl(url);
+        result.createRequest();
+        return result;
+    }
+
+    public void createRequest() throws NoSuchAlgorithmException {
+        this.origingHashCertVS = java.util.UUID.randomUUID().toString();
+        this.hashCertVS = CMSUtils.getHashBase64(origingHashCertVS, ContextVS.VOTING_DATA_DIGEST);
     }
 
     public String getUUID() {
@@ -65,5 +86,29 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public String getOrigingHashCertVS() {
+        return origingHashCertVS;
+    }
+
+    public void setOrigingHashCertVS(String origingHashCertVS) {
+        this.origingHashCertVS = origingHashCertVS;
+    }
+
+    public String getHashCertVS() {
+        return hashCertVS;
+    }
+
+    public void setHashCertVS(String hashCertVS) {
+        this.hashCertVS = hashCertVS;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
