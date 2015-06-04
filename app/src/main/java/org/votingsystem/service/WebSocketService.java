@@ -304,7 +304,7 @@ public class WebSocketService extends Service {
                         String message = socketMsg.getMessage();
                         if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode())
                             message = getString(R.string.device_not_found_error_msg);
-                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, message,
                                 getString(R.string.error_lbl));
                     }
                     break;

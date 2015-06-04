@@ -89,8 +89,8 @@ public class PaymentFragment extends Fragment {
                 setProgressDialogVisible(false);
                 String caption = ResponseVS.SC_OK == responseVS.getStatusCode()?getString(
                         R.string.payment_ok_caption):getString(R.string.error_lbl);
-                MessageDialogFragment.showDialog(responseVS.getStatusCode(), caption,
-                        responseVS.getMessage(), getFragmentManager());
+                getActivity().finish();
+                UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, responseVS.getMessage(), caption);
             }
         }
     };
