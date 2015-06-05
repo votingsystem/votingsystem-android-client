@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
@@ -21,6 +22,7 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
     @JsonIgnore private String origingHashCertVS;
+    @JsonIgnore private Currency currency ;
     private Long deviceId;
     private Date dateCreated;
     private String hashCertVS;
@@ -110,5 +112,13 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }

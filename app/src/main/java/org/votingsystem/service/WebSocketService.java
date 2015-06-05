@@ -369,10 +369,20 @@ public class WebSocketService extends Service {
                                     socketMsg.getMessage());
                             qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
-                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
-                                    JSON.writeValueAsString(transactionDto),
+
+                            Currency currency =  new  Currency(
+                                    AppVS.getInstance().getCurrencyServer().getServerURL(),
+                                    transactionDto.getAmount(), transactionDto.getCurrencyCode(),
+                                    transactionDto.isTimeLimited(), transactionDto.getTagName());
+                            qrDto.setCurrency(currency);
+
+
+                            SMIMEMessage simeMessage = null;
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
                                     AppVS.getInstance().getConnectedDevice().getId(),
-                                    TypeVS.TRANSACTIONVS_INFO);
+                                    simeMessage, TypeVS.TRANSACTIONVS_INFO);
+
+
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();

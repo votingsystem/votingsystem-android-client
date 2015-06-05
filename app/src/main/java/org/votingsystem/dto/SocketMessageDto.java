@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.util.encoders.Base64;
@@ -20,6 +21,9 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -80,7 +84,7 @@ public class SocketMessageDto implements Serializable {
     @JsonIgnore private transient AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
-    @JsonIgnore private SMIMEMessage smime;
+    @JsonIgnore private transient SMIMEMessage smime;
 
     public SocketMessageDto () {}
 
@@ -92,6 +96,11 @@ public class SocketMessageDto implements Serializable {
 
     public SocketMessageDto getResponse(Integer statusCode, String message,
                             Long deviceFromId, TypeVS operation) throws Exception {
+        return getResponse(statusCode, message, deviceFromId, null, operation);
+    }
+
+    public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId,
+            SMIMEMessage smimeMessage, TypeVS operation) throws Exception {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
@@ -102,6 +111,7 @@ public class SocketMessageDto implements Serializable {
         messageContentDto.setStatusCode(statusCode);
         messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setMessage(message);
+        messageContentDto.setSmimeMessage(new String(Base64.encode(smimeMessage.getBytes())));
         messageContentDto.setOperation(operation);
         messageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
@@ -577,6 +587,22 @@ public class SocketMessageDto implements Serializable {
                 break;
         }
         return responseVS;
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(smime != null) s.writeObject(smime.getBytes());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws Exception {
+        s.defaultReadObject();
+        byte[] receiptBytes = (byte[]) s.readObject();
+        if(receiptBytes != null) smime = new SMIMEMessage(receiptBytes);
     }
 
     @Override public String toString() {
