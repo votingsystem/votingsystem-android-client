@@ -373,7 +373,8 @@ public class WebSocketService extends Service {
                             Currency currency =  new  Currency(
                                     AppVS.getInstance().getCurrencyServer().getServerURL(),
                                     transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                                    transactionDto.isTimeLimited(), transactionDto.getTagName());
+                                    transactionDto.isTimeLimited(),  qrDto.getHashCertVS(),
+                                    transactionDto.getTagName());
                             qrDto.setCurrency(currency);
 
 
