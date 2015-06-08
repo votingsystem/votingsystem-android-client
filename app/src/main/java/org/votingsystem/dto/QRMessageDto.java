@@ -7,6 +7,7 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;

@@ -135,6 +135,7 @@ public class MsgUtils {
     public static String getUpdateCurrencyWithErrorMsg(Collection<Currency> currencyWithErrors, Context context) {
         Map<String,  Map<String, BigDecimal>> expendedMap = new HashMap<>();
         Map<String,  Map<String, BigDecimal>> lapsedMap = new HashMap<>();
+        Map<String,  Map<String, BigDecimal>> unknownMap = new HashMap<>();
         for(Currency currency : currencyWithErrors) {
             switch (currency.getState()) {
                 case LAPSED:
@@ -173,6 +174,25 @@ public class MsgUtils {
                         expendedMap.put(currency.getCurrencyCode(), tagInfo);
                     }
                     break;
+                case UNKNOWN:
+                    if(unknownMap.containsKey(currency.getCurrencyCode())) {
+                        Map<String, BigDecimal> tagInfo = unknownMap.get(currency.getCurrencyCode());
+                        if(tagInfo == null) {
+                            tagInfo = new HashMap<>();
+                            tagInfo.put(currency.getTag(), currency.getAmount());
+                        } else {
+                            BigDecimal tagAccumulated = tagInfo.get(currency.getTag()).add(
+                                    currency.getAmount());
+                            tagInfo.put(currency.getTag(), currency.getAmount());
+                        }
+                        unknownMap.put(currency.getCurrencyCode(), tagInfo);
+                    } else {
+                        Map<String, BigDecimal> tagInfo = new HashMap<>();
+                        tagInfo.put(currency.getTag(), currency.getAmount());
+                        unknownMap.put(currency.getCurrencyCode(), tagInfo);
+                    }
+                    break;
+                default:
             }
         }
         StringBuilder sb = new StringBuilder();
@@ -197,6 +217,17 @@ public class MsgUtils {
                 }
             }
         }
+        if(unknownMap.size() > 0) {
+            for(String currency : unknownMap.keySet()) {
+                Map<String, BigDecimal> tagInfo = unknownMap.get(currency);
+                for(String tagVS: tagInfo.keySet()) {
+                    sb.append(context.getString(R.string.currency_unknown_msg, tagInfo.get(tagVS).
+                            toString() + " " + currency, getTagVSMessage(tagVS)) + "<br/>");
+
+                }
+            }
+        }
+
         String result = context.getString(R.string.updated_currency_with_error_msg) + ":<br/>" +
                 sb.toString();
         return result;

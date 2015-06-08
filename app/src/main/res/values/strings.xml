@@ -504,9 +504,10 @@
     <string name="payment_ok_caption">pago completado con éxito</string>
     <string name="available_exceded_error_msg">el importe seleccionado excede el máximo disponible</string>
     <string name="expended_currency_error_msg">tenía en su monedero un currency de \'%1$s\' que ya había sido consumido, por favor repita la operación</string>
-    <string name="updated_currency_with_error_msg">se han eliminido de su monedero</string>
+    <string name="updated_currency_with_error_msg">se han eliminado de su monedero</string>
     <string name="currency_expended_msg">\'%1$s\' para \'%2$s\' que ya habían sido consumidos</string>
     <string name="currency_lapsed_msg">\'%1$s\' para \'%2$s\' que ya habían caducado</string>
+    <string name="currency_unknown_msg">\'%1$s\' para \'%2$s\' que emitidos por un servidor no reconocido</string>
     <string name="messages_lbl">mensajes</string>
     <string name="wallet_change_lbl">cambio de monedero</string>
     <string name="save_to_wallet_lbl">guardar en monedero</string>

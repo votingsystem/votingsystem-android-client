@@ -40,7 +40,7 @@ public class Currency extends ReceiptWrapper {
 
     private static final long serialVersionUID = 1L;
 
-    public enum State { OK, EXPENDED, LAPSED;}
+    public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;}
 
     private Long localId = -1L;
     private Long id;

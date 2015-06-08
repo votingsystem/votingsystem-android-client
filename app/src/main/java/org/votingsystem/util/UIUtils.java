@@ -100,11 +100,11 @@ public class UIUtils  {
     private static DateFormat sShortTimeFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
 
-    public static void launchMessageActivity(ResponseVS responseVS, Context context) {
-        Intent intent = new Intent(context, MessageActivity.class);
+    public static void launchMessageActivity(ResponseVS responseVS) {
+        Intent intent = new Intent(AppVS.getInstance(), MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        context.startActivity(intent);
+        AppVS.getInstance().startActivity(intent);
     }
 
     public static void launchMessageActivity(Integer statusCode, String message, String caption) {

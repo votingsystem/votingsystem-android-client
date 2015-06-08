@@ -10,6 +10,7 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.WalletActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -33,6 +34,7 @@ import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
@@ -327,15 +329,14 @@ public class PaymentService extends IntentService {
             if(removedSet != null && !removedSet.isEmpty()) {
                 for(Currency currency : removedSet) {
                     currency.setState(responseDto.get(currency.getHashCertVS()));
+                    getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
+                            CurrencyContentProvider.getContentValues(currency));
                 }
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR, MsgUtils.getUpdateCurrencyWithErrorMsg(
-                        removedSet, appVS));
+                responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                        MsgUtils.getUpdateCurrencyWithErrorMsg(removedSet, appVS));
                 responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
                         serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
-                Intent intent = new Intent(this, WalletActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-                startActivity(intent);
+                UIUtils.launchMessageActivity(responseVS);
             } else {
                 Wallet.updateCurrencyState(currencyOKList, Currency.State.OK);
                 responseVS = new ResponseVS(ResponseVS.SC_OK);

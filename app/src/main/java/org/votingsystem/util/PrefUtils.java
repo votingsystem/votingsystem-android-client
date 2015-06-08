@@ -3,7 +3,6 @@ package org.votingsystem.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.telephony.TelephonyManager;
-import android.util.Base64;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;

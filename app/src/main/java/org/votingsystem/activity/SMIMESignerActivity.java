@@ -69,7 +69,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
                 if(TypeVS.MESSAGEVS_SIGN_RESPONSE == socketMessageResponse.getOperation()) {
                     if(ResponseVS.SC_WS_MESSAGE_SEND_OK == socketMessageResponse.getStatusCode()) {
                         UIUtils.launchMessageActivity(socketMessageResponse.getNotificationResponse(
-                                SMIMESignerActivity.this), SMIMESignerActivity.this);
+                                SMIMESignerActivity.this));
                         SMIMESignerActivity.this.finish();
                     } else showMessage(socketMessageResponse.getStatusCode(),
                             getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());

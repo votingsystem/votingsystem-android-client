@@ -116,13 +116,6 @@ public class WalletFragment extends Fragment {
             printSummary();
         }
         setHasOptionsMenu(true);
-        ResponseVS responseVS = (getArguments() != null)? (ResponseVS) getArguments().getParcelable(
-                ContextVS.RESPONSEVS_KEY) :null;
-        if(responseVS != null) {
-            MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                    responseVS.getCaption(), responseVS.getMessage(),
-                    getFragmentManager());
-        }
         return rootView;
     }
 
