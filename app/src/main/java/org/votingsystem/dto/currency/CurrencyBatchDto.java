@@ -28,6 +28,7 @@ public class CurrencyBatchDto {
     private TypeVS operation = TypeVS.CURRENCY_SEND;
     private Set<String> currencySet;
     private String leftOverCSR;
+    private String currencyChangeCSR;
     private String toUserIBAN;
     private String toUserName;
     private String subject;
@@ -218,4 +219,11 @@ public class CurrencyBatchDto {
         this.currencyCollection = currencyCollection;
     }
 
+    public String getCurrencyChangeCSR() {
+        return currencyChangeCSR;
+    }
+
+    public void setCurrencyChangeCSR(String currencyChangeCSR) {
+        this.currencyChangeCSR = currencyChangeCSR;
+    }
 }

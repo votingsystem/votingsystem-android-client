@@ -21,6 +21,7 @@ import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
+import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -40,7 +41,6 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -49,7 +49,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -137,8 +136,11 @@ public class PaymentService extends IntentService {
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
-                                responseVS = HttpHelper.sendData(receipt.getBytes(),
-                                        ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                                TransactionResponseDto responseDto = new TransactionResponseDto();
+                                responseDto.setOperation(TypeVS.FROM_USERVS);
+                                responseDto.setSmimeMessage(base64Receipt);
+                                responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
+                                        ContentTypeVS.JSON, transactionDto.getPaymentConfirmURL());
                             }
                         }
                         break;
@@ -150,12 +152,14 @@ public class PaymentService extends IntentService {
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,
                                         AppVS.getInstance().getConnectedDevice().getId(),
+                                        responseVS.getSMIME(),
                                         TypeVS.TRANSACTIONVS_RESPONSE);
-                                socketRespDto.setSMIME(responseVS.getSMIME());
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
-                                responseVS = HttpHelper.sendData(responseVS.getSMIME().getBytes(),
+                                TransactionResponseDto responseDto = new TransactionResponseDto(
+                                        TypeVS.CURRENCY_SEND, null, responseVS.getSMIME());
+                                responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
                             responseVS.setMessage(MsgUtils.getAnonymousSignedTransactionOKMsg(
@@ -182,7 +186,29 @@ public class PaymentService extends IntentService {
                         if(!transactionDto.getQrMessageDto().getHashCertVS().equals(
                                 currencyDto.getHashCertVS()))
                             throw new ValidationExceptionVS("currency request hash mismatch");
-                        LOGD(TAG + ".processTransaction", "OK - proceed ...");
+                        responseVS = sendCurrencyBatch(transactionDto);
+                        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            if(transactionDto.getSocketMessageDto() != null) {
+                                String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
+                                String responseMessage = transactionDto.getQrMessageDto() == null?
+                                        null: transactionDto.getQrMessageDto().getCurrencyChangeCert();
+                                SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
+                                        .getResponse(ResponseVS.SC_OK, responseMessage,
+                                        AppVS.getInstance().getConnectedDevice().getId(),
+                                        responseVS.getSMIME(), TypeVS.TRANSACTIONVS_RESPONSE);
+                                sendSocketMessage(socketRespDto);
+                                responseVS.setMessage(message);
+                            } else {
+                                TransactionResponseDto responseDto = new TransactionResponseDto(
+                                        TypeVS.CURRENCY_CHANGE,
+                                        transactionDto.getQrMessageDto().getCurrencyChangeCert(),
+                                        responseVS.getSMIME());
+                                responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
+                                        ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                            }
+                            responseVS.setMessage(MsgUtils.getAnonymousSignedTransactionOKMsg(
+                                    transactionDto, this));
+                        }
                         break;
                     default:
                         LOGD(TAG + ".processTransaction", "unknown operation: " + transactionDto.getType());
@@ -271,11 +297,18 @@ public class PaymentService extends IntentService {
             CurrencyBundle currencyBundle = Wallet.getCurrencyBundleForTag(
                     transactionDto.getCurrencyCode(), transactionDto.getTagName());
             CurrencyBatchDto requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
+            if(TypeVS.CURRENCY_CHANGE == transactionDto.getOperation()) {
+                SMIMEMessage smimeMessage = transactionDto.getSmimeMessage();
+                requestDto.setCurrencyChangeCSR(smimeMessage.getSignedContent());
+                requestDto.setToUserIBAN(null);
+            }
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto)
                         responseVS.getMessage(CurrencyBatchResponseDto.class);
+                if(transactionDto.getQrMessageDto() != null) transactionDto.getQrMessageDto().
+                        setCurrencyChangeCert(responseDto.getCurrencyChangeCert());
                 SMIMEMessage smimeMessage = requestDto.validateResponse(responseDto,
                         currencyServer.getTrustAnchors());
                 responseVS.setSMIME(smimeMessage);

@@ -1,7 +1,6 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.signature.smime.SMIMEMessage;
 
@@ -12,6 +11,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 public class CurrencyBatchResponseDto {
 
     private String leftOverCert;
+    private String currencyChangeCert;
     private String receipt;
     private String message;
 
@@ -44,6 +44,14 @@ public class CurrencyBatchResponseDto {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getCurrencyChangeCert() {
+        return currencyChangeCert;
+    }
+
+    public void setCurrencyChangeCert(String currencyChangeCert) {
+        this.currencyChangeCert = currencyChangeCert;
     }
 
 }

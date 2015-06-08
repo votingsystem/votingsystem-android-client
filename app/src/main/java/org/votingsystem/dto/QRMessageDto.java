@@ -27,6 +27,7 @@ public class QRMessageDto<T> implements Serializable {
     private Long deviceId;
     private Date dateCreated;
     private String hashCertVS;
+    private String currencyChangeCert;
     private String url;
     private String UUID;
 
@@ -121,5 +122,13 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public String getCurrencyChangeCert() {
+        return currencyChangeCert;
+    }
+
+    public void setCurrencyChangeCert(String currencyChangeCert) {
+        this.currencyChangeCert = currencyChangeCert;
     }
 }

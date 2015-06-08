@@ -514,8 +514,38 @@ public class TransactionVSDto implements Serializable {
                 return validateFromUserVSReceipt(smimeMessage, isIncome);
             case CURRENCY_SEND:
                 return validateCurrencySendReceipt(smimeMessage, isIncome);
+            case CURRENCY_CHANGE:
+                return validateCurrencyChangeReceipt(smimeMessage, isIncome);
             default: throw new ValidationExceptionVS("unknown receipt type: " + typeVS);
         }
+    }
+
+    private String validateCurrencyChangeReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
+        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+        if(TypeVS.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
+                TypeVS.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
+        if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
+            if(!paymentOptions.contains(Type.CURRENCY_CHANGE)) throw new ValidationExceptionVS(
+                    "unexpected type: " + receiptDto.getOperation());
+        }
+        Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
+        if(!toUserIBAN.equals(receptorsSet)) throw new ValidationExceptionVS(
+                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
+        if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationExceptionVS(
+                "expected amount " + amount + " amount " + receiptDto.getBatchAmount());
+        if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
+                "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
+        if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
+                "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
+        String action = isIncome?AppVS.getInstance().getString(R.string.income_lbl):
+                AppVS.getInstance().getString(R.string.expense_lbl);
+        String result = AppVS.getInstance().getString(R.string.currency_change_receipt_ok_msg,
+                action, receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
+                MsgUtils.getTagVSMessage(receiptDto.getTag()));
+        if(receiptDto.timeLimited()) {
+            result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
+        }
+        return result;
     }
 
     private String validateCurrencySendReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {

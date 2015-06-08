@@ -406,13 +406,19 @@ public class WebSocketService extends Service {
                     //the payer has completed the payment and send the details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         try {
-                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
                             QRMessageDto<TransactionVSDto> qrDto =
                                     (QRMessageDto<TransactionVSDto>) socketSession.getData();
+                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
+                            TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
+                            if(TypeVS.CURRENCY_CHANGE == typeVS) {
+                                Currency currency = qrDto.getCurrency();
+                                currency.initSigner(socketMsg.getMessage().getBytes());
+                                LOGD(TAG + ".sendWebSocketBroadcast", "TODO - CURRENCY_CHANGE - save to wallet");
+                            }
                             TransactionVSDto transactionDto = qrDto.getData();
                             String result = transactionDto.validateReceipt(smimeMessage, true);
                             UIUtils.launchMessageActivity(ResponseVS.SC_OK, result,
-                                    getString(R.string.error_lbl));
+                                    getString(R.string.ok_lbl));
                             AppVS.getInstance().removeQRMessage(qrDto.getUUID());
                         } catch (Exception ex) {
                             ex.printStackTrace();
