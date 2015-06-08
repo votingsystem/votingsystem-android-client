@@ -18,11 +18,14 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.CurrencyBundle;
@@ -88,11 +91,10 @@ public class PaymentService extends IntentService {
                 case CURRENCY_REQUEST:
                     currencyRequest(serviceCaller, transactionDto, pin);
                     break;
+                case CURRENCY_CHANGE:
                 case FROM_USERVS:
                 case CURRENCY_SEND:
                     processTransaction(serviceCaller, transactionDto);
-                    break;
-                case CASH_SEND:
                     break;
                 default:
                     LOGD(TAG + ".onHandleIntent", "unknown operation: " + operation);
@@ -161,6 +163,26 @@ public class PaymentService extends IntentService {
                         }
                         break;
                     case CURRENCY_CHANGE:
+                        SMIMEMessage currencyRequest = new SMIMEMessage(Base64.decode(
+                                transactionDto.getMessageSMIME()));
+                        CurrencyDto currencyDto = new CurrencyDto(
+                                CertUtils.fromPEMToPKCS10CertificationRequest(
+                                currencyRequest.getSignedContent().getBytes()));
+                        if(!transactionDto.getTagName().equals(currencyDto.getTag()))
+                            throw new ValidationExceptionVS("Transaction tag: " + transactionDto.getTagName() +
+                            " doesn't match currency request tag: " + currencyDto.getTag());
+                        if(!transactionDto.getCurrencyCode().equals(currencyDto.getCurrencyCode()))
+                            throw new ValidationExceptionVS("Transaction CurrencyCode: " +
+                                    transactionDto.getCurrencyCode() +
+                                    " doesn't match currency CurrencyCode " + currencyDto.getCurrencyCode());
+                        if(transactionDto.getAmount().compareTo(currencyDto.getAmount()) != 0)
+                            throw new ValidationExceptionVS("Transaction amount: " +
+                                    transactionDto.getAmount() +
+                                    " doesn't match currency amount " + currencyDto.getAmount());
+                        if(!transactionDto.getQrMessageDto().getHashCertVS().equals(
+                                currencyDto.getHashCertVS()))
+                            throw new ValidationExceptionVS("currency request hash mismatch");
+                        LOGD(TAG + ".processTransaction", "OK - proceed ...");
                         break;
                     default:
                         LOGD(TAG + ".processTransaction", "unknown operation: " + transactionDto.getType());

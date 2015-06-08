@@ -6,6 +6,7 @@ import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.BasicConstraints;
 import org.bouncycastle2.asn1.x509.KeyUsage;
@@ -65,6 +66,7 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -287,6 +289,20 @@ public class CertUtils {
         DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
         String extensionData = ((DERUTF8String) derTaggedObject.getObject()).getString();
         return JSON.readValue(extensionData, type);
+    }
+
+    public static <T> T getCertExtensionData(Class<T> type, PKCS10CertificationRequest csr, int tagNo) throws Exception {
+        CertificationRequestInfo info = csr.getCertificationRequestInfo();
+        Enumeration csrAttributes = info.getAttributes().getObjects();
+        T certExtensionDto = null;
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            if(attribute.getTagNo() == tagNo) {
+                String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
+                certExtensionDto = JSON.getMapper().readValue(certAttributeJSONStr, type);
+            }
+        }
+        return certExtensionDto;
     }
 
     public static DERObject toDERObject(byte[] data) throws IOException, IOException {

@@ -2,8 +2,6 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.util.Log;
-
-import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
@@ -50,7 +48,6 @@ public class Currency extends ReceiptWrapper {
     private transient SMIMEMessage cancellationReceipt;
     private transient SMIMEMessage smimeMessage;
     private transient X509Certificate x509AnonymousCert;
-    private transient PKCS10CertificationRequest csr;
     private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
     private byte[] cancellationReceiptBytes;

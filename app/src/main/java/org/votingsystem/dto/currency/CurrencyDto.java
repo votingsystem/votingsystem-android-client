@@ -3,11 +3,14 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.Currency;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -60,6 +63,28 @@ public class CurrencyDto implements Serializable {
         this.dateCreated = currency.getDateCreated();
         this.notBefore = currency.getValidFrom();
         this.notAfter = currency.getValidTo();
+    }
+
+    public CurrencyDto(PKCS10CertificationRequest csrPKCS10) throws Exception {
+        this.csrPKCS10 = csrPKCS10;
+        CertificationRequestInfo info = csrPKCS10.getCertificationRequestInfo();
+        String subjectDN = info.getSubject().toString();
+        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                csrPKCS10, ContextVS.CURRENCY_TAG);
+        if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
+        currencyServerURL = certExtensionDto.getCurrencyServerURL();
+        hashCertVS = certExtensionDto.getHashCertVS();
+        amount = certExtensionDto.getAmount();
+        currencyCode = certExtensionDto.getCurrencyCode();
+        tag = certExtensionDto.getTag();
+        CurrencyDto certSubjectDto = getCertSubjectDto(subjectDN, hashCertVS);
+        if(!certSubjectDto.getCurrencyServerURL().equals(currencyServerURL))
+            throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
+        if(certSubjectDto.getAmount().compareTo(amount) != 0)
+            throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + subjectDN);
+        if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
+            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+        if(!certSubjectDto.getTag().equals(tag)) throw new ValidationExceptionVS("tag: " + tag + " - certSubject: " + subjectDN);
     }
 
     public CurrencyDto(Boolean timeLimited, String object) {

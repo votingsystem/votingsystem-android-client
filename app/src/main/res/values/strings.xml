@@ -571,4 +571,5 @@
     <string name="from_uservs_receipt_ok_msg">ha \'%1$s\' un ingreso de \'%2$s\' para \'%3$s\'</string>
     <string name="income_lbl">recibido</string>
     <string name="expense_lbl">realizado</string>
+    <string name="currency_change_subject">intercambio de moneda anónimo</string>
 </resources>

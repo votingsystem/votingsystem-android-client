@@ -241,6 +241,7 @@ public class PaymentFragment extends Fragment {
                                 false, TypeVS.FROM_USERVS);
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
+                case CURRENCY_CHANGE:
                 case CURRENCY_SEND:
                     if(Wallet.getCurrencySet() == null) {
                         PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
@@ -303,10 +304,8 @@ public class PaymentFragment extends Fragment {
                             UIUtils.showMessageDialog(builder);
                         }
                     } else {
-                        launchTransactionVS(TransactionVSDto.Type.CURRENCY_SEND);
+                        launchTransactionVS(transactionDto.getType());
                     }
-                    break;
-                case CURRENCY_CHANGE:
                     break;
             }
         } catch(Exception ex) { ex.printStackTrace();}

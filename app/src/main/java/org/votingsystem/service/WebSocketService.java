@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -376,14 +377,16 @@ public class WebSocketService extends Service {
                                     transactionDto.isTimeLimited(),  qrDto.getHashCertVS(),
                                     transactionDto.getTagName());
                             qrDto.setCurrency(currency);
-
-
-                            SMIMEMessage simeMessage = null;
-                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
+                            SMIMEMessage simeMessage = AppVS.getInstance().signMessage(
+                                    qrDto.getHashCertVS(),
+                                    new String(currency.getCertificationRequest().getCsrPEM()),
+                                    getString(R.string.currency_change_subject));
+                            transactionDto.setMessageSMIME(
+                                    new String(Base64.encode(simeMessage.getBytes())));
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
+                                    JSON.getMapper().writeValueAsString(transactionDto),
                                     AppVS.getInstance().getConnectedDevice().getId(),
                                     simeMessage, TypeVS.TRANSACTIONVS_INFO);
-
-
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
