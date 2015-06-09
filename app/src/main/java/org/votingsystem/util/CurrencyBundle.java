@@ -90,8 +90,10 @@ public class CurrencyBundle {
 
 
     public CurrencyBatchDto getCurrencyBatchDto(TransactionVSDto transactionDto) throws Exception {
+        String toUserIBAN = transactionDto.getToUserIBAN() == null ? null:
+                transactionDto.getToUserIBAN().iterator().next();
         return getCurrencyBatchDto(transactionDto.getOperation(),
-                transactionDto.getSubject(), transactionDto.getToUserIBAN().iterator().next(),
+                transactionDto.getSubject(), toUserIBAN,
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                 transactionDto.getTagVS().getName(), transactionDto.isTimeLimited(),
                 transactionDto.getUUID());

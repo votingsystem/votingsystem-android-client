@@ -100,15 +100,6 @@ public class MsgUtils {
         }
     }
 
-    public static String getAnonymousSignedTransactionOKMsg(TransactionVSDto transactionRequest,
-                 Context context) {
-        String toUser = transactionRequest.getToUser() != null?
-                transactionRequest.getToUser(): transactionRequest.getToUserIBAN().iterator().next();
-        return context.getString(R.string.anonymous_signed_transaction_ok_msg,
-                transactionRequest.getAmount().toString() + " " + transactionRequest.getCurrencyCode(),
-                toUser);
-    }
-
     public static String getCurrencyRequestMessage(TransactionVSDto transactionDto, Context context) {
         String tagMessage = getTagVSMessage(transactionDto.getTagVS().getName());
         return context.getString(R.string.currency_request_msg, transactionDto.getAmount().toPlainString(),

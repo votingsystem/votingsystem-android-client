@@ -162,7 +162,6 @@ public class PaymentService extends IntentService {
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
-                            //message = MsgUtils.getAnonymousSignedTransactionOKMsg(transactionDto, this);
                             responseVS.setMessage(message);
                         }
                         break;
@@ -206,7 +205,6 @@ public class PaymentService extends IntentService {
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
-                            //message = MsgUtils.getAnonymousSignedTransactionOKMsg(transactionDto, this);
                             responseVS.setMessage(message);
                         }
                         break;
@@ -296,12 +294,14 @@ public class PaymentService extends IntentService {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
             CurrencyBundle currencyBundle = Wallet.getCurrencyBundleForTag(
                     transactionDto.getCurrencyCode(), transactionDto.getTagName());
-            CurrencyBatchDto requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
+            CurrencyBatchDto requestDto = null;
             if(TypeVS.CURRENCY_CHANGE == transactionDto.getOperation()) {
+                transactionDto.setToUserIBAN(null);
+                requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
                 SMIMEMessage smimeMessage = transactionDto.getSmimeMessage();
                 requestDto.setCurrencyChangeCSR(smimeMessage.getSignedContent());
                 requestDto.setToUserIBAN(null);
-            }
+            } else requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
