@@ -79,4 +79,20 @@
         android:layout_gravity="center"
         android:text="@string/time_limited_checkbox_msg"/>
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:gravity="end"
+        android:orientation="horizontal" >
+        <Button android:id="@+id/submit_form_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_marginRight="30dp"
+            android:layout_gravity="center"
+            android:drawableStart="@drawable/fa_check_16"
+            android:text="@string/request_cash_lbl" />
+    </LinearLayout>
 </LinearLayout>

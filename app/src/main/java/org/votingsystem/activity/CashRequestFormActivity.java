@@ -55,6 +55,7 @@ public class CashRequestFormActivity extends AppCompatActivity {
     private TextView msgTextView;
     private TextView currency_text;
     private Button add_tag_btn;
+    private Button submit_form_btn;
     private TextView errorMsgTextView;
     private String broadCastId = CashRequestFormActivity.class.getSimpleName();
     private EditText amount;
@@ -125,30 +126,18 @@ public class CashRequestFormActivity extends AppCompatActivity {
                 else setTagVS(null);
             }
         });
+        submit_form_btn = (Button)findViewById(R.id.submit_form_btn);
+        submit_form_btn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                submitForm();
+            }
+        });
         amount.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if(TextUtils.isEmpty(amount.getText().toString())) return true;
-                    BigDecimal selectedAmount = new BigDecimal(amount.getText().toString());
-                    if(selectedAmount.compareTo(maxValue) > 0) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                                getString(R.string.available_exceded_error_msg), getSupportFragmentManager());
-                    } else {
-                        if(selectedAmount.compareTo(new BigDecimal(0)) > 0) {
-                            if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
-                            transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
-                                    currencyCode, tagVS, time_limited_checkbox.isChecked());
-                            PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                                    MsgUtils.getCurrencyRequestMessage(transactionDto, CashRequestFormActivity.this),
-                                    false, TypeVS.CURRENCY_REQUEST);
-                        } else errorMsgTextView.setVisibility(View.VISIBLE);
-                    }
-                    return true;
-                }
+                if (actionId == EditorInfo.IME_ACTION_DONE) return submitForm();
                 return false;
             }
         });
-
 
         if(savedInstanceState != null) {
             setTagVS((TagVSDto) savedInstanceState.getSerializable(ContextVS.TAG_KEY));
@@ -161,6 +150,25 @@ public class CashRequestFormActivity extends AppCompatActivity {
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.request_cash_lbl));
+    }
+
+    private boolean submitForm() {
+        if(TextUtils.isEmpty(amount.getText().toString())) return true;
+        BigDecimal selectedAmount = new BigDecimal(amount.getText().toString());
+        if(selectedAmount.compareTo(maxValue) > 0) {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                    getString(R.string.available_exceded_error_msg), getSupportFragmentManager());
+        } else {
+            if(selectedAmount.compareTo(new BigDecimal(0)) > 0) {
+                if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
+                transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
+                        currencyCode, tagVS, time_limited_checkbox.isChecked());
+                PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
+                        MsgUtils.getCurrencyRequestMessage(transactionDto, CashRequestFormActivity.this),
+                        false, TypeVS.CURRENCY_REQUEST);
+            } else errorMsgTextView.setVisibility(View.VISIBLE);
+        }
+        return true;
     }
 
     private void setTagVS(TagVSDto tagVS) {

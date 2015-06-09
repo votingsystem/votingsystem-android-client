@@ -161,7 +161,7 @@ public class CurrencyBundle {
                 currencySet.add(lastCurrencyAdded);
                 bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
             }
-        } else if(batchAmount.compareTo(totalAmount) < 0) {
+        } else if(batchAmount.compareTo(totalAmount) <= 0) {
             List<Currency> tagCurrencyList = new ArrayList<>(tagTimeLimitedCurrencyList);
             tagCurrencyList.addAll(tagTimeUnlimitedCurrencyList);
             tagCurrencyList.addAll(wildTagTimeLimitedCurrencyList);
