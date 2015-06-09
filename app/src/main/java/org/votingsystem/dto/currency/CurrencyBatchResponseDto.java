@@ -1,6 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.signature.smime.SMIMEMessage;
 

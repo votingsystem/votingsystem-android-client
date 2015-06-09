@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;

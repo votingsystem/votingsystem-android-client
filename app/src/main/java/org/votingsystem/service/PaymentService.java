@@ -8,13 +8,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.WalletActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
@@ -41,6 +39,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -49,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -107,7 +107,6 @@ public class PaymentService extends IntentService {
 
     private void processTransaction(String serviceCaller, TransactionVSDto transactionDto) {
         LOGD(TAG + ".processTransaction", "operation: " + transactionDto.getOperation());
-        UserVSDto userVS = PrefUtils.getSessionUserVS(this);
         ResponseVS responseVS = null;
         if(transactionDto.getDateCreated() != null && DateUtils.inRange(transactionDto.getDateCreated(),
                 Calendar.getInstance().getTime(), FOUR_MINUTES)) {
@@ -147,8 +146,9 @@ public class PaymentService extends IntentService {
                     case CURRENCY_SEND:
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
                             if(transactionDto.getSocketMessageDto() != null) {
-                                String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
+
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,
                                         AppVS.getInstance().getConnectedDevice().getId(),
@@ -162,8 +162,8 @@ public class PaymentService extends IntentService {
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
-                            responseVS.setMessage(MsgUtils.getAnonymousSignedTransactionOKMsg(
-                                    transactionDto, this));
+                            //message = MsgUtils.getAnonymousSignedTransactionOKMsg(transactionDto, this);
+                            responseVS.setMessage(message);
                         }
                         break;
                     case CURRENCY_CHANGE:
@@ -188,8 +188,8 @@ public class PaymentService extends IntentService {
                             throw new ValidationExceptionVS("currency request hash mismatch");
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                            String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
                             if(transactionDto.getSocketMessageDto() != null) {
-                                String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
                                 String responseMessage = transactionDto.getQrMessageDto() == null?
                                         null: transactionDto.getQrMessageDto().getCurrencyChangeCert();
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
@@ -206,8 +206,8 @@ public class PaymentService extends IntentService {
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
-                            responseVS.setMessage(MsgUtils.getAnonymousSignedTransactionOKMsg(
-                                    transactionDto, this));
+                            //message = MsgUtils.getAnonymousSignedTransactionOKMsg(transactionDto, this);
+                            responseVS.setMessage(message);
                         }
                         break;
                     default:

@@ -528,9 +528,6 @@ public class TransactionVSDto implements Serializable {
             if(!paymentOptions.contains(Type.CURRENCY_CHANGE)) throw new ValidationExceptionVS(
                     "unexpected type: " + receiptDto.getOperation());
         }
-        Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
-        if(!toUserIBAN.equals(receptorsSet)) throw new ValidationExceptionVS(
-                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
         if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationExceptionVS(
                 "expected amount " + amount + " amount " + receiptDto.getBatchAmount());
         if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(

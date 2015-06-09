@@ -110,7 +110,8 @@ public class SocketMessageDto implements Serializable {
         messageContentDto.setStatusCode(statusCode);
         messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setMessage(message);
-        messageContentDto.setSmimeMessage(new String(Base64.encode(smimeMessage.getBytes())));
+        if(smimeMessage != null) messageContentDto.setSmimeMessage(
+                new String(Base64.encode(smimeMessage.getBytes())));
         messageContentDto.setOperation(operation);
         messageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));

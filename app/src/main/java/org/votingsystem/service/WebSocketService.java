@@ -351,6 +351,7 @@ public class WebSocketService extends Service {
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
                         dto.setSocketMessageDto(socketMsg);
+                        dto.setQrMessageDto((QRMessageDto) socketSession.getData());
                         Intent resultIntent = new Intent(this, FragmentContainerActivity.class);
                         resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
                         resultIntent.putExtra(ContextVS.TRANSACTION_KEY, dto);
