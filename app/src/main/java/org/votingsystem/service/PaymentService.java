@@ -300,7 +300,6 @@ public class PaymentService extends IntentService {
                 requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
                 SMIMEMessage smimeMessage = transactionDto.getSmimeMessage();
                 requestDto.setCurrencyChangeCSR(smimeMessage.getSignedContent());
-                requestDto.setToUserIBAN(null);
             } else requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
