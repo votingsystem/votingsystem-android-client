@@ -22,7 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.activity.CashRequestFormActivity;
+import org.votingsystem.activity.CurrencyRequestFormActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
@@ -286,7 +286,7 @@ public class PaymentFragment extends Fragment {
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             Intent intent = new Intent(getActivity(),
-                                                    CashRequestFormActivity.class);
+                                                    CurrencyRequestFormActivity.class);
                                             intent.putExtra(ContextVS.MAX_VALUE_KEY,
                                                     availableForTagVS);
                                             intent.putExtra(ContextVS.DEFAULT_VALUE_KEY,

@@ -44,9 +44,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CashRequestFormActivity extends AppCompatActivity {
+public class CurrencyRequestFormActivity extends AppCompatActivity {
 	
-	public static final String TAG = CashRequestFormActivity.class.getSimpleName();
+	public static final String TAG = CurrencyRequestFormActivity.class.getSimpleName();
 
 
     private LinearLayout tag_info;
@@ -57,7 +57,7 @@ public class CashRequestFormActivity extends AppCompatActivity {
     private Button add_tag_btn;
     private Button submit_form_btn;
     private TextView errorMsgTextView;
-    private String broadCastId = CashRequestFormActivity.class.getSimpleName();
+    private String broadCastId = CurrencyRequestFormActivity.class.getSimpleName();
     private EditText amount;
     private CheckBox time_limited_checkbox;
     private BigDecimal maxValue;
@@ -82,12 +82,12 @@ public class CashRequestFormActivity extends AppCompatActivity {
                     case CURRENCY_REQUEST:
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                 responseVS.getCaption(), responseVS.getNotificationMessage(),
-                                CashRequestFormActivity.this);
+                                CurrencyRequestFormActivity.this);
                         builder.setPositiveButton(getString(R.string.accept_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                                        CashRequestFormActivity.this.setResult(Activity.RESULT_OK, null);
+                                        CurrencyRequestFormActivity.this.setResult(Activity.RESULT_OK, null);
                                         finish();
                                     }
                                 }
@@ -134,7 +134,7 @@ public class CashRequestFormActivity extends AppCompatActivity {
         });
         amount.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) return submitForm();
+                //if (actionId == EditorInfo.IME_ACTION_DONE) return submitForm();
                 return false;
             }
         });
@@ -164,7 +164,7 @@ public class CashRequestFormActivity extends AppCompatActivity {
                 transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
                 PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                        MsgUtils.getCurrencyRequestMessage(transactionDto, CashRequestFormActivity.this),
+                        MsgUtils.getCurrencyRequestMessage(transactionDto, CurrencyRequestFormActivity.this),
                         false, TypeVS.CURRENCY_REQUEST);
             } else errorMsgTextView.setVisibility(View.VISIBLE);
         }

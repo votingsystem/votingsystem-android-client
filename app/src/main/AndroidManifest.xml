@@ -19,7 +19,7 @@
         <activity android:name="org.votingsystem.activity.BrowserVSActivity"
             android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.CashRequestFormActivity" android:noHistory="true"
+        <activity android:name="org.votingsystem.activity.CurrencyRequestFormActivity" android:noHistory="true"
             android:label="@string/cash_request_dialog_caption" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.CertRequestActivity" android:noHistory="true"
