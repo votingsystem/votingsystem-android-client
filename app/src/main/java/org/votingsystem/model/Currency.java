@@ -306,6 +306,7 @@ public class Currency extends ReceiptWrapper {
     }
 
     public String getTag() {
+        if(tag != null) return tag.trim();
         return tag;
     }
 
@@ -446,7 +447,7 @@ public class Currency extends ReceiptWrapper {
         currencyCode = certExtensionDto.getCurrencyCode();
         hashCertVS = certExtensionDto.getHashCertVS();
         timeLimited = certExtensionDto.getTimeLimited();
-        tag = certExtensionDto.getTag();
+        tag = certExtensionDto.getTag().trim();
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
         validFrom = x509AnonymousCert.getNotBefore();
         validTo = x509AnonymousCert.getNotAfter();

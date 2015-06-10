@@ -254,14 +254,14 @@ public class PaymentFragment extends Fragment {
                     if(availableForTagVSWallet.compareTo(transactionDto.getAmount()) < 0) {
                         final BigDecimal amountToRequest = transactionDto.getAmount().subtract(
                                 availableForTagVSWallet);
-                        if(availableForTagVS.compareTo(amountToRequest) < 0) {
+                        if(availableForTagVSWallet.compareTo(amountToRequest) < 0) {
                             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                     getString(R.string.insufficient_cash_caption),
                                     getString(R.string.insufficient_anonymous_money_msg,
                                             transactionDto.getCurrencyCode(),
                                             availableForTagVSWallet.toString(),
                                             amountToRequest.toString(),
-                                            availableForTagVS.toString()), getActivity());
+                                            availableForTagVSWallet.toString()), getActivity());
                             builder.setPositiveButton(getString(R.string.check_available_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {

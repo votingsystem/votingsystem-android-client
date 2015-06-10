@@ -45,7 +45,8 @@ public class TagVSDto implements Serializable {
     }
     
     public String getName() {
-        return this.name;
+        if(name != null) return name.trim();
+        return name;
     }
     
     public void setName(String name) {
