@@ -83,7 +83,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getAnonymousDelegationRequest(int keySize, String keyName,
+    public static CertificationRequestVS getAnonymousDelegationRequest(
             String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
             Integer weeksOperationActive, Date validFrom, Date validTo) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
@@ -100,12 +100,12 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getCurrencyRequest(int keySize, String keyName,
+    public static CertificationRequestVS getCurrencyRequest(
             String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
             BigDecimal amount, String currencyCode, Boolean timeLimited, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
-        tagVS = (tagVS == null)? TagVSDto.WILDTAG:tagVS;
+        tagVS = (tagVS == null)? TagVSDto.WILDTAG:tagVS.trim();
         X500Principal subject = new X500Principal("CN=currencyServerURL:" + currencyServerURL +
                 ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");

@@ -46,7 +46,7 @@ public class CurrencyBundle {
     }
 
     public void addCurrency(Currency currency) throws ValidationExceptionVS {
-        if(!currency.getTag().equals(tagVS) || !TagVSDto.WILDTAG.equals(currency.getTag()))
+        if(!currency.getTag().equals(tagVS) && !TagVSDto.WILDTAG.equals(currency.getTag()))
             throw new ValidationExceptionVS("CurrencyBundle for Tag: " + tagVS + " - can't have " +
                     "items with tag: " + currency.getTag());
         if(!currency.getCurrencyCode().equals(currencyCode))
@@ -140,7 +140,7 @@ public class CurrencyBundle {
         Currency lastCurrencyAdded = null;
         if(batchAmount.compareTo(tagTimeLimitedAmount) < 0) {
             while(bundleAccumulated.compareTo(batchAmount) < 0) {
-                lastCurrencyAdded = wildTagTimeLimitedCurrencyList.remove(0);
+                lastCurrencyAdded = tagTimeLimitedCurrencyList.remove(0);
                 currencySet.add(lastCurrencyAdded);
                 bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
             }
