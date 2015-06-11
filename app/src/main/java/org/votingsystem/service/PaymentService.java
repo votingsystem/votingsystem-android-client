@@ -10,6 +10,7 @@ import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
+import org.votingsystem.contentprovider.OperationVSContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -33,6 +34,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.MsgUtils;
+import org.votingsystem.util.OperationVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -113,6 +115,10 @@ public class PaymentService extends IntentService {
             try {
                 switch (transactionDto.getType()) {
                     case FROM_USERVS:
+                        OperationVS operationVS = new OperationVS(TypeVS.FROM_USERVS, transactionDto,
+                                OperationVS.State.PENDING);
+                        getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                                OperationVSContentProvider.getContentValues(operationVS));
                         responseVS = sendTransactionVS(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
                                 transactionDto.getPaymentConfirmURL() != null) {
@@ -141,6 +147,13 @@ public class PaymentService extends IntentService {
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON, transactionDto.getPaymentConfirmURL());
                             }
+                            operationVS.setState(OperationVS.State.FINISHED);
+                            getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                                    OperationVSContentProvider.getContentValues(operationVS));
+                        } else {
+                            operationVS.setState(OperationVS.State.ERROR);
+                            getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                                    OperationVSContentProvider.getContentValues(operationVS));
                         }
                         break;
                     case CURRENCY_SEND:
@@ -301,6 +314,10 @@ public class PaymentService extends IntentService {
                 SMIMEMessage smimeMessage = transactionDto.getSmimeMessage();
                 requestDto.setCurrencyChangeCSR(smimeMessage.getSignedContent());
             } else requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
+            OperationVS operationVS = new OperationVS(transactionDto.getOperation(), requestDto,
+                    OperationVS.State.PENDING);
+            getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                    OperationVSContentProvider.getContentValues(operationVS));
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -312,10 +329,17 @@ public class PaymentService extends IntentService {
                         currencyServer.getTrustAnchors());
                 responseVS.setSMIME(smimeMessage);
                 Wallet.updateWallet(requestDto);
+                operationVS.setState(OperationVS.State.FINISHED);
+                getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                        OperationVSContentProvider.getContentValues(operationVS));
             } else if(ResponseVS.SC_CURRENCY_EXPENDED == responseVS.getStatusCode()) {
                 Currency expendedCurrency = Wallet.removeExpendedCurrency(responseVS.getMessage());
                 responseVS.setMessage(getString(R.string.expended_currency_error_msg, expendedCurrency.
                         getAmount().toString() + " " + expendedCurrency.getCurrencyCode()));
+                operationVS.setState(OperationVS.State.ERROR).setStatusCode(responseVS.getStatusCode())
+                        .setMessage(responseVS.getMessage());
+                getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                        OperationVSContentProvider.getContentValues(operationVS));
             }
         } catch(Exception ex) {
             ex.printStackTrace();

@@ -12,6 +12,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.text.MessageFormat;
@@ -23,7 +24,9 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CurrencyBatchDto {
+public class CurrencyBatchDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private TypeVS operation = TypeVS.CURRENCY_SEND;
     private Set<String> currencySet;

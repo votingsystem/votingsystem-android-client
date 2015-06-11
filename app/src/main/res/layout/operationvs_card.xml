@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/frg_vs"
+    card_view:cardCornerRadius="4dp"
+    android:layout_margin="5dp">
+    <LinearLayout android:id="@+id/row"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="4dip">
+        <TextView android:id="@+id/operation_type"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="14sp"
+            android:textColor="@color/body_text"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:ellipsize="marquee" />
+        <TextView android:id="@+id/date_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/body_text"
+            android:textSize="12sp"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+</android.support.v7.widget.CardView>

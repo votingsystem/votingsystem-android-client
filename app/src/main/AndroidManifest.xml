@@ -129,6 +129,10 @@
 
         <activity android:name="org.votingsystem.activity.TransactionVSPagerActivity" android:theme="@style/ThemeVS"/>
 
+        <activity android:name="org.votingsystem.activity.OperationVSGridActivity" android:theme="@style/ThemeVS"/>
+
+        <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
+
 
         <!-- This provider declaration informs the Search Manager that you have a provider of -->
         <!-- Search suggestions, and provides information about how to access it. -->
@@ -151,6 +155,12 @@
 
         <provider android:name="org.votingsystem.contentprovider.TransactionVSContentProvider"
             android:exported="false" android:authorities="votingsystem.org.transactionVS"/>
+
+        <provider android:name="org.votingsystem.contentprovider.CurrencyContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.currency"/>
+
+        <provider android:name="org.votingsystem.contentprovider.OperationVSContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.operationvs"/>
 
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service are only available to this app. -->
