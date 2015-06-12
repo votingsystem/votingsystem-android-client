@@ -43,10 +43,6 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_INITIALIZED              = 1;
     public static final int SC_PAUSED                   = 10;
 
-    public static final int SC_CURRENCY_OK              = 290;
-    public static final int SC_CURRENCY_EXPENDED        = 491;
-    public static final int SC_CURRENCY_LAPSED          = 492;
-
     private int statusCode;
     private OperationVS operation;
     private String caption;

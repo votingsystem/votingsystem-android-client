@@ -41,6 +41,8 @@ public class Currency extends ReceiptWrapper {
 
     public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;}
 
+    public enum Type { LEFT_OVER, CHANGE, REQUEST}
+
     private Long localId = -1L;
     private Long id;
     private TypeVS operation;

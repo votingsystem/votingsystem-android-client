@@ -55,7 +55,7 @@ public class Wallet {
         return new HashSet<>(currencySet);
     }
 
-    public static void saveCurrencyCollection(Collection<Currency> currencyCollection, String pin)
+    public static void save(Collection<Currency> currencyCollection, String pin)
             throws Exception {
         Set<Currency> newCurrencySet = new HashSet<>();
         if(currencySet != null) newCurrencySet.addAll(currencySet);
@@ -63,30 +63,35 @@ public class Wallet {
         Wallet.saveWallet(newCurrencySet, pin);
     }
 
-    public static void removeCurrencyCollection(Collection<Currency> currencyCollection) throws Exception {
+    public static void remove(Collection<Currency> currencyCollection) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         for(Currency currency : currencyCollection) {
-            if(currencyMap.remove(currency.getHashCertVS()) != null)  LOGD(
-                    TAG +  ".removeCurrencyCollection", "removed currency: " + currency.getHashCertVS());
+            if(currencyMap.remove(currency.getHashCertVS()) != null) {
+                LOGD(TAG +  ".remove", "removed currency: " + currency.getHashCertVS());
+                AppVS.getInstance().updateCurrencyDB(currency);
+            }
         }
-        currencySet = new HashSet<>(currencyMap.values());
-        Wallet.saveWallet(currencySet, null);
+        Wallet.saveWallet(currencyMap.values(), null);
     }
 
 
-    public static Currency removeExpendedCurrency(String hashCertVS) throws Exception {
-        Map<String, Currency> currencyMap = new HashMap<>();
-        for(Currency currency : currencySet) {
-            currencyMap.put(currency.getHashCertVS(), currency);
+    public static Set<Currency> removeErrors(Collection<String> currencyWithErrors)
+            throws Exception {
+        Set<Currency> removedSet = new HashSet<>();
+        Map<String, Currency> currencyMap = getCurrencyMap();
+        for(String hashCertVS : currencyWithErrors) {
+            Currency removedCurrency = currencyMap.remove(hashCertVS);
+            if(removedCurrency != null)  {
+                LOGD(TAG +  ".removeErrors", "removed currency: " + hashCertVS);
+                removedSet.add(removedCurrency);
+                AppVS.getInstance().updateCurrencyDB(removedCurrency);
+            }
         }
-        Currency expendedCurrency = null;
-        if((expendedCurrency = currencyMap.remove(hashCertVS)) != null)  LOGD(TAG +  ".removeCurrencyList",
-                "removed currency: " + hashCertVS);
-        Wallet.saveWallet(currencySet, null);
-        return expendedCurrency;
+        Wallet.saveWallet(currencyMap.values(), null);
+        return removedSet;
     }
 
     public static Map<String, Currency> getCurrencyMap() {
@@ -95,21 +100,6 @@ public class Wallet {
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         return currencyMap;
-    }
-
-    public static Set<Currency> updateCurrencyWithErrors(Collection<String> currencyColToRemove)
-            throws Exception {
-        Set<Currency> removedSet = new HashSet<>();
-        Map<String, Currency> currencyMap = getCurrencyMap();
-        for(String hashCertVS : currencyColToRemove) {
-            Currency removedCurrency = currencyMap.remove(hashCertVS);
-            if(removedCurrency != null)  {
-                LOGD(TAG +  ".updateCurrencyWithErrors", "removed currency: " + hashCertVS);
-                removedSet.add(removedCurrency);
-            }
-        }
-        Wallet.saveWallet(currencyMap.values(), null);
-        return removedSet;
     }
 
     public static void updateCurrencyState(List<String> currencySetOK, Currency.State state)
@@ -238,7 +228,7 @@ public class Wallet {
     }
 
     public static void updateWallet(CurrencyBatchDto currencyBatchDto) throws Exception {
-        Wallet.removeCurrencyCollection(currencyBatchDto.getCurrencyCollection());
+        Wallet.remove(currencyBatchDto.getCurrencyCollection());
         if(currencyBatchDto.getLeftOverCurrency() != null) Wallet.updateWallet(
                 Arrays.asList(currencyBatchDto.getLeftOverCurrency()));
     }

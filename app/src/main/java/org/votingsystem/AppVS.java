@@ -16,6 +16,7 @@ import com.google.common.eventbus.EventBus;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.QRMessageDto;
@@ -23,6 +24,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.ControlCenterDto;
+import org.votingsystem.model.Currency;
 import org.votingsystem.service.BootStrapService;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -382,6 +384,11 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         Intent intent = new Intent(responseVS.getServiceCaller());
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    public void updateCurrencyDB(Currency currency) throws Exception {
+        getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
+                CurrencyContentProvider.getContentValues(currency));
     }
 
     @Override

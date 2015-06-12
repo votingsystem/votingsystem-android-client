@@ -20,6 +20,7 @@ import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
+import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
@@ -265,11 +266,11 @@ public class PaymentService extends IntentService {
                 ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
                         new TypeReference<ResultListDto<String>>(){});
                 requestDto.loadCurrencyCerts(resultListDto.getResultList());
-                Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin);
+                Wallet.save(requestDto.getCurrencyMap().values(), pin);
                 responseVS.setCaption(getString(R.string.currency_request_ok_caption)).setNotificationMessage(
                         getString(R.string.currency_request_ok_msg, requestDto.getTotalAmount(),
                         requestDto.getCurrencyCode()));
-                Wallet.saveCurrencyCollection(requestDto.getCurrencyMap().values(), pin);
+                Wallet.save(requestDto.getCurrencyMap().values(), pin);
                 updateUserInfo(serviceCaller);
             } else responseVS.setCaption(getString(
                     R.string.currency_request_error_caption));
@@ -332,10 +333,7 @@ public class PaymentService extends IntentService {
                 operationVS.setState(OperationVS.State.FINISHED);
                 getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
                         OperationVSContentProvider.getContentValues(operationVS));
-            } else if(ResponseVS.SC_CURRENCY_EXPENDED == responseVS.getStatusCode()) {
-                Currency expendedCurrency = Wallet.removeExpendedCurrency(responseVS.getMessage());
-                responseVS.setMessage(getString(R.string.expended_currency_error_msg, expendedCurrency.
-                        getAmount().toString() + " " + expendedCurrency.getCurrencyCode()));
+            } else {
                 operationVS.setState(OperationVS.State.ERROR).setStatusCode(responseVS.getStatusCode())
                         .setMessage(responseVS.getMessage());
                 getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
@@ -388,8 +386,8 @@ public class PaymentService extends IntentService {
                 LOGD(TAG + ".checkCurrency", "empty hashCertVSSet");
                 return;
             }
-            Map<String, Currency.State> responseDto =  HttpHelper.sendData(
-                    new TypeReference<Map<String, Currency.State>>() {},
+            Map<String, CurrencyStateDto> responseDto =  HttpHelper.sendData(
+                    new TypeReference<Map<String, CurrencyStateDto>>() {},
                     JSON.writeValueAsBytes(hashCertVSSet),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
                     MediaTypeVS.JSON);
@@ -397,16 +395,16 @@ public class PaymentService extends IntentService {
             List<String> currencyOKList = new ArrayList<>();
             Set<Currency> removedSet = null;
             for(String responseHashCertVS: responseDto.keySet()) {
-                if(Currency.State.OK == responseDto.get(responseHashCertVS)) {
+                if(Currency.State.OK == responseDto.get(responseHashCertVS).getState()) {
                     currencyOKList.add(responseHashCertVS);
                 } else currencyWithErrorList.add(responseHashCertVS);
             }
             if(currencyWithErrorList.size() > 0) {
-                removedSet = Wallet.updateCurrencyWithErrors(currencyWithErrorList);
+                removedSet = Wallet.removeErrors(currencyWithErrorList);
             }
             if(removedSet != null && !removedSet.isEmpty()) {
                 for(Currency currency : removedSet) {
-                    currency.setState(responseDto.get(currency.getHashCertVS()));
+                    currency.setState(responseDto.get(currency.getHashCertVS()).getState());
                     getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
                             CurrencyContentProvider.getContentValues(currency));
                 }
