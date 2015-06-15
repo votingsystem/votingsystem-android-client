@@ -2,14 +2,12 @@ package org.votingsystem.service;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.OperationVSContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
@@ -42,7 +40,6 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -51,7 +48,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -118,7 +114,8 @@ public class PaymentService extends IntentService {
                     case FROM_USERVS:
                         OperationVS operationVS = new OperationVS(TypeVS.FROM_USERVS, transactionDto,
                                 OperationVS.State.PENDING);
-                        getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+                        Uri operationUri = getContentResolver().insert(
+                                OperationVSContentProvider.CONTENT_URI,
                                 OperationVSContentProvider.getContentValues(operationVS));
                         responseVS = sendTransactionVS(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
@@ -149,12 +146,11 @@ public class PaymentService extends IntentService {
                                         ContentTypeVS.JSON, transactionDto.getPaymentConfirmURL());
                             }
                             operationVS.setState(OperationVS.State.FINISHED);
-                            getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
-                                    OperationVSContentProvider.getContentValues(operationVS));
+                            getContentResolver().delete(operationUri, null, null);
                         } else {
                             operationVS.setState(OperationVS.State.ERROR);
-                            getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
-                                    OperationVSContentProvider.getContentValues(operationVS));
+                            getContentResolver().update(operationUri, OperationVSContentProvider
+                                    .getContentValues(operationVS), null, null);
                         }
                         break;
                     case CURRENCY_SEND:
@@ -317,7 +313,7 @@ public class PaymentService extends IntentService {
             } else requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
             OperationVS operationVS = new OperationVS(transactionDto.getOperation(), requestDto,
                     OperationVS.State.PENDING);
-            getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
+            Uri operationUri = getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
                     OperationVSContentProvider.getContentValues(operationVS));
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
@@ -331,13 +327,12 @@ public class PaymentService extends IntentService {
                 responseVS.setSMIME(smimeMessage);
                 Wallet.updateWallet(requestDto);
                 operationVS.setState(OperationVS.State.FINISHED);
-                getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
-                        OperationVSContentProvider.getContentValues(operationVS));
+                getContentResolver().delete(operationUri, null, null);
             } else {
                 operationVS.setState(OperationVS.State.ERROR).setStatusCode(responseVS.getStatusCode())
                         .setMessage(responseVS.getMessage());
-                getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
-                        OperationVSContentProvider.getContentValues(operationVS));
+                getContentResolver().update(operationUri, OperationVSContentProvider
+                        .getContentValues(operationVS), null, null);
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -405,8 +400,7 @@ public class PaymentService extends IntentService {
             if(removedSet != null && !removedSet.isEmpty()) {
                 for(Currency currency : removedSet) {
                     currency.setState(responseDto.get(currency.getHashCertVS()).getState());
-                    getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
-                            CurrencyContentProvider.getContentValues(currency));
+                    AppVS.getInstance().updateCurrencyDB(currency);
                 }
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                         MsgUtils.getUpdateCurrencyWithErrorMsg(removedSet, appVS));

@@ -7,12 +7,12 @@
     android:layout_height="wrap_content"
     android:background="@color/frg_vs"
     card_view:cardCornerRadius="4dp"
-    android:layout_margin="5dp">
+    android:layout_margin="6dp">
     <LinearLayout android:id="@+id/row"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="4dip">
+        android:padding="5dp">
         <TextView android:id="@+id/operation_type"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

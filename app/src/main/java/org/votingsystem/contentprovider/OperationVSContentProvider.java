@@ -61,8 +61,8 @@ public class OperationVSContentProvider extends ContentProvider {
     //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getReceiptURI(Long operationvs) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + operationvs);
+    public static Uri getURI(Long operationId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + operationId);
     }
 
     @Override public boolean onCreate() {

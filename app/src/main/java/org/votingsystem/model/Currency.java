@@ -232,7 +232,8 @@ public class Currency extends ReceiptWrapper {
             throws Exception {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
-        currency.initSigner(certificationRequest.getSignedCsr());
+        if(certificationRequest.getSignedCsr() != null) currency.initSigner(certificationRequest.getSignedCsr());
+        else Log.d(TAG + ".fromCertificationRequestVS", "CertificationRequestVS with NULL SignedCSR");
         return currency;
     }
 

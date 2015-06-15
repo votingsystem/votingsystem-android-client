@@ -16,6 +16,10 @@ import android.text.TextUtils;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.ObjectUtils;
+
+import java.io.File;
+import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -58,8 +62,8 @@ public class CurrencyContentProvider extends ContentProvider {
     //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getCurrencyURI(Long currency) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + currency);
+    public static Uri getCurrencyURI(Long currencyId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + currencyId);
     }
 
     @Override public boolean onCreate() {
@@ -78,7 +82,7 @@ public class CurrencyContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/currencies"; // List of items.
+                return "vnd.android.cursor.dir/currencyList"; // List of items.
             case SPECIFIC_ITEM:
                 return "vnd.android.cursor.item/currency"; // Specific item.
             default:
@@ -160,9 +164,8 @@ public class CurrencyContentProvider extends ContentProvider {
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID_COL                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                STATE_COL              + " TEXT," +
-                HASH_COL               + " TEXT," +
                 STATE_COL             + " TEXT," +
+                HASH_COL              + " TEXT," +
                 SERIALIZED_OBJECT_COL + " blob, " +
                 TIMESTAMP_UPDATED_COL + " INTEGER DEFAULT 0, " +
                 TIMESTAMP_CREATED_COL + " INTEGER DEFAULT 0);";
@@ -170,6 +173,7 @@ public class CurrencyContentProvider extends ContentProvider {
         public DatabaseHelper(Context context) {
             super(context, DB_NAME, null, DATABASE_VERSION);
             //File dbFile = context.getDatabasePath(DB_NAME);
+            //if(dbFile.exists()) dbFile.delete();
             //LOGD(TAG + ".DatabaseHelper", "dbFile.getAbsolutePath(): " + dbFile.getAbsolutePath());
         }
 
@@ -203,4 +207,13 @@ public class CurrencyContentProvider extends ContentProvider {
         return values;
     }
 
+    public static Currency getCurrency(Cursor cursor) {
+        byte[] objectBytes = cursor.getBlob(cursor.getColumnIndex(
+                CurrencyContentProvider.SERIALIZED_OBJECT_COL));
+        Currency currency = (Currency) ObjectUtils.deSerializeObject(objectBytes);
+        currency.setLocalId(cursor.getLong(cursor.getColumnIndex(CurrencyContentProvider.ID_COL)));
+        currency.setDateCreated(new Date(cursor.getLong(cursor.getColumnIndex(
+                CurrencyContentProvider.TIMESTAMP_CREATED_COL))));
+        return currency;
+    }
 }

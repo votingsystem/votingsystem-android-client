@@ -570,4 +570,5 @@
     <string name="income_lbl">recibido</string>
     <string name="expense_lbl">realizado</string>
     <string name="currency_change_subject">intercambio de moneda anónimo</string>
+    <string name="check_operationvs">comprobar operación</string>
 </resources>

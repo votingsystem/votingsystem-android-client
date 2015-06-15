@@ -8,7 +8,10 @@ import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -32,11 +35,12 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
     private static final int loaderId = 0;
 
     private GridView gridView;
+    private int currentItemPosition = -1;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.operationvs_grid);
+        setContentView(R.layout.simple_grid);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         gridView = (GridView) findViewById(R.id.gridview);
@@ -48,13 +52,15 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
             }
         });
         //gridView.setOnScrollListener(this);
+        registerForContextMenu(gridView);
         getLoaderManager().initLoader(loaderId, null, this);
         getSupportActionBar().setTitle("OperationsGridActivity");
     }
 
-    private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
+    private void onListItemClick(AdapterView<?> parent, View view, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "position: " + position + " - id: " + id);
-        //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
+        currentItemPosition = position;
+        view.showContextMenu();
     }
 
 
@@ -72,6 +78,29 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
     @Override
     public void onLoaderReset(android.content.Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.operationvs_grid_context_menu, menu);
+    }
+
+    @Override public boolean onContextItemSelected(MenuItem item) {
+        LOGD(TAG + ".onContextItemSelected", "item: " + item.getTitle() + " - currentItemPosition: "
+                + currentItemPosition);
+        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(currentItemPosition));
+        OperationVS operationVS = OperationVSContentProvider.getOperation(cursor);
+        switch (item.getItemId()) {
+            case R.id.check_operationvs:
+                return true;
+            case R.id.delete_operationvs:
+                getContentResolver().delete(OperationVSContentProvider.getURI(
+                        operationVS.getLocalId()), null, null);
+                return true;
+            default: return super.onOptionsItemSelected(item);
+        }
     }
 
     public class OperationListAdapter  extends CursorAdapter {
@@ -93,7 +122,7 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
                 TextView operation_type = (TextView) view.findViewById(R.id.operation_type);
                 TextView date_info = (TextView) view.findViewById(R.id.date_info);
                 operation_type.setText(operation.getTypeVS() + " - " + operation.getState());
-                date_info.setText("created: "+ DateUtils.getDayWeekDateStr(operation.getDateCreated())
+                date_info.setText(DateUtils.getDayWeekDateStr(operation.getDateCreated())
                         + " - updated: " + DateUtils.getDayWeekDateStr(operation.getLastUpdated())) ;
             }
         }
