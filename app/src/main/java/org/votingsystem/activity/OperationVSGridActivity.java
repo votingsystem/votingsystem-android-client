@@ -1,10 +1,15 @@
 package org.votingsystem.activity;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,15 +19,25 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.OperationVSContentProvider;
-import org.votingsystem.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.fragment.PinDialogFragment;
+import org.votingsystem.fragment.ProgressDialogFragment;
+import org.votingsystem.service.OperationVSService;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.OperationVS;
+import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Wallet;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -34,8 +49,47 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
 
     private static final int loaderId = 0;
 
+    private String broadCastId = OperationVSGridActivity.class.getSimpleName();
     private GridView gridView;
     private int currentItemPosition = -1;
+    private OperationVS operationVS;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                switch(responseVS.getTypeVS()) {
+                    case CURRENCY:
+                        try {
+                            Wallet.getCurrencySet((String) responseVS.getData());
+                            launchService();
+                        } catch(Exception ex) { ex.printStackTrace(); }
+                        break;
+                }
+            } else {
+                switch(responseVS.getTypeVS()) {
+                    default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                            responseVS.getCaption(), responseVS.getNotificationMessage(),
+                            getSupportFragmentManager());
+                }
+                setProgressDialogVisible(false, null, null);
+            }
+        }
+    };
+
+    private void launchService() {
+        if(operationVS == null) {
+            LOGD(TAG + ".launchService", "launchService - OperationVS NULL");
+            return;
+        }
+        Intent startIntent = new Intent(this, OperationVSService.class);
+        startIntent.putExtra(ContextVS.OPERATIONVS_KEY, operationVS);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                getString(R.string.check_operationvs));
+        startService(startIntent);
+    }
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
@@ -51,6 +105,9 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
                 onListItemClick(parent, v, position, id);
             }
         });
+        if(savedInstanceState != null) {
+            operationVS = (OperationVS) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
+        }
         //gridView.setOnScrollListener(this);
         registerForContextMenu(gridView);
         getLoaderManager().initLoader(loaderId, null, this);
@@ -62,7 +119,6 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
         currentItemPosition = position;
         view.showContextMenu();
     }
-
 
     @Override
     public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -76,9 +132,7 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
     }
 
     @Override
-    public void onLoaderReset(android.content.Loader<Cursor> loader) {
-
-    }
+    public void onLoaderReset(android.content.Loader<Cursor> loader) {  }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
@@ -91,16 +145,51 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
         LOGD(TAG + ".onContextItemSelected", "item: " + item.getTitle() + " - currentItemPosition: "
                 + currentItemPosition);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(currentItemPosition));
-        OperationVS operationVS = OperationVSContentProvider.getOperation(cursor);
+        operationVS = OperationVSContentProvider.getOperation(cursor);
         switch (item.getItemId()) {
-            case R.id.check_operationvs:
+            case R.id.operationvs_check:
+                if(Wallet.getCurrencySet() == null) {
+                    PinDialogFragment.showWalletScreen(getSupportFragmentManager(), broadCastId,
+                            getString(R.string.enter_wallet_pin_msg), false,
+                            TypeVS.CURRENCY);
+                    return true;
+                }
+                launchService();
                 return true;
-            case R.id.delete_operationvs:
+            case R.id.operationvs_details:
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        operationVS.getTypeVS().toString(),
+                        MsgUtils.getOperationVSDescription(operationVS), this);
+                UIUtils.showMessageDialog(builder);
+                return true;
+            case R.id.operationvs_delete:
                 getContentResolver().delete(OperationVSContentProvider.getURI(
                         operationVS.getLocalId()), null, null);
                 return true;
             default: return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void setProgressDialogVisible(final boolean isVisible, String caption, String message) {
+        if (isVisible) {
+            ProgressDialogFragment.showDialog(caption, message, broadCastId, getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(broadCastId, getSupportFragmentManager());
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+    }
+
+    @Override public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(ContextVS.OPERATIONVS_KEY, operationVS);
     }
 
     public class OperationListAdapter  extends CursorAdapter {

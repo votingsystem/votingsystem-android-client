@@ -84,7 +84,6 @@ public class PaymentFragment extends Fragment {
                         } catch(Exception ex) { ex.printStackTrace(); }
                         break;
                 }
-
             } else {
                 setProgressDialogVisible(false);
                 String caption = ResponseVS.SC_OK == responseVS.getStatusCode()?getString(

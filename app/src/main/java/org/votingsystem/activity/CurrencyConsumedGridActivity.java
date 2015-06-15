@@ -18,11 +18,13 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MsgUtils;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**

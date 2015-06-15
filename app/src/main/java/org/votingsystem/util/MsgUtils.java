@@ -7,6 +7,7 @@ import android.text.format.DateUtils;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -121,6 +122,29 @@ public class MsgUtils {
             case ERROR: return context.getString(R.string.votevs_error_msg);
             default: return voteState.toString();
         }
+    }
+
+    public static String getOperationVSDescription(OperationVS operationVS) {
+        Object data = operationVS.getData();
+        String result = null;
+        if(data instanceof CurrencyBatchDto) {
+            CurrencyBatchDto batchDto = (CurrencyBatchDto) data;
+            switch(batchDto.getOperation()) {
+                case CURRENCY_SEND:
+                    result = AppVS.getInstance().getString(R.string.currency_send_description,
+                            batchDto.getSubject(), batchDto.getToUserName(),
+                            batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode() + " - " + batchDto.getTag(),
+                            batchDto.getLeftOver() + " " + batchDto.getCurrencyCode());
+                    break;
+                case CURRENCY_CHANGE:
+                    result = AppVS.getInstance().getString(R.string.currency_change_description,
+                            batchDto.getSubject(), batchDto.getToUserName(),
+                            batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode() + " - " + batchDto.getTag(),
+                            batchDto.getLeftOver() + " " + batchDto.getCurrencyCode());
+                    break;
+            }
+        }
+        return result;
     }
 
     public static String getUpdateCurrencyWithErrorMsg(Collection<Currency> currencyWithErrors, Context context) {

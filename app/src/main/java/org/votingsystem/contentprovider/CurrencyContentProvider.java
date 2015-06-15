@@ -18,7 +18,6 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ObjectUtils;
 
-import java.io.File;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;

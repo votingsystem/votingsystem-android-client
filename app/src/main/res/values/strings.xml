@@ -571,4 +571,9 @@
     <string name="expense_lbl">realizado</string>
     <string name="currency_change_subject">intercambio de moneda anónimo</string>
     <string name="check_operationvs">comprobar operación</string>
+    <string name="currency_send_description"><![CDATA[<html><b>ingreso anónimo</b><br/>asunto: \'%1$s\'
+        <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>
+    <string name="currency_change_description"><![CDATA[<html><b>intercambio anónimo</b><br/>asunto: \'%1$s\'
+        <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>
+    <string name="details_lbl">detalles</string>
 </resources>

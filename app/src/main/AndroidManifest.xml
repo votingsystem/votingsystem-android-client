@@ -171,6 +171,7 @@
         <service android:name="org.votingsystem.service.UserCertRequestService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.VoteService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.WebSocketService"  android:exported="false"/>
+        <service android:name="org.votingsystem.service.OperationVSService"  android:exported="false"/>
 
     </application>
 </manifest>

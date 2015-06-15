@@ -55,6 +55,13 @@ public class Wallet {
         return new HashSet<>(currencySet);
     }
 
+    public static Currency getCurrency(String hashCertVS) throws Exception {
+        for(Currency currency : currencySet) {
+            if(currency.getHashCertVS().equals(currency.getHashCertVS())) return currency;
+        }
+        return null;
+    }
+
     public static void save(Collection<Currency> currencyCollection, String pin)
             throws Exception {
         Set<Currency> newCurrencySet = new HashSet<>();

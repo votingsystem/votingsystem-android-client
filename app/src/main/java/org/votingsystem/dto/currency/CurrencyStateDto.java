@@ -2,7 +2,9 @@ package org.votingsystem.dto.currency;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.votingsystem.model.Currency;
+
 import java.util.Date;
 
 /**
@@ -15,6 +17,7 @@ public class CurrencyStateDto {
     private Long batchId;
     private Currency.State state;
     private Currency.Type type;
+    private String currencyCert;
     private String leftOverCert;
     private String currencyChangeCert;
     private Date dateCreated;
@@ -75,6 +78,14 @@ public class CurrencyStateDto {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public String getCurrencyCert() {
+        return currencyCert;
+    }
+
+    public void setCurrencyCert(String currencyCert) {
+        this.currencyCert = currencyCert;
     }
 
 }
