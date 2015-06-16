@@ -390,13 +390,13 @@ public class PaymentService extends IntentService {
                     JSON.writeValueAsBytes(hashCertVSSet),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
                     MediaTypeVS.JSON);
-            List<String> currencyWithErrorList = new ArrayList<>();
+            List<CurrencyStateDto> currencyWithErrorList = new ArrayList<>();
             List<String> currencyOKList = new ArrayList<>();
             Set<Currency> removedSet = null;
             for(String responseHashCertVS: responseDto.keySet()) {
                 if(Currency.State.OK == responseDto.get(responseHashCertVS).getState()) {
                     currencyOKList.add(responseHashCertVS);
-                } else currencyWithErrorList.add(responseHashCertVS);
+                } else currencyWithErrorList.add(responseDto.get(responseHashCertVS));
             }
             if(currencyWithErrorList.size() > 0) {
                 removedSet = Wallet.removeErrors(currencyWithErrorList);
@@ -410,7 +410,7 @@ public class PaymentService extends IntentService {
                         MsgUtils.getUpdateCurrencyWithErrorMsg(removedSet, appVS));
                 responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
                         serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
-                UIUtils.launchMessageActivity(responseVS);
+                appVS.broadcastResponse(responseVS);
             } else {
                 Wallet.updateCurrencyState(currencyOKList, Currency.State.OK);
                 responseVS = new ResponseVS(ResponseVS.SC_OK);

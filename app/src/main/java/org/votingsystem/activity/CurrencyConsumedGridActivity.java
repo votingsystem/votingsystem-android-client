@@ -55,7 +55,6 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
         });
         //gridView.setOnScrollListener(this);
         getLoaderManager().initLoader(loaderId, null, this);
-        getSupportActionBar().setTitle("OperationsGridActivity");
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {

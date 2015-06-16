@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
@@ -14,7 +15,6 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.OperationVS;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Wallet;
 
 import java.util.Arrays;
@@ -39,7 +39,6 @@ public class OperationVSService extends IntentService {
         final Bundle arguments = intent.getExtras();
         final OperationVS operation = (OperationVS) arguments.getSerializable(ContextVS.OPERATIONVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-
         if(operation.getState() != OperationVS.State.PENDING) {
             runOnUiThread(new Runnable() {
                 @Override public void run() {
@@ -57,7 +56,8 @@ public class OperationVSService extends IntentService {
                     break;
             }
         } catch(Exception ex) {
-            AppVS.getInstance().broadcastResponse(ResponseVS.EXCEPTION(ex, AppVS.getInstance()));
+            AppVS.getInstance().broadcastResponse(ResponseVS.EXCEPTION(ex, AppVS.getInstance())
+                    .setServiceCaller(serviceCaller).setTypeVS(operation.getTypeVS()));
             ex.printStackTrace();
         }
     }

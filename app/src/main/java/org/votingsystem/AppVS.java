@@ -387,8 +387,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     public void updateCurrencyDB(Currency currency) throws Exception {
-        getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
+        Uri uri = getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
                 CurrencyContentProvider.getContentValues(currency));
+        LOGD(TAG + ".updateCurrencyDB", "uri: " + uri + " - state: " + currency.getState());
     }
 
     @Override

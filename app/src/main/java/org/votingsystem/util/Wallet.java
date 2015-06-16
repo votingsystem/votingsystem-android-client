@@ -7,6 +7,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyDto;
+import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.CMSUtils;
@@ -85,16 +86,16 @@ public class Wallet {
     }
 
 
-    public static Set<Currency> removeErrors(Collection<String> currencyWithErrors)
+    public static Set<Currency> removeErrors(Collection<CurrencyStateDto> currencyWithErrors)
             throws Exception {
         Set<Currency> removedSet = new HashSet<>();
         Map<String, Currency> currencyMap = getCurrencyMap();
-        for(String hashCertVS : currencyWithErrors) {
-            Currency removedCurrency = currencyMap.remove(hashCertVS);
+        for(CurrencyStateDto currencyStateDto : currencyWithErrors) {
+            Currency removedCurrency = currencyMap.remove(currencyStateDto.getHashCertVS());
             if(removedCurrency != null)  {
-                LOGD(TAG +  ".removeErrors", "removed currency: " + hashCertVS);
+                LOGD(TAG +  ".removeErrors", "removed currency: " + currencyStateDto.getHashCertVS());
                 removedSet.add(removedCurrency);
-                AppVS.getInstance().updateCurrencyDB(removedCurrency);
+                AppVS.getInstance().updateCurrencyDB(removedCurrency.setState(currencyStateDto.getState()));
             }
         }
         Wallet.saveWallet(currencyMap.values(), null);
