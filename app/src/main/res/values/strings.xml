@@ -388,7 +388,7 @@
     <string name="currency_accounts_lbl">cuentas</string>
     <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear su monedero</string>
     <string name="unlocking_wallet_msg">desbloqueando monedero</string>
-    <string name="currency_date_info">emitido: \'%1$s\'   caduca: \'%2$s\'</string>
+    <string name="lapse_info">caduca: \'%2$s\'</string>
     <string name="cancelled_lbl">cancelado</string>
     <string name="expended_lbl">consumido</string>
     <string name="rejected_lbl">rechazado</string>
@@ -576,4 +576,5 @@
     <string name="currency_change_description"><![CDATA[<html><b>intercambio anónimo</b><br/>asunto: \'%1$s\'
         <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>
     <string name="details_lbl">detalles</string>
+    <string name="check_lbl">comprobar</string>
 </resources>

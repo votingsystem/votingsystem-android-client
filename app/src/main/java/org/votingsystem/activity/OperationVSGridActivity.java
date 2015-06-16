@@ -147,7 +147,7 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(currentItemPosition));
         operationVS = OperationVSContentProvider.getOperation(cursor);
         switch (item.getItemId()) {
-            case R.id.operationvs_check:
+            case R.id.check:
                 if(Wallet.getCurrencySet() == null) {
                     PinDialogFragment.showWalletScreen(getSupportFragmentManager(), broadCastId,
                             getString(R.string.enter_wallet_pin_msg), false,
@@ -156,13 +156,13 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
                 }
                 launchService();
                 return true;
-            case R.id.operationvs_details:
+            case R.id.details:
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                         operationVS.getTypeVS().toString(),
                         MsgUtils.getOperationVSDescription(operationVS), this);
                 UIUtils.showMessageDialog(builder);
                 return true;
-            case R.id.operationvs_delete:
+            case R.id.delete:
                 getContentResolver().delete(OperationVSContentProvider.getURI(
                         operationVS.getLocalId()), null, null);
                 return true;

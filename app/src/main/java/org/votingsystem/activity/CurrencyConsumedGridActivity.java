@@ -2,6 +2,7 @@ package org.votingsystem.activity;
 
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.model.Currency;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MsgUtils;
 
@@ -36,6 +38,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
 
     private static final int loaderId = 0;
     private GridView gridView;
+    private Currency currency;
     private int currentItemPosition = -1;
     
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
             }
         });
         //gridView.setOnScrollListener(this);
+        registerForContextMenu(gridView);
         getLoaderManager().initLoader(loaderId, null, this);
     }
 
@@ -65,9 +69,32 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.currency_consumed_grid_context_menu, menu);
+    }
+
+    @Override public boolean onContextItemSelected(MenuItem item) {
+        LOGD(TAG + ".onContextItemSelected", "item: " + item.getTitle() + " - currentItemPosition: "
+                + currentItemPosition);
+        Cursor cursor = ((Cursor) gridView.getAdapter().getItem(currentItemPosition));
+        currency = CurrencyContentProvider.getCurrency(cursor);
+        switch (item.getItemId()) {
+            case R.id.check:
+
+                return true;
+            case R.id.details:
+                Intent intent = new Intent(this, CurrencyActivity.class);
+                intent.putExtra(ContextVS.CURRENCY_KEY, currency);
+                startActivity(intent);
+                return true;
+            case R.id.delete:
+                getContentResolver().delete(CurrencyContentProvider.getURI(
+                        currency.getLocalId()), null, null);
+                return true;
+            default: return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -107,8 +134,8 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     getContentResolver().delete(CurrencyContentProvider.
-                            getCurrencyURI(cursor.getLong(cursor.getColumnIndex(
-                            CurrencyContentProvider.ID_COL))), null, null);
+                            getURI(cursor.getLong(cursor.getColumnIndex(
+                                    CurrencyContentProvider.ID_COL))), null, null);
                     return;
                 }
                 LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.row);

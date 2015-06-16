@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/check" android:title="@string/check_operationvs" />
+    <item android:id="@+id/check" android:title="@string/check_lbl" />
     <item android:id="@+id/details" android:title="@string/details_lbl" />
     <item android:id="@+id/delete" android:title="@string/delete_lbl" />
 </menu>

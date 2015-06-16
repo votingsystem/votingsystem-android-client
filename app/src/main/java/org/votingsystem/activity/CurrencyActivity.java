@@ -117,7 +117,7 @@ public class CurrencyActivity extends AppCompatActivity {
                                 startService(startIntent);
                                 Toast.makeText(CurrencyActivity.this,
                                         getString(R.string.send_to_wallet) + " - " +
-                                                getString(R.string.check_target_device_lbl),
+                                        getString(R.string.check_target_device_lbl),
                                         Toast.LENGTH_SHORT).show();
                             }
                         } catch(Exception ex) {ex.printStackTrace();}
@@ -208,6 +208,7 @@ public class CurrencyActivity extends AppCompatActivity {
             ProgressDialogFragment.showDialog(caption, message, getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
+
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         LOGD(TAG + ".onCreateOptionsMenu", " selected model type:" + currency.getTypeVS());
         MenuInflater menuInflater = getMenuInflater();

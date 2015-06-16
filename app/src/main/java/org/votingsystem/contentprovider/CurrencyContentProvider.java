@@ -61,7 +61,7 @@ public class CurrencyContentProvider extends ContentProvider {
     //        AUTHORITY + "/" + BASE_PATH);
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getCurrencyURI(Long currencyId) {
+    public static Uri getURI(Long currencyId) {
         return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + currencyId);
     }
 
@@ -195,8 +195,7 @@ public class CurrencyContentProvider extends ContentProvider {
 
     public static ContentValues getContentValues(Currency currency) throws Exception {
         ContentValues values = new ContentValues();
-        CurrencyDto currencyDto = CurrencyDto.serialize(currency);
-        values.put(CurrencyContentProvider.SERIALIZED_OBJECT_COL, JSON.writeValueAsBytes(currencyDto));
+        values.put(CurrencyContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(currency));
         values.put(CurrencyContentProvider.HASH_COL, currency.getHashCertVS());
         values.put(CurrencyContentProvider.STATE_COL, currency.getState().toString());
         if(currency.getLocalId() < 0) {
