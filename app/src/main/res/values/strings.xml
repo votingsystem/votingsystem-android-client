@@ -222,6 +222,7 @@
     <string name="delete_lbl">borrar</string>
     <string name="num_vote_options_error_msg">debe añadir al menos un par de opciones en la votación</string>
     <string name="vote_options_lbl">opciones de la votación</string>
+    <string name="payment_options_lbl">opciones de pago</string>
     <string name="option_repeated_msg">ya ha introducido una opción con el valor \'%1$s\'</string>
     <string name="election_published_ok_msg">la votación se ha publicado corréctamente</string>
     <string name="representative_image_lbl">imagen del representante</string>
@@ -273,6 +274,7 @@
     <string name="cash_for_payment_dialog_msg"><![CDATA[para completar la operación necesita retirar
      <b>%2$s %1$s</b><br/> su límite es de <b>%3$s %1$s</b>]]></string>
     <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
+    <string name="min_payment_option_msg">debe seleccionar al menos una opción de pago</string>
     <string name="currency_request_msg_subject">retirada de efectivo</string>
     <string name="currency_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
     <string name="transactionvs_send_pin_msg"><![CDATA[va a realizar un pago de <b>%1$s %2$s</b>. a

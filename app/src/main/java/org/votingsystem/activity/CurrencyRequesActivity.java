@@ -43,9 +43,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CurrencyRequestFormActivity extends AppCompatActivity {
+public class CurrencyRequesActivity extends AppCompatActivity {
 	
-	public static final String TAG = CurrencyRequestFormActivity.class.getSimpleName();
+	public static final String TAG = CurrencyRequesActivity.class.getSimpleName();
 
 
     private LinearLayout tag_info;
@@ -56,7 +56,7 @@ public class CurrencyRequestFormActivity extends AppCompatActivity {
     private Button add_tag_btn;
     private Button submit_form_btn;
     private TextView errorMsgTextView;
-    private String broadCastId = CurrencyRequestFormActivity.class.getSimpleName();
+    private String broadCastId = CurrencyRequesActivity.class.getSimpleName();
     private EditText amount;
     private CheckBox time_limited_checkbox;
     private BigDecimal maxValue;
@@ -81,12 +81,12 @@ public class CurrencyRequestFormActivity extends AppCompatActivity {
                     case CURRENCY_REQUEST:
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                 responseVS.getCaption(), responseVS.getNotificationMessage(),
-                                CurrencyRequestFormActivity.this);
+                                CurrencyRequesActivity.this);
                         builder.setPositiveButton(getString(R.string.accept_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                                        CurrencyRequestFormActivity.this.setResult(Activity.RESULT_OK, null);
+                                        CurrencyRequesActivity.this.setResult(Activity.RESULT_OK, null);
                                         finish();
                                     }
                                 }
@@ -102,7 +102,7 @@ public class CurrencyRequestFormActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.cash_request_form_activity);
+        setContentView(R.layout.currency_request_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         maxValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.MAX_VALUE_KEY);
@@ -163,7 +163,7 @@ public class CurrencyRequestFormActivity extends AppCompatActivity {
                 transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
                 PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                        MsgUtils.getCurrencyRequestMessage(transactionDto, CurrencyRequestFormActivity.this),
+                        MsgUtils.getCurrencyRequestMessage(transactionDto, CurrencyRequesActivity.this),
                         false, TypeVS.CURRENCY_REQUEST);
             } else errorMsgTextView.setVisibility(View.VISIBLE);
         }

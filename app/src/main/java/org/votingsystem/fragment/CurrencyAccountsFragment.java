@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.CurrencyRequestFormActivity;
+import org.votingsystem.activity.CurrencyRequesActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
@@ -244,7 +244,7 @@ public class CurrencyAccountsFragment extends Fragment {
                 if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
                     request_button.setOnClickListener(new OnClickListener() {
                         public void onClick(View v) {
-                            Intent intent = new Intent(getActivity(), CurrencyRequestFormActivity.class);
+                            Intent intent = new Intent(getActivity(), CurrencyRequesActivity.class);
                             intent.putExtra(ContextVS.MAX_VALUE_KEY, accountBalance);
                             intent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
                             intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cash_dialog_msg,

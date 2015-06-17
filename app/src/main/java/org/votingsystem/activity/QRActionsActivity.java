@@ -26,7 +26,7 @@ import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.fragment.QRGeneratorFormFragment;
+import org.votingsystem.fragment.QRGeneratorFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -44,13 +44,14 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class QRCodesActivity extends ActivityBase {
+public class QRActionsActivity extends ActivityBase {
 
-	public static final String TAG = QRCodesActivity.class.getSimpleName();
+	public static final String TAG = QRActionsActivity.class.getSimpleName();
 
-    private String broadCastId = QRCodesActivity.class.getSimpleName();
-    private Button read_qr_btn;
-    private Button gen_qr_btn;
+    private enum Action {READ_QR, CREATE_QR}
+
+    private String broadCastId = QRActionsActivity.class.getSimpleName();
+    private Action pendingAction;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -71,6 +72,10 @@ public class QRCodesActivity extends ActivityBase {
                 }
             } else if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
+                if(AppVS.getInstance().isWithSocketConnection() && pendingAction != null) {
+                    processAction(pendingAction);
+                    pendingAction = null;
+                }
             }
         }
     };
@@ -79,37 +84,53 @@ public class QRCodesActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.qr_codes_activity);
+        setContentView(R.layout.qr_actions_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
-        read_qr_btn = (Button) findViewById(R.id.read_qr_btn);
+        Button read_qr_btn = (Button) findViewById(R.id.read_qr_btn);
         read_qr_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(!AppVS.getInstance().isWithSocketConnection()) {
-                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                            getString(R.string.qr_create_lbl), getString(R.string.qr_connection_required_msg),
-                            QRCodesActivity.this).setPositiveButton(getString(R.string.connect_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                            broadCastId, getString(R.string.init_authenticated_session_pin_msg),
-                                            false, TypeVS.WEB_SOCKET_INIT);
-                                }
-                            }).setNegativeButton(getString(R.string.cancel_lbl), null);;
-                    UIUtils.showMessageDialog(builder);
-                } else Utils.launchQRScanner(QRCodesActivity.this);
+                processAction(Action.READ_QR);
             }
         });
-        gen_qr_btn = (Button) findViewById(R.id.gen_qr_btn);
+        Button gen_qr_btn = (Button) findViewById(R.id.gen_qr_btn);
         gen_qr_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(QRCodesActivity.this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFormFragment.class.getName());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
+                processAction(Action.CREATE_QR);
             }
         });
         getSupportActionBar().setTitle(getString(R.string.qr_codes_lbl));
+    }
+
+    private void processAction(Action action) {
+        if(!AppVS.getInstance().isWithSocketConnection()) {
+            pendingAction = action;
+            String caption = (action == Action.CREATE_QR)? getString(R.string.qr_create_lbl):
+                    getString(R.string.qr_read_lbl);
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(caption,
+                    getString(R.string.qr_connection_required_msg),
+                    QRActionsActivity.this).setPositiveButton(getString(R.string.connect_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            PinDialogFragment.showPinScreen(getSupportFragmentManager(),
+                                    broadCastId, getString(R.string.init_authenticated_session_pin_msg),
+                                    false, TypeVS.WEB_SOCKET_INIT);
+                        }
+                    }).setNegativeButton(getString(R.string.cancel_lbl), null);;
+            UIUtils.showMessageDialog(builder);
+        } else {
+            switch (action) {
+                case READ_QR:
+                    Utils.launchQRScanner(QRActionsActivity.this);
+                    break;
+                case CREATE_QR:
+                    Intent intent = new Intent(QRActionsActivity.this, FragmentContainerActivity.class);
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFragment.class.getName());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    break;
+            }
+        }
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -140,7 +161,7 @@ public class QRCodesActivity extends ActivityBase {
     private void sendQRRequestInfo(DeviceVSDto deviceVSDto, QRMessageDto qrMessageDto) throws Exception {
         SocketMessageDto socketMessage = SocketMessageDto.getQRInfoRequest(
                 deviceVSDto, qrMessageDto);
-        Intent startIntent = new Intent(QRCodesActivity.this, WebSocketService.class);
+        Intent startIntent = new Intent(QRActionsActivity.this, WebSocketService.class);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.QR_MESSAGE_INFO);
         startService(startIntent);
@@ -251,7 +272,7 @@ public class QRCodesActivity extends ActivityBase {
                         case DELIVERY_WITHOUT_PAYMENT:
                         case DELIVERY_WITH_PAYMENT:
                         case REQUEST_FORM:
-                            Intent intent = new Intent(QRCodesActivity.this,
+                            Intent intent = new Intent(QRActionsActivity.this,
                                     FragmentContainerActivity.class);
                             intent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
                             intent.putExtra(ContextVS.TRANSACTION_KEY, dto);

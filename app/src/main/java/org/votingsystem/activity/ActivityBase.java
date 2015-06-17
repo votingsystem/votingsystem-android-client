@@ -410,7 +410,7 @@ public abstract class ActivityBase extends AppCompatActivity implements
                 finish();
                 break;
             case NAVDRAWER_ITEM_QR_CODES:
-                intent = new Intent(this, QRCodesActivity.class);
+                intent = new Intent(this, QRActionsActivity.class);
                 startActivity(intent);
                 finish();
                 break;

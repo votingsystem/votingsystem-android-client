@@ -13,9 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.ObjectUtils;
 
 import java.util.Date;

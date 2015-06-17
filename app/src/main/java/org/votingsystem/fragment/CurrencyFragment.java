@@ -26,7 +26,7 @@ public class CurrencyFragment extends Fragment {
 
     private AppVS appVS;
     private Currency currency;
-    private TextView currency_amount, currency_state, currency_currency, date_info, hash_cert, tag_info;
+    private TextView currency_amount, currency_state, date_info, hash_cert, tag_info;
 
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,7 +38,6 @@ public class CurrencyFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.currency, container, false);
         currency_amount = (TextView)rootView.findViewById(R.id.currency_amount);
         currency_state = (TextView)rootView.findViewById(R.id.currency_state);
-        currency_currency = (TextView)rootView.findViewById(R.id.currency_currency);
         date_info = (TextView)rootView.findViewById(R.id.date_info);
         hash_cert = (TextView)rootView.findViewById(R.id.hash_cert);
         tag_info = (TextView)rootView.findViewById(R.id.tag_info);
@@ -52,8 +51,8 @@ public class CurrencyFragment extends Fragment {
     public void initCurrencyScreen(Currency currency) {
         try {
             hash_cert.setText(currency.getHashCertVS());
-            currency_amount.setText(currency.getAmount().toPlainString());
-            currency_currency.setText(currency.getCurrencyCode());
+            currency_amount.setText(currency.getAmount().toPlainString() + " " +
+                    currency.getCurrencyCode());
             getActivity().setTitle(MsgUtils.getCurrencyDescriptionMessage(currency, getActivity()));
             date_info.setText(getString(R.string.lapse_info,
                     DateUtils.getDateStr(currency.getDateTo(), "dd MMM yyyy' 'HH:mm")));
@@ -61,6 +60,7 @@ public class CurrencyFragment extends Fragment {
             if(currency.getState() != null && Currency.State.OK != currency.getState()) {
                 currency_state.setText(MsgUtils.getCurrencyStateMessage(currency, getActivity()));
                 currency_state.setVisibility(View.VISIBLE);
+                currency_amount.setTextColor(getResources().getColor(R.color.bkg_vs));
             }
         } catch(Exception ex) {
             ex.printStackTrace();

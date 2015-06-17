@@ -19,7 +19,7 @@
         <activity android:name="org.votingsystem.activity.BrowserVSActivity"
             android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.CurrencyRequestFormActivity" android:noHistory="true"
+        <activity android:name="org.votingsystem.activity.CurrencyRequesActivity" android:noHistory="true"
             android:label="@string/cash_request_dialog_caption" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.CertRequestActivity" android:noHistory="true"
@@ -106,7 +106,7 @@
 
         <activity android:name="org.votingsystem.activity.MessageActivity" android:theme="@style/Theme.Transparent"/>
 
-        <activity android:name="org.votingsystem.activity.QRCodesActivity" android:theme="@style/ThemeVS"/>
+        <activity android:name="org.votingsystem.activity.QRActionsActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.RepresentativeDelegationActivity"
             android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
