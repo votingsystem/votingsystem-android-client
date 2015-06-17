@@ -62,7 +62,7 @@ public class WalletFragment extends Fragment {
                 case CURRENCY:
                     try {
                         currencyList = new ArrayList<>(Wallet.getCurrencySet((String) responseVS.getData()));
-                        Utils.launchCurrencyStatusCheck(broadCastId, null, getActivity());
+                        Utils.launchCurrencyStatusCheck(broadCastId, null);
                         printSummary();
                     } catch (Exception ex) {
                         ex.printStackTrace();

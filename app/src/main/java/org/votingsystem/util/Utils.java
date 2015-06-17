@@ -116,12 +116,12 @@ public class Utils {
         return arguments;
     }
 
-    public static void launchCurrencyStatusCheck(String broadCastId, String hashCertVS, Context context) {
-        Intent startIntent = new Intent(context, PaymentService.class);
+    public static void launchCurrencyStatusCheck(String broadCastId, String hashCertVS) {
+        Intent startIntent = new Intent(AppVS.getInstance(), PaymentService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_CHECK);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.HASH_CERTVS_KEY, hashCertVS);
-        context.startService(startIntent);
+        AppVS.getInstance().startService(startIntent);
     }
 
     public static void toggleWebSocketServiceConnection() {

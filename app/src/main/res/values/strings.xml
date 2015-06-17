@@ -388,7 +388,7 @@
     <string name="currency_accounts_lbl">cuentas</string>
     <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear su monedero</string>
     <string name="unlocking_wallet_msg">desbloqueando monedero</string>
-    <string name="lapse_info">caduca: \'%2$s\'</string>
+    <string name="lapse_info">válido hasta: %1$s</string>
     <string name="cancelled_lbl">cancelado</string>
     <string name="expended_lbl">consumido</string>
     <string name="rejected_lbl">rechazado</string>

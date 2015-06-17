@@ -236,6 +236,9 @@ public class Wallet {
     }
 
     public static void updateWallet(CurrencyBatchDto currencyBatchDto) throws Exception {
+        for(Currency currency : currencyBatchDto.getCurrencyCollection()) {
+            currency.setState(Currency.State.EXPENDED);
+        }
         Wallet.remove(currencyBatchDto.getCurrencyCollection());
         if(currencyBatchDto.getLeftOverCurrency() != null) Wallet.updateWallet(
                 Arrays.asList(currencyBatchDto.getLeftOverCurrency()));

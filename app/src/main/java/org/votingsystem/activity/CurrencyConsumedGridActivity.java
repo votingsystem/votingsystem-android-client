@@ -1,11 +1,15 @@
 package org.votingsystem.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,12 +24,20 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
+import org.votingsystem.dto.currency.CurrencyStateDto;
+import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.MsgUtils;
+import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.Utils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -40,7 +52,24 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
     private GridView gridView;
     private Currency currency;
     private int currentItemPosition = -1;
-    
+    private String broadCastId = CurrencyConsumedGridActivity.class.getSimpleName();
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) { } else {
+                switch(responseVS.getTypeVS()) {
+                    case CURRENCY_CHECK:
+                        MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                                null, responseVS.getMessage(),
+                                getSupportFragmentManager());
+                        break;
+                }
+            }
+        }
+    };
+
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
@@ -82,7 +111,8 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
         currency = CurrencyContentProvider.getCurrency(cursor);
         switch (item.getItemId()) {
             case R.id.check:
-
+                new GetDataTask().execute(AppVS.getInstance().getCurrencyServer()
+                        .getCurrencyStateServiceURL(currency.getHashCertVS()));
                 return true;
             case R.id.details:
                 Intent intent = new Intent(this, CurrencyActivity.class);
@@ -172,4 +202,51 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
+    }
+
+    @Override public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+    }
+
+
+    public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
+
+        public final String TAG = GetDataTask.class.getSimpleName();
+
+        public GetDataTask() { }
+
+        @Override protected void onPreExecute() {
+            ProgressDialogFragment.showDialog(getString(R.string.connecting_caption),
+                    getString(R.string.loading_data_msg), getSupportFragmentManager());
+        }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            try {
+                CurrencyStateDto currencyStateDto = HttpHelper.getData(CurrencyStateDto.class,
+                        urls[0], MediaTypeVS.JSON);
+                currency.setState(currencyStateDto.getState());
+                getContentResolver().update(CurrencyContentProvider.getURI(currency.getLocalId()),
+                        CurrencyContentProvider.getContentValues(currency), null, null);
+                return ResponseVS.OK();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return ResponseVS.EXCEPTION(ex, AppVS.getInstance());
+            }
+        }
+
+        // This is called each time you call publishProgress()
+        protected void onProgressUpdate(Integer... progress) { }
+
+        @Override  protected void onPostExecute(ResponseVS responseVS) {
+            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            ProgressDialogFragment.hide(getSupportFragmentManager());
+        }
+    }
+
 }
