@@ -62,6 +62,7 @@ import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.ui.DialogButton;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -490,6 +491,30 @@ public class UIUtils  {
         });
     }
 
+    public static void showMessageDialog(String caption, String message, DialogButton positiveButton,
+             DialogButton negativeButton, Context context) {
+        View view = LayoutInflater.from(context).inflate(R.layout.message_dialog, null);
+        ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
+        TextView messageTextView = (TextView)view.findViewById(R.id.message);
+        messageTextView.setText(Html.fromHtml(message));
+        messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        AlertDialog.Builder builder = new AlertDialog.Builder(context).setView(view)
+                .setCancelable(false);
+        if(positiveButton != null) builder.setPositiveButton(positiveButton.getLabel(),
+                positiveButton.getClickListener());
+        if(negativeButton != null) builder.setNegativeButton(negativeButton.getLabel(),
+                negativeButton.getClickListener());
+        final Dialog dialog = builder.show();
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    dialog.dismiss();
+                    return true;
+                } else return false;
+            }
+        });
+    }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
         AddressVS addressVS = PrefUtils.getAddressVS(contex);

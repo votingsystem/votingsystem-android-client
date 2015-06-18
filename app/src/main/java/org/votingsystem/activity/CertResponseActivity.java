@@ -79,7 +79,7 @@ public class CertResponseActivity extends AppCompatActivity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.cert_request_form_response);
+        setContentView(R.layout.cert_request_response);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
         setSupportActionBar(toolbar);
         appVS = (AppVS) getApplicationContext();

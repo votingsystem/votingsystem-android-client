@@ -1,11 +1,15 @@
 package org.votingsystem.fragment;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +19,9 @@ import android.widget.ImageView;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
@@ -32,6 +38,31 @@ public class QRFragment extends Fragment {
 
     public static final String TAG = QRFragment.class.getSimpleName();
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+            SocketMessageDto socketMsg = null;
+            try {
+                String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
+                if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
+            } catch (Exception ex) { ex.printStackTrace();}
+            if(socketMsg != null) {
+                switch (socketMsg.getOperation()) {
+                    case WEB_SOCKET_CLOSE:
+                        DialogButton positiveButton = new DialogButton(getString(R.string.accept_lbl),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        getActivity().finish();
+                                    }
+                                });
+                        UIUtils.showMessageDialog(getString(R.string.error_lbl),
+                                getString(R.string.connection_error_msg), positiveButton, null,
+                                getActivity());
+                        break;
+                }
+            }
+        }
+    };
 
     @Override public View onCreateView(LayoutInflater inflater,
                ViewGroup container, Bundle savedInstanceState) {
@@ -70,6 +101,17 @@ public class QRFragment extends Fragment {
             UIUtils.showMessageDialog(builder);
         }
         return rootView;
+    }
+
+    @Override public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
 }

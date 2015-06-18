@@ -14,13 +14,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
@@ -45,7 +46,6 @@ public class QRGeneratorFragment extends Fragment {
     private Button add_tag_btn;
     private String broadCastId = QRGeneratorFragment.class.getSimpleName();
     private CheckBox from_uservs_checkbox, currency_send_checkbox, currency_change_checkbox;
-    private LinearLayout tag_info;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -81,20 +81,21 @@ public class QRGeneratorFragment extends Fragment {
             }
         });
         tag_text = (TextView)rootView.findViewById(R.id.tag_text);
-        tag_info = (LinearLayout)rootView.findViewById(R.id.tag_info);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_create_lbl));
+        if(savedInstanceState != null)
+            setTagVS((TagVSDto) savedInstanceState.getSerializable(ContextVS.TAG_KEY));
         return rootView;
     }
 
     private void setTagVS(TagVSDto tagVS) {
         this.tagVS = tagVS;
         if(tagVS != null) {
-            add_tag_btn.setText(getString(R.string.remove_tag_lbl));
+            add_tag_btn.setText(getString(R.string.change_lbl));
             tag_text.setText(getString(R.string.selected_tag_lbl,tagVS.getName()));
-            tag_info.setVisibility(View.VISIBLE);
+            tag_text.setVisibility(View.VISIBLE);
         } else {
             add_tag_btn.setText(getString(R.string.add_tag_lbl));
-            tag_info.setVisibility(View.GONE);
+            tag_text.setVisibility(View.GONE);
         }
     }
 
@@ -118,16 +119,23 @@ public class QRGeneratorFragment extends Fragment {
                     getString(R.string.min_payment_option_msg), getFragmentManager());
             return;
         }
-        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-        TransactionVSDto dto = new TransactionVSDto();
-        dto.setAmount(new BigDecimal(amount_text.getText().toString()));
-        dto.setCurrencyCode(currencySpinner.getSelectedItem().toString());
+        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
+                AppVS.getInstance().getUserVS().getName(), UserVSDto.Type.USER,
+                new BigDecimal(amount_text.getText().toString()),
+                currencySpinner.getSelectedItem().toString(),
+                AppVS.getInstance().getConnectedDevice().getIBAN(), null,
+                (tagVS == null ? TagVSDto.WILDTAG : tagVS.getName()));
+        dto.setPaymentOptions(paymentOptions);
 
-        if(tagVS == null) dto.setTagVS(new TagVSDto(TagVSDto.WILDTAG));
-        else  dto.setTagVS(tagVS);
+        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
         intent.putExtra(ContextVS.TRANSACTION_KEY, dto);
         intent.putExtra(ContextVS.FRAGMENT_KEY, QRFragment.class.getName());
         startActivity(intent);
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(ContextVS.TAG_KEY, tagVS);
     }
 
     @Override public void onResume() {

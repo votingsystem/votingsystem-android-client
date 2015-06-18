@@ -383,7 +383,7 @@
     <string name="search_lbl">buscar</string>
     <string name="search_tag_lbl">buscar etiquetas</string>
     <string name="add_tag_advice_msg">si añade una etiqueta el ingreso sólo se podrá emplear en servicios asociados a esa etiqueta</string>
-    <string name="remove_tag_lbl">quitar etiqueta</string>
+    <string name="change_lbl">cambiar</string>
     <string name="wildtag_lbl">gastos libres</string>
     <string name="for_lbl">para</string>
     <string name="currency_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>

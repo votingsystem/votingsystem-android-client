@@ -93,8 +93,8 @@ public class TransactionVSDto implements Serializable {
     public TransactionVSDto() {}
 
 
-    public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVSDto.Type userToType, BigDecimal amount,
-               String currencyCode, String toUserIBAN, String subject, String tag) {
+    public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVSDto.Type userToType,
+            BigDecimal amount, String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionVSDto dto = new TransactionVSDto();
         dto.setOperation(TypeVS.TRANSACTIONVS_INFO);
         dto.setUserToType(userToType);
@@ -102,8 +102,9 @@ public class TransactionVSDto implements Serializable {
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(new HashSet<String>(Arrays.asList(toUserIBAN)));
+        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setDateCreated(new Date());
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }

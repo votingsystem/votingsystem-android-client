@@ -173,7 +173,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
     private void setTagVS(TagVSDto tagVS) {
         this.tagVS = tagVS;
         if(tagVS != null) {
-            add_tag_btn.setText(getString(R.string.remove_tag_lbl));
+            add_tag_btn.setText(getString(R.string.change_lbl));
             tag_text.setText(getString(R.string.selected_tag_lbl,tagVS.getName()));
             tag_info.setVisibility(View.VISIBLE);
         } else {
