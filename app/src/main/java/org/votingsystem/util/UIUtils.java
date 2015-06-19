@@ -174,8 +174,8 @@ public class UIUtils  {
         }
     }
 
-    public static boolean isSameDayDisplay(long time1, long time2, Context context) {
-        TimeZone displayTimeZone = PrefUtils.getDisplayTimeZone(context);
+    public static boolean isSameDayDisplay(long time1, long time2) {
+        TimeZone displayTimeZone = PrefUtils.getDisplayTimeZone();
         Calendar cal1 = Calendar.getInstance(displayTimeZone);
         Calendar cal2 = Calendar.getInstance(displayTimeZone);
         cal1.setTimeInMillis(time1);
@@ -517,7 +517,7 @@ public class UIUtils  {
     }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
-        AddressVS addressVS = PrefUtils.getAddressVS(contex);
+        AddressVS addressVS = PrefUtils.getAddressVS();
         ((TextView)linearLayout.findViewById(R.id.name)).setText(addressVS.getName());
         ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(addressVS.getPostalCode());
         ((TextView)linearLayout.findViewById(R.id.city)).setText(addressVS.getCity());

@@ -78,7 +78,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         appVS = (AppVS) getActivity().getApplicationContext();
         eventState = (EventVSDto.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
-        PrefUtils.registerPreferenceChangeListener(appVS, this);
+        PrefUtils.registerPreferenceChangeListener(this);
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
@@ -242,7 +242,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(this, appVS);
+        PrefUtils.unregisterPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 

@@ -46,7 +46,7 @@ public class BootStrapService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "accessControlURL: " + accessControlURL +
                 " - currencyServerURL: " + currencyServerURL);
         ResponseVS responseVS = null;
-        if(!PrefUtils.isDataBootstrapDone(this)) {
+        if(!PrefUtils.isDataBootstrapDone()) {
             responseVS = HttpHelper.getData(AccessControlDto.getServerInfoURL(accessControlURL),
                     ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -84,8 +84,8 @@ public class BootStrapService extends IntentService {
                 });
             }
         }
-        if(!PrefUtils.isDataBootstrapDone(this)) {
-            PrefUtils.markDataBootstrapDone(this);
+        if(!PrefUtils.isDataBootstrapDone()) {
+            PrefUtils.markDataBootstrapDone();
             /*if(appVS.getCurrencyServer() == null && appVS.getAccessControl() == null) {
                 intent = new Intent(getBaseContext(), IntentFilterActivity.class);
                 responseVS.setCaption(getString(R.string.connection_error_msg));

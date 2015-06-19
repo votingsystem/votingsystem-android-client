@@ -44,7 +44,7 @@ public class MsgUtils {
         }
         Formatter formatter = new Formatter(recycle);
         return DateUtils.formatDateRange(context, formatter, intervalStart, intervalEnd, TIME_FLAGS,
-                PrefUtils.getDisplayTimeZone(context).getID()).toString();
+                PrefUtils.getDisplayTimeZone().getID()).toString();
     }
 
     public static String getHashtagsString(String hashtags) {
@@ -56,10 +56,10 @@ public class MsgUtils {
         return null;
     }
 
-    public static String getMessagesDrawerItemMessage(Context context) {
-        Integer numMessagesNotreaded = PrefUtils.getNumMessagesNotReaded(context);
+    public static String getMessagesDrawerItemMessage() {
+        Integer numMessagesNotreaded = PrefUtils.getNumMessagesNotReaded();
         String prefix = numMessagesNotreaded == 0 ? "": numMessagesNotreaded + "  ";
-        return prefix + context.getString(R.string.messages_lbl);
+        return prefix + AppVS.getInstance().getString(R.string.messages_lbl);
     }
 
     public static String getTagVSMessage(String tag) {

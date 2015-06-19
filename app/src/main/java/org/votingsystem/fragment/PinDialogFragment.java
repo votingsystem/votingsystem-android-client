@@ -220,7 +220,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                     return;
                 case NEW_PIN_CONFIRM:
                     if(pin.equals(newPin)) {
-                        PrefUtils.putPin(pin.toCharArray(), getActivity());
+                        PrefUtils.putPin(pin.toCharArray());
                         userPinEditText.setVisibility(View.GONE);
                         msgTextView.setText(getString(R.string.new_pin_ok_msg));
                         return;
@@ -269,7 +269,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
     private boolean isHashOK(String pin) {
         try {
-            String expectedHash = PrefUtils.getPinHash(getActivity());
+            String expectedHash = PrefUtils.getPinHash();
             String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
             if(!expectedHash.equals(pinHash)) {
                 msgTextView.setText(getString(R.string.pin_error_msg));

@@ -130,7 +130,7 @@ public class CurrencyAccountsFragment extends Fragment {
     }
 
     private void loadUserInfo(TimePeriod timePeriod) {
-        Date lastCheckedTime = PrefUtils.getCurrencyAccountsLastCheckDate(getActivity());
+        Date lastCheckedTime = PrefUtils.getCurrencyAccountsLastCheckDate();
         if(lastCheckedTime == null) {
             updateCurrencyAccountsInfo();
             return;
@@ -138,7 +138,7 @@ public class CurrencyAccountsFragment extends Fragment {
         try {
             last_request_date.setText(Html.fromHtml(getString(R.string.currency_last_request_info_lbl,
                     DateUtils.getDayWeekDateStr(lastCheckedTime))));
-            BalancesDto userInfo = PrefUtils.getBalances(appVS);
+            BalancesDto userInfo = PrefUtils.getBalances();
             if(userInfo != null) {
                 Map<String, TagVSInfoDto> tagVSBalancesMap = userInfo.getTagVSInfoMap(
                         Currency.getInstance("EUR").getCurrencyCode());

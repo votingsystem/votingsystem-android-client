@@ -123,7 +123,7 @@ public class RepresentativeService extends IntentService {
                 case WITHOUT_REPRESENTATION:
                     break;
             }
-            PrefUtils.putRepresentationState(stateDto, this);
+            PrefUtils.putRepresentationState(stateDto);
             responseVS = ResponseVS.OK();
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -213,7 +213,7 @@ public class RepresentativeService extends IntentService {
                 stateDto.setRepresentative(delegationDto.getRepresentative());
                 responseVS = ResponseVS.OK().setCaption(getString(R.string.operation_ok_msg))
                         .setMessage(getString(R.string.representative_selected_msg));
-                PrefUtils.putRepresentationState(stateDto, this);
+                PrefUtils.putRepresentationState(stateDto);
             } else {
                 responseVS.setCaption(getString(R.string.error_lbl));
                 if(ContentTypeVS.JSON == responseVS.getContentType()) {
@@ -236,14 +236,14 @@ public class RepresentativeService extends IntentService {
                 "processAnonymousRepresentativeSelectionCancelation");
         ResponseVS responseVS = null;
         try {
-            RepresentativeDelegationDto representativeDelegationDto = PrefUtils.getAnonymousDelegation(this);
+            RepresentativeDelegationDto representativeDelegationDto = PrefUtils.getAnonymousDelegation();
             if(representativeDelegationDto == null) {
                 responseVS = new ResponseVS(ResponseVS.SC_ERROR,
                         getString(R.string.missing_anonymous_delegation_cancellation_data));
             } else {
                 responseVS = processAnonymousRepresentativeSelectionCancelation(representativeDelegationDto);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    PrefUtils.putAnonymousDelegation(null, this);
+                    PrefUtils.putAnonymousDelegation(null);
                     responseVS.setCaption(getString(R.string.cancel_anonymouys_representation_lbl)).
                             setNotificationMessage(getString(R.string.cancel_anonymous_representation_ok_msg));
                 }
@@ -325,14 +325,14 @@ public class RepresentativeService extends IntentService {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     delegationDto.setDelegationReceipt(responseVS.getSMIME(),
                             AppVS.getInstance().getAccessControl().getCertificate());
-                    PrefUtils.putAnonymousDelegation(delegationDto, this);
+                    PrefUtils.putAnonymousDelegation(delegationDto);
 
                     SMIMEMessage delegationReceipt = new SMIMEMessage(responseVS.getMessageBytes());
                     Collection matches = delegationReceipt.checkSignerCert(
                             appVS.getAccessControl().getCertificate());
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
 
-                    PrefUtils.putAnonymousDelegation(delegationDto, this);
+                    PrefUtils.putAnonymousDelegation(delegationDto);
                     responseVS.setCaption(getString(R.string.anonymous_delegation_caption))
                             .setNotificationMessage(getString(R.string.anonymous_delegation_msg,
                             delegationDto.getRepresentative().getName(),

@@ -209,7 +209,7 @@ public class PaymentFragment extends Fragment {
         try {
             transactionDto.setType(TransactionVSDto.getByDescription(
                     (String) payment_method_spinner.getSelectedItem()));
-            BalancesDto userInfo = PrefUtils.getBalances(getActivity());
+            BalancesDto userInfo = PrefUtils.getBalances();
             final BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
                     transactionDto.getCurrencyCode(), transactionDto.getTagVS().getName());
             switch (transactionDto.getType()) {

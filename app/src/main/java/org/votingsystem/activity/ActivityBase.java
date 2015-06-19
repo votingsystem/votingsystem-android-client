@@ -245,8 +245,8 @@ public abstract class ActivityBase extends AppCompatActivity implements
         mDrawerToggle.syncState();
         // When the user runs the app for the first time, we want to land them with the
         // navigation drawer open. But just the first time.
-        if (!PrefUtils.isDataBootstrapDone(this)) {
-            PrefUtils.markDataBootstrapDone(this);
+        if (!PrefUtils.isDataBootstrapDone()) {
+            PrefUtils.markDataBootstrapDone();
             mDrawerLayout.openDrawer(Gravity.START);
         }
     }
@@ -339,7 +339,7 @@ public abstract class ActivityBase extends AppCompatActivity implements
             chosenAccountView.setVisibility(View.VISIBLE);
             TextView nameTextView = (TextView) chosenAccountView.findViewById(R.id.profile_name_text);
             TextView email = (TextView) chosenAccountView.findViewById(R.id.profile_email_text);
-            UserVSDto sessionUserVS = PrefUtils.getSessionUserVS(this);
+            UserVSDto sessionUserVS = PrefUtils.getSessionUserVS();
             if(sessionUserVS != null) {
                 nameTextView.setText(sessionUserVS.getName());
                 email.setText(sessionUserVS.getEmail());
@@ -468,8 +468,8 @@ public abstract class ActivityBase extends AppCompatActivity implements
     @Override protected void onResume() {
         super.onResume();
         if(messageDrawerItemTextView != null) messageDrawerItemTextView.setText(
-                MsgUtils.getMessagesDrawerItemMessage(appVS));
-        PrefUtils.registerPreferenceChangeListener(this, this);
+                MsgUtils.getMessagesDrawerItemMessage());
+        PrefUtils.registerPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
@@ -482,14 +482,14 @@ public abstract class ActivityBase extends AppCompatActivity implements
 
     @Override protected void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
 
     @Override public void onStart() {
         super.onStart();
-        if (!PrefUtils.isDataBootstrapDone(this) && mDataBootstrapThread == null) {
+        if (!PrefUtils.isDataBootstrapDone() && mDataBootstrapThread == null) {
             performDataBootstrap();
         }
     }
@@ -522,7 +522,7 @@ public abstract class ActivityBase extends AppCompatActivity implements
 
     private void showConnectionStatusDialog() {
         if(appVS.isWithSocketConnection()) {
-            UserVSDto sessionUserVS = PrefUtils.getSessionUserVS(this);
+            UserVSDto sessionUserVS = PrefUtils.getSessionUserVS();
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
@@ -561,7 +561,7 @@ public abstract class ActivityBase extends AppCompatActivity implements
         if (iconId > 0)  iconView.setImageResource(iconId);
         if (itemId == NAVDRAWER_ITEM_MESSAGES) {
             messageDrawerItemTextView = titleView;
-            titleView.setText(MsgUtils.getMessagesDrawerItemMessage(this));
+            titleView.setText(MsgUtils.getMessagesDrawerItemMessage());
         } else  titleView.setText(getString(titleId));
         formatNavDrawerItem(view, itemId, selected);
         view.setOnClickListener(new View.OnClickListener() {
@@ -645,13 +645,13 @@ public abstract class ActivityBase extends AppCompatActivity implements
     }
 
     public void updateMessageDrawerDrawerItemText() {
-        messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(this));
+        messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage());
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(ContextVS.NUM_MESSAGES_KEY.equals(key)) {
-            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage(appVS));
+            messageDrawerItemTextView.setText(MsgUtils.getMessagesDrawerItemMessage());
         }
     }
 }

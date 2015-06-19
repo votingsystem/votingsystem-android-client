@@ -139,7 +139,7 @@ public class CertResponseActivity extends AppCompatActivity {
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
                 keyStore.load(null);
                 CertificationRequestVS certificationRequest = (CertificationRequestVS)
-                        ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest(this).getBytes());
+                        ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest().getBytes());
                 String passwordHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(certificationRequest.getHashPin())) {
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
@@ -152,7 +152,7 @@ public class CertResponseActivity extends AppCompatActivity {
                 X509Certificate x509Cert = certificates.iterator().next();
                 CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
                         CertExtensionDto.class, x509Cert, ContextVS.DEVICEVS_OID);
-                PrefUtils.putApplicationId(certExtensionDto.getDeviceId(), this);
+                PrefUtils.putApplicationId(certExtensionDto.getDeviceId());
                 UserVSDto user = UserVSDto.getUserVS(x509Cert);
                 LOGD(TAG + ".updateKeyStore", "user: " + user.getNIF() +
                         " - certificates.size(): " + certificates.size());
@@ -168,13 +168,13 @@ public class CertResponseActivity extends AppCompatActivity {
                 }*/
                 keyStore.setKeyEntry(USER_CERT_ALIAS, privateKey, null, certsArray);
                 PrefUtils.putAppCertState(appVS.getAccessControl().getServerURL(),
-                        State.WITH_CERTIFICATE, user.getNIF(), appVS);
-                PrefUtils.putPin(pin, appVS);
+                        State.WITH_CERTIFICATE, user.getNIF());
+                PrefUtils.putPin(pin);
                 /*if(wallet != null) {
                     Wallet.saveWallet(wallet, pin, appVS);
                 }*/
                 setMessage(getString(R.string.request_cert_result_activity_ok));
-                PrefUtils.putSessionUserVS(user, this);
+                PrefUtils.putSessionUserVS(user);
                 insertPinButton.setVisibility(View.GONE);
                 requestCertButton.setVisibility(View.GONE);
             } catch (Exception ex) {

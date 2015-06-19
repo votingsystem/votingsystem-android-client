@@ -141,7 +141,7 @@ public class MessageFragment extends Fragment {
                     getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
                             messageId), MessageContentProvider.getContentValues(socketMessage,
                             MessageContentProvider.State.READED), null, null);
-                    PrefUtils.addNumMessagesNotReaded(appVS, -1);
+                    PrefUtils.addNumMessagesNotReaded(-1);
                 }
             }
         } catch(Exception ex) { ex.printStackTrace(); }

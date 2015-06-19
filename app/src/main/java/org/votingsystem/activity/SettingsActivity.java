@@ -54,10 +54,10 @@ public class SettingsActivity extends PreferenceActivity
             }
         });
         toolbar.setTitle(R.string.navdrawer_item_settings);
-        PrefUtils.registerPreferenceChangeListener(this, this);
+        PrefUtils.registerPreferenceChangeListener(this);
         Preference addressButton = (Preference)findPreference("addressButton");
         try {
-            AddressVS addressVS = PrefUtils.getAddressVS(this);
+            AddressVS addressVS = PrefUtils.getAddressVS();
             if(addressVS != null) addressButton.setSummary(addressVS.getName());
         } catch (Exception ex) { ex.printStackTrace();}
         addressButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -104,14 +104,14 @@ public class SettingsActivity extends PreferenceActivity
         super.onResume();
         Preference addressButton = (Preference)findPreference("addressButton");
         try {
-            AddressVS addressVS = PrefUtils.getAddressVS(this);
+            AddressVS addressVS = PrefUtils.getAddressVS();
             if(addressVS != null) addressButton.setSummary(addressVS.getName());
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
     @Override protected void onDestroy() {
         super.onDestroy();
-        PrefUtils.unregisterPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this);
     }
 
 

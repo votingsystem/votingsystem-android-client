@@ -78,7 +78,7 @@ public class AddressFormFragment extends Fragment {
             }
         });
         try {
-            AddressVS addressVS = PrefUtils.getAddressVS(getActivity());
+            AddressVS addressVS = PrefUtils.getAddressVS();
             if(addressVS != null) {
                 address.setText(addressVS.getName());
                 postal_code.setText(addressVS.getPostalCode());
@@ -122,7 +122,7 @@ public class AddressFormFragment extends Fragment {
             addressVS.setCity(city.getText().toString());
             addressVS.setProvince(province.getText().toString());
             addressVS.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
-            PrefUtils.putAddressVS(addressVS, getActivity());
+            PrefUtils.putAddressVS(addressVS);
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.msg_lbl), getString(R.string.address_saved_msg), getActivity());
             builder.setPositiveButton(getString(R.string.accept_lbl),

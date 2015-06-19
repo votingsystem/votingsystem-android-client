@@ -110,12 +110,12 @@ public class DateUtils {
         Formatter formatter = new Formatter(sb);
         return android.text.format.DateUtils.formatDateRange(context, formatter, date.getTime(), date.getTime(),
                 android.text.format.DateUtils.FORMAT_ABBREV_ALL | android.text.format.DateUtils.FORMAT_NO_YEAR,
-                PrefUtils.getDisplayTimeZone(context).getID()).toString();
+                PrefUtils.getDisplayTimeZone().getID()).toString();
     }
 
     public static String formatShortTime(Context context, Date time) {
         DateFormat format = DateFormat.getTimeInstance(DateFormat.SHORT);
-        TimeZone tz = PrefUtils.getDisplayTimeZone(context);
+        TimeZone tz = PrefUtils.getDisplayTimeZone();
         if (tz != null) {
             format.setTimeZone(tz);
         }
@@ -130,7 +130,7 @@ public class DateUtils {
         long localTimestamp, localTime;
         long now = Calendar.getInstance().getTimeInMillis();
 
-        TimeZone tz = PrefUtils.getDisplayTimeZone(context);
+        TimeZone tz = PrefUtils.getDisplayTimeZone();
         localTimestamp = timestamp + tz.getOffset(timestamp);
         localTime = now + tz.getOffset(now);
 

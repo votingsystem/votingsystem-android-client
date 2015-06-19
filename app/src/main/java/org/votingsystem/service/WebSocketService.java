@@ -20,19 +20,24 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.SMIMESignerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
+import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -322,7 +327,7 @@ public class WebSocketService extends Service {
                         responseVS.setCaption(getString(R.string.message_lbl)).
                                 setNotificationMessage(socketMsg.getMessage());
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        PrefUtils.addNumMessagesNotReaded(appVS, 1);
+                        PrefUtils.addNumMessagesNotReaded(1);
                         Utils.showNewMessageNotification(appVS);
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
@@ -346,7 +351,7 @@ public class WebSocketService extends Service {
                         }
                     } else if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_TO_DEVICE) {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        PrefUtils.addNumMessagesNotReaded(appVS, 1);
+                        PrefUtils.addNumMessagesNotReaded(1);
                         Utils.showNewMessageNotification(appVS);
                     }
                     break;
@@ -419,7 +424,18 @@ public class WebSocketService extends Service {
                             if(TypeVS.CURRENCY_CHANGE == typeVS) {
                                 Currency currency = qrDto.getCurrency();
                                 currency.initSigner(socketMsg.getMessage().getBytes());
-                                LOGD(TAG + ".sendWebSocketBroadcast", "TODO - CURRENCY_CHANGE - save to wallet");
+                                CurrencyStateDto currencyStateDto = HttpHelper.getData(CurrencyStateDto.class,
+                                        AppVS.getInstance().getCurrencyServer()
+                                        .getCurrencyStateServiceURL(currency.getHashCertVS()),
+                                        MediaTypeVS.JSON);
+                                currency.setState(currencyStateDto.getState());
+                                getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
+                                        CurrencyContentProvider.getContentValues(currency));
+                                if(currency.getState() != Currency.State.OK) {
+                                    throw new ValidationExceptionVS(
+                                            "CURRENCY_CHANGE ERROR - Currency state: " + currency.getState());
+                                }
+                                Wallet.updateWallet(Arrays.asList(currency));
                             }
                             TransactionVSDto transactionDto = qrDto.getData();
                             String result = transactionDto.validateReceipt(smimeMessage, true);
@@ -445,7 +461,11 @@ public class WebSocketService extends Service {
                     break;
                 default: LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
-        } catch(Exception ex) {ex.printStackTrace();}
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
+                    getString(R.string.exception_lbl));
+        }
     }
 
 }

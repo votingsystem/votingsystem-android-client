@@ -123,7 +123,7 @@ public class RepresentativesMainActivity extends ActivityBase {
         MenuInflater inflater = getMenuInflater();
         menu.removeGroup(R.id.general_items);
         inflater.inflate(R.menu.representative_main, menu);
-        RepresentationStateDto representation = PrefUtils.getRepresentationState(this);
+        RepresentationStateDto representation = PrefUtils.getRepresentationState();
         if(representation != null) {
             switch(representation.getState()) {
                 case REPRESENTATIVE:

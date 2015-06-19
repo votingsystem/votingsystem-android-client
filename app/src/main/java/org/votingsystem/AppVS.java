@@ -108,7 +108,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         try {
             INSTANCE = this;
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-            PrefUtils.init(this);
+            PrefUtils.init();
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
             currencyServerURL = props.getProperty(ContextVS.CURRENCY_SERVER_URL);
@@ -125,9 +125,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
                 startIntent.putExtra(ContextVS.CURRENCY_SERVER_URL, currencyServerURL);
                 startService(startIntent);
             }
-            PrefUtils.registerPreferenceChangeListener(this, this);
-            state = PrefUtils.getAppCertState(this, accessControlURL);
-            userVS = PrefUtils.getSessionUserVS(this);
+            PrefUtils.registerPreferenceChangeListener(this);
+            state = PrefUtils.getAppCertState(accessControlURL);
+            userVS = PrefUtils.getSessionUserVS();
             byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
                     "VotingSystemSSLCert.pem"));
             Collection<X509Certificate> votingSystemSSLCerts =
@@ -181,7 +181,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
 
     @Override public void onTerminate() {
         super.onTerminate();
-        PrefUtils.unregisterPreferenceChangeListener(this, this);
+        PrefUtils.unregisterPreferenceChangeListener(this);
     }
 
     public Integer getNotificationId() {
@@ -230,8 +230,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         LOGD(TAG + ".setAccessControlVS", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
         serverMap.put(accessControl.getServerURL(), accessControl);
-        PrefUtils.markAccessControlLoaded(accessControl.getServerURL(), this);
-        state = PrefUtils.getAppCertState(this, this.accessControl.getServerURL());
+        PrefUtils.markAccessControlLoaded(accessControl.getServerURL());
+        state = PrefUtils.getAppCertState(this.accessControl.getServerURL());
     }
 
     public String getCurrentWeekLapseId() {
@@ -397,11 +397,11 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         if(accessControl != null) {//listen cert state changes
             String accessControlStateKey = STATE_KEY + "_" + accessControl.getServerURL();
             if(accessControlStateKey.equals(key)) {
-                this.state = PrefUtils.getAppCertState(this, accessControl.getServerURL());
+                this.state = PrefUtils.getAppCertState(accessControl.getServerURL());
             }
         }
         if(USER_KEY.equals(key)) {
-            userVS = PrefUtils.getSessionUserVS(this);
+            userVS = PrefUtils.getSessionUserVS();
         }
     }
 

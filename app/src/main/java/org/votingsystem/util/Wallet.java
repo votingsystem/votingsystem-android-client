@@ -58,7 +58,7 @@ public class Wallet {
 
     public static Currency getCurrency(String hashCertVS) throws Exception {
         for(Currency currency : currencySet) {
-            if(currency.getHashCertVS().equals(currency.getHashCertVS())) return currency;
+            if(currency.getHashCertVS().equals(hashCertVS)) return currency;
         }
         return null;
     }
@@ -158,14 +158,14 @@ public class Wallet {
 
     private static byte[] getWalletBytes(char[] pin) throws Exception {
         if(pin != null) {
-            String storedPinHash = PrefUtils.getPinHash(AppVS.getInstance());
+            String storedPinHash = PrefUtils.getPinHash();
             String pinHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
             }
         }
         try {
-            String walletBase64 = PrefUtils.getWallet(AppVS.getInstance());
+            String walletBase64 = PrefUtils.getWallet();
             if(walletBase64 == null) return null;
             else return AppVS.getInstance().decryptMessage(walletBase64.getBytes());
         } catch (Exception ex) {
@@ -177,7 +177,7 @@ public class Wallet {
     public static void saveWallet(Collection<Currency> currencyCollection, char[] pin) throws Exception {
         AppVS context = AppVS.getInstance();
         if(pin != null) {
-            String storedPinHash = PrefUtils.getPinHash(context);
+            String storedPinHash = PrefUtils.getPinHash();
             String pinHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(context.getString(R.string.pin_error_msg));
@@ -187,9 +187,9 @@ public class Wallet {
             Set<CurrencyDto> currencyDtoSet = CurrencyDto.serializeCollection(currencyCollection);
             byte[] walletBytes = JSON.writeValueAsBytes(currencyDtoSet);
             byte[] encryptedWalletBytesBase64 = Encryptor.encryptToCMS(walletBytes, context.getX509UserCert());
-            PrefUtils.putWallet(encryptedWalletBytesBase64, context);
+            PrefUtils.putWallet(encryptedWalletBytesBase64);
             currencySet = new HashSet<>(currencyCollection);
-        } else PrefUtils.putWallet(null, context);
+        } else PrefUtils.putWallet(null);
 
     }
 

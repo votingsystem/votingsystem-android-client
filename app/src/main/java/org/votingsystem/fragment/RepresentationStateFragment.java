@@ -69,7 +69,7 @@ public class RepresentationStateFragment extends Fragment implements
                 " - arguments: " + getArguments());
         rootView = inflater.inflate(R.layout.representative_state, container, false);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.user_representative_lbl);
-        setRepresentationView(PrefUtils.getRepresentationState(getActivity()));
+        setRepresentationView(PrefUtils.getRepresentationState());
         setHasOptionsMenu(true);
         return rootView;
     }
@@ -99,7 +99,7 @@ public class RepresentationStateFragment extends Fragment implements
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_anonymous_representation_msg, DateUtils.getDayWeekDateStr(
                                 representation.getDateTo())));
-                representativeDelegationDto = PrefUtils.getAnonymousDelegation(getActivity());
+                representativeDelegationDto = PrefUtils.getAnonymousDelegation();
                 if(representativeDelegationDto == null) {
                     ((TextView)rootView.findViewById(R.id.representative_name)).setText(
                             getString(R.string.missing_anonymous_delegation_cancellation_data));
@@ -142,14 +142,14 @@ public class RepresentationStateFragment extends Fragment implements
 
     @Override public void onResume() {
         super.onResume();
-        PrefUtils.registerPreferenceChangeListener(getActivity(), this);
+        PrefUtils.registerPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(this, getActivity());
+        PrefUtils.unregisterPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
@@ -171,7 +171,7 @@ public class RepresentationStateFragment extends Fragment implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(RepresentationStateDto.class.getSimpleName().equals(key)) {
             LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
-            setRepresentationView(PrefUtils.getRepresentationState(getActivity()));
+            setRepresentationView(PrefUtils.getRepresentationState());
         }
     }
 
