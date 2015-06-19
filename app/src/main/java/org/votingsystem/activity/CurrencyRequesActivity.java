@@ -73,7 +73,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case CURRENCY_REQUEST:
-                        sendCurrencyRequest((String) responseVS.getData());
+                        sendCurrencyRequest((char[]) responseVS.getData());
                         break;
                 }
             } else if(responseVS != null){
@@ -188,7 +188,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
-    private void sendCurrencyRequest(String pin) {
+    private void sendCurrencyRequest(char[] pin) {
         Intent startIntent = new Intent(this, PaymentService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_REQUEST);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);

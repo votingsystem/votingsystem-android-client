@@ -12,10 +12,10 @@ public class PrefsAction implements DebugAction {
     private static final String TAG = PrefsAction.class.getSimpleName();
 
     @Override public void run(final Context context, final Callback callback) {
-        PrefUtils.putCsrRequest(1L, null,context);
-        PrefUtils.putPin(1234, context);
+        /*PrefUtils.putCsrRequest(1L, null,context);
+        PrefUtils.putPin("1234".toCharArray(), context);
         PrefUtils.putAppCertState(((AppVS)context.getApplicationContext()).
-                getAccessControl().getServerURL(), ContextVS.State.WITHOUT_CSR, null, context);
+                getAccessControl().getServerURL(), ContextVS.State.WITHOUT_CSR, null, context);*/
     }
 
     @Override public String getLabel() {

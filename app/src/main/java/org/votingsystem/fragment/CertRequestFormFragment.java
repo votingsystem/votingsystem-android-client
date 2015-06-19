@@ -75,7 +75,7 @@ public class CertRequestFormFragment extends Fragment {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchUserCertRequestService(
-                (String) responseVS.getData());
+                (char[]) responseVS.getData());
         else {
             showProgress(false, true);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -261,7 +261,7 @@ public class CertRequestFormFragment extends Fragment {
     	return true;
     }
 
-    private void launchUserCertRequestService(String pin) {
+    private void launchUserCertRequestService(char[] pin) {
         LOGD(TAG + ".launchUserCertRequestService() ", "launchUserCertRequestService");
         CertRequestDto dto = new CertRequestDto();
         dto.setDeviceId(deviceId);

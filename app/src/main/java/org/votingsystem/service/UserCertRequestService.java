@@ -42,7 +42,7 @@ public class UserCertRequestService extends IntentService {
         try {
             CertRequestDto dto = JSON.readValue(arguments.getString(DTO_KEY),
                     CertRequestDto.class);
-            String pin = arguments.getString(PIN_KEY);
+            char[] pin = arguments.getCharArray(PIN_KEY);
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
                     SIGNATURE_ALGORITHM, PROVIDER, dto.getNif(), dto.getEmail(),
                     dto.getPhone(), dto.getDeviceId(), dto.getGivenName(), dto.getSurname(),
@@ -52,7 +52,7 @@ public class UserCertRequestService extends IntentService {
                     appVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
-                certificationRequest.setHashPin(CMSUtils.getHashBase64(pin,
+                certificationRequest.setHashPin(CMSUtils.getHashBase64(new String(pin),
                         ContextVS.VOTING_DATA_DIGEST));
                 PrefUtils.putCsrRequest(requestId, certificationRequest, this);
                 PrefUtils.putAppCertState(appVS.getAccessControl().getServerURL(),

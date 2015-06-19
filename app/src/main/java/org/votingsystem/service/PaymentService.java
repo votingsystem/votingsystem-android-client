@@ -77,7 +77,7 @@ public class PaymentService extends IntentService {
         final Bundle arguments = intent.getExtras();
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        String pin = arguments.getString(ContextVS.PIN_KEY);
+        char[] pin = arguments.getCharArray(ContextVS.PIN_KEY);
         String hashCertVS = arguments.getString(ContextVS.HASH_CERTVS_KEY);
         TransactionVSDto transactionDto = (TransactionVSDto) intent.getSerializableExtra(
                 ContextVS.TRANSACTION_KEY);
@@ -246,7 +246,7 @@ public class PaymentService extends IntentService {
     }
 
     private ResponseVS currencyRequest(String serviceCaller, TransactionVSDto transactionDto,
-                           String pin){
+                           char[] pin){
         CurrencyServerDto currencyServer = appVS.getCurrencyServer();
         ResponseVS responseVS = null;
         try {

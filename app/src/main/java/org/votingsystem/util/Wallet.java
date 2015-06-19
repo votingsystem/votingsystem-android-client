@@ -50,7 +50,7 @@ public class Wallet {
         return result;
     }
 
-    public static Set<Currency> getCurrencySet(String pin) throws Exception {
+    public static Set<Currency> getCurrencySet(char[] pin) throws Exception {
         Set<CurrencyDto> currencyDtoSet = getWallet(pin);
         currencySet = CurrencyDto.deSerializeCollection(currencyDtoSet);
         return new HashSet<>(currencySet);
@@ -63,7 +63,7 @@ public class Wallet {
         return null;
     }
 
-    public static void save(Collection<Currency> currencyCollection, String pin)
+    public static void save(Collection<Currency> currencyCollection, char[] pin)
             throws Exception {
         Set<Currency> newCurrencySet = new HashSet<>();
         if(currencySet != null) newCurrencySet.addAll(currencySet);
@@ -150,16 +150,16 @@ public class Wallet {
         return result;
     }
 
-    public static Set<CurrencyDto> getWallet(String pin) throws Exception {
+    public static Set<CurrencyDto> getWallet(char[] pin) throws Exception {
         byte[] walletBytes = getWalletBytes(pin);
         if(walletBytes == null) return new HashSet<>();
         else return JSON.readValue(walletBytes, new TypeReference<Set<CurrencyDto>>(){});
     }
 
-    private static byte[] getWalletBytes(String pin) throws Exception {
+    private static byte[] getWalletBytes(char[] pin) throws Exception {
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash(AppVS.getInstance());
-            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            String pinHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
             }
@@ -174,11 +174,11 @@ public class Wallet {
         }
     }
 
-    public static void saveWallet(Collection<Currency> currencyCollection, String pin) throws Exception {
+    public static void saveWallet(Collection<Currency> currencyCollection, char[] pin) throws Exception {
         AppVS context = AppVS.getInstance();
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash(context);
-            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            String pinHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(context.getString(R.string.pin_error_msg));
             }

@@ -57,7 +57,7 @@ public class TransactionVSFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
+        if(responseVS != null) {
             switch(responseVS.getTypeVS()) {
                 case RECEIPT:
                     byte[] receiptBytes = (byte[]) responseVS.getData();
@@ -68,7 +68,7 @@ public class TransactionVSFragment extends Fragment {
                         selectedTransaction.setSmimeMessage(new SMIMEMessage(receiptBytes));
                     } catch (Exception e) { e.printStackTrace(); }
                     TransactionVSContentProvider.updateTransaction(appVS, selectedTransaction);
-                break;
+                    break;
             }
         }
         }

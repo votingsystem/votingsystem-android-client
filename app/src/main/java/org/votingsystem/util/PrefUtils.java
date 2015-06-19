@@ -170,13 +170,13 @@ public class PrefUtils {
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
-    public static void putPin(Integer pin, Context context) {
+    public static void putPin(char[] pin, Context context) {
         try {
             SharedPreferences settings = context.getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            String hashPin = CMSUtils.getHashBase64(pin.toString(), ContextVS.VOTING_DATA_DIGEST);
-            editor.putString(ContextVS.PIN_KEY, hashPin);
+            editor.putString(ContextVS.PIN_KEY,
+                    CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }
@@ -367,13 +367,13 @@ public class PrefUtils {
         return representativeDelegationDto;
     }
 
-    public static void changePin(String newPin, String oldPin, Context context)
+    public static void changePin(char[] newPin, String oldPin, Context context)
             throws ExceptionVS, NoSuchAlgorithmException {
         String storedPinHash = PrefUtils.getPinHash(context);
         String pinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
         if(!storedPinHash.equals(pinHash)) {
             throw new ExceptionVS(context.getString(R.string.pin_error_msg));
         }
-        PrefUtils.putPin(Integer.valueOf(newPin), context);
+        PrefUtils.putPin(newPin, context);
     }
 }

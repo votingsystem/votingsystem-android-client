@@ -61,7 +61,7 @@ public class WalletFragment extends Fragment {
             switch(responseVS.getTypeVS()) {
                 case CURRENCY:
                     try {
-                        currencyList = new ArrayList<>(Wallet.getCurrencySet((String) responseVS.getData()));
+                        currencyList = new ArrayList<>(Wallet.getCurrencySet((char[]) responseVS.getData()));
                         Utils.launchCurrencyStatusCheck(broadCastId, null);
                         printSummary();
                     } catch (Exception ex) {

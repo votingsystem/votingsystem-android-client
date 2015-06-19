@@ -62,7 +62,7 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
                 switch(responseVS.getTypeVS()) {
                     case CURRENCY:
                         try {
-                            Wallet.getCurrencySet((String) responseVS.getData());
+                            Wallet.getCurrencySet((char[]) responseVS.getData());
                             launchService();
                         } catch(Exception ex) { ex.printStackTrace(); }
                         break;

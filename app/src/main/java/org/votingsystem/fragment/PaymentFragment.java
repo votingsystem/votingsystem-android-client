@@ -79,7 +79,7 @@ public class PaymentFragment extends Fragment {
                         break;
                     case CURRENCY:
                         try {
-                            Set<Currency> currencySet = Wallet.getCurrencySet((String) responseVS.getData());
+                            Set<Currency> currencySet = Wallet.getCurrencySet((char[]) responseVS.getData());
                             submitForm();
                         } catch(Exception ex) { ex.printStackTrace(); }
                         break;

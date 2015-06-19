@@ -220,7 +220,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                     return;
                 case NEW_PIN_CONFIRM:
                     if(pin.equals(newPin)) {
-                        PrefUtils.putPin(Integer.valueOf(pin), getActivity());
+                        PrefUtils.putPin(pin.toCharArray(), getActivity());
                         userPinEditText.setVisibility(View.GONE);
                         msgTextView.setText(getString(R.string.new_pin_ok_msg));
                         return;
@@ -256,7 +256,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             if(broadCastId != null) {
                 Intent intent = new Intent(broadCastId);
                 intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
-                ResponseVS responseVS = new ResponseVS(typeVS, pin);
+                ResponseVS responseVS = new ResponseVS(typeVS, pin.toCharArray());
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
             }
