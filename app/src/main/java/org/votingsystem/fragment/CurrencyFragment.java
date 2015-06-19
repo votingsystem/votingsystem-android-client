@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.ContextVS;
@@ -24,15 +22,12 @@ public class CurrencyFragment extends Fragment {
 
     public static final String TAG = CurrencyFragment.class.getSimpleName();
 
-    private AppVS appVS;
-    private Currency currency;
     private TextView currency_amount, currency_state, date_info, hash_cert, tag_info;
 
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
         View rootView = inflater.inflate(R.layout.currency, container, false);
@@ -42,7 +37,7 @@ public class CurrencyFragment extends Fragment {
         hash_cert = (TextView)rootView.findViewById(R.id.hash_cert);
         tag_info = (TextView)rootView.findViewById(R.id.tag_info);
         if(getArguments() != null && getArguments().containsKey(ContextVS.CURRENCY_KEY)) {
-            currency = (Currency) getArguments().getSerializable(ContextVS.CURRENCY_KEY);
+            Currency currency = (Currency) getArguments().getSerializable(ContextVS.CURRENCY_KEY);
             initCurrencyScreen(currency);
         }
         return rootView;

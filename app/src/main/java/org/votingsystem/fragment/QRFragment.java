@@ -26,6 +26,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.QRUtils;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
@@ -52,12 +53,25 @@ public class QRFragment extends Fragment {
                         DialogButton positiveButton = new DialogButton(getString(R.string.accept_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
-                                        getActivity().finish();
+                                        getActivity().onBackPressed();
                                     }
                                 });
                         UIUtils.showMessageDialog(getString(R.string.error_lbl),
                                 getString(R.string.connection_error_msg), positiveButton, null,
                                 getActivity());
+                        break;
+                    case TRANSACTIONVS_RESPONSE:
+                        if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
+                            DialogButton dialogButton = new DialogButton(getString(R.string.accept_lbl),
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            getActivity().onBackPressed();
+                                        }
+                                    });
+                            UIUtils.showMessageDialog(getString(R.string.payment_ok_caption),
+                                    intent.getStringExtra(ContextVS.MESSAGE_KEY), dialogButton, null,
+                                    getActivity());
+                        }
                         break;
                 }
             }

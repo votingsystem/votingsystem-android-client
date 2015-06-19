@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,7 @@ public class QRGeneratorFragment extends Fragment {
 
     private Spinner currencySpinner;
     private EditText amount_text;
-    private TextView tag_text;
+    private TextView tag_text, subject;
     private TagVSDto tagVS;
     private Button add_tag_btn;
     private String broadCastId = QRGeneratorFragment.class.getSimpleName();
@@ -67,6 +68,7 @@ public class QRGeneratorFragment extends Fragment {
                         generateQR();
                     }
                 });
+        subject = (EditText) rootView.findViewById(R.id.subject);
         amount_text = (EditText) rootView.findViewById(R.id.amount);
         from_uservs_checkbox = (CheckBox) rootView.findViewById(R.id.from_uservs_checkbox);
         currency_send_checkbox = (CheckBox) rootView.findViewById(R.id.currency_send_checkbox);
@@ -101,6 +103,11 @@ public class QRGeneratorFragment extends Fragment {
 
     private void generateQR() {
         LOGD(TAG + ".generateQR", "generateQR");
+        if(TextUtils.isEmpty(subject.getText().toString())){
+            MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                    getString(R.string.subject_missing_msg), getFragmentManager());
+            return ;
+        }
         Integer selectedAmount = 0;
         try {
             selectedAmount = Integer.valueOf(amount_text.getText().toString());
@@ -120,10 +127,10 @@ public class QRGeneratorFragment extends Fragment {
             return;
         }
         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
-                AppVS.getInstance().getUserVS().getName(), UserVSDto.Type.USER,
+                AppVS.getInstance().getUserVS().getFullName(), UserVSDto.Type.USER,
                 new BigDecimal(amount_text.getText().toString()),
                 currencySpinner.getSelectedItem().toString(),
-                AppVS.getInstance().getConnectedDevice().getIBAN(), null,
+                AppVS.getInstance().getConnectedDevice().getIBAN(), subject.getText().toString(),
                 (tagVS == null ? TagVSDto.WILDTAG : tagVS.getName()));
         dto.setPaymentOptions(paymentOptions);
 

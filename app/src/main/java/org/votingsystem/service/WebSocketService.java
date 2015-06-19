@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.util.encoders.Base64;
+import org.glassfish.grizzly.Context;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -277,7 +278,8 @@ public class WebSocketService extends Service {
                 AESParamsDto aesDto = JSON.readValue(decryptedBytes, AESParamsDto.class);
                 AESParams aesParams = AESParams.load(aesDto);
                 socketMsg.decryptMessage(aesParams);
-                appVS.putWSSession(socketMsg.getUUID(), new WebSocketSession(socketMsg));
+                socketSession = new WebSocketSession(socketMsg);
+                appVS.putWSSession(socketMsg.getUUID(), socketSession);
             } else if (socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
@@ -421,8 +423,8 @@ public class WebSocketService extends Service {
                             }
                             TransactionVSDto transactionDto = qrDto.getData();
                             String result = transactionDto.validateReceipt(smimeMessage, true);
-                            UIUtils.launchMessageActivity(ResponseVS.SC_OK, result,
-                                    getString(R.string.ok_lbl));
+                            intent.putExtra(ContextVS.MESSAGE_KEY, result);
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                             AppVS.getInstance().removeQRMessage(qrDto.getUUID());
                         } catch (Exception ex) {
                             ex.printStackTrace();

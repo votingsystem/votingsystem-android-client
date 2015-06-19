@@ -6,7 +6,18 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:fillViewport="true"
+        android:gravity="center"
         android:orientation="vertical">
+
+        <EditText android:id="@+id/subject"
+            android:layout_height="wrap_content"
+            android:layout_width="300dp"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
+            android:hint="@string/subject_lbl"
+            android:gravity="center">
+            <requestFocus />
+        </EditText>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -18,7 +29,6 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:gravity="center">
-                <requestFocus />
             </EditText>
             <Spinner android:id="@+id/currency_spinner"
                 android:layout_width="wrap_content"

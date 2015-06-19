@@ -579,4 +579,5 @@
         <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>
     <string name="details_lbl">detalles</string>
     <string name="check_lbl">comprobar</string>
+    <string name="subject_missing_msg">rellene el campo asunto</string>
 </resources>

@@ -27,6 +27,7 @@ import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectDeviceDialogFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.WebSocketService;
+import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -167,18 +168,16 @@ public class CurrencyActivity extends AppCompatActivity {
                     break;
                 case R.id.send_to_wallet:
                     if(!appVS.isWithSocketConnection()) {
-                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                                getString(R.string.send_to_wallet),
-                                getString(R.string.send_to_wallet_connection_required_msg),
-                                this).setPositiveButton(getString(R.string.connect_lbl),
+                        DialogButton positiveButton = new DialogButton(getString(R.string.connect_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         PinDialogFragment.showPinScreen(getSupportFragmentManager(),
                                                 broadCastId, getString(R.string.init_authenticated_session_pin_msg),
                                                 false, TypeVS.WEB_SOCKET_INIT);
                                     }
-                                }).setNegativeButton(getString(R.string.cancel_lbl), null);
-                        UIUtils.showMessageDialog(builder);
+                                });
+                        UIUtils.showMessageDialog(getString(R.string.send_to_wallet), getString(
+                            R.string.send_to_wallet_connection_required_msg), positiveButton, null, this);
                     } else SelectDeviceDialogFragment.showDialog(broadCastId, this.
                             getSupportFragmentManager(), SelectDeviceDialogFragment.TAG);
                     break;
@@ -217,6 +216,9 @@ public class CurrencyActivity extends AppCompatActivity {
             if(currency.getReceipt() == null) {
                 menu.removeItem(R.id.show_timestamp_info);
                 menu.removeItem(R.id.share_currency);
+            }
+            if(currency.getState() != Currency.State.OK) {
+                menu.removeItem(R.id.send_to_wallet);
             }
         } catch(Exception ex) {
             ex.printStackTrace();
