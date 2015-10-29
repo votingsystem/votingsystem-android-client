@@ -159,7 +159,7 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.nfc_signature);
+        this.setContentView(R.layout.dnie_voting_activity);
 		cansDO 	= new CANSpecDOStore(this);
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
