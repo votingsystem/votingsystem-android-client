@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -81,9 +80,6 @@ public class RepresentativesMainActivity extends ActivityBase {
                 " - intent extras: " + getIntent().getExtras());
         appVS = (AppVS) getApplicationContext();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
         RepresentationStateFragment fragment = new RepresentationStateFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -148,12 +144,7 @@ public class RepresentativesMainActivity extends ActivityBase {
         else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
-    @Override protected int getSelfNavDrawerItem() {
-        // we only have a nav drawer if we are in top-level Representatives mode.
-        return NAVDRAWER_ITEM_REPRESENTATIVES;
-    }
-
-    @Override public void requestDataRefresh() {
+    public void requestDataRefresh() {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
         RepresentativeGridFragment fragment = representativeGridRef.get();
         fragment.fetchItems(fragment.getOffset());

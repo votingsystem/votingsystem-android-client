@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/polls_lbl">
+        <menu android:checkableBehavior="single">
+            <item
+                android:id="@+id/polls"
+                android:icon="@drawable/poll_32"
+                android:title="@string/polls_lbl" />
+            <item
+                android:id="@+id/representatives"
+                android:icon="@drawable/system_users_32"
+                android:title="@string/representatives_lbl" />
+        </menu>
+    </item>
+
+    <item android:title="@string/currency_lbl">
+        <menu android:checkableBehavior="single">
+            <item
+                android:id="@+id/currency_accounts"
+                android:icon="@drawable/fa_bank_32"
+                android:title="@string/currency_accounts_lbl" />
+            <item
+                android:id="@+id/wallet"
+                android:icon="@drawable/fa_money_32"
+                android:title="@string/wallet_lbl" />
+            <item
+                android:id="@+id/contacts"
+                android:icon="@drawable/fa_user_32"
+                android:title="@string/contacts_lbl" />
+        </menu>
+    </item>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/fa_qrcode"
+            android:icon="@drawable/fa_qrcode_32"
+            android:title="@string/qr_codes_lbl" />
+        <item
+            android:id="@+id/receipts"
+            android:icon="@drawable/fa_cert_32"
+            android:title="@string/receipts_lbl" />
+        <item
+            android:id="@+id/messages"
+            android:icon="@drawable/fa_comments_32"
+            android:title="@string/messages_lbl" />
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_drawer_settings"
+            android:title="@string/navdrawer_item_settings" />
+    </group>
+
+
+</menu>

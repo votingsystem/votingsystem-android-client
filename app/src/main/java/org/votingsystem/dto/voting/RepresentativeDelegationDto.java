@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
@@ -163,9 +163,9 @@ public class RepresentativeDelegationDto implements Serializable {
     public RepresentativeDelegationDto getAnonymousCertRequest() throws NoSuchAlgorithmException, IOException,
             NoSuchProviderException, InvalidKeyException, SignatureException {
         originHashCertVS = java.util.UUID.randomUUID().toString();
-        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        hashCertVSBase64 = StringUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
         originHashAnonymousDelegation = java.util.UUID.randomUUID().toString();
-        hashAnonymousDelegation = CMSUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
+        hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(

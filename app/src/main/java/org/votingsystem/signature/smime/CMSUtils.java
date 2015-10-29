@@ -4,31 +4,22 @@ import android.util.Log;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ASN1OctetString;
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.BEROctetStringGenerator;
-import org.bouncycastle2.asn1.BERSet;
-import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERNull;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
 import org.bouncycastle2.asn1.cms.ContentInfo;
-import org.bouncycastle2.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle2.asn1.cms.SignerIdentifier;
 import org.bouncycastle2.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle2.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle2.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.asn1.x509.CertificateList;
-import org.bouncycastle2.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle2.asn1.x509.X509CertificateStructure;
 import org.bouncycastle2.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
@@ -50,16 +41,9 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import static org.votingsystem.util.ContextVS.PROVIDER;
 
@@ -114,62 +98,6 @@ public class CMSUtils {
         return readContentInfo(new ASN1InputStream(input, getMaximumMemory()));
     }
 
-    static List getCertificatesFromStore(CertStore certStore) throws
-            CertStoreException, CMSException {
-        List certs = new ArrayList();
-        try {
-            for (Iterator it = certStore.getCertificates(null).iterator(); it.hasNext();) {
-                X509Certificate c = (X509Certificate)it.next();
-                certs.add(X509CertificateStructure.getInstance(
-                                                       ASN1Object.fromByteArray(c.getEncoded())));
-            }
-            return certs;
-        }
-        catch (IllegalArgumentException e) {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (IOException e) {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (CertificateEncodingException e) {
-            throw new CMSException("error encoding certs", e);
-        }
-    }
-
-    static List getCRLsFromStore(CertStore certStore) throws CertStoreException,
-            CMSException {
-        List crls = new ArrayList();
-        try {
-            for (Iterator it = certStore.getCRLs(null).iterator(); it.hasNext();) {
-                X509CRL c = (X509CRL)it.next();
-                crls.add(CertificateList.getInstance(ASN1Object.fromByteArray(c.getEncoded())));
-            }
-            return crls;
-        } catch (IllegalArgumentException e) {
-            throw new CMSException("error processing crls", e);
-        } catch (IOException e) {
-            throw new CMSException("error processing crls", e);
-        } catch (CRLException e) {
-            throw new CMSException("error encoding crls", e);
-        }
-    }
-
-    public static ASN1Set createBerSetFromList(List derObjects) {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-        for (Iterator it = derObjects.iterator(); it.hasNext();) {
-            v.add((DEREncodable)it.next());
-        }
-        return new BERSet(v);
-    }
-
-    static ASN1Set createDerSetFromList(List derObjects) {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-        for (Iterator it = derObjects.iterator(); it.hasNext();) {
-            v.add((DEREncodable)it.next());
-        }
-        return new DERSet(v);
-    }
-
     static OutputStream createBEROctetOutputStream(OutputStream s,
             int tagNo, boolean isExplicit, int bufferSize) throws IOException {
         BEROctetStringGenerator octGen = new BEROctetStringGenerator(s, tagNo, isExplicit);
@@ -179,15 +107,6 @@ public class CMSUtils {
         return octGen.getOctetOutputStream();
     }
 
-    static TBSCertificateStructure getTBSCertificateStructure(
-        X509Certificate cert) throws CertificateEncodingException {
-        try {
-            return TBSCertificateStructure.getInstance(ASN1Object
-                .fromByteArray(cert.getTBSCertificate()));
-        } catch (IOException e) {
-            throw new CertificateEncodingException(e.toString());
-        }
-    }
 
     private static ContentInfo readContentInfo(ASN1InputStream in) throws CMSException {
         try {
@@ -218,21 +137,6 @@ public class CMSUtils {
             throw new NoSuchProviderException("provider " + providerName + " not found.");
         }
         return null;
-    }
-
-    public static SignerIdentifier getSignerIdentifier(X509Certificate cert) {
-        TBSCertificateStructure tbs;
-        try {
-            tbs = CMSUtils.getTBSCertificateStructure(cert);
-        }
-        catch (CertificateEncodingException e) {
-            throw new IllegalArgumentException(
-                "can't extract TBS structure from this cert");
-        }
-        //Aqui podría ser ...pkcs.IssuerAndSerialNumber
-        IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
-                .getIssuer(), tbs.getSerialNumber().getValue());
-        return new SignerIdentifier(encSid);
     }
 
     /**
@@ -326,14 +230,12 @@ public class CMSUtils {
     }
 
     public static byte[] getSignerDigest(SignerInformation signer) throws CMSException {
-        DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
-                CMSAttributes.messageDigest, "message-digest");
-        ASN1OctetString signedMessageDigest = (ASN1OctetString)derObject;
-        return signedMessageDigest.getOctets();
+        Attribute hash = signer.getSignedAttributes().get(CMSAttributes.messageDigest);
+        return ((ASN1OctetString)hash.getAttrValues().getObjectAt(0)).getOctets();
     }
 
     public static DERObject getSingleValuedSignedAttribute(AttributeTable signedAttrTable,
-            DERObjectIdentifier attrOID, String printableName) throws CMSException {
+                                                           DERObjectIdentifier attrOID, String printableName) throws CMSException {
         if (signedAttrTable == null) return null;
         ASN1EncodableVector vector = signedAttrTable.getAll(attrOID);
         switch (vector.size()) {
@@ -346,8 +248,8 @@ public class CMSUtils {
                         " attribute MUST have a single attribute value");
                 return attrValues.getObjectAt(0).getDERObject();
             default: throw new CMSException(
-                "The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
-                + printableName + " attribute");
+                    "The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
+                            + printableName + " attribute");
         }
     }
 

@@ -11,7 +11,6 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 
@@ -90,6 +89,22 @@ public class PrefUtils {
             LOGD(TAG, ".getApplicationId - new applicationId: " + applicationId);
         }
         return applicationId;
+    }
+
+    public static void putDNIeEnabled(boolean enabled) {
+        try {
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean(ContextVS.DNIE_KEY, enabled);
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static boolean isDNIeEnabled() {
+        SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+                Context.MODE_PRIVATE);
+        return pref.getBoolean(ContextVS.DNIE_KEY, true);
     }
 
     public static void putApplicationId(String applicationId) {
@@ -175,7 +190,7 @@ public class PrefUtils {
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(ContextVS.PIN_KEY,
-                    CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
+                    StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }
@@ -367,7 +382,7 @@ public class PrefUtils {
     public static void changePin(char[] newPin, String oldPin)
             throws ExceptionVS, NoSuchAlgorithmException {
         String storedPinHash = PrefUtils.getPinHash();
-        String pinHash = CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
+        String pinHash = StringUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
         if(!storedPinHash.equals(pinHash)) {
             throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
         }

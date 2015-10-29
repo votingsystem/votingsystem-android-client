@@ -16,6 +16,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.service.BootStrapService;
 import org.votingsystem.util.ContextVS;
@@ -57,7 +58,7 @@ public class IntentFilterActivity extends AppCompatActivity {
                             operationVS.setEventVS(selectedEvent);
                         }
                     } else if(operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
-                        Intent newIntent = new Intent(getBaseContext(), CurrencyAccountsMainActivity.class);
+                        Intent newIntent = new Intent(getBaseContext(), CurrencyAccountsPagerFragment.class);
                         newIntent.putExtra(ContextVS.OPERATIONVS_KEY, JSON.writeValueAsString(operationVS));
                         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(newIntent);

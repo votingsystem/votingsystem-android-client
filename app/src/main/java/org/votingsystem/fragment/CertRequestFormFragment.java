@@ -14,17 +14,14 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -55,8 +52,11 @@ public class CertRequestFormFragment extends Fragment {
 	public static final String TAG = CertRequestFormFragment.class.getSimpleName();
 
     private String broadCastId = CertRequestFormFragment.class.getSimpleName();
-    private View progressContainer;
-    private FrameLayout mainLayout;
+    private View progressView;
+    private View formView;
+
+
+
     private AtomicBoolean progressVisible = new AtomicBoolean(false);
     private String givenname = null;
     private String surname = null;
@@ -108,9 +108,9 @@ public class CertRequestFormFragment extends Fragment {
         LOGD(TAG + ".onCreateView", "onCreateView");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.cert_request_form, container, false);
-        mainLayout = (FrameLayout)rootView.findViewById(R.id.mainLayout);
-        progressContainer = rootView.findViewById(R.id.progressContainer);
-        mainLayout.getForeground().setAlpha(0);
+        progressView = rootView.findViewById(R.id.progress_view);
+        formView = rootView.findViewById(R.id.form_view);
+
         getActivity().setTitle(getString(R.string.request_certificate_form_lbl));
         Button cancelButton = (Button) rootView.findViewById(R.id.cancel_lbl);
         cancelButton.setOnClickListener(new OnClickListener() {
@@ -209,37 +209,37 @@ public class CertRequestFormFragment extends Fragment {
 
     private boolean validateForm () {
     	LOGD(TAG + ".validateForm()", "");
-        try {
-            nif = NifUtils.validate(nifText.getText().toString().toUpperCase(), getActivity());
-        } catch(Exception ex) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                    getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
-            return false;
-        }
+        givennameText.setError(null);
+        surnameText.setError(null);
+        nifText.setError(null);
+        phoneText.setError(null);
+        mailText.setError(null);
     	if(TextUtils.isEmpty(givennameText.getText().toString())){
-    		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.givenname_missing_msg));
+            givennameText.setError(getString(R.string.givenname_missing_msg));
     		return false;
     	} else {
             givenname = StringUtils.normalize(givennameText.getText().toString()).toUpperCase();
         }
     	if(TextUtils.isEmpty(surnameText.getText().toString())){
-    		showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.surname_missing_msg));
+            surnameText.setError(getString(R.string.surname_missing_msg));
     		return false;
     	} else {
             surname = StringUtils.normalize(surnameText.getText().toString()).toUpperCase();
         }
+        try {
+            nif = NifUtils.validate(nifText.getText().toString().toUpperCase(), getActivity());
+        } catch(Exception ex) {
+            nifText.setError(ex.getMessage());
+            return false;
+        }
         if(TextUtils.isEmpty(phoneText.getText().toString())){
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.phone_missing_msg));
+            phoneText.setError(getString(R.string.phone_missing_msg));
             return false;
         } else {
             phone = phoneText.getText().toString();
         }
         if(TextUtils.isEmpty(mailText.getText().toString())){
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.mail_missing_msg));
+            mailText.setError(getString(R.string.mail_missing_msg));
             return false;
         } else {
             email =  StringUtils.normalize(mailText.getText().toString()).toUpperCase();
@@ -280,33 +280,9 @@ public class CertRequestFormFragment extends Fragment {
         showProgress(true, true);
     }
 
-    public void showProgress(boolean showProgress, boolean animate) {
-        if (progressVisible.get() == showProgress)  return;
-        progressVisible.set(showProgress);
-        if (progressVisible.get() && progressContainer != null) {
-            getActivity().getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity(), android.R.anim.fade_in));
-            progressContainer.setVisibility(View.VISIBLE);
-            mainLayout.getForeground().setAlpha(150); // dim
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to disable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        } else {
-            if (animate) progressContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getActivity(), android.R.anim.fade_out));
-            progressContainer.setVisibility(View.GONE);
-            mainLayout.getForeground().setAlpha(0); // restore
-            progressContainer.setOnTouchListener(new View.OnTouchListener() {
-                //to enable touch events on background view
-                @Override public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-        }
+    public void showProgress(boolean show, boolean animate) {
+        progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        formView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
 }

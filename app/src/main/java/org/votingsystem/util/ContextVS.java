@@ -56,6 +56,7 @@ public class ContextVS {
 
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
     public static final String PIN_KEY = "PIN";
+    public static final String DNIE_KEY = "DNIE_KEY";
     public static final String CONNECTED_KEY = "CONNECTED_KEY";
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";
     public static final String PERIOD_KEY = "PERIOD";

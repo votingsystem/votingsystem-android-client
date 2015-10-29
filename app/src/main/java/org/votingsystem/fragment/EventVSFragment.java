@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.DNIeVotingActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
@@ -39,6 +40,7 @@ import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -326,8 +328,16 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             String pinMsgPart = optionSelected.getContent().length() >
                     ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
                     ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
-            PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                    getString(R.string.option_selected_msg, pinMsgPart), false, TypeVS.SEND_VOTE);
+            if(PrefUtils.isDNIeEnabled()) {
+                Intent intent = new Intent(getActivity(), DNIeVotingActivity.class);
+                voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
+                intent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getActivity().startActivity(intent);
+            } else {
+                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                        getString(R.string.option_selected_msg, pinMsgPart), false, TypeVS.SEND_VOTE);
+            }
         } catch (Exception ex) { ex.printStackTrace(); }
     }
 

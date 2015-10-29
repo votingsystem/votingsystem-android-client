@@ -3,6 +3,7 @@ package org.votingsystem.util;
 import android.content.Context;
 import android.util.Log;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
 
 import java.io.BufferedReader;
@@ -15,6 +16,8 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Random;
 
@@ -101,6 +104,13 @@ public class StringUtils {
             is.close();
         }
         return writer.toString();
+    }
+
+    public static String getHashBase64 (String originStr, String digestAlgorithm)
+            throws NoSuchAlgorithmException {
+        MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
+        byte[] resultDigest =  sha.digest(originStr.getBytes());
+        return new String(Base64.encode(resultDigest));
     }
 
     public static String toHex(String base64Str) throws UnsupportedEncodingException {

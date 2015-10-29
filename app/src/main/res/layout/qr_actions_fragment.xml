@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <Button android:id="@+id/gen_qr_btn"
+        android:textSize="12sp"
+        android:padding="10dp"
+        android:layout_margin="3dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/qr_create_lbl" />
+
+    <Button android:id="@+id/read_qr_btn"
+        android:textSize="12sp"
+        android:padding="10dp"
+        android:layout_margin="3dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/qr_read_lbl" />
+
+</LinearLayout>

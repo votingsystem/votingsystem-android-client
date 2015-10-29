@@ -39,10 +39,10 @@ import org.votingsystem.activity.CertRequestActivity;
 import org.votingsystem.activity.CertResponseActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
@@ -131,7 +131,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateDialog", "savedInstanceState: ");
+        LOGD(TAG + ".onCreateDialog", "onCreateDialog");
         LayoutInflater inflater = getActivity().getLayoutInflater();
         AppVS appVS = (AppVS) getActivity().getApplicationContext();
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
@@ -270,7 +270,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private boolean isHashOK(String pin) {
         try {
             String expectedHash = PrefUtils.getPinHash();
-            String pinHash = CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
+            String pinHash = StringUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST);
             if(!expectedHash.equals(pinHash)) {
                 msgTextView.setText(getString(R.string.pin_error_msg));
                 userPinEditText.setText("");

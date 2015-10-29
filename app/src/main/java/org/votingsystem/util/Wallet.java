@@ -10,7 +10,6 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -159,7 +158,7 @@ public class Wallet {
     private static byte[] getWalletBytes(char[] pin) throws Exception {
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash();
-            String pinHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
+            String pinHash = StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
             }
@@ -178,7 +177,7 @@ public class Wallet {
         AppVS context = AppVS.getInstance();
         if(pin != null) {
             String storedPinHash = PrefUtils.getPinHash();
-            String pinHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
+            String pinHash = StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
             if(!pinHash.equals(storedPinHash)) {
                 throw new ExceptionVS(context.getString(R.string.pin_error_msg));
             }

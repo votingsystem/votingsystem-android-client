@@ -135,7 +135,7 @@ public class CertUtils {
         certGen.setSignatureAlgorithm(SIG_ALGORITHM);
         //The following fragment shows how to create one which indicates that 
         //the certificate containing it is a CA and that only one certificate can follow in the certificate path.
-        certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true, 0));
+        certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pair.getPublic()));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign));
         return certGen.generate(pair.getPrivate(), "BC");
@@ -303,12 +303,6 @@ public class CertUtils {
             }
         }
         return certExtensionDto;
-    }
-
-    public static DERObject toDERObject(byte[] data) throws IOException, IOException {
-        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-        ASN1InputStream DIS = new ASN1InputStream(inStream);
-        return DIS.readObject();
     }
 
     /**

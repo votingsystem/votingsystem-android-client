@@ -8,8 +8,7 @@
 
     <LinearLayout android:id="@+id/mainLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:foreground="@drawable/shape_window_dim" >
+        android:layout_height="match_parent">
         <ScrollView android:id="@+id/scroller"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

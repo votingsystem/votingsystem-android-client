@@ -8,11 +8,11 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
@@ -52,10 +52,10 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     public static VoteVSHelper load(VoteVSDto voteVSDto) throws Exception {
         VoteVSHelper voteVSHelper = new VoteVSHelper();
         voteVSHelper.originHashAccessRequest = UUID.randomUUID().toString();
-        voteVSHelper.hashAccessRequestBase64 = CMSUtils.getHashBase64(
+        voteVSHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
                 voteVSHelper.originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
         voteVSHelper.originHashCertVote = UUID.randomUUID().toString();
-        voteVSHelper.hashCertVSBase64 = CMSUtils.getHashBase64(
+        voteVSHelper.hashCertVSBase64 = StringUtils.getHashBase64(
                 voteVSHelper.originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
         voteVSHelper.eventVSId = voteVSDto.getEventVS().getId();
         voteVSHelper.eventVSURL = voteVSDto.getEventVS().getURL();

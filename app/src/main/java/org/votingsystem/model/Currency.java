@@ -7,7 +7,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
@@ -16,6 +15,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
@@ -103,7 +103,7 @@ public class Currency extends ReceiptWrapper {
         this.timeLimited = timeLimited;
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
-            this.hashCertVS = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
+            this.hashCertVS = StringUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
             certificationRequest = CertificationRequestVS.getCurrencyRequest(
                     ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);

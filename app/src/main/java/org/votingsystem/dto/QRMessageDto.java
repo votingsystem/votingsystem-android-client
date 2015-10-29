@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
@@ -49,7 +49,7 @@ public class QRMessageDto<T> implements Serializable {
 
     public void createRequest() throws NoSuchAlgorithmException {
         this.origingHashCertVS = java.util.UUID.randomUUID().toString();
-        this.hashCertVS = CMSUtils.getHashBase64(origingHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        this.hashCertVS = StringUtils.getHashBase64(origingHashCertVS, ContextVS.VOTING_DATA_DIGEST);
     }
 
     public String getUUID() {

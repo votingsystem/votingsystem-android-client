@@ -9,11 +9,14 @@ import org.bouncycastle2.asn1.smime.SMIMECapability;
 import org.bouncycastle2.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.SignerInfoGenerator;
+import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle2.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -59,6 +62,7 @@ public class SignedMailGenerator {
         SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
                 signatureMechanism, key, (X509Certificate)chain[0]);
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
+
         // add our pool of certs and cerls (if any) to go with the signature
         smimeSignedGenerator.addCertificates(certs);
     }
@@ -94,7 +98,7 @@ public class SignedMailGenerator {
         MimeBodyPart msg = new MimeBodyPart();
         msg.setText(textToSign);
         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(msg,
-                ContextVS.DEFAULT_SIGNED_FILE_NAME);
+                Security.getProvider(ContextVS.PROVIDER));
         SMIMEMessage smimeMessage = new SMIMEMessage(mimeMultipart, headers);
         fromUser = StringUtils.getNormalized(fromUser);
         toUser = StringUtils.getNormalized(toUser);
@@ -103,17 +107,6 @@ public class SignedMailGenerator {
         smimeMessage.setSubject(subject);
         return smimeMessage;
     }
-   
-     public MimeMultipart genMimeMultipart(MimeBodyPart body, 
-             SMIMEMessage dnieMimeMessage, String provider) throws Exception {
-         smimeSignedGenerator.addSigners(dnieMimeMessage.getSmimeSigned().getSignerInfos());
-         smimeSignedGenerator.addAttributeCertificates(dnieMimeMessage.getSmimeSigned().getAttributeCertificates());
-         smimeSignedGenerator.addCertificates(dnieMimeMessage.getSmimeSigned().getCertificates());
-         smimeSignedGenerator.addCRLs(dnieMimeMessage.getSmimeSigned().getCRLs());
-         smimeSignedGenerator.getGeneratedDigests();
-         MimeMultipart mimeMultipart = smimeSignedGenerator.generate(
-        		 body, provider, ContextVS.SIGNATURE_ALGORITHM);
-         return mimeMultipart;
-     }
+
     
 }

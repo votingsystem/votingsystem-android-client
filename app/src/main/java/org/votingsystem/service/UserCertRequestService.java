@@ -8,13 +8,13 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CertRequestDto;
 import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 
 import static org.votingsystem.util.ContextVS.CALLER_KEY;
 import static org.votingsystem.util.ContextVS.DTO_KEY;
@@ -52,7 +52,7 @@ public class UserCertRequestService extends IntentService {
                     appVS.getAccessControl().getUserCSRServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
-                certificationRequest.setHashPin(CMSUtils.getHashBase64(new String(pin),
+                certificationRequest.setHashPin(StringUtils.getHashBase64(new String(pin),
                         ContextVS.VOTING_DATA_DIGEST));
                 PrefUtils.putCsrRequest(requestId, certificationRequest);
                 PrefUtils.putAppCertState(appVS.getAccessControl().getServerURL(),

@@ -9,12 +9,12 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1OctetString;
-import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
+import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.cms.Time;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.cert.X509CertificateHolder;
@@ -29,6 +29,7 @@ import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.cms.SignerInformationVerifier;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.mail.smime.SMIMESigned;
+import org.bouncycastle2.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle2.operator.DigestCalculator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Store;
@@ -191,10 +192,19 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             Attribute timeStampAttribute = unsignedAttributes.get(
                     PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
             if(timeStampAttribute != null) {
-                DEREncodable dob = timeStampAttribute.getAttrValues().getObjectAt(0);
-                org.bouncycastle2.cms.CMSSignedData signedData =
-                        new org.bouncycastle2.cms.CMSSignedData(dob.getDERObject().getEncoded());
-                timeStampToken = new TimeStampToken(signedData);
+                //DEREncodable dob = (DEREncodable) timeStampAttribute.getAttrValues().getObjectAt(0);
+                //byte[] derEncoded = dob.getDERObject().getEncoded();
+                //org.bouncycastle2.cms.CMSSignedData signedData = new CMSSignedData(derEncoded);
+                //timeStampToken = new TimeStampToken(signedData);
+                //==============
+
+                ContentInfo contentInfo = ContentInfo.getInstance(timeStampAttribute.getAttrValues().getObjectAt(0));
+                timeStampToken = new TimeStampToken(contentInfo);
+
+
+
+
+
                 //byte[] hashToken = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
                 //String hashTokenStr = new String(Base64.encode(hashToken));
                 //Log.d(TAG, "checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
@@ -418,9 +428,9 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
 
         private byte[] verifySigner(SignerInformation signer, SignerInformationVerifier verifier) throws CMSException,
                 OperatorCreationException, IOException, MessagingException {
-            DERObject derObject = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
+            DERObject attr = CMSUtils.getSingleValuedSignedAttribute(signer.getSignedAttributes(),
                     CMSAttributes.signingTime, "signing-time");
-            Time signingTime = Time.getInstance(derObject);
+            Time signingTime = Time.getInstance(attr);
             X509CertificateHolder dcv = verifier.getAssociatedCertificate();
             if (!dcv.isValidOn(signingTime.getDate()))  {
                 throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");

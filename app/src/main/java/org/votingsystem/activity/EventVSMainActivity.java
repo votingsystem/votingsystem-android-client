@@ -20,7 +20,6 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,16 +52,12 @@ public class EventVSMainActivity extends ActivityBase {
 
 	public static final String TAG = EventVSMainActivity.class.getSimpleName();
 
-    WeakReference<EventVSGridFragment> eventVSGridRef;
-    private boolean mSpinnerConfigured = false;
+    private WeakReference<EventVSGridFragment> eventVSGridRef;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
         Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
         eventVSGridRef = new WeakReference<EventVSGridFragment>(fragment);
@@ -95,9 +90,8 @@ public class EventVSMainActivity extends ActivityBase {
         });
         ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        mSpinnerConfigured = true;
-        updateActionBarNavigation();
         getSupportActionBar().setCustomView(spinnerContainer, lp);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
         getSupportActionBar().setSubtitle(getString(R.string.polls_lbl));
         if(args != null && args.getString(SearchManager.QUERY) != null) {
@@ -112,34 +106,10 @@ public class EventVSMainActivity extends ActivityBase {
         }
     }
 
-    private void updateActionBarNavigation() {
-        boolean show = mSpinnerConfigured && !isNavDrawerOpen();
-        if (show) {
-            getSupportActionBar().setDisplayShowCustomEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            getSupportActionBar().setDisplayUseLogoEnabled(false);
-        } else {
-            getSupportActionBar().setDisplayShowCustomEnabled(false);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            getSupportActionBar().setDisplayUseLogoEnabled(true);
-        }
-    }
-
     public void setTitle(String title, String subTitle, Integer iconId) {
         getSupportActionBar().setTitle(title);
         if(subTitle != null) getSupportActionBar().setSubtitle(subTitle);
         if(iconId != null) getSupportActionBar().setLogo(iconId);
-    }
-
-    @Override protected int getSelfNavDrawerItem() {
-        // we only have a nav drawer if we are in top-level Representatives mode.
-        return NAVDRAWER_ITEM_POLLS;
-    }
-
-    @Override public void requestDataRefresh() {
-        LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
-        EventVSGridFragment fragment = eventVSGridRef.get();
-        fragment.fetchItems(fragment.getOffset());
     }
 
     private void setProgressDialogVisible(final boolean isVisible) {

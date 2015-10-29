@@ -132,9 +132,9 @@
     <string name="request_lbl">solicitar</string>
     <string name="nif_lbl">introduzca su nif</string>
     <string name="representative_nif_lbl">introduzca el nif del representante que desee editar</string>
-    <string name="password_label">contraseña del certificado</string>
+    <string name="password_lbl">contraseña</string>
     <string name="dialogo_password_text_entry">introducir contraseña</string>
-    <string name="repeat_password_label">repita la contraseña</string>
+    <string name="repeat_password_lbl">repita la contraseña</string>
     <string name="close_lbl">cerrar</string>
     <string name="ok_lbl">ok</string>
     <string name="accept_lbl">aceptar</string>
@@ -580,4 +580,19 @@
     <string name="details_lbl">detalles</string>
     <string name="check_lbl">comprobar</string>
     <string name="subject_missing_msg">rellene el campo asunto</string>
+    <string name="psswd_dialog_title">introducir contraseña</string>
+    <string name="psswd_lbl">contraseña</string>
+    <string name="psswd_dialog_show">mostrar contraseña</string>
+    <string name="psswd_dialog_hide">ocultar contraseña</string>
+    <string name="str_logo_desc">DNI electrónico</string>
+    <string name="result_ok_description">La operación se ha completado correctamente</string>
+    <string name="op_dgtinit">Aproxime DNIe al dispositivo</string>
+    <string name="process_msg_lectura">Leyendo DNIe...</string>
+    <string name="navigation_drawer_open">desplegar menu</string>
+    <string name="navigation_drawer_close">cerrar menu</string>
+    <string name="enter_passwrod_msg">DNIe</string>
+    <string name="enter_passwrod_last_try_msg">DNIe - último intento</string>
+    <string name="enter_passwrod_retry_msg">DNIe - le quedan \'%1$s\' intentos</string>
+    <string name="pref_title_dnie">votar con DNIe 3.0</string>
+    <string name="pref_description_dnie">para poder votar con su DNI el teléfono debe disponer de NFC</string>
 </resources>

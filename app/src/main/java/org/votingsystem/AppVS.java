@@ -11,8 +11,6 @@ import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.google.common.eventbus.EventBus;
-
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
@@ -58,6 +56,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.activation.DataHandler;
+
+import de.tsenger.androsmex.data.CANSpecDO;
+
 import static org.votingsystem.util.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.util.ContextVS.ANDROID_PROVIDER;
 import static org.votingsystem.util.ContextVS.KEY_SIZE;
@@ -78,9 +80,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
 
     public static final String TAG = AppVS.class.getSimpleName();
 
-    private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
-    private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
-
     private State state = State.WITHOUT_CSR;
     private boolean withSocketConnection;
     private static final Map<String, ActorDto> serverMap = new HashMap<>();
@@ -88,6 +87,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
     private AccessControlDto accessControl;
     private String accessControlURL;
+    private CANSpecDO canDnie;
     private ControlCenterDto controlCenter;
     private CurrencyServerDto currencyServer;
     private String currencyServerURL;
@@ -96,9 +96,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
+    private DataHandler dataHandler;
 
     private static AppVS INSTANCE;
-
 
     public static AppVS getInstance() {
         return INSTANCE;
@@ -136,18 +136,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             HttpHelper.init(sslServerCert);
         } catch(Exception ex) { ex.printStackTrace(); }
 	}
-
-    public void registerToEventBus(Object eventBusListener) {
-        eventBus.register(eventBusListener);
-    }
-
-    public void unregisterFromEventBus(Object eventBusListener) {
-        eventBus.unregister(eventBusListener);
-    }
-
-    public void postToEventBus(Object eventData) {
-        eventBus.post(eventData);
-    }
 
     public X509Certificate getSSLServerCert() {
         return sslServerCert;
@@ -420,4 +408,13 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     public void setWithSocketConnection(boolean withSocketConnection) {
         this.withSocketConnection = withSocketConnection;
     }
+
+    public CANSpecDO getCanDnie() {
+        return canDnie;
+    }
+
+    public void setCanDnie(CANSpecDO canDnie) {
+        this.canDnie = canDnie;
+    }
+
 }

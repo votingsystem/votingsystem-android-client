@@ -26,7 +26,6 @@ import org.votingsystem.fragment.CertRequestFormFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.signature.smime.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -35,6 +34,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -140,7 +140,7 @@ public class CertResponseActivity extends AppCompatActivity {
                 keyStore.load(null);
                 CertificationRequestVS certificationRequest = (CertificationRequestVS)
                         ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest().getBytes());
-                String passwordHash = CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
+                String passwordHash = StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
                 if(!passwordHash.equals(certificationRequest.getHashPin())) {
                     MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
                             getString(R.string.pin_error_msg), getSupportFragmentManager());

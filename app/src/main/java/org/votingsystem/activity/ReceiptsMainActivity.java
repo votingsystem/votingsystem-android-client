@@ -1,7 +1,6 @@
 package org.votingsystem.activity;
 
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
@@ -19,16 +18,13 @@ public class ReceiptsMainActivity extends ActivityBase {
 
     public static final String TAG = ReceiptsMainActivity.class.getSimpleName();
 
-    WeakReference<ReceiptGridFragment> receiptGridRef;
+    private WeakReference<ReceiptGridFragment> receiptGridRef;
     private AppVS appVS;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         appVS = (AppVS) getApplicationContext();
-        setContentView(R.layout.activity_base);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
         ReceiptGridFragment fragment = new ReceiptGridFragment();
         receiptGridRef = new WeakReference<ReceiptGridFragment>(fragment);
         fragment.setArguments(getIntent().getExtras());
@@ -45,14 +41,6 @@ public class ReceiptsMainActivity extends ActivityBase {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override protected int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_RECEIPTS;// we only have a nav drawer if we are in top-level
-    }
-
-    @Override public void requestDataRefresh() {
-        LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
     }
 
 }

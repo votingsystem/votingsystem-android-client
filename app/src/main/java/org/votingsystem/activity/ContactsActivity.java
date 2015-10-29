@@ -18,7 +18,6 @@ package org.votingsystem.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,9 +46,6 @@ public class ContactsActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
         Bundle args = getIntent().getExtras();
         ContactsGridFragment fragment = new ContactsGridFragment();
         contactsGridRef = new WeakReference<ContactsGridFragment>(fragment);
@@ -59,11 +55,6 @@ public class ContactsActivity extends ActivityBase {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
         getSupportActionBar().setSubtitle(getString(R.string.contacts_lbl));
-    }
-
-    @Override protected int getSelfNavDrawerItem() {
-        // we only have a nav drawer if we are in top-level Representatives mode.
-        return NAVDRAWER_ITEM_CONTACTS;
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -103,6 +94,5 @@ public class ContactsActivity extends ActivityBase {
                 return super.onOptionsItemSelected(item);
         }
     };
-
 
 }
