@@ -11,10 +11,10 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.SMIMESignerActivity;

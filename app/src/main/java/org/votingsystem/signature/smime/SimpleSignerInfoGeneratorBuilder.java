@@ -11,6 +11,7 @@ import org.bouncycastle2.operator.DigestCalculatorProvider;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.CertificateEncodingException;
@@ -180,5 +181,12 @@ public class SimpleSignerInfoGeneratorBuilder {
         {
             return new JcaDigestCalculatorProviderBuilder().setProvider(provider).build();
         }
-    }    
+    }
+
+    public SignerInfoGenerator build(DNIeContentSigner contentSigner)
+            throws OperatorCreationException, CertificateEncodingException
+    {
+
+        return configureAndBuild().build((ContentSigner) contentSigner, new JcaX509CertificateHolder(contentSigner.getUserCert()));
+    }
 }

@@ -107,6 +107,22 @@ public class PrefUtils {
         return pref.getBoolean(ContextVS.DNIE_KEY, true);
     }
 
+    public static void putDNIeCAN(String CAN) {
+        try {
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(ContextVS.CAN_KEY, CAN);
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static String getDNIeCAN() {
+        SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        return sp.getString(ContextVS.CAN_KEY, null);
+    }
+
     public static void putApplicationId(String applicationId) {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(

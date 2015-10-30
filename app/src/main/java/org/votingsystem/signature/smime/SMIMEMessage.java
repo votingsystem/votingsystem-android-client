@@ -9,12 +9,12 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.ASN1InputStream;
 import org.bouncycastle2.asn1.ASN1OctetString;
+import org.bouncycastle2.asn1.DEREncodable;
 import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
-import org.bouncycastle2.asn1.cms.ContentInfo;
 import org.bouncycastle2.asn1.cms.Time;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.cert.X509CertificateHolder;
@@ -192,19 +192,10 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             Attribute timeStampAttribute = unsignedAttributes.get(
                     PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
             if(timeStampAttribute != null) {
-                //DEREncodable dob = (DEREncodable) timeStampAttribute.getAttrValues().getObjectAt(0);
-                //byte[] derEncoded = dob.getDERObject().getEncoded();
-                //org.bouncycastle2.cms.CMSSignedData signedData = new CMSSignedData(derEncoded);
-                //timeStampToken = new TimeStampToken(signedData);
-                //==============
-
-                ContentInfo contentInfo = ContentInfo.getInstance(timeStampAttribute.getAttrValues().getObjectAt(0));
-                timeStampToken = new TimeStampToken(contentInfo);
-
-
-
-
-
+                DEREncodable dob = timeStampAttribute.getAttrValues().getObjectAt(0);
+                org.bouncycastle2.cms.CMSSignedData signedData =
+                        new org.bouncycastle2.cms.CMSSignedData(dob.getDERObject().getEncoded());
+                timeStampToken = new TimeStampToken(signedData);
                 //byte[] hashToken = timeStampToken.getTimeStampInfo().getMessageImprintDigest();
                 //String hashTokenStr = new String(Base64.encode(hashToken));
                 //Log.d(TAG, "checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);

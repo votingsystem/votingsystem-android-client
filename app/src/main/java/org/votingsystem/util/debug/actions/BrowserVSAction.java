@@ -31,7 +31,8 @@ public class BrowserVSAction implements DebugAction {
                 Intent intent = new Intent(appContext, BrowserVSActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 //intent.putExtra(ContextVS.URL_KEY, appContext.getCurrencyServer().getServerURL());
-                intent.putExtra(ContextVS.URL_KEY,"http://currency:8086/Currency/testing/testSocket");
+                //intent.putExtra(ContextVS.URL_KEY,"http://currency:8086/Currency/testing/testSocket");
+                intent.putExtra(ContextVS.URL_KEY,"http://currency:8080/AccessControl");
                 appContext.startActivity(intent);
                 return null;
             }

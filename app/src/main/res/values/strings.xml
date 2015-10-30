@@ -346,6 +346,9 @@
         <a href="http://www.sistemavotacion.org/termsOfService.html">condiciones del  servicio</a><br><br>
         <a href="http://www.sistemavotacion.org/privacyPolicy.html">política de privacidad</a>
     ]]></string>
+    <string name="can_dialog_body"><![CDATA[
+        <a href="http://www.sistemavotacion.org/AccessControl/docs/dnieCAN.xhtml">¿qué es el CAN del DNIe?</a>
+    ]]></string>
     <string name="about_licenses">open source licenses</string>
     <string name="about_eula">end user license agreement</string>
     <string name="title_about">acerca de</string>
@@ -595,4 +598,5 @@
     <string name="enter_passwrod_retry_msg">DNIe - le quedan \'%1$s\' intentos</string>
     <string name="pref_title_dnie">votar con DNIe 3.0</string>
     <string name="pref_description_dnie">para poder votar con su DNI el teléfono debe disponer de NFC</string>
+    <string name="can_dialog_caption">introduzca el CAN de su DNIe</string>
 </resources>

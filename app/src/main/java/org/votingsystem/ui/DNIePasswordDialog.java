@@ -22,28 +22,14 @@ import es.gob.jmulticard.ui.passwordcallback.DialogUIHandler;
 
 public class DNIePasswordDialog implements DialogUIHandler {
 
-    static private Context mContext;
     private final Activity activity;
 
-    /**
-     * Flag que indica si se cachea el PIN.
-     */
     private final boolean cachePIN;
-
-    /**
-     * El password introducido. Si está activado el cacheo se reutilizará.
-     */
     private char[] password = null;
 
     public DNIePasswordDialog(final Context context, final boolean cachePIN) {
-
-        // Guardamos el contexto para poder mostrar el diálogo
-        mContext = context;
         activity = ((Activity) context);
         this.cachePIN = cachePIN;
-
-        // Cuadro de diálogo para confirmación de firmas
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
     }
 
     @Override
@@ -195,7 +181,7 @@ public class DNIePasswordDialog implements DialogUIHandler {
 
     @Override
     public Object getAndroidContext() {
-        return mContext;
+        return activity;
     }
 
     /**
@@ -207,11 +193,11 @@ public class DNIePasswordDialog implements DialogUIHandler {
     private String getTriesMessage(final int retries) {
         String text;
         if (retries < 0) {
-            text = mContext.getString(R.string.enter_passwrod_msg);
+            text = activity.getString(R.string.enter_passwrod_msg);
         } else if (retries == 1) {
-            text = mContext.getString(R.string.enter_passwrod_last_try_msg);
+            text = activity.getString(R.string.enter_passwrod_last_try_msg);
         } else {
-            text = mContext.getString(R.string.enter_passwrod_retry_msg, retries);
+            text = activity.getString(R.string.enter_passwrod_retry_msg, retries);
         }
         return text;
     }

@@ -329,6 +329,7 @@ public class HttpHelper {
              responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes,
                      responseContentType);
          } catch(ConnectTimeoutException ex) {
+             ex.printStackTrace();
              responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
          }  catch(Exception ex) {
              ex.printStackTrace();

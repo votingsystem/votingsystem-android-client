@@ -2,8 +2,6 @@ package org.votingsystem.signature.util;
 
 import android.util.Log;
 
-import org.bouncycastle2.asn1.ASN1InputStream;
-import org.bouncycastle2.asn1.DERObject;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;

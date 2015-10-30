@@ -20,21 +20,15 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.VoteVSHelper;
-import org.votingsystem.ui.DNIePasswordDialog;
 import org.votingsystem.util.ContextVS;
-
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.Signature;
-import java.security.cert.Certificate;
+import org.votingsystem.util.PrefUtils;
 
 import de.tsenger.androsmex.data.CANSpecDO;
 import de.tsenger.androsmex.data.CANSpecDOStore;
-import es.gob.jmulticard.jse.provider.DnieProvider;
-import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -50,15 +44,9 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 	private NfcB exNfcB;
 	private IsoDep exIsoDep;
 	private Tag tagFromIntent;
-	
-	private CANSpecDOStore cansDO;
-	private CANSpecDO canDnie;
 
 	private ProgressDialog progressBar;
 	private final Handler myHandler = new Handler();
-
-	private static final String AUTH_CERT_ALIAS = "CertAutenticacion";
-	private static final String SIGN_CERT_ALIAS = "CertFirmaDigital";
 
 	final Runnable newRead = new Runnable() {
 		public void run() {
@@ -106,42 +94,11 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 	    protected Void doInBackground(Void... arg0) {
 			try  {
 				//TODO
-				LOGD(TAG, "sendVote");
-				// Se instancia el proveedor y se añade
-				final DnieProvider p = new DnieProvider();
-				p.setProviderTag(tagFromIntent);
-				// Tag discovered by the activity
-				p.setProviderCan("*****");
-				Security.insertProviderAt(p, 1);
-
-				// Desactivamos el modod rápido
-				System.setProperty("es.gob.jmulticard.fastmode", "false");
-				DNIePasswordDialog myFragment = new DNIePasswordDialog(DNIeVotingActivity.this, true);
-				DNIeDialogManager.setDialogUIHandler(myFragment);
-				KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
-				ksUserDNIe.load(null,null);
-
-				// Actualizamos la BBDD de los CAN para añadir estos datos si no los tuviéramos
-				/*if(canDnie.getUserNif().length()==0){
-					String certSubject = ((X509Certificate) ksUserDNIe.getCertificate(SIGN_CERT_ALIAS)).getSubjectDN().toString();
-					CANSpecDO newCan = new CANSpecDO(canDnie.getCanNumber(),
-							certSubject.substring((certSubject.indexOf("CN=") + 3)),
-							certSubject.substring(certSubject.indexOf("NIF ") + 4));
-					cansDO.delete(canDnie);
-					cansDO.save(newCan);
-				}*/
-				//Forzamos a cargar los certificados reales pidiendo la clave
-				ksUserDNIe.getKey(SIGN_CERT_ALIAS, null);
-				ksUserDNIe.getCertificate(SIGN_CERT_ALIAS).getEncoded();
-
-				PrivateKey privateKey = (PrivateKey) ksUserDNIe.getKey(SIGN_CERT_ALIAS, null);
-				Certificate[] chain = ksUserDNIe.getCertificateChain(SIGN_CERT_ALIAS);
-
-				Signature signature = Signature.getInstance("SHA1withRSA", "DNIeJCAProvider");
-				signature.initSign(privateKey);
-				signature.update("CertVoteRequest".getBytes());
-				byte[] signatureBytes = signature.sign();
-				LOGD(TAG, "signatureBytes: " + new String(signatureBytes));
+				Log.d(TAG, "sendVote");
+				SMIMEMessage simeMessage = AppVS.getInstance().signMessageWithDNIe(tagFromIntent,
+						PrefUtils.getDNIeCAN(), DNIeVotingActivity.this, "JJ", "TextToSign",
+						"Subject", AppVS.getInstance().getCurrencyServer().getTimeStampServiceURL());
+				Log.d(TAG, "doInBackground - signMessageWithDNIe OK: " + new String(simeMessage.getBytes()));
 			}
 			catch (Exception ex) {
 				ex.printStackTrace();
@@ -160,7 +117,6 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.dnie_voting_activity);
-		cansDO 	= new CANSpecDOStore(this);
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);

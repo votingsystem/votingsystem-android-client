@@ -9,7 +9,6 @@ import org.bouncycastle2.asn1.smime.SMIMECapability;
 import org.bouncycastle2.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.SignerInfoGenerator;
-import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle2.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.util.ContextVS;

@@ -1,12 +1,16 @@
 package org.votingsystem.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,6 +20,7 @@ import android.view.ViewGroup;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.fragment.AddressFormFragment;
+import org.votingsystem.fragment.CANDialogFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HelpUtils;
 import org.votingsystem.util.JSON;
@@ -65,16 +70,41 @@ public class SettingsActivity extends PreferenceActivity
 
     public static class SettingsFragment extends PreferenceFragment {
 
+        private String broadCastId = SettingsFragment.class.getSimpleName();
+        private SwitchPreference dnie_switch;
+
+        private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
+                String CAN = null;
+                if((CAN = intent.getStringExtra(ContextVS.CAN_KEY)) != null) {
+                    LOGD(TAG + ".broadcastReceiver", "CAN:" + CAN);
+                    if(dnie_switch.isChecked()) {
+                        PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
+                        PrefUtils.putDNIeCAN(CAN);
+                        dnie_switch.setSummary("CAN: " + CAN);
+                    }
+                } else {
+                    if(dnie_switch.isChecked()) {
+                        dnie_switch.setChecked(false);
+                        dnie_switch.setSummary(getString(R.string.pref_description_dnie));
+                    }
+                }
+            }
+        };
+
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.main_settings);
             setHasOptionsMenu(true);
 
-            final SwitchPreference dnie_switch = (SwitchPreference) findPreference("dnie_switch");
+            dnie_switch = (SwitchPreference) findPreference("dnie_switch");
             dnie_switch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
-                    PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
+                    if(dnie_switch.isChecked()) CANDialogFragment.showDialog(
+                            broadCastId, getFragmentManager());
+                    else dnie_switch.setSummary(getString(R.string.pref_description_dnie));
                     return true;
                 }
             });
@@ -127,6 +157,9 @@ public class SettingsActivity extends PreferenceActivity
                     return true;
                 }
             });
+            if(PrefUtils.isDNIeEnabled()) {
+                dnie_switch.setSummary("CAN: " + PrefUtils.getDNIeCAN());
+            }
         }
 
         @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -153,6 +186,17 @@ public class SettingsActivity extends PreferenceActivity
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+
+        @Override public void onResume() {
+            super.onResume();
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                    broadcastReceiver, new IntentFilter(broadCastId));
+        }
+
+        @Override public void onPause() {
+            super.onPause();
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         }
     }
 

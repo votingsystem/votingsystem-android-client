@@ -31,8 +31,9 @@ public class ContextVS {
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
-    public static final String WALLET_FILE_NAME = "wallet.wvs";
-    public static final String PLAIN_WALLET_FILE_NAME = "plain_wallet.wvs";
+    public static final String DNIe_SIGN_MECHANISM             = "SHA1withRSA";
+    public static final String WALLET_FILE_NAME                = "wallet.wvs";
+    public static final String PLAIN_WALLET_FILE_NAME          = "plain_wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
     public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentTypeVS.TEXT.getName();
     public static final String SMIME_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
@@ -56,6 +57,7 @@ public class ContextVS {
 
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
     public static final String PIN_KEY = "PIN";
+    public static final String CAN_KEY = "CAN_KEY";
     public static final String DNIE_KEY = "DNIE_KEY";
     public static final String CONNECTED_KEY = "CONNECTED_KEY";
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";

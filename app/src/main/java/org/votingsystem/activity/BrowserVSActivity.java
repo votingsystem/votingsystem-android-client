@@ -72,8 +72,6 @@ public class BrowserVSActivity extends AppCompatActivity {
         appVS = (AppVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         setContentView(R.layout.browservs);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
         if(savedInstanceState != null) {
             operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
         }

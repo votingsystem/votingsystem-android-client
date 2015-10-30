@@ -3,9 +3,9 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
