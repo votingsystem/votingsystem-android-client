@@ -27,7 +27,7 @@ public class DNIePasswordDialog implements DialogUIHandler {
     private final boolean cachePIN;
     private char[] password = null;
 
-    public DNIePasswordDialog(final Context context, final boolean cachePIN) {
+    public DNIePasswordDialog(Context context, boolean cachePIN) {
         activity = ((Activity) context);
         this.cachePIN = cachePIN;
     }
@@ -45,10 +45,8 @@ public class DNIePasswordDialog implements DialogUIHandler {
         final DNIePasswordDialog instance 	= this;
         dialog.setMessage(getTriesMessage(retries));
 
-        synchronized (instance)
-        {
+        synchronized (instance) {
             activity.runOnUiThread( new Runnable() {
-
                 @Override
                 public void run() {
                     try {
@@ -90,6 +88,12 @@ public class DNIePasswordDialog implements DialogUIHandler {
                         dialog.setCancelable(false);
                         dialog.setView(passwordView);
                         dialog.create().show();
+
+                        synchronized (instance) {
+                            passwordBuilder.append(passwordText.getText().toString());
+                            instance.notifyAll();
+                        }
+
                     } catch (Exception ex) {
                         Log.e("MyPasswordFragment", "Excepción en diálogo de contraseña" + ex.getMessage());
                     } catch (Error err) {
@@ -97,8 +101,7 @@ public class DNIePasswordDialog implements DialogUIHandler {
                     }
                 }
             });
-            try
-            {
+            try {
                 instance.wait();
                 return passwordBuilder.toString().toCharArray();
             } catch (InterruptedException e) {
