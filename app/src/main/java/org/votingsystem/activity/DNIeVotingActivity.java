@@ -13,22 +13,28 @@ import android.nfc.tech.NfcB;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.callable.VoteSender;
+import org.votingsystem.dto.voting.AccessRequestDto;
+import org.votingsystem.dto.voting.ControlCenterDto;
+import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
+import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
 
-import de.tsenger.androsmex.data.CANSpecDO;
-import de.tsenger.androsmex.data.CANSpecDOStore;
+import java.io.IOException;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -39,29 +45,30 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 
 	private String broadCastId = DNIeVotingActivity.class.getSimpleName();
 
+	private VoteVSHelper voteVSHelper;
 	private NfcAdapter myNfcAdapter = null;
 	private NfcA exNfcA;
 	private NfcB exNfcB;
 	private IsoDep exIsoDep;
 	private Tag tagFromIntent;
+	private String serviceCaller;
 
 	private ProgressDialog progressBar;
-	private final Handler myHandler = new Handler();
+	private Handler myHandler = new Handler();
 
 	final Runnable newRead = new Runnable() {
 		public void run() {
-			// Cambiamos el fondo de pantalla
-			findViewById(R.id.fondopantalla).setBackgroundResource(R.drawable.fondo_secundario);
-			((TextView)findViewById(R.id.result1)).setText(R.string.process_msg_lectura);
-			findViewById(R.id.result1).setVisibility(TextView.VISIBLE);
-			((ImageView)findViewById(R.id.resultimg)).setImageResource(R.drawable.dni30_peq);
-			findViewById(R.id.resultimg).setVisibility(ImageView.VISIBLE);
-			findViewById(R.id.result2).setVisibility(TextView.INVISIBLE);
-			findViewById(R.id.resultinfo).setVisibility(TextView.INVISIBLE);
-			findViewById(R.id.fab).setVisibility(FloatingActionButton.INVISIBLE);
+			((TextView)findViewById(R.id.msg)).setText(R.string.process_msg_lectura);
+			((ImageView)findViewById(R.id.result_img)).setImageResource(R.drawable.dni30_peq);
 		}
 	};
 
+	final Runnable askForRead = new Runnable() {
+		public void run() {
+			((ImageView)findViewById(R.id.result_img)).setImageResource(R.drawable.dni30_grey_peq);
+			((TextView)findViewById(R.id.msg)).setText(R.string.op_dgtinit);
+		}
+	};
 
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override public void onReceive(Context context, Intent intent) {
@@ -72,46 +79,93 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if( (exNfcA!=null) || (exNfcB!=null) || (exIsoDep!=null) ) {
-			new SendVoteTask().execute();
-		}
 	}
 
-	public class SendVoteTask extends AsyncTask<Void, Integer, Void> {
+	public class SendVoteTask extends AsyncTask<Void, Integer, SMIMEMessage> {
 	    @Override
 	    protected void onPreExecute()  {
-	    	// Lanzamos el diálogo con el progreso
-			myHandler.post(newRead);
-		    progressBar = new ProgressDialog(DNIeVotingActivity.this);
-		    progressBar.setIndeterminate(true);
-		    progressBar.setCancelable(false);
-		    progressBar.setTitle("DNIe version 3.0");
-		    progressBar.setMessage("Estableciendo conexión...");
-			progressBar.show();
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					myHandler.post(newRead);
+					progressBar = new ProgressDialog(DNIeVotingActivity.this);
+					progressBar.setIndeterminate(true);
+					progressBar.setCancelable(false);
+					progressBar.setTitle("DNIe version 3.0");
+					progressBar.setMessage("Estableciendo conexión...");
+					progressBar.show();
+				}
+			});
 	    }
 	    
 		@Override
-	    protected Void doInBackground(Void... arg0) {
+	    protected SMIMEMessage doInBackground(Void... arg0) {
 			try  {
-				//TODO
 				Log.d(TAG, "sendVote");
-				SMIMEMessage simeMessage = AppVS.getInstance().signMessageWithDNIe(tagFromIntent,
-						PrefUtils.getDNIeCAN(), DNIeVotingActivity.this, "JJ", "TextToSign",
-						"Subject", AppVS.getInstance().getCurrencyServer().getTimeStampServiceURL());
-				Log.d(TAG, "doInBackground - signMessageWithDNIe OK: " + new String(simeMessage.getBytes()));
-			}
-			catch (Exception ex) {
+				if(AppVS.getInstance().getControlCenter() == null) {
+					ControlCenterDto controlCenter = AppVS.getInstance().getActorVS(ControlCenterDto.class,
+							voteVSHelper.getEventVS().getControlCenter().getServerURL());
+					AppVS.getInstance().setControlCenter(controlCenter);
+				}
+				AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
+				String subject = AppVS.getInstance().getString(R.string.request_msg_subject,
+						voteVSHelper.getEventVS().getId());
+				String eventSubject = voteVSHelper.getTruncatedSubject();
+				SMIMEMessage accessRequest = AppVS.getInstance().signMessageWithDNIe(tagFromIntent,
+						PrefUtils.getDNIeCAN(), DNIeVotingActivity.this,
+						AppVS.getInstance().getAccessControl().getName(),
+						JSON.writeValueAsString(requestDto),
+						subject, AppVS.getInstance().getCurrencyServer().getTimeStampServiceURL());
+				ResponseVS responseVS = new VoteSender(voteVSHelper, accessRequest).call();
+				if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+					voteVSHelper = (VoteVSHelper)responseVS.getData();
+					responseVS.setCaption(getString(R.string.vote_ok_caption)).
+							setNotificationMessage(getString(
+									R.string.vote_ok_msg, eventSubject,
+									voteVSHelper.getVote().getOptionSelected().getContent()));
+				} else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+					responseVS.setCaption(getString(R.string.access_request_repeated_caption)).
+							setNotificationMessage(getString( R.string.access_request_repeated_msg,
+									eventSubject));
+				} else {
+					responseVS.setCaption(getString(R.string.vote_error_caption)).
+							setNotificationMessage(
+									Html.fromHtml(responseVS.getMessage()).toString());
+				}
+				Intent resultIntent = new Intent(serviceCaller);
+				resultIntent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+				responseVS.setTypeVS(TypeVS.SEND_VOTE).setServiceCaller(serviceCaller);
+				resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+				LocalBroadcastManager.getInstance(DNIeVotingActivity.this).sendBroadcast(resultIntent);
+			} catch (IOException ex) {
 				ex.printStackTrace();
+				showMessageDialog(getString(R.string.error_lbl), getString(R.string.dnie_connection_error_msg));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				showMessageDialog(getString(R.string.error_lbl), ex.getMessage());
 			}
 			return null;
         }
 
 	    @Override
-	    protected void onPostExecute(Void result) {
+	    protected void onPostExecute(SMIMEMessage simeMessage) {
 			LOGD(TAG, "onPostExecute");
-			progressBar.dismiss();
+			if(simeMessage != null) {
+				try {
+					Log.d(TAG, "doInBackground - signMessageWithDNIe OK: " + new String(simeMessage.getBytes()));
+					progressBar.dismiss();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			myHandler.post(askForRead);
         }
     }
+
+	private void showMessageDialog(String caption, String message) {
+		if(progressBar.isShowing()) progressBar.dismiss();
+		MessageDialogFragment.showDialog(caption, message, getSupportFragmentManager());
+	}
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,7 +174,8 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
-		VoteVSHelper voteVSHelper = (VoteVSHelper) getIntent().getSerializableExtra(ContextVS.VOTE_KEY);
+		voteVSHelper = (VoteVSHelper) getIntent().getSerializableExtra(ContextVS.VOTE_KEY);
+		serviceCaller = getIntent().getExtras().getString(ContextVS.CALLER_KEY);
 		LOGD(TAG, "onCreate - voteVSHelper: " + voteVSHelper);
     }
 
@@ -141,7 +196,7 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 		Log.d(TAG, "enableNFCReaderMode");
 		// Ponemos en 30 segundos el tiempo de espera para comprobar presencia de lectores NFC
 		Bundle options = new Bundle();
-		options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 30000);
+		//options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 30000);
 		myNfcAdapter.enableReaderMode(DNIeVotingActivity.this,
 				this,
 				NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
@@ -165,13 +220,7 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 		exNfcB	 = NfcB.get(tagFromIntent);
 		exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA!=null) || (exNfcB!=null) || (exIsoDep!=null)) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					SendVoteTask newTask = new SendVoteTask();
-					newTask.execute();
-				}
-			});
+			new SendVoteTask().execute();
 		}
 	}
 

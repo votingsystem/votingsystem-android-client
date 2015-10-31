@@ -26,9 +26,15 @@ public class VoteSender implements Callable<ResponseVS> {
     public static final String TAG = VoteSender.class.getSimpleName();
 
     private VoteVSHelper voteVSHelper;
+    private SMIMEMessage accessRequest;
 
     public VoteSender(VoteVSHelper voteVSHelper) {
         this.voteVSHelper = voteVSHelper;
+    }
+
+    public VoteSender(VoteVSHelper voteVSHelper, SMIMEMessage accessRequest) {
+        this.voteVSHelper = voteVSHelper;
+        this.accessRequest = accessRequest;
     }
 
     @Override public ResponseVS call() {
@@ -38,7 +44,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String subject = AppVS.getInstance().getString(R.string.request_msg_subject,
                     voteVSHelper.getEventVS().getId());
             AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
-            SMIMEMessage smimeMessage = AppVS.getInstance().signMessage(
+            if(accessRequest == null) accessRequest = AppVS.getInstance().signMessage(
                     AppVS.getInstance().getAccessControl().getName(),
                     JSON.writeValueAsString(requestDto), subject,
                     AppVS.getInstance().getTimeStampServiceURL());
@@ -46,7 +52,7 @@ public class VoteSender implements Callable<ResponseVS> {
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME,
                     voteVSHelper.getCertificationRequest().getCsrPEM());
-            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, accessRequest.getBytes());
             responseVS = HttpHelper.sendObjectMap(mapToSend,
                     AppVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;

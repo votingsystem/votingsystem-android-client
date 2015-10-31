@@ -89,7 +89,6 @@ public class DNIePasswordDialog implements DialogUIHandler {
                         });
                         dialog.setCancelable(false);
                         dialog.setView(passwordView);
-                        dialog.create().show();
                     } catch (Exception ex) {
                         Log.e("MyPasswordFragment", "Excepción en diálogo de contraseña" + ex.getMessage());
                     } catch (Error err) {

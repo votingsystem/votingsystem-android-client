@@ -332,6 +332,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 Intent intent = new Intent(getActivity(), DNIeVotingActivity.class);
                 voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
                 intent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+                intent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getActivity().startActivity(intent);
             } else {
