@@ -1,6 +1,5 @@
 package org.votingsystem.activity;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,6 +18,7 @@ import org.votingsystem.util.TypeVS;
 import static org.votingsystem.util.ContextVS.CURSOR_POSITION_KEY;
 import static org.votingsystem.util.ContextVS.EVENT_STATE_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -64,11 +64,6 @@ public class EventVSPagerActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public class EventsPagerAdapter extends FragmentStatePagerAdapter {

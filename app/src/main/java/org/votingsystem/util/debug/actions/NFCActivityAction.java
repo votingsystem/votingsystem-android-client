@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.DNIeVotingActivity;
+import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.util.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -23,7 +23,7 @@ public class NFCActivityAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
-                Intent intent = new Intent(appContext, DNIeVotingActivity.class);
+                Intent intent = new Intent(appContext, DNIeSigningActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 appContext.startActivity(intent);
                 return null;

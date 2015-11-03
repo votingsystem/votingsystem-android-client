@@ -149,6 +149,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
 
     private void searchFor(String query) {
         searchView.clearFocus();
+        this.queryStr = query;
         new SearchTask(query, eventState).execute();
     }
 
@@ -164,9 +165,10 @@ public class EventVSSearchActivity extends AppCompatActivity {
         public final String TAG = SearchTask.class.getSimpleName();
 
         private EventVSDto.State eventState;
+        private String queryStr;
 
-        public SearchTask(String query, EventVSDto.State eventState) {
-            queryStr = query;
+        public SearchTask(String queryStr, EventVSDto.State eventState) {
+            this.queryStr = queryStr;
             this.eventState = eventState;
         }
 

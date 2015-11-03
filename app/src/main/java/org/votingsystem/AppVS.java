@@ -59,10 +59,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.activation.DataHandler;
 import javax.mail.Header;
-
-import de.tsenger.androsmex.data.CANSpecDO;
 
 import static org.votingsystem.util.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.util.ContextVS.ANDROID_PROVIDER;
@@ -91,7 +88,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
     private AccessControlDto accessControl;
     private String accessControlURL;
-    private CANSpecDO canDnie;
     private ControlCenterDto controlCenter;
     private CurrencyServerDto currencyServer;
     private String currencyServerURL;
@@ -100,7 +96,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
-    private DataHandler dataHandler;
+    private Map<String, ResponseVS> dnieSignatureMap = new HashMap<>();
 
     private static AppVS INSTANCE;
 
@@ -109,6 +105,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     @Override public void onCreate() {
+        super.onCreate();
         try {
             INSTANCE = this;
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
@@ -330,11 +327,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
     public SMIMEMessage signMessageWithDNIe(Tag nfcTag, String CAN, Activity activity, String toUser,
             String textToSign, String subject, String timeStampServiceURL, Header... headers) throws Exception {
-        String userNIF = getUserVS().getNIF();
         LOGD(TAG + ".signMessageWithDNIe", "subject: " + subject);
-        //Tag nfcTag, String CAN, Context context, String fromUser, String toUser, String textToSign, String subject, Header... headers
-        SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(nfcTag, CAN, activity, userNIF, toUser,
-                textToSign, subject, headers);
+        SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(nfcTag, CAN, activity, toUser,
+                textToSign, subject, null, headers);
         return new MessageTimeStamper(smimeMessage, timeStampServiceURL).call();
     }
 
@@ -424,12 +419,12 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         this.withSocketConnection = withSocketConnection;
     }
 
-    public CANSpecDO getCanDnie() {
-        return canDnie;
+    public ResponseVS removeDNIeSignature(String broadcastId) {
+        return dnieSignatureMap.remove(broadcastId);
     }
 
-    public void setCanDnie(CANSpecDO canDnie) {
-        this.canDnie = canDnie;
+    public void setDNIeSignature(String broadcastId, ResponseVS dnieSignature) {
+        dnieSignatureMap.put(broadcastId, dnieSignature);
     }
 
 }

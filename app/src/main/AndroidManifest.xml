@@ -129,7 +129,7 @@
 
         <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.DNIeVotingActivity"
+        <activity android:name="org.votingsystem.activity.DNIeSigningActivity"
             android:label = "nfcIntentActivityLbl"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"

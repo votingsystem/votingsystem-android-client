@@ -64,7 +64,7 @@ public class DNIeContentSigner implements ContentSigner {
     private X509Certificate userCert;
     private String signatureAlgorithm;
 
-    private DNIeContentSigner(Tag nfcTag, String CAN, Context context)
+    private DNIeContentSigner(Tag nfcTag, String CAN, char[] password, Context context)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
             IOException, CertificateException {
         signatureAlgorithm = DNIe_SIGN_MECHANISM;
@@ -74,7 +74,7 @@ public class DNIeContentSigner implements ContentSigner {
         Security.insertProviderAt(p, 1);
         //Deactivate fastmode
         System.setProperty("es.gob.jmulticard.fastmode", "false");
-        DNIePasswordDialog myFragment = new DNIePasswordDialog(context, true);
+        DNIePasswordDialog myFragment = new DNIePasswordDialog(context, password, true);
         DNIeDialogManager.setDialogUIHandler(myFragment);
         KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
         ksUserDNIe.load(null, null);
@@ -141,8 +141,8 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     public static SMIMEMessage getSMIME(Tag nfcTag, String CAN, Context context,
-                    String fromUser, String toUser, String textToSign,
-                    String subject, Header... headers) throws Exception {
+                String toUser, String textToSign, String subject, char[] password,
+                Header... headers) throws Exception {
         if (subject == null) throw new ExceptionVS("missing subject");
         if (textToSign == null) throw new ExceptionVS("missing text to sign");
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
@@ -152,7 +152,7 @@ public class DNIeContentSigner implements ContentSigner {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
-        DNIeContentSigner dnieContentSigner = new DNIeContentSigner(nfcTag, CAN, context);
+        DNIeContentSigner dnieContentSigner = new DNIeContentSigner(nfcTag, CAN, password, context);
         SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
         dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));

@@ -27,11 +27,12 @@ public class DNIePasswordDialog implements DialogUIHandler {
     private final Activity activity;
 
     private final boolean cachePIN;
-    private char[] password = null;
+    private char[] password;
 
-    public DNIePasswordDialog(Context context, boolean cachePIN) {
+    public DNIePasswordDialog(Context context, char[] password, boolean cachePIN) {
         activity = ((Activity) context);
         this.cachePIN = cachePIN;
+        this.password = password;
     }
 
     @Override
@@ -41,6 +42,8 @@ public class DNIePasswordDialog implements DialogUIHandler {
 
     @SuppressLint("InflateParams")
     private char[] doShowPasswordDialog(final int retries) {
+        if(password != null) return password;
+
         final AlertDialog.Builder dialog 	= new AlertDialog.Builder(activity);
         final LayoutInflater inflater 		= activity.getLayoutInflater();
         final StringBuilder passwordBuilder = new StringBuilder();
@@ -90,12 +93,6 @@ public class DNIePasswordDialog implements DialogUIHandler {
                         dialog.setCancelable(false);
                         dialog.setView(passwordView);
                         dialog.create().show();
-
-                        synchronized (instance) {
-                            passwordBuilder.append(passwordText.getText().toString());
-                            instance.notifyAll();
-                        }
-
                     } catch (Exception ex) {
                         Log.e(TAG, "Excepción en diálogo de contraseña" + ex.getMessage());
                     } catch (Error err) {
@@ -115,17 +112,13 @@ public class DNIePasswordDialog implements DialogUIHandler {
     @Override
     public char[] showPasswordDialog(final int retries) {
         char[] returning;
-
         if (retries < 0 && cachePIN && password != null && password.length > 0)
             returning = password.clone();
-        else
-            returning = doShowPasswordDialog(retries);
+        else returning = doShowPasswordDialog(retries);
 
         if (cachePIN && returning != null && returning.length > 0)
             password = returning.clone();
-        else
-            return null;
-
+        else return null;
         return returning;
     }
 

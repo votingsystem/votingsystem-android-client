@@ -212,6 +212,11 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         return result;
     }
 
+    @Override public String getSubject() {
+        if(eventVS != null) return eventVS.getSubject();
+        else return null;
+    }
+
     @Override
     public SMIMEMessage getReceipt() throws Exception {
         if(cancelVoteReceipt != null) return cancelVoteReceipt;

@@ -38,6 +38,7 @@ public class VoteService extends IntentService {
         appVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
+        byte[] smimeMessageBytes = arguments.getByteArray(ContextVS.SMIME_MSG_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVSHelper voteVSHelper = (VoteVSHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
@@ -52,7 +53,10 @@ public class VoteService extends IntentService {
                                 voteVSHelper.getEventVS().getControlCenter().getServerURL());
                         appVS.setControlCenter(controlCenter);
                     }
-                    responseVS = new VoteSender(voteVSHelper).call();
+                    if(smimeMessageBytes != null) {
+                        SMIMEMessage accessRequest = new SMIMEMessage(smimeMessageBytes);
+                        responseVS = new VoteSender(voteVSHelper, accessRequest).call();
+                    } else responseVS = new VoteSender(voteVSHelper).call();
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         voteVSHelper = (VoteVSHelper)responseVS.getData();
                         responseVS.setCaption(getString(R.string.vote_ok_caption)).

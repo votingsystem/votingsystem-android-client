@@ -27,15 +27,17 @@ import android.widget.TextView;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.DNIeVotingActivity;
+import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.service.VoteService;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -69,6 +71,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     private Button cancelVoteButton;
     private AppVS appVS;
     private View rootView;
+    private TypeVS pendingOperation;
     private String broadCastId = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -79,7 +82,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 try {
                     if(TypeVS.SEND_VOTE == responseVS.getTypeVS()) voteVSHelper =
                             VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
-                    launchVoteService(responseVS.getTypeVS());
+                    launchVoteService(responseVS.getTypeVS(), null);
                 } catch (Exception ex) { ex.printStackTrace();}
             } else {
                 voteVSHelper = (VoteVSHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
@@ -90,8 +93,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private void processVoteResult(VoteVSHelper voteVSHelper, ResponseVS responseVS) {
         if(responseVS.getTypeVS() == TypeVS.SEND_VOTE) {
-            if(ResponseVS.SC_OK == responseVS.getStatusCode())  showReceiptScreen(voteVSHelper);
-            else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()){
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                showReceiptScreen(voteVSHelper);
+                MessageDialogFragment.showDialog(null, getString(R.string.vote_ok_caption),
+                        getString(R.string.result_ok_description), getFragmentManager());
+            } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()){
                 MessageDto messageDto = null;
                 try {
                     messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
@@ -125,12 +131,17 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         setProgressDialogVisible(false, null);
     }
 
-    private void launchVoteService(TypeVS operation) {
+    private void launchVoteService(TypeVS operation, SMIMEMessage smimeMessage) {
         LOGD(TAG + ".launchVoteService", "operation: " + operation.toString());
         Intent startIntent = new Intent(getActivity(), VoteService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, operation);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         startIntent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+        if(smimeMessage != null) {
+            try {
+                startIntent.putExtra(ContextVS.SMIME_MSG_KEY, smimeMessage.getBytes());
+            } catch (Exception e) { e.printStackTrace(); }
+        }
         String caption = null;
         if(operation == TypeVS.CANCEL_VOTE) {
             cancelVoteButton.setEnabled(false);
@@ -202,6 +213,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         if(bundle != null) {
             voteVSHelper = (VoteVSHelper) bundle.getSerializable(ContextVS.VOTE_KEY);
             optionSelected = (FieldEventVSDto) bundle.getSerializable(ContextVS.DTO_KEY);
+            pendingOperation = (TypeVS) bundle.getSerializable(ContextVS.STATE_KEY);
         }
         if(voteVSHelper != null && voteVSHelper.getVoteReceipt() != null) showReceiptScreen(voteVSHelper);
         else setEventScreen(eventVS);
@@ -223,7 +235,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             case R.id.event_subject:
                 if(eventVS != null && eventVS.getSubject() != null &&
                         eventVS.getSubject().length() > MAX_SUBJECT_SIZE) {
-                    MessageDialogFragment.showDialog(null, getActivity().getString(R.string.subject_lbl),
+                    MessageDialogFragment.showDialog(null, getString(R.string.subject_lbl),
                             eventVS.getSubject(), getFragmentManager());
                 }
                 break;
@@ -338,12 +350,17 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                     ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
                     ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
             if(PrefUtils.isDNIeEnabled()) {
-                Intent intent = new Intent(getActivity(), DNIeVotingActivity.class);
+                pendingOperation = TypeVS.SEND_VOTE;
+                Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
                 voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
-                intent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+                AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
+                intent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(requestDto));
+                intent.putExtra(ContextVS.USER_KEY, AppVS.getInstance().getAccessControl().getName());
+                intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.request_msg_subject,
+                        voteVSHelper.getEventVS().getId()));
                 intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.vote_selected_msg,
                         optionSelected.getContent()));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } else {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
@@ -356,6 +373,13 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
+        ResponseVS responseVS = AppVS.getInstance().removeDNIeSignature(broadCastId);
+        if(responseVS != null) {
+            launchVoteService(pendingOperation, responseVS.getSMIME());
+        } else {
+            setOptionButtonsEnabled(true);
+            setProgressDialogVisible(false, null);
+        }
     }
 
     @Override public void onPause() {
@@ -374,6 +398,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onSaveInstanceState(outState);
         outState.putSerializable(ContextVS.VOTE_KEY, voteVSHelper);
         outState.putSerializable(ContextVS.DTO_KEY, optionSelected);
+        outState.putSerializable(ContextVS.STATE_KEY, pendingOperation);
     }
 
     public void saveCancelReceipt(VoteVSHelper voteVSHelper) {

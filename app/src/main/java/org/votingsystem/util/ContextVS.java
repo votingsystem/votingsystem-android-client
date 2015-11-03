@@ -77,6 +77,7 @@ public class ContextVS {
     public static final String CURRENCY_SERVER_URL = "CURRENCY_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
+    public static final String MESSAGE_CONTENT_KEY = "MESSAGE_CONTENT_KEY";
     public static final String NUM_MESSAGES_KEY = "NUM_MESSAGES_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
     public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
@@ -109,6 +110,7 @@ public class ContextVS {
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
     public static final String QUERY_KEY                   = "QUERY_KEY";
     public static final String REFRESH_KEY                 = "REFRESH_KEY";
+    public static final String SMIME_MSG_KEY               = "SMIME_MSG_KEY";
     public static final String MAX_VALUE_KEY               = "MAX_VALUE_KEY";
     public static final String DEFAULT_VALUE_KEY           = "DEFAULT_VALUE_KEY";
     public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =
