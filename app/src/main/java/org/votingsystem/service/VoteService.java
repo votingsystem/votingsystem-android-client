@@ -74,10 +74,13 @@ public class VoteService extends IntentService {
                     }
                     break;
                 case CANCEL_VOTE:
-                    SMIMEMessage smime = appVS.signMessage(appVS.getAccessControl().getName(),
-                            JSON.writeValueAsString(voteVSHelper.getVoteCanceler()),
-                            getString(R.string.cancel_vote_msg_subject));
-                    responseVS = HttpHelper.sendData(smime.getBytes(),
+                    if(smimeMessageBytes == null) {
+                        SMIMEMessage cancelVoteRequest = appVS.signMessage(appVS.getAccessControl().getName(),
+                                JSON.writeValueAsString(voteVSHelper.getVoteCanceler()),
+                                getString(R.string.cancel_vote_msg_subject));
+                        smimeMessageBytes = cancelVoteRequest.getBytes();
+                    }
+                    responseVS = HttpHelper.sendData(smimeMessageBytes,
                             ContentTypeVS.JSON_SIGNED,
                             appVS.getAccessControl().getCancelVoteServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

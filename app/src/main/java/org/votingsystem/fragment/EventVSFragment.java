@@ -222,8 +222,21 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     @Override public void onClick(View view) {
         switch (view.getId()) {
             case R.id.cancel_vote_button:
-                PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
+                if(PrefUtils.isDNIeEnabled()) {
+                    try {
+                        pendingOperation = TypeVS.CANCEL_VOTE;
+                        Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
+                        intent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                        intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(voteVSHelper.getVoteCanceler()));
+                        intent.putExtra(ContextVS.USER_KEY, AppVS.getInstance().getAccessControl().getName());
+                        intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.cancel_vote_msg_subject));
+                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cancel_vote_lbl));
+                        startActivity(intent);
+                    } catch (Exception ex) { ex.printStackTrace(); }
+                } else {
+                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
+                            getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
+                }
                 break;
             case R.id.save_receipt_button:
                 voteVSHelper.setTypeVS(TypeVS.SEND_VOTE);

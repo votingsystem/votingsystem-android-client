@@ -19,6 +19,8 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
+
 import java.io.IOException;
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -28,6 +30,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	public static final String TAG = DNIeSigningActivity.class.getSimpleName();
 
     private String serviceCaller;
+    private TypeVS operation;
 	private String textToSign;
 	private String toUser;
 	private String msgSubject;
@@ -68,6 +71,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
                         PrefUtils.getDNIeCAN(), DNIeSigningActivity.this,
                         toUser, textToSign, msgSubject, AppVS.getInstance().getTimeStampServiceURL());
                 responseVS = new ResponseVS(ResponseVS.SC_OK, accessRequest);
+                responseVS.setTypeVS(operation);
                 AppVS.getInstance().setDNIeSignature(serviceCaller,responseVS);
 			} catch (IOException ex) {
 				ex.printStackTrace();
@@ -101,6 +105,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
         serviceCaller = getIntent().getExtras().getString(ContextVS.CALLER_KEY);
+        operation = (TypeVS) getIntent().getExtras().getSerializable(ContextVS.TYPEVS_KEY);
         textToSign = getIntent().getExtras().getString(ContextVS.MESSAGE_CONTENT_KEY);
         toUser = getIntent().getExtras().getString(ContextVS.USER_KEY);
         msgSubject = getIntent().getExtras().getString(ContextVS.MESSAGE_SUBJECT_KEY);
@@ -112,21 +117,32 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 
 	@Override public void onResume() {
 		super.onResume();
-        Bundle options = new Bundle();
-        //options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 30000);//30 secs to check NFC reader
-        myNfcAdapter.enableReaderMode(DNIeSigningActivity.this,
-                this,
-                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
-                        NfcAdapter.FLAG_READER_NFC_A |
-                        NfcAdapter.FLAG_READER_NFC_B,
-                options);
+        enableNFCReaderMode();
 	}
 
 	@Override public void onPause() {
 		super.onPause();
         LOGD(TAG, "disableNFCReaderMode");
-        myNfcAdapter.disableReaderMode(DNIeSigningActivity.this);
+        disableNFCReaderMode();
 	}
+
+
+    private void enableNFCReaderMode () {
+        LOGD(TAG, "enableNFCReaderMode");
+        Bundle options = new Bundle();
+        //30 secs to check NFC reader
+        //options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 30000);
+        myNfcAdapter.enableReaderMode(this, this,
+                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
+                        NfcAdapter.FLAG_READER_NFC_A |
+                        NfcAdapter.FLAG_READER_NFC_B,
+                options);
+    }
+
+    private void disableNFCReaderMode() {
+        LOGD(TAG, "disableNFCReaderMode");
+        myNfcAdapter.disableReaderMode(this);
+    }
 
 	@Override
 	public void onTagDiscovered(Tag tag) {
@@ -135,7 +151,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         NfcA exNfcA	 = NfcA.get(tagFromIntent);
         NfcB exNfcB	 = NfcB.get(tagFromIntent);
         IsoDep exIsoDep = IsoDep.get(tagFromIntent);
-		if( (exNfcA!=null) || (exNfcB!=null) || (exIsoDep!=null)) {
+		if( (exNfcA != null) || (exNfcB != null) || (exIsoDep != null)) {
 			new SignWithDNIeTask().execute();
 		}
 	}
