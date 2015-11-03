@@ -18,6 +18,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -40,7 +41,7 @@ public class VoteService extends IntentService {
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVSHelper voteVSHelper = (VoteVSHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
-        String eventSubject = voteVSHelper.getTruncatedSubject();
+        String eventSubject = StringUtils.truncate(voteVSHelper.getSubject(), 50);
         Intent resultIntent = new Intent(serviceCaller);
         try {
             LOGD(TAG + ".onHandleIntent", "operation: " + operation);

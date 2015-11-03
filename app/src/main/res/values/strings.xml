@@ -36,11 +36,12 @@
     <string name="eventVsCancellationDataErrorMsg">error en los datos de cancelación de evento</string>
     <string name="receiverNotFoundErrorMsg">falta el name de destinatario del documento firmado</string>
     <string name="panel_principal_lbl">panel principal</string>
-    <string name="search_hint">buscar...</string>
+    <string name="search_hint">buscar</string>
 	<string name="guardar_recibo_voto_label">guardar recibo</string>
 	<string name="remove_receipt_lbl">borrar recibo</string>
 	<string name="remove_receipt_msg">¿seguro que desea borrar recibo?</string>
     <string name="search_label"></string>
+    <string name="search_msg">realizando búsqueda</string>
     <string name="search_invoke">búsquedas</string>
     <string name="empty_search_lbl">consulta sin resultados</string>
 	<string name="pin_for_new_cert_msg">introduzca el código PIN que usará para firmar con el

@@ -1,22 +1,5 @@
-/*
- * Copyright 2011 - Jose. J. García Zornoza
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.votingsystem.activity;
 
-import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -35,9 +18,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.fragment.EventVSGridFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.service.EventVSService;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
 import java.lang.ref.WeakReference;
@@ -50,7 +31,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
  */
 public class EventVSMainActivity extends ActivityBase {
 
-	public static final String TAG = EventVSMainActivity.class.getSimpleName();
+    public static final String TAG = EventVSMainActivity.class.getSimpleName();
 
     private WeakReference<EventVSGridFragment> eventVSGridRef;
 
@@ -60,7 +41,7 @@ public class EventVSMainActivity extends ActivityBase {
         super.onCreate(savedInstanceState);
         Bundle args = getIntent().getExtras();
         EventVSGridFragment fragment = new EventVSGridFragment();
-        eventVSGridRef = new WeakReference<EventVSGridFragment>(fragment);
+        eventVSGridRef = new WeakReference<>(fragment);
         if(args == null) args = new Bundle();
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVSDto.State.ACTIVE);
         fragment.setArguments(args);
@@ -94,16 +75,6 @@ public class EventVSMainActivity extends ActivityBase {
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
         getSupportActionBar().setSubtitle(getString(R.string.polls_lbl));
-        if(args != null && args.getString(SearchManager.QUERY) != null) {
-            String queryStr = getIntent().getExtras().getString(SearchManager.QUERY);
-            Bundle bundled = getIntent().getBundleExtra(SearchManager.APP_DATA);
-            Intent startIntent = new Intent(this, EventVSService.class);
-            startIntent.putExtra(ContextVS.STATE_KEY, bundled.getSerializable(ContextVS.STATE_KEY));
-            startIntent.putExtra(ContextVS.QUERY_KEY, queryStr);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.VOTING_EVENT);
-            startIntent.putExtra(ContextVS.OFFSET_KEY, 0L);
-            startService(startIntent);
-        }
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {
@@ -141,23 +112,16 @@ public class EventVSMainActivity extends ActivityBase {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
-        Intent intent = null;
         switch (item.getItemId()) {
             case R.id.search_item:
-                onSearchRequested();
+                Intent searchStarter = new Intent(this, EventVSSearchActivity.class);
+                searchStarter.putExtra(ContextVS.EVENT_STATE_KEY, eventVSGridRef.get().getState());
+                startActivityForResult(searchStarter, 0, null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     };
-
-    @Override public boolean onSearchRequested() {
-        Bundle appData = new Bundle();
-        EventVSGridFragment fragment = eventVSGridRef.get();
-        appData.putSerializable(ContextVS.STATE_KEY, fragment.getState());
-        startSearch(null, false, appData, false);
-        return true;
-    }
 
     private class EventVSSpinnerItem {
         boolean isHeader;

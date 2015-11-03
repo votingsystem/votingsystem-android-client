@@ -46,8 +46,7 @@ public class DebugActionRunnerFragment extends Fragment {
         tests.addView(createTestAction(new DeleteDBAction()));
         tests.addView(createTestAction(new CurrencyConsumedAction()));
         tests.addView(createTestAction(new OperationVSAction()));
-        tests.addView(createTestAction(new BrowserVSAction(
-                (AppVS) getActivity().getApplicationContext())));
+        tests.addView(createTestAction(new BrowserVSAction()));
         tests.addView(createTestAction(new NFCActivityAction((AppVS) getActivity().getApplicationContext())));
 
         setHasOptionsMenu(true);

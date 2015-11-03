@@ -13,11 +13,6 @@
     <application android:name="org.votingsystem.AppVS" android:allowBackup="true"
         android:icon="@drawable/mail_mark_unread_48" android:label="@string/app_name">
 
-     	<!-- <activity android:label="@string/app_name" android:noHistory="true"
-            android:name=".MainActivity" android:screenOrientation="portrait">-->
-
-        <meta-data android:name="android.app.default_searchable" android:value=".app.Search" />
-
         <activity android:name="org.votingsystem.activity.ActivityBase"
             android:label="@string/app_name" android:theme="@style/ThemeVS"/>
 
@@ -42,11 +37,17 @@
 
         <activity android:name="org.votingsystem.activity.EventVSMainActivity"
             android:label="@string/app_name" android:theme="@style/ThemeVS">
+        </activity>
+
+        <activity android:name="org.votingsystem.activity.EventVSSearchActivity" android:theme="@style/ThemeVS">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
+            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>
 
         <activity android:name="org.votingsystem.activity.ContactsActivity"
@@ -62,14 +63,6 @@
             android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.EventVSPagerActivity" android:label="@string/app_name"
-            android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.EventVSSearchResultActivity"
-            android:label="@string/search_result"
-            android:theme="@style/ThemeVS">
-        </activity>
-
-        <activity android:name="org.votingsystem.fragment.CurrencyAccountsPagerFragment"
             android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.WalletActivity"
@@ -111,8 +104,6 @@
 
         <activity android:name="org.votingsystem.activity.MessageActivity" android:theme="@style/Theme.Transparent"/>
 
-        <activity android:name="org.votingsystem.fragment.QRActionsFragment" android:theme="@style/ThemeVS"/>
-
         <activity android:name="org.votingsystem.activity.RepresentativeDelegationActivity"
             android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
 
@@ -142,6 +133,7 @@
             android:label = "nfcIntentActivityLbl"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:noHistory="true"
             android:theme="@style/ThemeVS">
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED"/>

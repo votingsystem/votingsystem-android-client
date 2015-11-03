@@ -292,8 +292,10 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 if(eventVS.getUserVS() != null) {
                     ((TextView)view.findViewById(R.id.publisher)).setText(eventVS.getUserVS());
                 }
-                view.findViewById(R.id.subject_layout).setBackgroundColor(
+                ((TextView)view.findViewById(R.id.subject)).setTextColor(
                         getResources().getColor(state_color));
+
+
                 ((TextView)view.findViewById(R.id.subject)).setText(eventVS.getSubject());
                 TextView time_info = ((TextView)view.findViewById(R.id.time_info));
                 time_info.setText(tameInfoMsg);

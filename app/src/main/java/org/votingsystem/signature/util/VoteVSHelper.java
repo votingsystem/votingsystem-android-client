@@ -119,15 +119,6 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         return eventVS;
     }
 
-    public String getTruncatedSubject() {
-        if(eventVS == null) return null;
-        else {
-            if(eventVS.getSubject().length() <= 50) return eventVS.getSubject();
-            else return  eventVS.getSubject().substring(0, 50) + "...";
-        }
-
-    }
-
     public VoteVSDto getVote() {
         return voteVSDto;
     }

@@ -41,6 +41,18 @@
         <item name="android:subtitleTextStyle">@style/ToolBarVS.SubTitleTextStyle</item>
     </style>
 
+    <style name="SearchViewTheme" parent="Theme.AppCompat">
+        <item name="colorControlActivated">?android:colorAccent</item>
+        <item name="android:searchViewStyle">@style/Widget.Plaid.SearchView</item>
+    </style>
+
+    <style name="Widget.Plaid.SearchView" parent="android:style/Widget.Material.SearchView">
+        <item name="android:searchIcon">@null</item>
+        <item name="android:searchHintIcon">@null</item>
+        <item name="android:queryBackground">@null</item>
+        <item name="android:submitBackground">@null</item>
+    </style>
+
     <style name="ToolBarVS.TitleTextStyle"
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/bkg_vs</item>

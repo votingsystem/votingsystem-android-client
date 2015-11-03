@@ -122,17 +122,14 @@ public class IntentFilterActivity extends AppCompatActivity {
                 startIntent.putExtra(ContextVS.CURRENCY_SERVER_URL, currencyServerURL);
                 startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                 startService(startIntent);
-                operationVS = null;
-                if(uriData != null) {
-                    String operationStr = uriData.getQueryParameter("operation");
-                    if(operationStr != null) {
-                        operationVS = new OperationVS(TypeVS.valueOf(operationStr), uriData);
-                    } else {
-                        String encodedMsg = uriData.getQueryParameter("operationvs");
-                        if(encodedMsg != null) {
-                            operationVS = JSON.readValue(
-                                    Base64.decode(encodedMsg.getBytes()), OperationVS.class);
-                        }
+                String operationStr = uriData.getQueryParameter("operation");
+                if(operationStr != null) {
+                    operationVS = new OperationVS(TypeVS.valueOf(operationStr), uriData);
+                } else {
+                    String encodedMsg = uriData.getQueryParameter("operationvs");
+                    if(encodedMsg != null) {
+                        operationVS = JSON.readValue(
+                                Base64.decode(encodedMsg.getBytes()), OperationVS.class);
                     }
                 }
             } catch(Exception ex) {ex.printStackTrace();}

@@ -14,13 +14,10 @@ import org.votingsystem.util.debug.DebugAction;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 public class BrowserVSAction implements DebugAction {
+
     private static final String TAG = BrowserVSAction.class.getSimpleName();
 
-    private AppVS appContext;
-
-    public BrowserVSAction(AppVS context) {
-        this.appContext = context;
-    }
+    public BrowserVSAction() {  }
 
     @Override public void run(final Context context, final Callback callback) {
         final Bundle bundle = new Bundle();
@@ -28,12 +25,12 @@ public class BrowserVSAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
-                Intent intent = new Intent(appContext, BrowserVSActivity.class);
+                Intent intent = new Intent(AppVS.getInstance(), BrowserVSActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 //intent.putExtra(ContextVS.URL_KEY, appContext.getCurrencyServer().getServerURL());
                 //intent.putExtra(ContextVS.URL_KEY,"http://currency:8086/Currency/testing/testSocket");
-                intent.putExtra(ContextVS.URL_KEY,"http://currency:8080/AccessControl");
-                appContext.startActivity(intent);
+                intent.putExtra(ContextVS.URL_KEY, "http://currency:8080/AccessControl");
+                AppVS.getInstance().startActivity(intent);
                 return null;
             }
         }.execute(context);

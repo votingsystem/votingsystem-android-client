@@ -1,7 +1,5 @@
 package org.votingsystem.activity;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +33,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.StringUtils;
 
 import java.io.IOException;
 
@@ -49,12 +47,11 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 	private String broadCastId = DNIeVotingActivity.class.getSimpleName();
 
 	private VoteVSHelper voteVSHelper;
-	private NfcAdapter myNfcAdapter = null;
+	private NfcAdapter myNfcAdapter;
 	private NfcA exNfcA;
 	private NfcB exNfcB;
 	private IsoDep exIsoDep;
 	private Tag tagFromIntent;
-	private String serviceCaller;
 
 	private Handler myHandler = new Handler();
 
@@ -106,7 +103,7 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 				AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
 				String subject = AppVS.getInstance().getString(R.string.request_msg_subject,
 						voteVSHelper.getEventVS().getId());
-				String eventSubject = voteVSHelper.getTruncatedSubject();
+				String eventSubject = StringUtils.truncate(voteVSHelper.getSubject(), 50);
 				SMIMEMessage accessRequest = AppVS.getInstance().signMessageWithDNIe(tagFromIntent,
 						PrefUtils.getDNIeCAN(), DNIeVotingActivity.this,
 						AppVS.getInstance().getAccessControl().getName(),
@@ -146,7 +143,6 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 					Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
 					intent.putExtra(ContextVS.FRAGMENT_KEY, EventVSFragment.class.getName());
 					intent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
-					responseVS.setTypeVS(TypeVS.SEND_VOTE).setServiceCaller(serviceCaller);
 					intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
 					startActivity(intent);
 				} catch (Exception ex) {
@@ -162,7 +158,6 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 		ProgressDialogFragment.hide(getSupportFragmentManager());
 		super.onBackPressed();
 	}
-
 
 	private void showMessageDialog(String caption, String message) {
 		ProgressDialogFragment.hide(getSupportFragmentManager());
@@ -181,8 +176,6 @@ public class DNIeVotingActivity extends AppCompatActivity implements NfcAdapter.
 		if(message != null) {
 			((TextView)findViewById(R.id.vote)).setText(message);
 		}
-		serviceCaller = getIntent().getExtras().getString(ContextVS.CALLER_KEY);
-		LOGD(TAG, "onCreate - voteVSHelper: " + voteVSHelper);
     }
 
 	@Override public void onResume() {

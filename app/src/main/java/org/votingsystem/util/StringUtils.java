@@ -53,6 +53,14 @@ public class StringUtils {
         return tmp.toString();
     }
 
+    public static String truncate(String string, int length) {
+        if(string == null) return null;
+        else {
+            if(string.length() <= length) return string;
+            else return  string.substring(0, length) + "...";
+        }
+    }
+
     public static String decodeString(String string) {
     	if(string == null) return null;
     	String result = null;

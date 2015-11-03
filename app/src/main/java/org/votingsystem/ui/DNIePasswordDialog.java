@@ -22,6 +22,8 @@ import es.gob.jmulticard.ui.passwordcallback.DialogUIHandler;
 
 public class DNIePasswordDialog implements DialogUIHandler {
 
+    private static final String TAG = DNIePasswordDialog.class.getSimpleName();
+
     private final Activity activity;
 
     private final boolean cachePIN;
@@ -95,9 +97,9 @@ public class DNIePasswordDialog implements DialogUIHandler {
                         }
 
                     } catch (Exception ex) {
-                        Log.e("MyPasswordFragment", "Excepción en diálogo de contraseña" + ex.getMessage());
+                        Log.e(TAG, "Excepción en diálogo de contraseña" + ex.getMessage());
                     } catch (Error err) {
-                        Log.e("MyPasswordFragment", "Error en diálogo de contraseña" + err.getMessage());
+                        Log.e(TAG, "Error en diálogo de contraseña" + err.getMessage());
                     }
                 }
             });

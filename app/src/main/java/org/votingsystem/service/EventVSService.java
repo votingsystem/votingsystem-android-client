@@ -8,7 +8,6 @@ import android.os.Bundle;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.EventVSSearchResultActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
@@ -65,15 +64,10 @@ public class EventVSService extends IntentService {
         appVS = (AppVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
-            String queryStr = arguments.getString(ContextVS.QUERY_KEY);
             EventVSDto.State eventState = (EventVSDto.State) arguments.getSerializable(ContextVS.STATE_KEY);
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
             if(appVS.getAccessControl() == null) {
                 LOGD(TAG, "AccessControl not initialized");
-                return;
-            }
-            if(queryStr != null) {
-                processSearch(queryStr, eventState);
                 return;
             }
             String serviceURL = appVS.getAccessControl().getEventVSURL(eventState,
@@ -129,18 +123,6 @@ public class EventVSService extends IntentService {
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
             appVS.broadcastResponse(responseVS);
         } else LOGD(TAG + ".onHandleIntent", "missing params");
-    }
-
-    private void processSearch(String queryStr, EventVSDto.State eventState) {
-        String serviceURL = appVS.getAccessControl().getSearchServiceURL(null, null, queryStr,
-                EventVSDto.Type.ELECTION, eventState);
-        ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
-        Intent intent = new Intent(this, EventVSSearchResultActivity.class);
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        intent.putExtra(ContextVS.EVENT_STATE_KEY, eventState);
-        intent.putExtra(ContextVS.QUERY_KEY, queryStr);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
     }
 
 }

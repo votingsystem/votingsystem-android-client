@@ -1,6 +1,5 @@
 package org.votingsystem.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,7 +13,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -62,7 +60,6 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = EventVSFragment.class.getSimpleName();
-    private static final int DNIE_REQUEST_CODE = 0;
 
     private EventVSDto eventVS;
     private VoteVSHelper voteVSHelper;
@@ -344,11 +341,10 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 Intent intent = new Intent(getActivity(), DNIeVotingActivity.class);
                 voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
                 intent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
-                intent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                 intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.vote_selected_msg,
                         optionSelected.getContent()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivityForResult(intent, DNIE_REQUEST_CODE);
+                startActivity(intent);
             } else {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.option_selected_msg, pinMsgPart), false, TypeVS.SEND_VOTE);
