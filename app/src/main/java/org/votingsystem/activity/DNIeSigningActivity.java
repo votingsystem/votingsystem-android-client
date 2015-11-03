@@ -9,10 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -21,9 +19,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-
 import java.io.IOException;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 
@@ -36,9 +32,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	private String toUser;
 	private String msgSubject;
 	private NfcAdapter myNfcAdapter;
-	private NfcA exNfcA;
-	private NfcB exNfcB;
-	private IsoDep exIsoDep;
 	private Tag tagFromIntent;
 
 	private Handler myHandler = new Handler();
@@ -56,11 +49,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 			((TextView)findViewById(R.id.msg)).setText(R.string.op_dgtinit);
 		}
 	};
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-	}
 
 	public class SendVoteTask extends AsyncTask<Void, Integer, ResponseVS> {
 
@@ -100,11 +88,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         }
     }
 
-	@Override
-	public void onBackPressed() {
-		finish();
-	}
-
 	private void showMessageDialog(String caption, String message) {
 		ProgressDialogFragment.hide(getSupportFragmentManager());
 		MessageDialogFragment.showDialog(caption, message, getSupportFragmentManager());
@@ -129,40 +112,29 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 
 	@Override public void onResume() {
 		super.onResume();
-		enableNFCReaderMode();
+        Bundle options = new Bundle();
+        //options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 30000);//30 secs to check NFC reader
+        myNfcAdapter.enableReaderMode(DNIeSigningActivity.this,
+                this,
+                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
+                        NfcAdapter.FLAG_READER_NFC_A |
+                        NfcAdapter.FLAG_READER_NFC_B,
+                options);
 	}
 
 	@Override public void onPause() {
 		super.onPause();
-		disableNFCReaderMode();
-	}
-
-	private boolean enableNFCReaderMode () {
-		Log.d(TAG, "enableNFCReaderMode");
-		Bundle options = new Bundle();
-		//options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 30000);//30 secs to check NFC reader
-		myNfcAdapter.enableReaderMode(DNIeSigningActivity.this,
-				this,
-				NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
-						NfcAdapter.FLAG_READER_NFC_A |
-						NfcAdapter.FLAG_READER_NFC_B,
-				options);
-		return true;
-	}
-
-	private boolean disableNFCReaderMode() {
-		Log.d(TAG, "disableNFCReaderMode");
-		myNfcAdapter.disableReaderMode(DNIeSigningActivity.this);
-		return true;
+        LOGD(TAG, "disableNFCReaderMode");
+        myNfcAdapter.disableReaderMode(DNIeSigningActivity.this);
 	}
 
 	@Override
 	public void onTagDiscovered(Tag tag) {
-		Log.d(TAG, "onTagDiscovered");
+		LOGD(TAG, "onTagDiscovered");
 		tagFromIntent = tag;
-		exNfcA	 = NfcA.get(tagFromIntent);
-		exNfcB	 = NfcB.get(tagFromIntent);
-		exIsoDep = IsoDep.get(tagFromIntent);
+        NfcA exNfcA	 = NfcA.get(tagFromIntent);
+        NfcB exNfcB	 = NfcB.get(tagFromIntent);
+        IsoDep exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA!=null) || (exNfcB!=null) || (exIsoDep!=null)) {
 			new SendVoteTask().execute();
 		}
