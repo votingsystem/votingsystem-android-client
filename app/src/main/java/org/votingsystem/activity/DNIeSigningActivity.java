@@ -50,7 +50,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		}
 	};
 
-	public class SendVoteTask extends AsyncTask<Void, Integer, ResponseVS> {
+	public class SignWithDNIeTask extends AsyncTask<Void, Integer, ResponseVS> {
 
 		@Override
 	    protected void onPreExecute()  {
@@ -136,7 +136,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         NfcB exNfcB	 = NfcB.get(tagFromIntent);
         IsoDep exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA!=null) || (exNfcB!=null) || (exIsoDep!=null)) {
-			new SendVoteTask().execute();
+			new SignWithDNIeTask().execute();
 		}
 	}
 
