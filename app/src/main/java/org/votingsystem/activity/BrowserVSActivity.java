@@ -1,18 +1,20 @@
 package org.votingsystem.activity;
 
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
@@ -34,16 +36,19 @@ import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ *
+ * http://www.devahead.com/blog/2012/01/preserving-the-state-of-an-android-webview-on-screen-orientation-change/
  */
 public class BrowserVSActivity extends AppCompatActivity {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
-    private String viewerURL = null;
-    private TypeVS operationType;
+    private String viewerURL;
+    private String jsCommand;
     private AppVS appVS = null;
     private String broadCastId = BrowserVSActivity.class.getSimpleName();
     private WebView webView;
+    private FrameLayout webViewPlaceholder;
     private OperationVS operationVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -70,41 +75,80 @@ public class BrowserVSActivity extends AppCompatActivity {
     	super.onCreate(savedInstanceState);
         appVS = (AppVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
+        jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
         setContentView(R.layout.browservs);
         if(savedInstanceState != null) {
-            operationType = (TypeVS) savedInstanceState.getSerializable(ContextVS.TYPEVS_KEY);
+            operationVS = (OperationVS) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
         }
-        if(getResources().getBoolean(R.bool.portrait_only)){
+        /*if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        loadUrl(viewerURL, getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY));
+        } else setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);*/
+        initUI();
     }
 
-    private void loadUrl(String viewerURL, final String jsCommand) {
-        LOGD(TAG + ".viewerURL", "viewerURL: " + viewerURL);
-        webView = (WebView) findViewById(R.id.browservs_content);
-        WebSettings webSettings = webView.getSettings();
-        setProgressDialogVisible(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setLoadWithOverviewMode(true);
-        webView.setClickable(true);
-        webSettings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(this, "clientTool");
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setDomStorageEnabled(true);
-        webView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                if(jsCommand != null) webView.loadUrl(jsCommand);
-                setProgressDialogVisible(false);
-            }
-        });
-        webView.loadUrl(viewerURL);
+    protected void initUI() {
+        webViewPlaceholder = ((FrameLayout)findViewById(R.id.webViewPlaceholder));
+        if (webView == null) {
+            setProgressDialogVisible(true);
+            webView = new WebView(this);
+            webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            webView.getSettings().setUseWideViewPort(true);
+            webView.getSettings().setLoadWithOverviewMode(true);
+            webView.setClickable(true);
+            webView.getSettings().setSupportZoom(true);
+            webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+            webView.setScrollbarFadingEnabled(true);
+            webView.getSettings().setLoadsImagesAutomatically(true);
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.addJavascriptInterface(this, "clientTool");
+            webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+            webView.getSettings().setDomStorageEnabled(true);
+            // Load the URLs inside the WebView, not in the external web browser
+            webView.setWebViewClient(new WebViewClient() {
+                public void onPageFinished(WebView view, String url) {
+                    webView.loadUrl("javascript:setClientToolConnected()");
+                    if (jsCommand != null) webView.loadUrl(jsCommand);
+                    setProgressDialogVisible(false);
+                }
+            });
+            webView.loadUrl(viewerURL);
+        }
+        // Attach the WebView to its placeholder
+        webViewPlaceholder.addView(webView);
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (webView != null) {
+            // Remove the WebView from the old placeholder
+            webViewPlaceholder.removeView(webView);
+        }
+        super.onConfigurationChanged(newConfig);
+        // Load the layout resource for the new configuration
+        setContentView(R.layout.browservs);
+        initUI();
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save the state of the WebView
+        webView.saveState(outState);
+        outState.putSerializable(ContextVS.OPERATIONVS_KEY, operationVS);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore the state of the WebView
+        webView.restoreState(savedInstanceState);
     }
 
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getSupportFragmentManager());
+                    getString(R.string.wait_msg), getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
@@ -199,12 +243,6 @@ public class BrowserVSActivity extends AppCompatActivity {
     @Override public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-    }
-
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(ContextVS.URL_KEY, viewerURL);
-        outState.putSerializable(ContextVS.TYPEVS_KEY, operationType);
     }
 
 }

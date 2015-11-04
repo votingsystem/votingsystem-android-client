@@ -9,10 +9,12 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
+import java.io.Serializable;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class OperationVS {
+public class OperationVS implements Serializable {
 
 	public static final String TAG = OperationVS.class.getSimpleName();
 

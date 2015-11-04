@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -22,6 +23,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 
