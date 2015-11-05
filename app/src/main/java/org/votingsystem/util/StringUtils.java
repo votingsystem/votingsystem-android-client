@@ -27,7 +27,8 @@ import java.util.Random;
 public class StringUtils {
 	
 	public static final String TAG = StringUtils.class.getSimpleName();
- 
+
+
     public static String getStringFromInputStream(InputStream input) throws IOException {
     	ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buf =new byte[4096];

@@ -18,8 +18,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
+import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
@@ -159,7 +159,22 @@ public class BrowserVSActivity extends AppCompatActivity {
     @JavascriptInterface public void setMessage (String appMessage) {
         LOGD(TAG + ".setMessage", "appMessage: " + appMessage);
         try {
-            operationVS = JSON.readValue(appMessage, OperationVS.class);
+            String decodedStr = new String(Base64.decode(appMessage.getBytes()), "UTF-8");
+            final String urlDecoded = java.net.URLDecoder.decode(decodedStr, "UTF-8");
+            webView.post(new Runnable() {
+                @Override public void run() {
+                    webView.loadUrl("javascript:clientTool.unescapedMsg(unescape('" + urlDecoded + "'))");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @JavascriptInterface
+    public void unescapedMsg(String jsonStr) {
+        try {
+            operationVS = JSON.readValue(jsonStr, OperationVS.class);
             switch(operationVS.getTypeVS()) {
                 default:
                     processSignatureOperation(operationVS);
@@ -198,14 +213,16 @@ public class BrowserVSActivity extends AppCompatActivity {
         this.doubleBackToExitPressedOnce = true;
         if(showBrowserAdvice) {
             Snackbar.make(webViewPlaceholder, getString(R.string.double_back_advice), Snackbar.LENGTH_LONG)
-                .setAction(getString(R.string.no_more_advice), new View.OnClickListener() {
-                    @Override public void onClick(View view) {
-                        showBrowserAdvice = false;
-                    }
-                }).show();
+                    .setAction(getString(R.string.no_more_advice), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showBrowserAdvice = false;
+                        }
+                    }).show();
         }
         new Handler().postDelayed(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 doubleBackToExitPressedOnce = false;
             }
         }, 700);
