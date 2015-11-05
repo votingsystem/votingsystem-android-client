@@ -7,14 +7,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
@@ -170,19 +174,41 @@ public class BrowserVSActivity extends AppCompatActivity {
         Intent startIntent = new Intent(appVS, WebSocketService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
-        runOnUiThread(new Runnable() { @Override public void run() { setProgressDialogVisible(true); } });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setProgressDialogVisible(true);
+            }
+        });
         startService(startIntent);
     }
 
-    @Override public void onBackPressed() {
+
+    boolean doubleBackToExitPressedOnce = false;
+    boolean showBrowserAdvice = true;
+
+    @Override
+    public void onBackPressed() {
         String webUrl = webView.getUrl();
         LOGD(TAG + ".onBackPressed", "webUrl: " + webUrl);
-        if (webView.isFocused() && webView.canGoBack() && webUrl.contains("mode=details")) {
-            webView.goBack();
-        } else {
+        if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
-            finish();
+            return;
+        } else webView.loadUrl("javascript:app.back()");
+        this.doubleBackToExitPressedOnce = true;
+        if(showBrowserAdvice) {
+            Snackbar.make(webViewPlaceholder, getString(R.string.double_back_advice), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.no_more_advice), new View.OnClickListener() {
+                    @Override public void onClick(View view) {
+                        showBrowserAdvice = false;
+                    }
+                }).show();
         }
+        new Handler().postDelayed(new Runnable() {
+            @Override public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 700);
     }
 
     private void processSignatureOperation(OperationVS operationVS) {
