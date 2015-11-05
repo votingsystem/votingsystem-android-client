@@ -20,7 +20,7 @@ public class OperationVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private TypeVS typeVS;
+    private TypeVS operation;
     private Integer statusCode;
     private String caption;
     private String message;
@@ -45,27 +45,24 @@ public class OperationVS implements Serializable {
     }
     
     public OperationVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+        this.operation = typeVS;
     }
 
-    public OperationVS(TypeVS typeVS, Uri uriData) {
-        this.typeVS = typeVS;
+    public OperationVS(TypeVS operation, Uri uriData) {
+        this.operation = operation;
         this.uriData = uriData;
     }
 
-    public OperationVS(String typeVS) {
-        this.typeVS = TypeVS.valueOf(typeVS);
-    }
     
     public OperationVS(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
     
-    public OperationVS(int statusCode, String message, TypeVS typeVS) {
+    public OperationVS(int statusCode, String message, TypeVS operation) {
         this.statusCode = statusCode;
         this.message = message;
-        this.typeVS = typeVS;
+        this.operation = operation;
     }
 
     public String getUUID() {
@@ -75,14 +72,6 @@ public class OperationVS implements Serializable {
     public OperationVS setUUID(String UUID) {
         this.UUID = UUID;
         return this;
-    }
-
-    public TypeVS getTypeVS() {
-        return typeVS;
-    }
-
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
     }
 
     public Integer getStatusCode() {
@@ -198,6 +187,14 @@ public class OperationVS implements Serializable {
 
     public void setJsonStr(String jsonStr) {
         this.jsonStr = jsonStr;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
     }
 }
 

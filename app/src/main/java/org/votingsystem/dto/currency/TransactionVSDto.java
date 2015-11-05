@@ -690,7 +690,7 @@ public class TransactionVSDto implements Serializable {
         }
         UserVSDto toUserVS = new UserVSDto();
         toUserVS.setName(transactionDto.getFromUser());
-        if(operationVS.getTypeVS() == TypeVS.FROM_USERVS) {
+        if(operationVS.getOperation() == TypeVS.FROM_USERVS) {
             if(transactionDto.getToUserIBAN().size() != 1) throw new ExceptionVS("FROM_USERVS must have " +
                     "'one' receptor and it has '" + transactionDto.getToUserIBAN().size() + "'");
             toUserVS.setIBAN(transactionDto.getToUserIBAN().iterator().next());

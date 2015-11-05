@@ -47,6 +47,7 @@ public class BrowserVSActivity extends AppCompatActivity {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
+
     private String viewerURL;
     private String jsCommand;
     private AppVS appVS = null;
@@ -54,6 +55,9 @@ public class BrowserVSActivity extends AppCompatActivity {
     private WebView webView;
     private FrameLayout webViewPlaceholder;
     private OperationVS operationVS;
+    private boolean doubleBackEnabled = true;
+    private boolean doubleBackToExitPressedOnce = false;
+    private boolean showBrowserAdvice = true;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -80,6 +84,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         appVS = (AppVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
+        doubleBackEnabled = getIntent().getBooleanExtra(ContextVS.DOUBLE_BACK_KEY, true);
         setContentView(R.layout.browservs);
         if(savedInstanceState != null) {
             operationVS = (OperationVS) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
@@ -118,7 +123,6 @@ public class BrowserVSActivity extends AppCompatActivity {
             });
             webView.loadUrl(viewerURL);
         }
-        // Attach the WebView to its placeholder
         webViewPlaceholder.addView(webView);
     }
 
@@ -126,18 +130,15 @@ public class BrowserVSActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (webView != null) {
-            // Remove the WebView from the old placeholder
             webViewPlaceholder.removeView(webView);
         }
         super.onConfigurationChanged(newConfig);
-        // Load the layout resource for the new configuration
         setContentView(R.layout.browservs);
         initUI();
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // Save the state of the WebView
         webView.saveState(outState);
         outState.putSerializable(ContextVS.OPERATIONVS_KEY, operationVS);
     }
@@ -145,7 +146,6 @@ public class BrowserVSActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        // Restore the state of the WebView
         webView.restoreState(savedInstanceState);
     }
 
@@ -175,7 +175,7 @@ public class BrowserVSActivity extends AppCompatActivity {
     public void unescapedMsg(String jsonStr) {
         try {
             operationVS = JSON.readValue(jsonStr, OperationVS.class);
-            switch(operationVS.getTypeVS()) {
+            switch(operationVS.getOperation()) {
                 default:
                     processSignatureOperation(operationVS);
             }
@@ -198,15 +198,11 @@ public class BrowserVSActivity extends AppCompatActivity {
         startService(startIntent);
     }
 
-
-    boolean doubleBackToExitPressedOnce = false;
-    boolean showBrowserAdvice = true;
-
     @Override
     public void onBackPressed() {
         String webUrl = webView.getUrl();
         LOGD(TAG + ".onBackPressed", "webUrl: " + webUrl);
-        if (doubleBackToExitPressedOnce) {
+        if (doubleBackToExitPressedOnce || !doubleBackEnabled) {
             super.onBackPressed();
             return;
         } else webView.loadUrl("javascript:app.back()");
@@ -225,7 +221,7 @@ public class BrowserVSActivity extends AppCompatActivity {
             public void run() {
                 doubleBackToExitPressedOnce = false;
             }
-        }, 700);
+        }, 500);
     }
 
     private void processSignatureOperation(OperationVS operationVS) {
@@ -241,7 +237,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         finish();
     }
 
-    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction)  {
+    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction) {
         LOGD(TAG + ".sendMessageToBrowserApp", "statusCode: " + statusCode + " - message: " +
                 message + " - callbackFunction: " + callbackFunction);
         try {
@@ -262,17 +258,6 @@ public class BrowserVSActivity extends AppCompatActivity {
         String jsCommand = "javascript:" + callbackFunction + "(" + message + ")";
         webView.loadUrl(jsCommand);
         setProgressDialogVisible(false);
-    }
-
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override public void onResume() {

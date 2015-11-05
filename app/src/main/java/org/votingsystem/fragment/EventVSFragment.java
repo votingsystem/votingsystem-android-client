@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.BrowserVSActivity;
 import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
@@ -270,9 +271,9 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
-                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(FRAGMENT_KEY, EventVSStatsFragment.class.getName());
-                intent.putExtra(ContextVS.ITEM_ID_KEY, eventVS.getId());
+                Intent intent = new Intent(AppVS.getInstance(), BrowserVSActivity.class);
+                intent.putExtra(ContextVS.URL_KEY, eventVS.getStatsServiceURL());
+                intent.putExtra(ContextVS.DOUBLE_BACK_KEY, false);
                 startActivity(intent);
                 return true;
             default:
