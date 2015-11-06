@@ -24,7 +24,9 @@ public class OperationVS implements Serializable {
     private Integer statusCode;
     private String caption;
     private String message;
+    private String email;
     private String serviceURL;
+    private String documentURL;
     private String serverURL;
     private String receiverName;
     private String signedMessageSubject;
@@ -195,6 +197,22 @@ public class OperationVS implements Serializable {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDocumentURL() {
+        return documentURL;
+    }
+
+    public void setDocumentURL(String documentURL) {
+        this.documentURL = documentURL;
     }
 }
 

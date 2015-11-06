@@ -1,11 +1,14 @@
 package org.votingsystem.activity;
 
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.net.MailTo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
@@ -120,12 +123,36 @@ public class BrowserVSActivity extends AppCompatActivity {
                     if (jsCommand != null) webView.loadUrl(jsCommand);
                     setProgressDialogVisible(false);
                 }
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    if (url.startsWith("mailto:")) {
+                        MailTo mt = MailTo.parse(url);
+                        launchEmailClient(mt.getTo(), mt.getSubject(), mt.getBody(), mt.getCc());
+                        view.reload();
+                        return true;
+                    } else view.loadUrl(url);
+                    return true;
+                }
             });
             webView.loadUrl(viewerURL);
         }
         webViewPlaceholder.addView(webView);
     }
 
+    private void launchEmailClient(String address, String subject, String body, String cc) {
+        /*Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] { address });
+        intent.putExtra(Intent.EXTRA_TEXT, body);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_CC, cc);
+        intent.setType("message/rfc822");*/
+        if(subject == null) subject = "";
+        if(body == null) body = "";
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri data = Uri.parse("mailto:?subject=" + subject + "&to=" + address + "&body=" + body);
+        intent.setData(data);
+        startActivity(intent);
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -176,6 +203,12 @@ public class BrowserVSActivity extends AppCompatActivity {
         try {
             operationVS = JSON.readValue(jsonStr, OperationVS.class);
             switch(operationVS.getOperation()) {
+                case BROWSER_URL:
+                    if(operationVS.getEmail() != null) {
+                        launchEmailClient(operationVS.getEmail() , operationVS.getSubject(),
+                                operationVS.getMessage(), null);
+                    }
+                    break;
                 default:
                     processSignatureOperation(operationVS);
             }

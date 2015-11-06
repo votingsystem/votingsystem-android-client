@@ -139,8 +139,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
                 .getIdentifier("android:id/search_close_btn", null, null);
         ImageView searchCloseButton = (ImageView)searchView.findViewById(searchCloseButtonId);
         searchCloseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            @Override public void onClick(View v) {
                 clearSearchResult();
             }
         });
@@ -203,7 +202,8 @@ public class EventVSSearchActivity extends AppCompatActivity {
     }
 
     private void clearSearchResult() {
-        showSearchResult(Collections.<EventVSDto>emptyList());
+        searchView.setQuery("", false);
+        num_results.setText("");
         search_query.setText("");
     }
 
