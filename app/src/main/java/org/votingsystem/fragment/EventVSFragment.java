@@ -64,7 +64,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     public static final String TAG = EventVSFragment.class.getSimpleName();
 
     public static final int SIGN_ACCESS_REQUEST = 0;
-    public static final int CANCEL_VOTE = 0;
+    public static final int CANCEL_VOTE = 1;
 
     private EventVSDto eventVS;
     private VoteVSHelper voteVSHelper;
@@ -286,8 +286,8 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         LOGD(TAG + ".onActivityResult", "eventVS.getSubject(): " + eventVS.getSubject());
-        ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(SIGN_ACCESS_REQUEST == requestCode) {
+        if(SIGN_ACCESS_REQUEST == requestCode && data != null) {
+            ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(responseVS != null) {
                 launchVoteService(pendingOperation, responseVS.getSMIME());
             } else {
