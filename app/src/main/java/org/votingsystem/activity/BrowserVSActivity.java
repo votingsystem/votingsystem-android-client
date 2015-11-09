@@ -20,10 +20,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
@@ -31,6 +34,7 @@ import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
@@ -68,10 +72,10 @@ public class BrowserVSActivity extends AppCompatActivity {
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(responseVS.getOperation() != null) {
             if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                sendMessageToBrowserApp(responseVS.getMessage(),
+                invokeOperationCallback(responseVS.getMessage(),
                         responseVS.getOperation().getCallerCallback());
             } else {
-                sendMessageToBrowserApp(responseVS.getStatusCode(),
+                invokeOperationCallback(responseVS.getStatusCode(),
                         responseVS.getNotificationMessage(), responseVS.getOperation().getCallerCallback());
             }
         } else MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
@@ -207,12 +211,43 @@ public class BrowserVSActivity extends AppCompatActivity {
                                 operationVS.getMessage(), null);
                     }
                     break;
+                case REPRESENTATIVE_STATE:
+                    RepresentationStateDto representationState = PrefUtils.getRepresentationState();
+                    invokeOperationCallback(representationState, operationVS.getCallerCallback());
+                    break;
                 default:
-                    processSignatureOperation(operationVS);
+                    LOGD(TAG, "unknown operation: " + operationVS.getOperation());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    public void invokeOperationCallback(Object dto, String callerCallback) {
+        try {
+            String dtoStr = JSON.getMapper().writeValueAsString(dto);
+            invokeOperationCallback(dtoStr, callerCallback);
+        } catch (JsonProcessingException e) { e.printStackTrace(); }
+    }
+
+    public void invokeOperationCallback(String dtoStr, String callerCallback) {
+        try {
+            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8")));
+            final String jsCommand = "javascript:setClientToolMessage('" + callerCallback + "','" +
+                    base64EncodedMsg + "')";
+            LOGD(TAG, "jsCommand: " + jsCommand);
+            webView.post(new Runnable() {
+                @Override public void run() {
+                    webView.loadUrl(jsCommand);
+                }
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace(); }
+    }
+
+    public void invokeOperationCallback(int statusCode, String message, String callerCallback) {
+        Map resultMap = new HashMap();
+        resultMap.put("statusCode", statusCode);
+        resultMap.put("message", message);
+        invokeOperationCallback(resultMap, callerCallback);
     }
 
     private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
@@ -253,42 +288,6 @@ public class BrowserVSActivity extends AppCompatActivity {
                 doubleBackToExitPressedOnce = false;
             }
         }, 500);
-    }
-
-    private void processSignatureOperation(OperationVS operationVS) {
-        LOGD(TAG + ".processSignatureOperation", "processSignatureOperation");
-        PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                getString(R.string.enter_signature_pin_msg), false, null);
-    }
-
-    private void sendResult(int result, String message) {
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra(ContextVS.MESSAGE_KEY, message);
-        setResult(result, resultIntent);
-        finish();
-    }
-
-    public void sendMessageToBrowserApp(int statusCode, String message, String callbackFunction) {
-        LOGD(TAG + ".sendMessageToBrowserApp", "statusCode: " + statusCode + " - message: " +
-                message + " - callbackFunction: " + callbackFunction);
-        try {
-            Map resultMap = new HashMap();
-            resultMap.put("statusCode", statusCode);
-            resultMap.put("message", message);
-            String jsCommand = "javascript:" + callbackFunction + "(" +
-                    JSON.writeValueAsString(resultMap) + ")";
-            webView.loadUrl(jsCommand);
-            setProgressDialogVisible(false);
-        } catch (Exception ex) { ex.printStackTrace(); }
-    }
-
-
-    public void sendMessageToBrowserApp(String message, String callbackFunction) {
-        LOGD(TAG + ".sendMessageToBrowserApp", "statusCode: " + message +
-                " - callbackFunction: " + callbackFunction);
-        String jsCommand = "javascript:" + callbackFunction + "(" + message + ")";
-        webView.loadUrl(jsCommand);
-        setProgressDialogVisible(false);
     }
 
     @Override public void onResume() {
