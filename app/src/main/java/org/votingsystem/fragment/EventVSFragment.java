@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.votingsystem.util.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.util.ContextVS.MAX_SUBJECT_SIZE;
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -63,6 +62,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     public static final String TAG = EventVSFragment.class.getSimpleName();
+
+    public static final int SIGN_ACCESS_REQUEST = 0;
+    public static final int CANCEL_VOTE = 0;
 
     private EventVSDto eventVS;
     private VoteVSHelper voteVSHelper;
@@ -227,12 +229,11 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                     try {
                         pendingOperation = TypeVS.CANCEL_VOTE;
                         Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
-                        intent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                         intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(voteVSHelper.getVoteCanceler()));
                         intent.putExtra(ContextVS.USER_KEY, AppVS.getInstance().getAccessControl().getName());
                         intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.cancel_vote_msg_subject));
                         intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cancel_vote_lbl));
-                        startActivity(intent);
+                        startActivityForResult(intent, CANCEL_VOTE);
                     } catch (Exception ex) { ex.printStackTrace(); }
                 } else {
                     PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
@@ -278,6 +279,21 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        LOGD(TAG + ".onActivityResult", "eventVS.getSubject(): " + eventVS.getSubject());
+        ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        if(SIGN_ACCESS_REQUEST == requestCode) {
+            if(responseVS != null) {
+                launchVoteService(pendingOperation, responseVS.getSMIME());
+            } else {
+                setOptionButtonsEnabled(true);
+                setProgressDialogVisible(false, null);
+            }
         }
     }
 
@@ -368,14 +384,13 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
                 voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
                 AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
-                intent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                 intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(requestDto));
                 intent.putExtra(ContextVS.USER_KEY, AppVS.getInstance().getAccessControl().getName());
                 intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.request_msg_subject,
                         voteVSHelper.getEventVS().getId()));
                 intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.vote_selected_msg,
                         optionSelected.getContent()));
-                startActivity(intent);
+                startActivityForResult(intent, SIGN_ACCESS_REQUEST);
             } else {
                 PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
                         getString(R.string.option_selected_msg, pinMsgPart), false, TypeVS.SEND_VOTE);
@@ -387,13 +402,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-        ResponseVS responseVS = AppVS.getInstance().removeDNIeSignature(broadCastId);
-        if(responseVS != null) {
-            launchVoteService(pendingOperation, responseVS.getSMIME());
-        } else {
-            setOptionButtonsEnabled(true);
-            setProgressDialogVisible(false, null);
-        }
     }
 
     @Override public void onPause() {

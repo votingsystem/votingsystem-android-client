@@ -37,7 +37,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.votingsystem.util.ContextVS.FRAGMENT_KEY;

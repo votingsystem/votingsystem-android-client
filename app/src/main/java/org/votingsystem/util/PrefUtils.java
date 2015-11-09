@@ -112,7 +112,7 @@ public class PrefUtils {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(ContextVS.CAN_KEY, CAN);
+            editor.putString(ContextVS.CAN_KEY, CAN.trim());
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }

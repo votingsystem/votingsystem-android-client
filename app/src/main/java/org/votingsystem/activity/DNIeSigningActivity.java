@@ -1,5 +1,7 @@
 package org.votingsystem.activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
@@ -12,17 +14,31 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.bouncycastle2.cert.jcajce.JcaCertStore;
+import org.bouncycastle2.util.Store;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
+import org.votingsystem.signature.smime.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.ui.DNIePasswordDialog;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+
+import es.gob.jmulticard.jse.provider.DnieProvider;
+import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -31,7 +47,9 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 
 	public static final String TAG = DNIeSigningActivity.class.getSimpleName();
 
-    private String serviceCaller;
+	public static final String CERT_AUTENTICATION = "CertAutenticacion";
+	public static final String CERT_SIGN = "CertFirmaDigital";
+
     private TypeVS operation;
 	private String textToSign;
 	private String toUser;
@@ -55,6 +73,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		}
 	};
 
+
 	public class SignWithDNIeTask extends AsyncTask<Void, Integer, ResponseVS> {
 
 		@Override
@@ -69,12 +88,30 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	    protected ResponseVS doInBackground(Void... arg0) {
 			ResponseVS responseVS = null;
 			try  {
-				SMIMEMessage accessRequest = AppVS.getInstance().signMessageWithDNIe(tagFromIntent,
-                        PrefUtils.getDNIeCAN(), DNIeSigningActivity.this,
-                        toUser, textToSign, msgSubject, AppVS.getInstance().getTimeStampServiceURL());
+				DnieProvider p = new DnieProvider();
+				p.setProviderTag(tagFromIntent);
+				p.setProviderCan(PrefUtils.getDNIeCAN());
+				Security.insertProviderAt(p, 1);
+				//Deactivate fastmode
+				System.setProperty("es.gob.jmulticard.fastmode", "false");
+				DNIePasswordDialog myFragment = new DNIePasswordDialog(DNIeSigningActivity.this, null, true);
+				DNIeDialogManager.setDialogUIHandler(myFragment);
+				KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
+				ksUserDNIe.load(null, null);
+				//force load real certs
+				ksUserDNIe.getKey(CERT_SIGN, null);
+				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
+				PrivateKey privateKey = (PrivateKey) ksUserDNIe.getKey(CERT_SIGN, null);
+				Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
+				Store cerStore = new JcaCertStore(Arrays.asList(chain));
+
+				SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(privateKey, userCert, cerStore,
+						toUser, textToSign, msgSubject);
+				SMIMEMessage accessRequest = new MessageTimeStamper(smimeMessage,
+						AppVS.getInstance().getTimeStampServiceURL()).call();
+
                 responseVS = new ResponseVS(ResponseVS.SC_OK, accessRequest);
                 responseVS.setTypeVS(operation);
-                AppVS.getInstance().setDNIeSignature(serviceCaller,responseVS);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 				showMessageDialog(getString(R.string.error_lbl), getString(R.string.dnie_connection_error_msg));
@@ -90,7 +127,12 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 			LOGD(TAG, "onPostExecute");
             myHandler.post(askForRead);
             ProgressDialogFragment.hide(getSupportFragmentManager());
-            if(responseVS != null) finish();
+            if(responseVS != null) {
+				Intent resultIntent = new Intent();
+				resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+				setResult(Activity.RESULT_OK, resultIntent);
+				finish();
+			}
         }
     }
 
@@ -106,7 +148,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
-        serviceCaller = getIntent().getExtras().getString(ContextVS.CALLER_KEY);
         operation = (TypeVS) getIntent().getExtras().getSerializable(ContextVS.TYPEVS_KEY);
         textToSign = getIntent().getExtras().getString(ContextVS.MESSAGE_CONTENT_KEY);
         toUser = getIntent().getExtras().getString(ContextVS.USER_KEY);

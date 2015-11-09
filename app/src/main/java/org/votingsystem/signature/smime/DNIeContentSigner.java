@@ -1,8 +1,6 @@
 package org.votingsystem.signature.smime;
 
 
-import android.content.Context;
-import android.nfc.Tag;
 import android.util.Log;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
@@ -11,39 +9,26 @@ import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle2.asn1.smime.SMIMECapability;
 import org.bouncycastle2.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.SignerInfoGenerator;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.AppVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.ui.DNIePasswordDialog;
 import org.votingsystem.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.Signature;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-
-import es.gob.jmulticard.jse.provider.DnieProvider;
-import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
 
 import static org.votingsystem.util.ContextVS.DNIe_SIGN_MECHANISM;
 import static org.votingsystem.util.ContextVS.PROVIDER;
@@ -55,35 +40,16 @@ public class DNIeContentSigner implements ContentSigner {
 
     public static final String TAG = DNIeContentSigner.class.getSimpleName();
 
-    public static final String CERT_AUTENTICATION = "CertAutenticacion";
-    public static final String CERT_SIGN = "CertFirmaDigital";
-    
+    private X509Certificate userCert;
     private Store cerStore;
     private SignatureOutputStream stream;
     private PrivateKey privateKey;
-    private X509Certificate userCert;
-    private String signatureAlgorithm;
 
-    private DNIeContentSigner(Tag nfcTag, String CAN, char[] password, Context context)
-            throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
-            IOException, CertificateException {
-        signatureAlgorithm = DNIe_SIGN_MECHANISM;
-        final DnieProvider p = new DnieProvider();
-        p.setProviderTag(nfcTag);
-        p.setProviderCan(CAN);
-        Security.insertProviderAt(p, 1);
-        //Deactivate fastmode
-        System.setProperty("es.gob.jmulticard.fastmode", "false");
-        DNIePasswordDialog myFragment = new DNIePasswordDialog(context, password, true);
-        DNIeDialogManager.setDialogUIHandler(myFragment);
-        KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
-        ksUserDNIe.load(null, null);
-        //force load real certs
-        ksUserDNIe.getKey(CERT_SIGN, null);
-        userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
-        privateKey = (PrivateKey) ksUserDNIe.getKey(CERT_SIGN, null);
-        Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
-        cerStore = new JcaCertStore(Arrays.asList(chain));
+
+    private DNIeContentSigner(PrivateKey privateKey, X509Certificate userCert, Store cerStore) {
+        this.privateKey = privateKey;
+        this.userCert = userCert;
+        this.cerStore = cerStore;
         stream = new SignatureOutputStream();
     }
 
@@ -96,7 +62,7 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     @Override public AlgorithmIdentifier getAlgorithmIdentifier() {
-        return new DefaultSignatureAlgorithmIdentifierFinder().find(signatureAlgorithm);
+        return new DefaultSignatureAlgorithmIdentifierFinder().find(DNIe_SIGN_MECHANISM);
     }
 
     @Override public OutputStream getOutputStream() {
@@ -128,7 +94,7 @@ public class DNIeContentSigner implements ContentSigner {
         byte[] getSignature() {
             byte[] sigBytes = null;
             try {
-                Signature signature = Signature.getInstance(signatureAlgorithm, "DNIeJCAProvider");
+                Signature signature = Signature.getInstance(DNIe_SIGN_MECHANISM, "DNIeJCAProvider");
                 signature.initSign(privateKey);
                 signature.update(bOut.toByteArray());
                 sigBytes = signature.sign();
@@ -140,9 +106,8 @@ public class DNIeContentSigner implements ContentSigner {
         }
     }
 
-    public static SMIMEMessage getSMIME(Tag nfcTag, String CAN, Context context,
-                String toUser, String textToSign, String subject, char[] password,
-                Header... headers) throws Exception {
+    public static SMIMEMessage getSMIME(PrivateKey privateKey, X509Certificate userCert, Store cerStore,
+                String toUser, String textToSign, String subject, Header... headers) throws Exception {
         if (subject == null) throw new ExceptionVS("missing subject");
         if (textToSign == null) throw new ExceptionVS("missing text to sign");
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
@@ -152,7 +117,7 @@ public class DNIeContentSigner implements ContentSigner {
         caps.addCapability(SMIMECapability.dES_CBC);
         signedAttrs.add(new SMIMECapabilitiesAttribute(caps));
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
-        DNIeContentSigner dnieContentSigner = new DNIeContentSigner(nfcTag, CAN, password, context);
+        DNIeContentSigner dnieContentSigner = new DNIeContentSigner(privateKey, userCert, cerStore);
         SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
         dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(PROVIDER);
         dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));

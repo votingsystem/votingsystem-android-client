@@ -1,13 +1,11 @@
 package org.votingsystem;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Looper;
 import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
@@ -27,7 +25,6 @@ import org.votingsystem.dto.voting.ControlCenterDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.BootStrapService;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.signature.smime.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.signature.util.AESParams;
@@ -58,8 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.mail.Header;
 
 import static org.votingsystem.util.ContextVS.ALGORITHM_RNG;
 import static org.votingsystem.util.ContextVS.ANDROID_PROVIDER;
@@ -96,7 +91,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
-    private Map<String, ResponseVS> dnieSignatureMap = new HashMap<>();
 
     private static AppVS INSTANCE;
 
@@ -324,15 +318,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return new MessageTimeStamper(smimeMessage, timeStampServiceURL).call();
     }
 
-    //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
-    public SMIMEMessage signMessageWithDNIe(Tag nfcTag, String CAN, Activity activity, String toUser,
-            String textToSign, String subject, String timeStampServiceURL, Header... headers) throws Exception {
-        LOGD(TAG + ".signMessageWithDNIe", "subject: " + subject);
-        SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(nfcTag, CAN, activity, toUser,
-                textToSign, subject, null, headers);
-        return new MessageTimeStamper(smimeMessage, timeStampServiceURL).call();
-    }
-
     public SMIMEMessage signMessage(String toUser, String textToSign, String subject) throws Exception {
         return signMessage(toUser, textToSign, subject, getTimeStampServiceURL());
     }
@@ -417,14 +402,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
 
     public void setWithSocketConnection(boolean withSocketConnection) {
         this.withSocketConnection = withSocketConnection;
-    }
-
-    public ResponseVS removeDNIeSignature(String broadcastId) {
-        return dnieSignatureMap.remove(broadcastId);
-    }
-
-    public void setDNIeSignature(String broadcastId, ResponseVS dnieSignature) {
-        dnieSignatureMap.put(broadcastId, dnieSignature);
     }
 
 }
