@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -21,8 +22,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
@@ -51,6 +50,8 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class BrowserVSActivity extends AppCompatActivity {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
+
+    private static final int FLAGS = Base64.NO_WRAP | Base64.URL_SAFE;
 
 
     private String viewerURL;
@@ -188,11 +189,10 @@ public class BrowserVSActivity extends AppCompatActivity {
     @JavascriptInterface public void setMessage (String appMessage) {
         LOGD(TAG + ".setMessage", "appMessage: " + appMessage);
         try {
-            String decodedStr = new String(Base64.decode(appMessage.getBytes()), "UTF-8");
-            final String urlDecoded = java.net.URLDecoder.decode(decodedStr, "UTF-8");
+            final String decodedStr = new String(Base64.decode(appMessage.getBytes(), FLAGS), "UTF-8");
             webView.post(new Runnable() {
                 @Override public void run() {
-                    webView.loadUrl("javascript:clientTool.unescapedMsg(unescape('" + urlDecoded + "'))");
+                    webView.loadUrl("javascript:clientTool.unescapedMsg(unescape('" + decodedStr + "'))");
                 }
             });
         } catch (Exception e) {
@@ -230,7 +230,7 @@ public class BrowserVSActivity extends AppCompatActivity {
 
     public void invokeOperationCallback(String dtoStr, String callerCallback) {
         try {
-            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8")));
+            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"), FLAGS));
             final String jsCommand = "javascript:setClientToolMessage('" + callerCallback + "','" +
                     base64EncodedMsg + "')";
             LOGD(TAG, "jsCommand: " + jsCommand);
@@ -271,7 +271,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         if (doubleBackToExitPressedOnce || !doubleBackEnabled) {
             super.onBackPressed();
             return;
-        } else webView.loadUrl("javascript:app.back()");
+        } else webView.loadUrl("javascript:try { app.back() } catch(e) { window.history.back() }");
         this.doubleBackToExitPressedOnce = true;
         if(showBrowserAdvice) {
             Snackbar.make(webViewPlaceholder, getString(R.string.double_back_advice), Snackbar.LENGTH_LONG)
