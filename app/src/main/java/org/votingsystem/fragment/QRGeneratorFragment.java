@@ -103,9 +103,10 @@ public class QRGeneratorFragment extends Fragment {
 
     private void generateQR() {
         LOGD(TAG + ".generateQR", "generateQR");
+        subject.setError(null);
+        amount_text.setError(null);
         if(TextUtils.isEmpty(subject.getText().toString())){
-            MessageDialogFragment.showDialog(getString(R.string.error_lbl),
-                    getString(R.string.subject_missing_msg), getFragmentManager());
+            subject.setError(getString(R.string.subject_missing_msg));
             return ;
         }
         Integer selectedAmount = 0;
@@ -113,8 +114,7 @@ public class QRGeneratorFragment extends Fragment {
             selectedAmount = Integer.valueOf(amount_text.getText().toString());
         } catch (Exception ex) { LOGD(TAG + ".generateQR", "ERROR - amount_text:" + amount_text.getText());}
         if(selectedAmount <= 0) {
-            MessageDialogFragment.showDialog(getString(R.string.error_lbl),
-                    getString(R.string.min_withdrawal_msg), getFragmentManager());
+            amount_text.setError(getString(R.string.min_withdrawal_msg));
             return;
         }
         List<TransactionVSDto.Type> paymentOptions = new ArrayList<>();

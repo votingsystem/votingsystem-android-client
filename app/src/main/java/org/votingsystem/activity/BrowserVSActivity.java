@@ -22,12 +22,12 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ContentTypeVS;

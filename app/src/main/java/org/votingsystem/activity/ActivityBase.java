@@ -245,9 +245,11 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.currency_accounts:
-                intent = new Intent(this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, CurrencyAccountsPagerFragment.class.getName());
-                startActivity(intent);
+                getSupportActionBar().setDisplayShowCustomEnabled(false);
+                getSupportActionBar().setSubtitle(null);
+                CurrencyAccountsPagerFragment accountsFragment = new CurrencyAccountsPagerFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        accountsFragment, CurrencyAccountsPagerFragment.TAG).commit();
                 break;
             case R.id.wallet:
                 intent = new Intent(this, WalletActivity.class);
@@ -260,9 +262,11 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.fa_qrcode:
-                intent = new Intent(this, FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, QRActionsFragment.class.getName());
-                startActivity(intent);
+                getSupportActionBar().setDisplayShowCustomEnabled(false);
+                getSupportActionBar().setSubtitle(null);
+                QRActionsFragment qrFragment = new QRActionsFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        qrFragment, QRActionsFragment.TAG).commit();
                 break;
             case R.id.receipts:
                 intent = new Intent(getBaseContext(), ReceiptsMainActivity.class);
@@ -279,7 +283,6 @@ public class ActivityBase extends AppCompatActivity
                 startActivity(intent);
                 break;
         }
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

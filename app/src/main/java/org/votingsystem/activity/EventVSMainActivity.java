@@ -73,7 +73,6 @@ public class EventVSMainActivity extends ActivityBase {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         getSupportActionBar().setCustomView(spinnerContainer, lp);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setLogo(UIUtils.getLogoIcon(this, R.drawable.mail_mark_unread_32));
         getSupportActionBar().setSubtitle(getString(R.string.polls_lbl));
     }
 

@@ -9,27 +9,42 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <EditText android:id="@+id/subject"
-            android:layout_height="wrap_content"
-            android:layout_width="300dp"
-            android:singleLine="true"
-            android:imeOptions="actionNext"
-            android:hint="@string/subject_lbl"
-            android:gravity="center">
-            <requestFocus />
-        </EditText>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/subject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/subject_lbl"
+                android:imeActionLabel="@string/given_name_lbl"
+                android:imeOptions="actionNext"
+                android:nextFocusDown="@+id/request_button"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:gravity="center"/>
+        </android.support.design.widget.TextInputLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center">
-            <EditText android:id="@+id/amount"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:gravity="center">
-            </EditText>
+                android:layout_height="wrap_content">
+                <EditText
+                    android:id="@+id/amount"
+                    android:layout_width="100dp"
+                    android:inputType="number"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/amount_lbl"
+                    android:imeActionLabel="@string/given_name_lbl"
+                    android:imeOptions="actionNext"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:gravity="center"/>
+            </android.support.design.widget.TextInputLayout>
             <Spinner android:id="@+id/currency_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
