@@ -275,7 +275,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         this.doubleBackToExitPressedOnce = true;
         if(showBrowserAdvice) {
             Snackbar.make(webViewPlaceholder, getString(R.string.double_back_advice), Snackbar.LENGTH_LONG)
-                    .setAction(getString(R.string.no_more_advice), new View.OnClickListener() {
+                    .setAction(getString(R.string.understood_lbl), new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             showBrowserAdvice = false;

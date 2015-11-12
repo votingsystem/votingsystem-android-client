@@ -65,9 +65,6 @@
         <activity android:name="org.votingsystem.activity.EventVSPagerActivity" android:label="@string/app_name"
             android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.WalletActivity"
-            android:theme="@style/ThemeVS"/>
-
         <activity android:name="org.votingsystem.activity.FragmentContainerActivity"
             android:theme="@style/ThemeVS"/>
 
@@ -110,10 +107,6 @@
         <activity android:name="org.votingsystem.activity.RepresentativesMainActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.RepresentativePagerActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.ReceiptsMainActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.MessagesMainActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.MessagesPagerActivity" android:theme="@style/ThemeVS"/>
 

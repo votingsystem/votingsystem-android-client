@@ -87,7 +87,9 @@ public class CurrencyActivity extends AppCompatActivity {
                                     CurrencyActivity.this).setPositiveButton(getString(R.string.accept_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
-                                            startActivity(new Intent(appVS, WalletActivity.class));
+                                            Intent intent = new Intent(CurrencyActivity.this, ActivityBase.class);
+                                            intent.putExtra(ContextVS.FRAGMENT_KEY, R.id.wallet);
+                                            startActivity(intent);
                                         }
                                     });
                             UIUtils.showMessageDialog(builder);

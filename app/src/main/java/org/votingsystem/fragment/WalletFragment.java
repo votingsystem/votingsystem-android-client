@@ -150,6 +150,7 @@ public class WalletFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menu.clear();
         if(!walletLoaded) menuInflater.inflate(R.menu.wallet, menu);
         this.menu = menu;
     }

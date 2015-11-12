@@ -17,9 +17,10 @@ import android.support.v4.app.NotificationCompat;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.MessagesMainActivity;
+import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
+import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.service.WebSocketService;
 
@@ -152,7 +153,8 @@ public class Utils {
         final NotificationManager mgr = (NotificationManager)context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Intent clickIntent = new Intent(context, MessagesMainActivity.class);
+        Intent clickIntent = new Intent(context, FragmentContainerActivity.class);
+        clickIntent.putExtra(ContextVS.FRAGMENT_KEY, MessagesGridFragment.class.getName());
         PendingIntent pendingIntent = PendingIntent.getActivity(context,
                 ContextVS.NEW_MESSAGE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)

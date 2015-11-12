@@ -22,7 +22,15 @@
         <item name="android:actionBarWidgetTheme">@style/ThemeVS</item>
         <item name="android:panelFullBackground">@color/bkg_vs</item>
         <item name="android:itemTextAppearance">@style/popupItemTextStyle</item>
+        <item name="searchViewStyle">@style/ThemeVS.SearchView</item>
     </style>
+
+    <style name="ThemeVS.SearchView" parent="Widget.AppCompat.SearchView">
+        <item name="suggestionRowLayout">@color/bkg_vs</item>
+        <item name="queryBackground">@color/bkg_vs</item>
+        <item name="submitBackground">@color/bkg_vs</item>
+    </style>
+
     <style name="ItemVS">
         <item name="android:textColor">@color/frg_vs</item>
     </style>
@@ -39,18 +47,6 @@
         <item name="android:background">@color/bkg_vs</item>
         <item name="android:titleTextStyle">@style/ToolBarVS.TitleTextStyle</item>
         <item name="android:subtitleTextStyle">@style/ToolBarVS.SubTitleTextStyle</item>
-    </style>
-
-    <style name="SearchViewTheme" parent="Theme.AppCompat">
-        <item name="colorControlActivated">?android:colorAccent</item>
-        <item name="android:searchViewStyle">@style/Widget.Plaid.SearchView</item>
-    </style>
-
-    <style name="Widget.Plaid.SearchView" parent="android:style/Widget.Material.SearchView">
-        <item name="android:searchIcon">@null</item>
-        <item name="android:searchHintIcon">@null</item>
-        <item name="android:queryBackground">@null</item>
-        <item name="android:submitBackground">@null</item>
     </style>
 
     <style name="ToolBarVS.TitleTextStyle"

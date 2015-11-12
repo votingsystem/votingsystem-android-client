@@ -605,6 +605,6 @@
     <string name="dnie_sign_connecting_msg">estableciendo conexión ...</string>
     <string name="vote_selected_msg">voto: %1$s</string>
     <string name="double_back_advice">Pulse 2 veces seguidas ATRAS para salir</string>
-    <string name="no_more_advice">No mostrar más este mensaje</string>
+    <string name="understood_lbl">entendido</string>
     <string name="amount_lbl">cantidad</string>
 </resources>

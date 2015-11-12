@@ -8,11 +8,12 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -28,14 +29,10 @@ public class CurrencyAccountsPagerFragment extends Fragment {
     private static final int USER_ACCOUNTS_POS       = 0;
     private static final int TRANSANCTIONVS_LIST_POS = 1;
 
-    private AppVS appVS;
-
-
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "onCreateView");
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.currency_accounts_main, container, false);
         ViewPager mViewPager = (ViewPager) rootView.findViewById(R.id.pager);
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -62,9 +59,14 @@ public class CurrencyAccountsPagerFragment extends Fragment {
                 getActivity().getIntent().getExtras());
         mViewPager.setAdapter(pagerAdapter);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.currency_accounts_lbl));
+        setHasOptionsMenu(true);
         return rootView;
     }
 
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menu.clear();
+        menuInflater.inflate(R.menu.activity_base, menu);
+    }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());

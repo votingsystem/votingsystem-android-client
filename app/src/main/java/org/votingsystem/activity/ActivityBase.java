@@ -28,9 +28,12 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRActionsFragment;
+import org.votingsystem.fragment.ReceiptGridFragment;
+import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -138,6 +141,9 @@ public class ActivityBase extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
+        if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
     }
 
     private void setConnectionStatusUI() {
@@ -230,10 +236,15 @@ public class ActivityBase extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        return selectedContentFragment(item.getItemId());
+    }
+
+    private boolean selectedContentFragment(int menuId) {
+        //this is to remove actionbar spinners
+        getSupportActionBar().setDisplayShowCustomEnabled(false);
+        getSupportActionBar().setSubtitle(null);
         Intent intent = null;
-        switch (id) {
+        switch (menuId) {
             case R.id.polls:
                 intent = new Intent(this, EventVSMainActivity.class);
                 startActivity(intent);
@@ -245,16 +256,13 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.currency_accounts:
-                getSupportActionBar().setDisplayShowCustomEnabled(false);
-                getSupportActionBar().setSubtitle(null);
-                CurrencyAccountsPagerFragment accountsFragment = new CurrencyAccountsPagerFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        accountsFragment, CurrencyAccountsPagerFragment.TAG).commit();
+                        new CurrencyAccountsPagerFragment(), CurrencyAccountsPagerFragment.TAG).commit();
                 break;
             case R.id.wallet:
-                intent = new Intent(this, WalletActivity.class);
-                startActivity(intent);
-                finish();
+                getSupportActionBar().setTitle(getString(R.string.wallet_lbl));
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new WalletFragment(), WalletFragment.TAG).commit();
                 break;
             case R.id.contacts:
                 intent = new Intent(this, ContactsActivity.class);
@@ -262,28 +270,24 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.fa_qrcode:
-                getSupportActionBar().setDisplayShowCustomEnabled(false);
-                getSupportActionBar().setSubtitle(null);
-                QRActionsFragment qrFragment = new QRActionsFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        qrFragment, QRActionsFragment.TAG).commit();
+                        new QRActionsFragment(), QRActionsFragment.TAG).commit();
                 break;
             case R.id.receipts:
-                intent = new Intent(getBaseContext(), ReceiptsMainActivity.class);
-                startActivity(intent);
-                finish();
+                getSupportActionBar().setTitle(getString(R.string.receipts_lbl));
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new ReceiptGridFragment(), ReceiptGridFragment.TAG).commit();
                 break;
             case R.id.messages:
-                intent = new Intent(getBaseContext(), MessagesMainActivity.class);
-                startActivity(intent);
-                finish();
+                getSupportActionBar().setTitle(getString(R.string.messages_lbl));
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new MessagesGridFragment(), MessagesGridFragment.TAG).commit();
                 break;
             case R.id.settings:
                 intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 break;
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
