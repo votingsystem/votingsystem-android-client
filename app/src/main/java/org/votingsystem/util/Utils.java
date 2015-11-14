@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -46,13 +47,21 @@ public class Utils {
     public static final String TAG = Utils.class.getSimpleName();
 
     public static void launchQRScanner(Activity activity) {
-        IntentIntegrator integrator = null;
-        if(activity != null) integrator = new IntentIntegrator(activity);
+        IntentIntegrator integrator = new IntentIntegrator(activity);
         integrator.addExtra("SCAN_WIDTH", 500);
         integrator.addExtra("SCAN_HEIGHT", 500);
         integrator.addExtra("RESULT_DISPLAY_DURATION_MS", 3000L);
         integrator.addExtra("PROMPT_MESSAGE", "Enfoque el código QR");
         integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES, activity);
+    }
+
+    public static void launchQRScanner(android.support.v4.app.Fragment fragment) {
+        IntentIntegrator integrator = new IntentIntegrator(fragment);
+        integrator.addExtra("SCAN_WIDTH", 500);
+        integrator.addExtra("SCAN_HEIGHT", 500);
+        integrator.addExtra("RESULT_DISPLAY_DURATION_MS", 3000L);
+        integrator.addExtra("PROMPT_MESSAGE", "Enfoque el código QR");
+        integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
     }
 
     protected void sendEmail(Context context, List<String> recipients,

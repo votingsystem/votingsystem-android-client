@@ -86,7 +86,6 @@ public class QRActionsFragment extends Fragment {
         LOGD(TAG + ".onCreate", "onCreateView");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.qr_actions_fragment, container, false);
-
         Button read_qr_btn = (Button) rootView.findViewById(R.id.read_qr_btn);
         read_qr_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -123,7 +122,7 @@ public class QRActionsFragment extends Fragment {
         } else {
             switch (action) {
                 case READ_QR:
-                    Utils.launchQRScanner(getActivity());
+                    Utils.launchQRScanner(this);
                     break;
                 case CREATE_QR:
                     Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
