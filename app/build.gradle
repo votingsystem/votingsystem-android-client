@@ -8,8 +8,8 @@ android {
     }
 
     dexOptions {
-        //incremental true
-        //javaMaxHeapSize "4g"
+        incremental true
+        javaMaxHeapSize "4g"
     }
 
     signingConfigs {

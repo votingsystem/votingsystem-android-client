@@ -51,7 +51,7 @@ public class Utils {
         integrator.addExtra("SCAN_WIDTH", 500);
         integrator.addExtra("SCAN_HEIGHT", 500);
         integrator.addExtra("RESULT_DISPLAY_DURATION_MS", 3000L);
-        integrator.addExtra("PROMPT_MESSAGE", "Enfoque el código QR");
+        integrator.addExtra("PROMPT_MESSAGE", activity.getString(R.string.set_focus_on_qrcode));
         integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES, activity);
     }
 
@@ -60,7 +60,7 @@ public class Utils {
         integrator.addExtra("SCAN_WIDTH", 500);
         integrator.addExtra("SCAN_HEIGHT", 500);
         integrator.addExtra("RESULT_DISPLAY_DURATION_MS", 3000L);
-        integrator.addExtra("PROMPT_MESSAGE", "Enfoque el código QR");
+        integrator.addExtra("PROMPT_MESSAGE", fragment.getString(R.string.set_focus_on_qrcode));
         integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
     }
 

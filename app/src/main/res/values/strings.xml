@@ -607,4 +607,5 @@
     <string name="double_back_advice">Pulse 2 veces seguidas ATRAS para salir</string>
     <string name="understood_lbl">entendido</string>
     <string name="amount_lbl">cantidad</string>
+    <string name="set_focus_on_qrcode">Enfoque el código QR</string>
 </resources>
