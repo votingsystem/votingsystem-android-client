@@ -271,7 +271,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         if (doubleBackToExitPressedOnce || !doubleBackEnabled) {
             super.onBackPressed();
             return;
-        } else webView.loadUrl("javascript:try { app.back() } catch(e) { window.history.back() }");
+        } else webView.loadUrl("javascript:try { vs.back() } catch(e) { window.history.back() }");
         this.doubleBackToExitPressedOnce = true;
         if(showBrowserAdvice) {
             Snackbar.make(webViewPlaceholder, getString(R.string.double_back_advice), Snackbar.LENGTH_LONG)
