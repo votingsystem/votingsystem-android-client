@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -124,11 +125,14 @@ public class ActivityBase extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        connectionStatusText = (TextView) findViewById(R.id.connection_status_text);
-        headerTextView = (TextView) findViewById(R.id.headerTextView);
-        connectionStatusView = (ImageView) findViewById(R.id.connection_status_img);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
-        LinearLayout userBox = (LinearLayout)findViewById(R.id.user_box);
+        View header = LayoutInflater.from(this).inflate(R.layout.activity_base_header, null);
+        connectionStatusText = (TextView)header.findViewById(R.id.connection_status_text);
+        headerTextView = (TextView)header.findViewById(R.id.headerTextView);
+        connectionStatusView = (ImageView)header.findViewById(R.id.connection_status_img);
+        LinearLayout userBox = (LinearLayout)header.findViewById(R.id.user_box);
         userBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 LOGD(TAG, "userBox clicked");
@@ -138,9 +142,7 @@ public class ActivityBase extends AppCompatActivity
                 } else {showConnectionStatusDialog();}
             }
         });
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.addHeaderView(header);
 
         int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
         if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);

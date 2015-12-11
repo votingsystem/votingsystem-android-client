@@ -37,6 +37,7 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -288,6 +289,25 @@ public class BrowserVSActivity extends AppCompatActivity {
                 doubleBackToExitPressedOnce = false;
             }
         }, 500);
+    }
+
+
+    public void fireCoreSignal(String name, Object data) {
+        try {
+            Map coreSignal = new HashMap<>();
+            coreSignal.put("name", name);
+            coreSignal.put("data", data);
+            String dtoStr = JSON.getMapper().writeValueAsString(coreSignal);
+            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"), FLAGS));
+            final String jsCommand = "javascript:fireCoreSignal('" + base64EncodedMsg + "')";
+            webView.post(new Runnable() {
+                @Override public void run() {
+                    webView.loadUrl(jsCommand);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override public void onResume() {
