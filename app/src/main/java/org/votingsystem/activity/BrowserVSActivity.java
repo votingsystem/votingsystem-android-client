@@ -123,7 +123,7 @@ public class BrowserVSActivity extends AppCompatActivity {
             // Load the URLs inside the WebView, not in the external web browser
             webView.setWebViewClient(new WebViewClient() {
                 public void onPageFinished(WebView view, String url) {
-                    webView.loadUrl("javascript:setClientToolConnected()");
+                    //webView.loadUrl("javascript:setClientToolConnected()");
                     if (jsCommand != null) webView.loadUrl(jsCommand);
                     setProgressDialogVisible(false);
                 }
@@ -289,25 +289,6 @@ public class BrowserVSActivity extends AppCompatActivity {
                 doubleBackToExitPressedOnce = false;
             }
         }, 500);
-    }
-
-
-    public void fireCoreSignal(String name, Object data) {
-        try {
-            Map coreSignal = new HashMap<>();
-            coreSignal.put("name", name);
-            coreSignal.put("data", data);
-            String dtoStr = JSON.getMapper().writeValueAsString(coreSignal);
-            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"), FLAGS));
-            final String jsCommand = "javascript:fireCoreSignal('" + base64EncodedMsg + "')";
-            webView.post(new Runnable() {
-                @Override public void run() {
-                    webView.loadUrl(jsCommand);
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override public void onResume() {
