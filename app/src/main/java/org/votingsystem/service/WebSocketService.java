@@ -55,6 +55,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
@@ -78,6 +80,7 @@ public class WebSocketService extends Service {
 
     private AppVS appVS;
     private Session session;
+    private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private CountDownLatch latch = new CountDownLatch(1);
 
     @Override public void onCreate(){
@@ -122,15 +125,15 @@ public class WebSocketService extends Service {
         if(operationType == TypeVS.WEB_SOCKET_INIT) {
             initValidatedSession();
         } else if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
-            new Thread(null, new Runnable() {
+            executorService.submit(new Runnable() {
                 @Override public void run() {
                     try {
                         session.close();
                     } catch (Exception ex) { ex.printStackTrace();}
                 }
-            }, "websocket_message_proccessor_thread").start();
+            });
         } else if(message != null) {
-            new Thread(null, new Runnable() {
+            executorService.submit(new Runnable() {
                 @Override public void run() {
                     try {
                         LOGD(TAG + ".onStartCommand", "operation: " + operationType +
@@ -154,32 +157,32 @@ public class WebSocketService extends Service {
                                 getString(R.string.error_lbl));
                     }
                 }
-            }, "websocket_message_proccessor_thread").start();
+            });
         }
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
     }
 
     private void initValidatedSession() {
-        new Thread(null, new Runnable() {
+        executorService.submit(new Runnable() {
             @Override public void run() {
-            try {
-                CurrencyServerDto currencyServer = appVS.getCurrencyServer();
-                SocketMessageDto messageDto = SocketMessageDto.INIT_SESSION_REQUEST();
-                String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
-                SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
-                        JSON.writeValueAsString(messageDto), msgSubject,
-                        currencyServer.getTimeStampServiceURL());
-                messageDto.setSMIME(smimeMessage);
-                session.getBasicRemote().sendText(JSON.writeValueAsString(messageDto));
-                LOGD(TAG + ".onStartCommand", "websocket session started");
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                appVS.broadcastResponse(ResponseVS.EXCEPTION(ex, appVS)
-                        .setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID));
+                try {
+                    CurrencyServerDto currencyServer = appVS.getCurrencyServer();
+                    SocketMessageDto messageDto = SocketMessageDto.INIT_SESSION_REQUEST();
+                    String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
+                    SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
+                            JSON.writeValueAsString(messageDto), msgSubject,
+                            currencyServer.getTimeStampServiceURL());
+                    messageDto.setSMIME(smimeMessage);
+                    session.getBasicRemote().sendText(JSON.writeValueAsString(messageDto));
+                    LOGD(TAG + ".onStartCommand", "websocket session started");
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    appVS.broadcastResponse(ResponseVS.EXCEPTION(ex, appVS)
+                            .setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID));
+                }
             }
-            }
-        }, "websocket_message_proccessor_thread").start();
+        });
     }
 
     @Override public IBinder onBind(Intent intent){
