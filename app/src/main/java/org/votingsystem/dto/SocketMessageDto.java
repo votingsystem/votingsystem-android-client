@@ -72,7 +72,7 @@ public class SocketMessageDto implements Serializable {
     private String toUser;
     private String URL;
     private DeviceVSDto connectedDevice;
-    private List<CurrencyDto> currencyDtoList;
+    private List<CurrencyDto> currencyList;
     private Date date;
 
     private SocketMessageContentDto content;
@@ -168,12 +168,12 @@ public class SocketMessageDto implements Serializable {
         this.textToSign = textToSign;
     }
 
-    public List<CurrencyDto> getCurrencyDtoList() {
-        return currencyDtoList;
+    public List<CurrencyDto> getCurrencyList() {
+        return currencyList;
     }
 
-    public void setCurrencyDtoList(List<CurrencyDto> currencyDtoList) {
-        this.currencyDtoList = currencyDtoList;
+    public void setCurrencyList(List<CurrencyDto> currencyList) {
+        this.currencyList = currencyList;
     }
 
     public String getCaption() {
@@ -373,7 +373,7 @@ public class SocketMessageDto implements Serializable {
     }
 
     public Set<Currency> getCurrencySet() throws Exception {
-        if(currencySet == null && currencyDtoList != null) currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
+        if(currencySet == null && currencyList != null) currencySet = CurrencyDto.deSerializeCollection(currencyList);
         return currencySet;
     }
 
