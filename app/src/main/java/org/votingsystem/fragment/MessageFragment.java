@@ -139,7 +139,8 @@ public class MessageFragment extends Fragment {
             if (isVisibleToUser) {
                 if(messageState == MessageContentProvider.State.NOT_READED) {
                     getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
-                            messageId), MessageContentProvider.getContentValues(socketMessage,
+                            messageId), MessageContentProvider.getContentValues(socketMessage.getOperation(),
+                            JSON.writeValueAsString(socketMessage),
                             MessageContentProvider.State.READED), null, null);
                     PrefUtils.addNumMessagesNotReaded(-1);
                 }

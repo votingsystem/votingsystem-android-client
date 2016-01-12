@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;

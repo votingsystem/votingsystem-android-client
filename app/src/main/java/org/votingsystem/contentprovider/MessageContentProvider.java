@@ -16,6 +16,7 @@ import android.text.TextUtils;
 
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
 
@@ -148,16 +149,17 @@ public class MessageContentProvider extends ContentProvider {
 
     public static Uri insert(ContentResolver contentResolver, SocketMessageDto socketMsg) throws
             IOException {
-        return contentResolver.insert(CONTENT_URI, getContentValues(socketMsg, State.NOT_READED));
+        String decryptedMsg = JSON.writeValueAsString(socketMsg.getContent());
+        return contentResolver.insert(CONTENT_URI, getContentValues(socketMsg.getOperation(),
+                decryptedMsg, State.NOT_READED));
     }
 
-    public static ContentValues getContentValues(SocketMessageDto socketMsg, State state)
+    public static ContentValues getContentValues(TypeVS operation, String socketMsg, State state)
             throws IOException {
         ContentValues values = new ContentValues();
         values.put(MessageContentProvider.STATE_COL, state.toString());
-        String decryptedMsg = JSON.writeValueAsString(socketMsg.getContent());
-        values.put(MessageContentProvider.JSON_COL, decryptedMsg);
-        values.put(MessageContentProvider.TYPE_COL, socketMsg.getOperation().toString());
+        values.put(MessageContentProvider.JSON_COL, socketMsg);
+        values.put(MessageContentProvider.TYPE_COL, operation.toString());
         values.put(MessageContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
         values.put(MessageContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         return values;
