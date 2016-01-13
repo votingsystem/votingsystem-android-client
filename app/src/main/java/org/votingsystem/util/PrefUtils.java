@@ -303,27 +303,6 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static Integer getNumMessagesNotReaded() {
-        if(numMessagesNotReaded != null) return numMessagesNotReaded;
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        numMessagesNotReaded = settings.getInt(ContextVS.NUM_MESSAGES_KEY, 0);
-        if(numMessagesNotReaded < 0) numMessagesNotReaded = 0;
-        return numMessagesNotReaded;
-    }
-
-    public static void addNumMessagesNotReaded(Integer amount) {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        try {
-            numMessagesNotReaded = numMessagesNotReaded + amount;
-            editor.putInt(ContextVS.NUM_MESSAGES_KEY, numMessagesNotReaded);
-            editor.commit();
-        } catch(Exception ex) {ex.printStackTrace();}
-    }
-
-
     public static AddressVS getAddressVS() throws IOException {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);

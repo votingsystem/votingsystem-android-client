@@ -201,14 +201,12 @@ public class ReceiptContentProvider extends ContentProvider {
 
     public static ContentValues getContentValues(VoteVSHelper voteVSHelper, ReceiptWrapper.State state) {
         ContentValues values = new ContentValues();
-        values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(voteVSHelper));
-        values.put(ReceiptContentProvider.URL_COL, voteVSHelper.getMessageId());
-        values.put(ReceiptContentProvider.TYPE_COL, voteVSHelper.getTypeVS().toString());
-        values.put(ReceiptContentProvider.STATE_COL, state.toString());
-        if(voteVSHelper.getLocalId() == null) {
-            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-        }
-        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        values.put(SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(voteVSHelper));
+        values.put(URL_COL, voteVSHelper.getMessageId());
+        values.put(TYPE_COL, voteVSHelper.getTypeVS().toString());
+        values.put(STATE_COL, state.toString());
+        if(voteVSHelper.getLocalId() == null) values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+        values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         return values;
     }
 

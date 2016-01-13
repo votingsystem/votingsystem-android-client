@@ -201,6 +201,7 @@
     <string name="cancel_vote_from_receipt_msg"><![CDATA[si continua anulará el voto del asunto \'<b>%1$s</b>\' \n \
         una vez anulado el voto podrá volver a votar<br/>¿desea continuar?]]></string>
     <string name="delete_receipt_msg"><![CDATA[¿desea borrar el recibo con asunto \'<b>%1$s</b>\'?]]></string>
+    <string name="delete_confirm_msg">¿seguro que desea borrar el mensaje?</string>
     <string name="show_all_receipts_lbl">mostrar todos los recibos</string>
     <string name="vote_receipts_lbl">recibos de voto</string>
     <string name="show_vote_receipts_lbl">mostrar sólo recibos de voto</string>
@@ -254,9 +255,9 @@
     <string name="currency_drop_down_lbl">finanzas</string>
     <string name="currency_list_lbl">últimos movimientos</string>
     <string name="cash_lbl">efectivo</string>
-    <string name="save_currency_lbl">guardar certificado-moneda</string>
-    <string name="delete_currency_lbl">borrar certificado-moneda</string>
-    <string name="share_currency_lbl">compartir certificado-moneda</string>
+    <string name="save_currency_lbl">guardar moneda</string>
+    <string name="delete_currency_lbl">borrar moneda</string>
+    <string name="share_currency_lbl">compartir moneda</string>
     <string name="currency_user_info_lbl">información del usuario</string>
     <string name="request_cash_lbl">retirar efectivo</string>
     <string name="update_signers_info_lbl">actualizar datos</string>
@@ -310,8 +311,8 @@
     <string name="transactionvs_receipt">recibo</string>
     <string name="wallet_lbl">monedero</string>
     <string name="cert_info_lbl">datos del certificado</string>
-    <string name="currency_cert_caption">datos del certificado-moneda</string>
-    <string name="cancel_currency_lbl">cancelar certificado-moneda</string>
+    <string name="currency_cert_caption">datos del moneda</string>
+    <string name="cancel_currency_lbl">cancelar moneda</string>
     <string name="currency_data_info_lbl">válido desde %1$s hasta %2$s</string>
     <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
     <string name="currency_expended_send_error_msg">los currencies ya habían sido consumidos</string>

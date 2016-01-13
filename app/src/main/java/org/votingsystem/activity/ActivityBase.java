@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
@@ -55,8 +56,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class ActivityBase extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = ActivityBase.class.getSimpleName();
 
@@ -302,8 +302,7 @@ public class ActivityBase extends AppCompatActivity
 
     @Override protected void onResume() {
         super.onResume();
-        navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage());
-        PrefUtils.registerPreferenceChangeListener(this);
+        navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage(this));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
@@ -313,7 +312,6 @@ public class ActivityBase extends AppCompatActivity
 
     @Override protected void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
@@ -325,10 +323,4 @@ public class ActivityBase extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(ContextVS.NUM_MESSAGES_KEY.equals(key)) {
-            navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage());
-        }
-    }
 }

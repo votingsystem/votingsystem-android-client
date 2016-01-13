@@ -6,6 +6,7 @@ import android.text.format.DateUtils;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -56,9 +57,9 @@ public class MsgUtils {
         return null;
     }
 
-    public static String getMessagesDrawerItemMessage() {
-        Integer numMessagesNotreaded = PrefUtils.getNumMessagesNotReaded();
-        String prefix = numMessagesNotreaded == 0 ? "": numMessagesNotreaded + "  ";
+    public static String getMessagesDrawerItemMessage(Context context) {
+        Integer messagesNotReaded = MessageContentProvider.countNumMessagesNotReaded(context);
+        String prefix = messagesNotReaded == 0 ? "": messagesNotReaded + "  ";
         return prefix + AppVS.getInstance().getString(R.string.messages_lbl);
     }
 

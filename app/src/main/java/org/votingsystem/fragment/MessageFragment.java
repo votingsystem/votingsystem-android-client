@@ -55,7 +55,6 @@ public class MessageFragment extends Fragment {
     private static final int CONTENT_VIEW_ID = 1000000;
 
     private WeakReference<CurrencyFragment> currencyRef;
-    private AppVS appVS;
     private SocketMessageDto socketMessage;
     private TypeVS typeVS;
     private Currency currency;
@@ -100,7 +99,6 @@ public class MessageFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
         fragment_container = (LinearLayout)rootView.findViewById(R.id.fragment_container);
         message_content = (TextView)rootView.findViewById(R.id.message_content);
@@ -142,7 +140,6 @@ public class MessageFragment extends Fragment {
                             messageId), MessageContentProvider.getContentValues(socketMessage.getOperation(),
                             JSON.writeValueAsString(socketMessage),
                             MessageContentProvider.State.READED), null, null);
-                    PrefUtils.addNumMessagesNotReaded(-1);
                 }
             }
         } catch(Exception ex) { ex.printStackTrace(); }
@@ -224,9 +221,19 @@ public class MessageFragment extends Fragment {
         switch (item.getItemId()) {
             case android.R.id.home:
                 break;
+            case R.id.delete_wallet_message:
             case R.id.delete_message:
-                MessageContentProvider.deleteById(messageId, getActivity());
-                getActivity().onBackPressed();
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                        getString(R.string.delete_lbl),
+                        getString(R.string.delete_confirm_msg), getActivity())
+                        .setPositiveButton(getString(R.string.ok_lbl),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    MessageContentProvider.deleteById(messageId, getActivity());
+                                    getActivity().onBackPressed();
+                                }
+                            });
+                UIUtils.showMessageDialog(builder);
                 return true;
             case R.id.save_to_wallet:
                 updateWallet();

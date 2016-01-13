@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -157,11 +158,11 @@ public class MessageContentProvider extends ContentProvider {
     public static ContentValues getContentValues(TypeVS operation, String socketMsg, State state)
             throws IOException {
         ContentValues values = new ContentValues();
-        values.put(MessageContentProvider.STATE_COL, state.toString());
-        values.put(MessageContentProvider.JSON_COL, socketMsg);
-        values.put(MessageContentProvider.TYPE_COL, operation.toString());
-        values.put(MessageContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-        values.put(MessageContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        values.put(STATE_COL, state.toString());
+        values.put(JSON_COL, socketMsg);
+        values.put(TYPE_COL, operation.toString());
+        values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+        values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         return values;
     }
 
@@ -178,13 +179,25 @@ public class MessageContentProvider extends ContentProvider {
         return rowCount;
     }
 
+    public static int countNumMessagesNotReaded(Context context) {
+        //return DatabaseUtils.queryNumEntries(database, TABLE_NAME,
+        //        STATE_COL + "=?", new String[]{State.NOT_READED.toString()});
+        String selection = STATE_COL + "=? ";
+        String[] selectionArgs = new String[]{State.NOT_READED.toString()};
+        Cursor countCursor = context.getContentResolver().query(CONTENT_URI,
+                new String[] {"count(*) AS count"},
+                selection,
+                selectionArgs,
+                null);
+        countCursor.moveToFirst();
+        return countCursor.getInt(0);
+    }
+
     public static void deleteById(Long messageId, Context context) {
-        context.getContentResolver().delete(MessageContentProvider.getMessageURI(
-                messageId), null, null);
+        context.getContentResolver().delete(getMessageURI(messageId), null, null);
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME + "(" +
                 ID_COL                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +

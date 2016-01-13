@@ -329,7 +329,6 @@ public class WebSocketService extends Service {
                         responseVS.setCaption(getString(R.string.message_lbl)).
                                 setNotificationMessage(socketMsg.getMessage());
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        PrefUtils.addNumMessagesNotReaded(1);
                         Utils.showNewMessageNotification(appVS);
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
@@ -353,7 +352,6 @@ public class WebSocketService extends Service {
                         }
                     } else if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_TO_DEVICE) {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        PrefUtils.addNumMessagesNotReaded(1);
                         Utils.showNewMessageNotification(appVS);
                     }
                     break;
