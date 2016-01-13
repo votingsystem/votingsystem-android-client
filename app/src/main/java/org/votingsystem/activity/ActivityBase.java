@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.LocalBroadcastManager;
@@ -25,7 +24,6 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
@@ -88,8 +86,7 @@ public class ActivityBase extends AppCompatActivity
                         ProgressDialogFragment.showDialog(getString(R.string.connecting_caption),
                                 getString(R.string.connecting_to_service_msg),
                                 getSupportFragmentManager());
-                        new Thread(new Runnable() {@Override public void run() {
-                            Utils.toggleWebSocketServiceConnection(); }}).start();
+                        Utils.toggleWebSocketServiceConnection();
                         break;
                 }
             } else if(socketMsg != null) {
@@ -103,10 +100,16 @@ public class ActivityBase extends AppCompatActivity
                             getSupportFragmentManager());
                 }
             } else if(responseVS != null) {
-                if(ResponseVS.SC_ERROR == responseVS.getStatusCode())
+                if(ResponseVS.SC_ERROR == responseVS.getStatusCode()) {
                     MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                             getString(R.string.error_lbl), responseVS.getMessage(),
                             getSupportFragmentManager());
+                } else {
+                    if(TypeVS.MESSAGEVS == responseVS.getTypeVS()) {
+                        navigationView.getMenu().findItem(R.id.messages).setTitle(
+                                MsgUtils.getMessagesDrawerItemMessage());
+                    }
+                }
             }
         }
     };
@@ -302,7 +305,7 @@ public class ActivityBase extends AppCompatActivity
 
     @Override protected void onResume() {
         super.onResume();
-        navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage(this));
+        navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage());
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(

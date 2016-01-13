@@ -93,8 +93,8 @@ public class Wallet {
             Currency removedCurrency = currencyMap.remove(currencyStateDto.getHashCertVS());
             if(removedCurrency != null)  {
                 LOGD(TAG +  ".removeErrors", "removed currency: " + currencyStateDto.getHashCertVS());
-                removedSet.add(removedCurrency);
                 AppVS.getInstance().updateCurrencyDB(removedCurrency.setState(currencyStateDto.getState()));
+                removedSet.add(removedCurrency);
             }
         }
         Wallet.saveWallet(currencyMap.values(), null);
@@ -109,7 +109,7 @@ public class Wallet {
         return currencyMap;
     }
 
-    public static void updateCurrencyState(List<String> currencySetOK, Currency.State state)
+    public static void updateCurrencyState(Set<String> currencySetOK, Currency.State state)
             throws Exception {
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(String hashCertVS : currencySetOK) {

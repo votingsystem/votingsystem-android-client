@@ -7,7 +7,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -15,8 +14,11 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
@@ -70,11 +72,7 @@ public class MessageContentProvider extends ContentProvider {
 
     @Override public boolean onCreate() {
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
-        try{
-            database = databaseHelper.getWritableDatabase();
-        } catch (Exception ex) {
-            return false;
-        }
+        database = databaseHelper.getWritableDatabase();
         if(database == null) return false;
         else return true;
     }
@@ -148,11 +146,15 @@ public class MessageContentProvider extends ContentProvider {
         return newUri;
     }
 
-    public static Uri insert(ContentResolver contentResolver, SocketMessageDto socketMsg) throws
-            IOException {
+    public static Uri insert(ContentResolver contentResolver, SocketMessageDto socketMsg)
+            throws IOException {
         String decryptedMsg = JSON.writeValueAsString(socketMsg.getContent());
-        return contentResolver.insert(CONTENT_URI, getContentValues(socketMsg.getOperation(),
+        Uri result = contentResolver.insert(CONTENT_URI, getContentValues(socketMsg.getOperation(),
                 decryptedMsg, State.NOT_READED));
+        ResponseVS responseVS = new ResponseVS().setTypeVS(TypeVS.MESSAGEVS)
+                .setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID);
+        AppVS.getInstance().broadcastResponse(responseVS);
+        return result;
     }
 
     public static ContentValues getContentValues(TypeVS operation, String socketMsg, State state)
@@ -179,12 +181,12 @@ public class MessageContentProvider extends ContentProvider {
         return rowCount;
     }
 
-    public static int countNumMessagesNotReaded(Context context) {
+    public static int countNumMessagesNotReaded() {
         //return DatabaseUtils.queryNumEntries(database, TABLE_NAME,
         //        STATE_COL + "=?", new String[]{State.NOT_READED.toString()});
         String selection = STATE_COL + "=? ";
         String[] selectionArgs = new String[]{State.NOT_READED.toString()};
-        Cursor countCursor = context.getContentResolver().query(CONTENT_URI,
+        Cursor countCursor = AppVS.getInstance().getContentResolver().query(CONTENT_URI,
                 new String[] {"count(*) AS count"},
                 selection,
                 selectionArgs,

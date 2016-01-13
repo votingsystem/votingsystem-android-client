@@ -380,39 +380,36 @@ public class PaymentService extends IntentService {
             if(hashCertVS != null) hashCertVSSet = new HashSet<>(Arrays.asList(hashCertVS));
             else hashCertVSSet = Wallet.getHashCertVSSet();
             if(hashCertVSSet == null) {
-                LOGD(TAG + ".checkCurrency", "empty hashCertVSSet");
+                LOGD(TAG + ".checkCurrency", "empty hashCertVSSet nothing to check");
                 return;
             }
-            Map<String, CurrencyStateDto> responseDto =  HttpHelper.sendData(
+            Set<CurrencyStateDto> responseDto =  HttpHelper.sendData(
                     new TypeReference<Map<String, CurrencyStateDto>>() {},
                     JSON.writeValueAsBytes(hashCertVSSet),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
                     MediaTypeVS.JSON);
-            List<CurrencyStateDto> currencyWithErrorList = new ArrayList<>();
-            List<String> currencyOKList = new ArrayList<>();
-            Set<Currency> removedSet = null;
-            for(String responseHashCertVS: responseDto.keySet()) {
-                if(Currency.State.OK == responseDto.get(responseHashCertVS).getState()) {
-                    currencyOKList.add(responseHashCertVS);
-                } else currencyWithErrorList.add(responseDto.get(responseHashCertVS));
+            Set<CurrencyStateDto> currencyWithErrors = new HashSet<>();
+            Set<String> currencyOKSet = new HashSet<>();
+            for(CurrencyStateDto currencyDto: responseDto) {
+                if(Currency.State.OK == currencyDto.getState()) {
+                    currencyOKSet.add(currencyDto.getHashCertVS());
+                } else currencyWithErrors.add(currencyDto);
             }
-            if(currencyWithErrorList.size() > 0) {
-                removedSet = Wallet.removeErrors(currencyWithErrorList);
+            if(!currencyOKSet.isEmpty()) {
+                Wallet.updateCurrencyState(currencyOKSet, Currency.State.OK);
             }
-            if(removedSet != null && !removedSet.isEmpty()) {
-                for(Currency currency : removedSet) {
-                    currency.setState(responseDto.get(currency.getHashCertVS()).getState());
-                    AppVS.getInstance().updateCurrencyDB(currency);
+            if(!currencyWithErrors.isEmpty()) {
+                Set<Currency> removedSet = Wallet.removeErrors(currencyWithErrors);
+                if(!removedSet.isEmpty()) {
+                    responseVS = new ResponseVS(ResponseVS.SC_ERROR,
+                            MsgUtils.getUpdateCurrencyWithErrorMsg(removedSet, appVS));
+                    responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
+                            serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
+                    appVS.broadcastResponse(responseVS);
                 }
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                        MsgUtils.getUpdateCurrencyWithErrorMsg(removedSet, appVS));
-                responseVS.setCaption(getString(R.string.error_lbl)).setServiceCaller(
-                        serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
-                appVS.broadcastResponse(responseVS);
             } else {
-                Wallet.updateCurrencyState(currencyOKList, Currency.State.OK);
-                responseVS = new ResponseVS(ResponseVS.SC_OK);
-                responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.CURRENCY_CHECK);
+                responseVS = new ResponseVS(ResponseVS.SC_OK).setServiceCaller(serviceCaller)
+                        .setTypeVS(TypeVS.CURRENCY_CHECK);
                 appVS.broadcastResponse(responseVS);
             }
         } catch(Exception ex) {  ex.printStackTrace(); }

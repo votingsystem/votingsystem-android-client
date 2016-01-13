@@ -31,7 +31,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;

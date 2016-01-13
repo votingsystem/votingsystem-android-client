@@ -1,6 +1,7 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:vs="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menu_about"
         android:title="@string/title_about"
         android:orderInCategory="10"
-        android:showAsAction="never" />
+        vs:showAsAction="never" />
 </menu>

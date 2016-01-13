@@ -1,13 +1,14 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:vs="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/representative_list"
         android:orderInCategory="1"
-        android:showAsAction="never"
+        vs:showAsAction="never"
         android:title="@string/representative_list_lbl"/>
 
     <item android:id="@+id/check_representation_state"
         android:orderInCategory="2"
-        android:showAsAction="never"
+        vs:showAsAction="never"
         android:title="@string/check_representative_lbl"/>
 
     <!--<item android:id="@+id/options_for_representatives" android:orderInCategory="3"
@@ -16,7 +17,7 @@
     <group android:id="@+id/options_for_uservs">
         <item android:id="@+id/cancel_anonymouys_representation"
             android:orderInCategory="5"
-            android:showAsAction="never"
+            vs:showAsAction="never"
             android:title="@string/cancel_anonymouys_representation_lbl"/>
     </group>
 

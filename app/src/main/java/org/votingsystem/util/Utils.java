@@ -157,17 +157,17 @@ public class Utils {
         mgr.notify(ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, builder.build());
     }
 
-    public static void showNewMessageNotification(Context context){
-        final NotificationManager mgr = (NotificationManager)context.getSystemService(
+    public static void showNewMessageNotification(){
+        final NotificationManager mgr = (NotificationManager)AppVS.getInstance().getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Intent clickIntent = new Intent(context, FragmentContainerActivity.class);
+        Intent clickIntent = new Intent(AppVS.getInstance(), FragmentContainerActivity.class);
         clickIntent.putExtra(ContextVS.FRAGMENT_KEY, MessagesGridFragment.class.getName());
-        PendingIntent pendingIntent = PendingIntent.getActivity(context,
+        PendingIntent pendingIntent = PendingIntent.getActivity(AppVS.getInstance(),
                 ContextVS.NEW_MESSAGE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(AppVS.getInstance())
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
-                .setAutoCancel(true).setContentTitle(context.getString(R.string.message_lbl))
+                .setAutoCancel(true).setContentTitle(AppVS.getInstance().getString(R.string.message_lbl))
                 .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());

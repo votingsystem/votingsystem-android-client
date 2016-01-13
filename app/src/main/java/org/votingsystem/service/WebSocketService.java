@@ -37,7 +37,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -329,7 +328,7 @@ public class WebSocketService extends Service {
                         responseVS.setCaption(getString(R.string.message_lbl)).
                                 setNotificationMessage(socketMsg.getMessage());
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        Utils.showNewMessageNotification(appVS);
+                        Utils.showNewMessageNotification();
                     } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS_SIGN:
@@ -352,7 +351,7 @@ public class WebSocketService extends Service {
                         }
                     } else if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_TO_DEVICE) {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        Utils.showNewMessageNotification(appVS);
+                        Utils.showNewMessageNotification();
                     }
                     break;
                 case TRANSACTIONVS_INFO:

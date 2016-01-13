@@ -65,11 +65,7 @@ public class CurrencyContentProvider extends ContentProvider {
 
     @Override public boolean onCreate() {
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
-        try{
-            database = databaseHelper.getWritableDatabase();
-        } catch (Exception ex) {
-            return false;
-        }
+        database = databaseHelper.getWritableDatabase();
         if(database == null) return false;
         else return true;
     }

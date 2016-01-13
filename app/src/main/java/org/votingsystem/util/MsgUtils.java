@@ -57,15 +57,15 @@ public class MsgUtils {
         return null;
     }
 
-    public static String getMessagesDrawerItemMessage(Context context) {
-        Integer messagesNotReaded = MessageContentProvider.countNumMessagesNotReaded(context);
+    public static String getMessagesDrawerItemMessage() {
+        Integer messagesNotReaded = MessageContentProvider.countNumMessagesNotReaded();
         String prefix = messagesNotReaded == 0 ? "": messagesNotReaded + "  ";
         return prefix + AppVS.getInstance().getString(R.string.messages_lbl);
     }
 
     public static String getTagVSMessage(String tag) {
         if(TagVSDto.WILDTAG.equals(tag)) return AppVS.getInstance().getString(R.string.wildtag_lbl);
-        else return tag;
+        else return tag.toLowerCase();
     }
 
     public static String getCurrencyDescriptionMessage(Currency currency, Context context) {
