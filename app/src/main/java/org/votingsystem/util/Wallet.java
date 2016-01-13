@@ -109,14 +109,14 @@ public class Wallet {
         return currencyMap;
     }
 
-    public static void updateCurrencyState(Set<String> currencySetOK, Currency.State state)
+    public static void updateCurrencyState(Set<String> currencySet, Currency.State state)
             throws Exception {
         Map<String, Currency> currencyMap = getCurrencyMap();
-        for(String hashCertVS : currencySetOK) {
+        for(String hashCertVS : currencySet) {
             Currency currency = currencyMap.get(hashCertVS);
             if(currency != null)  {
-                LOGD(TAG + ".updateCurrencyOK", "currency OK: " + hashCertVS);
-                currency.setState(Currency.State.OK);
+                LOGD(TAG + ".updateCurrencyState", "hash: " + hashCertVS + " - state:" + state);
+                currency.setState(state);
             }
         }
         Wallet.saveWallet(currencyMap.values(), null);
