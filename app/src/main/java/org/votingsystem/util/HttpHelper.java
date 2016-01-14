@@ -176,10 +176,9 @@ public class HttpHelper {
         return sendData(null, type, data, mediaType, serverURL);
     }
 
-    public static <T> T sendData(Class<T> type, byte[] data, String serverURL, String mediaType) throws Exception {
-        return sendData(type, null, data, serverURL, mediaType);
+    public static <T> T sendData1(Class<T> type, byte[] data, String serverURL, String mediaType) throws Exception {
+        return sendData(type, null, data, mediaType, serverURL);
     }
-
 
     public static <T> T sendData(Class<T> type, TypeReference typeReference, byte[] data,
             String contentType, String serverURL, String... headerNames) throws IOException, ExceptionVS {

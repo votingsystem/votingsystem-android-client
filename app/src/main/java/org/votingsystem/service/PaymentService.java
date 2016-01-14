@@ -384,7 +384,7 @@ public class PaymentService extends IntentService {
                 return;
             }
             Set<CurrencyStateDto> responseDto =  HttpHelper.sendData(
-                    new TypeReference<Map<String, CurrencyStateDto>>() {},
+                    new TypeReference<Set<CurrencyStateDto>>() {},
                     JSON.writeValueAsBytes(hashCertVSSet),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
                     MediaTypeVS.JSON);
