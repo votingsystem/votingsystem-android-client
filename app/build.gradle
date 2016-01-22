@@ -76,6 +76,7 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/ASL2.0'
     }
+    buildToolsVersion '23.0.2'
 }
 
 ext {
