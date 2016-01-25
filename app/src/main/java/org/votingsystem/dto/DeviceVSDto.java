@@ -5,13 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.signature.util.CertUtils;
 
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DeviceVSDto {
+public class DeviceVSDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public enum Type {MOBILE, PC}
 

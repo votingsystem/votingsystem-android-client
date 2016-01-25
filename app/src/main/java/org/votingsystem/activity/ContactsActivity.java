@@ -30,12 +30,8 @@ public class ContactsActivity extends ActivityBase {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
-        Bundle args = getIntent().getExtras();
         ContactsGridFragment fragment = new ContactsGridFragment();
-        contactsGridRef = new WeakReference<ContactsGridFragment>(fragment);
-        if(args == null) args = new Bundle();
-        args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVSDto.State.ACTIVE);
-        fragment.setArguments(args);
+        contactsGridRef = new WeakReference<>(fragment);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
         getSupportActionBar().setSubtitle(getString(R.string.contacts_lbl));

@@ -51,7 +51,9 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
     }
 
     public String getSearchServiceURL(String phone, String email) {
-        return getServerURL() + "/rest/userVS/searchByDevice?phone=" + phone + "&email=" + email;
+        String query = phone != null? "phone=" + phone + "&":"";
+        if(email != null) query = query + "email=" + email;
+        return getServerURL() + "/rest/userVS/searchByDevice?" + query;
     }
 
     public String getCurrencyStateServiceURL(String hashCertVS) {

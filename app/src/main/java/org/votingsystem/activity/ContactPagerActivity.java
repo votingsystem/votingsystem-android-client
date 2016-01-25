@@ -45,7 +45,7 @@ public class ContactPagerActivity extends AppCompatActivity {
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
-        String dtoStr = getIntent().getExtras().getParcelable(ContextVS.DTO_KEY);
+        String dtoStr = getIntent().getExtras().getString(ContextVS.DTO_KEY);
         List<UserVSDto> userVSListDto = null;
         try {
             if(dtoStr != null) userVSListDto = JSON.readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
