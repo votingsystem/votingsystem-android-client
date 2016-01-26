@@ -40,6 +40,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -313,19 +314,20 @@ public class ContactFragment extends Fragment {
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(List<DeviceVSDto> targetDevicesDto) {
+        @Override protected void onPostExecute(List<DeviceVSDto> deviceListDto) {
             try {
-                if(targetDevicesDto != null) {
+                if(deviceListDto != null) {
                     isConnected = false;
                     TelephonyManager telephonyManager = (TelephonyManager)getActivity().
                             getSystemService(Context.TELEPHONY_SERVICE);
                     String deviceId = telephonyManager.getDeviceId();
-                    for(DeviceVSDto deviceVSDto : targetDevicesDto) {
+                    targetDevicesDto =  new ArrayList<>();
+                    for(DeviceVSDto deviceVSDto : deviceListDto) {
                         if(!deviceId.equals(deviceVSDto.getDeviceId())) {
                             isConnected = true;
-                        } else targetDevicesDto.remove(deviceVSDto);
+                            targetDevicesDto.add(deviceVSDto);
+                        }
                     }
-                    ContactFragment.this.targetDevicesDto = targetDevicesDto;
                     setContactButtonState(isDBUserVS);
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());

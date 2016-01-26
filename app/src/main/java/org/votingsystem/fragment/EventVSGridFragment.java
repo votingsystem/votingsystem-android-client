@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -24,8 +25,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.android.R;
@@ -120,12 +119,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onScroll(AbsListView view,  int firstVisibleItem,
                                    int visibleItemCount, int totalItemCount) {
-        if(appVS.getAccessControl() == null) {
-            LOGD(TAG +  ".onScroll", "Missing Access Control. Waiting for data");
-            Toast.makeText(getActivity(), getString(R.string.waiting_for_access_control_connection),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
         if (totalItemCount == 0 || firstVisibleItem == 0) return ;
         boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
         Long numTotalEvents = EventVSContentProvider.getNumTotal(eventState);

@@ -38,6 +38,7 @@ import org.votingsystem.util.TypeVS;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
 
 
 public class MessagesGridFragment extends Fragment implements
@@ -171,6 +172,12 @@ public class MessagesGridFragment extends Fragment implements
                             MessageContentProvider.JSON_COL));
                     SocketMessageDto socketMessage = JSON.readValue(
                             message, SocketMessageDto.class);
+                    if(socketMessage == null) {
+                        Long messageId = cursor.getLong(cursor.getColumnIndex(MessageContentProvider.ID_COL));
+                        LOGE(TAG + ".bindView", "socketMessage NULL - messageId: " + messageId);
+                        MessageContentProvider.deleteById(messageId, getActivity());
+                        return;
+                    }
                     TypeVS typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
                             MessageContentProvider.TYPE_COL)));
                     Integer logoId = null;

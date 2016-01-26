@@ -76,7 +76,7 @@ public class MessageFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        TypeVS typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
+        typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
@@ -169,7 +169,7 @@ public class MessageFragment extends Fragment {
     }
 
     private void loadCurrencyWalletChangeData() throws Exception {
-        if(isVisibleToUser) {
+        if(isVisibleToUser && socketMessage != null && socketMessage.getCurrencySet() != null) {
             currency = socketMessage.getCurrencySet().iterator().next();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
                     R.string.wallet_change_lbl));
@@ -187,7 +187,7 @@ public class MessageFragment extends Fragment {
                 getFragmentManager().beginTransaction().add(tempView.getId(),
                         currencyRef.get(), fragmentTag).commit();
             }
-        }
+        } else LOGD(TAG + ".loadCurrencyWalletChangeData", "NULL DATA");
     }
 
     @Override public void onPause() {

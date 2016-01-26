@@ -292,7 +292,7 @@
         disponible en efectivo <b>%3$s %1$s</b><br/> no dispone efectivo suficiente para hacer
         una transacción anónima,<br/> ¿desea retirar <b>efectivo</b> de su cuenta para completar la operación?]]></string>
     <string name="insufficient_anonymous_money_msg"><![CDATA[no puede completar la transacción anónima,
-        dispone de <b>\'%2$s\' %1$s</b> en efectivo, necesita retirar <b>\'%3$s\' %1$s</b> en currencies<br/>
+        dispone de <b>\'%2$s\' %1$s</b> en efectivo, necesita retirar <b>\'%3$s\' %1$s</b> en efectivo<br/>
         y en su cuenta sólo dispone de <b>\'%4$s\' %1$s</b>]]></string>
     <string name="currency_send_ok_caption">pago realizado con éxito</string>
     <string name="currency_send_ok_msg"><![CDATA[ha realizado un pago de <b>\'%1$s\' %2$s</b> bajo el
@@ -315,13 +315,13 @@
     <string name="cancel_currency_lbl">cancelar moneda</string>
     <string name="currency_data_info_lbl">válido desde %1$s hasta %2$s</string>
     <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
-    <string name="currency_expended_send_error_msg">los currencies ya habían sido consumidos</string>
-    <string name="currency_repeated_error_msg">en la operación se han mezclado currencies usados, por favor, vuelva a intentarlo</string>
+    <string name="currency_expended_send_error_msg">el efectivo ya habían sido consumidos</string>
+    <string name="currency_repeated_error_msg">en la operación se han mezclado billetes usados, por favor, vuelva a intentarlo</string>
     <string name="currency_repeated_wallet_error_msg">ha intentado añadir al monedero un billete de %1$s que ya estaba guardado</string>
     <string name="browswevs_lbl">sistema de votación</string>
     <string name="test_lbl">test</string>
     <string name="enter_signature_pin_msg">introduzca el pin de su dispositivo de firma</string>
-    <string name="admin_currency_menu_item">administración de currencies</string>
+    <string name="admin_currency_menu_item">administración de efectivo</string>
     <string name="connecting_lbl">conectando...</string>
     <string name="phone_lbl">teléfono móvil</string>
     <string name="mail_lbl">correo electrónico</string>
@@ -455,7 +455,7 @@
     <string name="qr_read_lbl">leer QR</string>
     <string name="currency_prompt">moneda</string>
     <string name="operation_prompt">tipo de operación</string>
-    <string name="currency_ticket_request_operation">solicitar currencies</string>
+    <string name="currency_ticket_request_operation">solicitar efectivo</string>
     <string name="transactionvs_operation">solicitar ingreso en cuenta</string>
     <string name="operation_lbl">operación</string>
     <string name="delete_transactionvs_lbl">borrar transacción</string>
@@ -470,11 +470,11 @@
     <string name="tag_info"><![CDATA[<b>%1$s %2$s</b> para <b>%3$s</b>]]></string>
     <string name="tag_info_time_limited"><![CDATA[tienes que gastar <b>%1$s %2$s</b> antes de que acabe la semana]]></string>
     <string name="send_to_wallet">cambiar de monedero</string>
-    <string name="connect_device_advice_msg">¿está conectado el dispositivo al que desea enviar el currency?</string>
+    <string name="connect_device_advice_msg">¿está conectado el dispositivo al que desea enviar el efectivo?</string>
     <string name="searching_devices_lbl">buscando dispositivos</string>
     <string name="send_to_wallet_connection_required_msg">para poder acceder al monedero destino necesita estar conectado</string>
     <string name="connection_required_msg">para poder acceder al servicio necesita estar conectado</string>
-    <string name="select_connected_device_msg">seleccione el dispositivo al que desee enviar el currency</string>
+    <string name="select_connected_device_msg">seleccione el dispositivo al que desee enviar el efectivo</string>
     <string name="connect_lbl">conectar</string>
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
     <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
@@ -485,7 +485,7 @@
     <string name="remove_contact_lbl">borrar contacto</string>
     <string name="add_contact_lbl">añadir contacto</string>
     <string name="open_contacts_lbl">abrir agenda</string>
-    <string name="contactvs_not_found_msg">no dispone de la información necesaria para enviar currencies o mensajes cifrados a \'%1$s\', ¿desea comprobas si \'%1$s\' se encuentra dado de alta como votante?</string>
+    <string name="contactvs_not_found_msg">no dispone de la información necesaria para enviar efectivo o mensajes cifrados a \'%1$s\', ¿desea comprobas si \'%1$s\' se encuentra dado de alta en el sistema?</string>
     <string name="missing_server_connection">no existe conexión con el servidor</string>
     <string name="device_not_found_error_msg">¿seguro que está conectado el dispositivo con el que intenta comunicarse?</string>
     <string name="usevs_connection_not_found_error_msg">el destinatario no está conectado</string>
@@ -553,7 +553,7 @@
     <string name="currency_send">pago anónimo</string>
     <string name="currency_ticket_send">pago en efectivo</string>
     <string name="currency_request_subtitle">retirada de efectivo</string>
-    <string name="currency_cancellation">cancelación de currencies</string>
+    <string name="currency_cancellation">cancelación de efectivo</string>
     <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
     <string name="delegation_lbl">delegación</string>
     <string name="representative_selection_lbl">delegación pública de representante</string>

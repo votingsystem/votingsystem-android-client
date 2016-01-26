@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -62,8 +63,8 @@ public class ActivityBase extends AppCompatActivity
     private AppVS appVS = null;
     private NavigationView navigationView;
     private Thread mDataBootstrapThread = null;
-
     private TextView connectionStatusText;
+    private Button connectButton;
     private TextView headerTextView;
     private ImageView connectionStatusView;
 
@@ -133,18 +134,23 @@ public class ActivityBase extends AppCompatActivity
 
         View header = LayoutInflater.from(this).inflate(R.layout.activity_base_header, null);
         connectionStatusText = (TextView)header.findViewById(R.id.connection_status_text);
-        headerTextView = (TextView)header.findViewById(R.id.headerTextView);
-        connectionStatusView = (ImageView)header.findViewById(R.id.connection_status_img);
-        LinearLayout userBox = (LinearLayout)header.findViewById(R.id.user_box);
-        userBox.setOnClickListener(new View.OnClickListener() {
+        connectButton = (Button)header.findViewById(R.id.connect_button);
+        connectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                LOGD(TAG, "userBox clicked");
                 if(!appVS.isWithSocketConnection()) {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
                             R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
-                } else {showConnectionStatusDialog();}
+                }
             }
         });
+        LinearLayout userBox = (LinearLayout)header.findViewById(R.id.user_box);
+        userBox.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if(appVS.isWithSocketConnection()) showConnectionStatusDialog();
+            }
+        });
+        headerTextView = (TextView)header.findViewById(R.id.headerTextView);
+        connectionStatusView = (ImageView)header.findViewById(R.id.connection_status_img);
         navigationView.addHeaderView(header);
 
         int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
@@ -157,10 +163,12 @@ public class ActivityBase extends AppCompatActivity
             connectionStatusView.setVisibility(View.VISIBLE);
             headerTextView.setText(PrefUtils.getSessionUserVS().getEmail());
             headerTextView.setVisibility(View.VISIBLE);
+            connectButton.setVisibility(View.GONE);
         } else {
             connectionStatusText.setText(getString(R.string.disconnected_lbl));
             connectionStatusView.setVisibility(View.GONE);
             headerTextView.setVisibility(View.GONE);
+            connectButton.setVisibility(View.VISIBLE);
         }
     }
 

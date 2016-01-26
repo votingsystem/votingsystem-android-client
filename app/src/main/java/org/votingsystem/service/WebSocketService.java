@@ -323,13 +323,11 @@ public class WebSocketService extends Service {
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case MESSAGEVS:
-                    if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
-                        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
-                        responseVS.setCaption(getString(R.string.message_lbl)).
-                                setNotificationMessage(socketMsg.getMessage());
-                        MessageContentProvider.insert(getContentResolver(), socketMsg);
-                        Utils.showNewMessageNotification();
-                    } else LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
+                    responseVS.setCaption(getString(R.string.message_lbl)).
+                            setNotificationMessage(socketMsg.getMessage());
+                    MessageContentProvider.insert(getContentResolver(), socketMsg);
+                    Utils.showNewMessageNotification();
                     break;
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);
