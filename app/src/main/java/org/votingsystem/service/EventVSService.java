@@ -61,6 +61,7 @@ public class EventVSService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "onHandleIntent ");
         ResponseVS responseVS = null;
         final Bundle arguments = intent.getExtras();
+        String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         appVS = (AppVS) getApplicationContext();
         if(arguments != null && arguments.containsKey(ContextVS.STATE_KEY)
                 && arguments.containsKey(ContextVS.OFFSET_KEY)) {
@@ -68,6 +69,8 @@ public class EventVSService extends IntentService {
             Long offset = arguments.getLong(ContextVS.OFFSET_KEY);
             if(appVS.getAccessControl() == null) {
                 LOGD(TAG, "AccessControl not initialized");
+                appVS.broadcastResponse(ResponseVS.ERROR(getString(R.string.error_lbl),
+                        getString(R.string.connection_error_msg)).setServiceCaller(serviceCaller));
                 return;
             }
             String serviceURL = appVS.getAccessControl().getEventVSURL(eventState,

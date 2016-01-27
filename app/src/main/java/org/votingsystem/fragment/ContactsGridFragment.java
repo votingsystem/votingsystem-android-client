@@ -23,13 +23,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -69,7 +70,6 @@ public class ContactsGridFragment extends Fragment
     private String queryStr = null;
     private Mode mode = Mode.CONTACT;
     private AppVS appVS = null;
-    private Integer firstVisiblePosition = null;
     private String broadCastId = ContactsGridFragment.class.getSimpleName();
     private static final int loaderId = 0;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
@@ -93,6 +93,7 @@ public class ContactsGridFragment extends Fragment
             }
         }
     };
+
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,13 +126,6 @@ public class ContactsGridFragment extends Fragment
         }
         rootView = inflater.inflate(R.layout.contacts_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        Button open_contacts_btn = (Button) rootView.findViewById(R.id.open_contacts_btn);
-        open_contacts_btn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startActivityForResult(new Intent(Intent.ACTION_PICK,
-                        ContactsContract.Contacts.CONTENT_URI), CONTACT_PICKER);
-            }
-        });
         if(savedInstanceState != null) {
             String dtoStr = savedInstanceState.getString(ContextVS.DTO_KEY);
             if(dtoStr != null) {
@@ -162,6 +156,7 @@ public class ContactsGridFragment extends Fragment
             }
         });
         gridView.setOnScrollListener(this);
+        getLoaderManager().initLoader(loaderId, null, this);
         return rootView;
     }
 
@@ -234,17 +229,24 @@ public class ContactsGridFragment extends Fragment
         }
     }
 
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.contacts_grid_fragment, menu);
+    }
+
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected(..)", "Title: " + item.getTitle() +
                 " - ItemId: " + item.getItemId());
         switch (item.getItemId()) {
-            default:
-                return super.onOptionsItemSelected(item);
+            case R.id.open_contacts:
+                startActivityForResult(new Intent(Intent.ACTION_PICK,
+                        ContactsContract.Contacts.CONTENT_URI), CONTACT_PICKER);
+                break;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
+        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " - id: " + id);
         launchPager(position, null);
     }
 
@@ -261,18 +263,20 @@ public class ContactsGridFragment extends Fragment
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         LOGD(TAG + ".onCreateLoader", "onCreateLoader");
-        String selection = UserContentProvider.TYPE_COL + " =? ";
+        /*String selection = UserContentProvider.TYPE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 UserContentProvider.CONTENT_URI, null, selection,
                 new String[]{UserVSDto.Type.CONTACT.toString()}, null);
-        return loader;
+        return loader;*/
+        return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, null, null, null);
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount() +
-                " - firstVisiblePosition: " + firstVisiblePosition);
-        if(firstVisiblePosition != null) cursor.moveToPosition(firstVisiblePosition);
-        firstVisiblePosition = null;
+        LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount());
+        if(!(gridView.getAdapter() instanceof CursorAdapter)) {
+            ContactDBListAdapter adapter = new ContactDBListAdapter(getActivity(), null,false);
+            gridView.setAdapter(adapter);
+        }
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
@@ -336,6 +340,8 @@ public class ContactsGridFragment extends Fragment
             }
             ((TextView)itemView.findViewById(R.id.fullname)).setText(userVS.getName());
             ((TextView) itemView.findViewById(R.id.nif)).setText(userVS.getNIF());
+            if(userVS.getEmail() != null) ((TextView) itemView.findViewById(R.id.email)).setText(userVS.getEmail());
+            if(userVS.getPhone() != null) ((TextView) itemView.findViewById(R.id.phone)).setText(userVS.getPhone());
             return itemView;
         }
     }
@@ -388,6 +394,8 @@ public class ContactsGridFragment extends Fragment
                         ResultListDto<UserVSDto> resultList = ((ResultListDto<UserVSDto>) responseVS
                                 .getMessage(new TypeReference<ResultListDto<UserVSDto>>() {}));
                         userVSList = resultList.getResultList();
+                        if(userVSList.size() > 0)
+                            rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
                         ContactListAdapter adapter = new ContactListAdapter(userVSList, appVS);
                         gridView.setAdapter(adapter);
                     }

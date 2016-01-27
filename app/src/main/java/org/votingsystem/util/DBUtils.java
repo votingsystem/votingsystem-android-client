@@ -21,7 +21,7 @@ public class DBUtils {
     public static UserVSDto extractInfoFromContactPickerIntent(final Intent intent, Context mContext) {
         Cursor cursor = null;
         try {
-            Uri contactURI = intent.getData();
+             Uri contactURI = intent.getData();
             String id = contactURI.getLastPathSegment();// Get the contact id from the Uri
             String phone = null;
             String email = null;

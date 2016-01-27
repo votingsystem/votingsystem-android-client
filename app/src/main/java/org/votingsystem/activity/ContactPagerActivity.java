@@ -84,7 +84,7 @@ public class ContactPagerActivity extends AppCompatActivity {
             });
             mViewPager.setCurrentItem(cursorPosition);
         }
-
+        getSupportActionBar().setTitle(getString(R.string.contacts_lbl));
     }
 
     private void updateActionBarTitle(String fullName) {

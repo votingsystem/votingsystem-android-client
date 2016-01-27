@@ -175,15 +175,13 @@ public class ContactFragment extends Fragment {
     }
 
     private void deleteContact() {
-        getActivity().getContentResolver().delete(UserContentProvider.CONTENT_URI,
-                UserContentProvider.CONTACT_URI_COL + " = ?" ,
-                new String[]{contact.getContactURI().toString()});
-        setContactButtonState(false);
+        UserContentProvider.deleteById(contact.getId(), getActivity());
+        getActivity().onBackPressed();
     }
 
     private void addContact() {
         getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
-                UserContentProvider.getContentValues(contact));
+                UserContentProvider.getContentValues(contact.setType(UserVSDto.Type.CONTACT)));
         setContactButtonState(true);
     }
 

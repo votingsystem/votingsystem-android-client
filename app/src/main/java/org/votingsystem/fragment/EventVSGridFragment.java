@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -25,10 +24,12 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
+import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.service.EventVSService;
 import org.votingsystem.util.ContextVS;
@@ -60,6 +61,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private Integer firstVisiblePosition = null;
     private static final int loaderId = 0;
     private String broadCastId = null;
+    private AccessControlDto accessControl = null;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -67,8 +69,10 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
-            if(ResponseVS.SC_OK != responseVS.getStatusCode())
+            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                setProgressDialogVisible(false);
                 MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            }
         }
     };
 
@@ -99,6 +103,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             gridView.onRestoreInstanceState(gridState);
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
         }
+        accessControl = appVS.getAccessControl();
         return rootView;
     }
 
@@ -213,8 +218,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 " - numTotal: " + EventVSContentProvider.getNumTotal(eventState) +
                 " - cursor.getCount(): " + cursor.getCount() +
                 " - firstVisiblePosition: " + firstVisiblePosition);
-        if((EventVSContentProvider.getNumTotal(eventState) == null)
-                && appVS.getAccessControl() != null)
+        if((EventVSContentProvider.getNumTotal(eventState) == null) && accessControl != null)
             fetchItems(offset);
         else {
             setProgressDialogVisible(false);
@@ -226,6 +230,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
             } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
         }
+        if(accessControl == null)((TextView)rootView.findViewById(android.R.id.empty)).setText(R.string.connection_error_msg);
+        else ((TextView)rootView.findViewById(android.R.id.empty)).setText(getString(R.string.empty_search_lbl));
     }
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {

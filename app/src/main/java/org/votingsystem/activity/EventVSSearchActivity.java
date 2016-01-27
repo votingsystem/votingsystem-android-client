@@ -177,6 +177,10 @@ public class EventVSSearchActivity extends AppCompatActivity {
 
         @Override protected Void doInBackground(String... urls) {
             LOGD(TAG + ".doInBackground", "doInBackground");
+            if(AppVS.getInstance().getAccessControl() == null) {
+                LOGD(TAG + ".doInBackground", "missing connection with Access Control");
+                return null;
+            }
             String serviceURL = AppVS.getInstance().getAccessControl().getSearchServiceURL(null, null, queryStr,
                     EventVSDto.Type.ELECTION, eventState);
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
@@ -184,7 +188,6 @@ public class EventVSSearchActivity extends AppCompatActivity {
                 ResultListDto<EventVSDto> resultListDto = (ResultListDto<EventVSDto>)
                         responseVS.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});
                 eventVSList = resultListDto.getResultList();
-
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

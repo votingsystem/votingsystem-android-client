@@ -71,7 +71,7 @@ public class UserContentProvider extends ContentProvider {
 
     @Override public boolean onCreate() {
         //Delete previous session database
-        getContext().deleteDatabase(DB_NAME);
+        //getContext().deleteDatabase(DB_NAME);
         DatabaseHelper databaseHelper = new DatabaseHelper(getContext());
         try{
             database = databaseHelper.getWritableDatabase();
@@ -133,6 +133,14 @@ public class UserContentProvider extends ContentProvider {
         // Notify any listeners and return the updated row count.
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;
+    }
+
+    public static void deleteById(Long id, Context context) {
+        context.getContentResolver().delete(getContactURI(id), null, null);
+    }
+
+    public static Uri getContactURI(Long id) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + id);
     }
 
     public static ContentValues getContentValues(UserVSDto userVS) {
