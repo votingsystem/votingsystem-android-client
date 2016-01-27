@@ -263,12 +263,9 @@ public class ContactsGridFragment extends Fragment
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         LOGD(TAG + ".onCreateLoader", "onCreateLoader");
-        /*String selection = UserContentProvider.TYPE_COL + " =? ";
-        CursorLoader loader = new CursorLoader(this.getActivity(),
-                UserContentProvider.CONTENT_URI, null, selection,
+        return new CursorLoader(this.getActivity(),
+                UserContentProvider.CONTENT_URI, null, UserContentProvider.TYPE_COL + " =? ",
                 new String[]{UserVSDto.Type.CONTACT.toString()}, null);
-        return loader;*/
-        return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, null, null, null);
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
