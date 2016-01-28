@@ -92,7 +92,7 @@ public class PaymentFragment extends Fragment {
     };
 
     private void launchTransactionVS(TransactionVSDto.Type transactionType) {
-        LOGD(TAG + ".launchSignedTransaction() ", "launchSignedTransaction");
+        LOGD(TAG + ".launchTransactionVS() ", "launchTransactionVS");
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
         try {
             transactionDto.setType(transactionType);
@@ -138,13 +138,16 @@ public class PaymentFragment extends Fragment {
             if(transactionDto.isTimeLimited()) tagvsInfo = tagvsInfo + " " +
                     getString(R.string.time_remaining_tagvs_info_lbl);
             tagvs.setText(tagvsInfo);
-            switch(transactionDto.getOperation()) {
-                case DELIVERY_WITH_PAYMENT:
-                case DELIVERY_WITHOUT_PAYMENT:
-                    UIUtils.fillAddressInfo((LinearLayout)rootView.findViewById(R.id.address_info),
-                            getActivity());
-                    break;
+            if(transactionDto.getOperation() != null) {
+                switch(transactionDto.getOperation()) {
+                    case DELIVERY_WITH_PAYMENT:
+                    case DELIVERY_WITHOUT_PAYMENT:
+                        UIUtils.fillAddressInfo((LinearLayout)rootView.findViewById(R.id.address_info),
+                                getActivity());
+                        break;
+                }
             }
+
         } catch (Exception ex) { ex.printStackTrace(); }
         Button save_button = (Button) rootView.findViewById(R.id.save_button);
         save_button.setOnClickListener(new OnClickListener() {

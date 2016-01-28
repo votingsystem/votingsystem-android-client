@@ -36,7 +36,9 @@ import org.votingsystem.util.Utils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -179,6 +181,11 @@ public class TransactionVSFormFragment extends Fragment {
         if(from_uservs_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.FROM_USERVS);
         if(currency_send_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.CURRENCY_SEND);
         if(currency_change_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.CURRENCY_CHANGE);
+        if(paymentOptions.isEmpty()) {
+            MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                    getString(R.string.min_payment_option_msg), getFragmentManager());
+            return;
+        }
         if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
         switch (formType) {
             case TRANSACTIONVS_FORM:
@@ -190,6 +197,8 @@ public class TransactionVSFormFragment extends Fragment {
                 transactionDto.setSubject(subject.getText().toString());
                 transactionDto.setToUser(toUserVS.getFullName());
                 transactionDto.setToUserIBAN(Utils.asSet(toUserVS.getIBAN()));
+                transactionDto.setDateCreated(new Date());
+                transactionDto.setUUID(UUID.randomUUID().toString());
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
                 resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
                 resultIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionDto);
@@ -197,11 +206,6 @@ public class TransactionVSFormFragment extends Fragment {
                 startActivity(resultIntent);
                 break;
             case QR_FORM:
-                if(paymentOptions.size() == 0) {
-                    MessageDialogFragment.showDialog(getString(R.string.error_lbl),
-                            getString(R.string.min_payment_option_msg), getFragmentManager());
-                    return;
-                }
                 TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
                         AppVS.getInstance().getUserVS().getFullName(), UserVSDto.Type.USER,
                         new BigDecimal(amount_text.getText().toString()),
