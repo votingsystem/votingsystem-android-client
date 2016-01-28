@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.DeviceVSDto;
@@ -40,8 +41,9 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -60,7 +62,7 @@ public class ContactFragment extends Fragment {
     private UserVSDto contact;
     private TextView connected_text;
     private Menu menu;
-    private List<DeviceVSDto> targetDevicesDto;
+    private Set<DeviceVSDto> connectedDevices;
     private boolean isDBUserVS;
     private boolean isConnected = false;
 
@@ -90,7 +92,7 @@ public class ContactFragment extends Fragment {
                     startIntent.putExtra(ContextVS.MESSAGE_KEY, responseVS.getMessage());
                     try {
                         startIntent.putExtra(ContextVS.DTO_KEY,
-                                JSON.writeValueAsString(targetDevicesDto));
+                                JSON.writeValueAsString(connectedDevices));
                     } catch(Exception ex) { ex.printStackTrace();}
                     startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
                     getActivity().startService(startIntent);
@@ -165,12 +167,12 @@ public class ContactFragment extends Fragment {
                 UUID.randomUUID().toString());
         if(savedInstanceState != null) {
             try {
-                targetDevicesDto = JSON.readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
+                connectedDevices = JSON.readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
                         new TypeReference<ResultListDto<DeviceVSDto>>() {});
             } catch (Exception ex) {ex.printStackTrace();}
             isConnected = savedInstanceState.getBoolean(ContextVS.CONNECTED_KEY);
         }
-        if(targetDevicesDto == null) new UserVSDataFetcher().execute("");
+        if(connectedDevices == null) new UserVSDataFetcher().execute("");
         return rootView;
     }
 
@@ -261,6 +263,12 @@ public class ContactFragment extends Fragment {
                         broadCastId, TypeVS.MESSAGEVS, getFragmentManager());
                 return true;
             case R.id.send_money:
+                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionVSFormFragment.class.getName());
+                intent.putExtra(ContextVS.TYPEVS_KEY, TransactionVSFormFragment.Type.TRANSACTIONVS_FORM);
+                intent.putExtra(ContextVS.USER_KEY, contact);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
                 return true;
             case R.id.delete_item:
                 deleteContact();
@@ -273,8 +281,8 @@ public class ContactFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         try {
-            if(targetDevicesDto != null) outState.putString(ContextVS.DTO_KEY,
-                    JSON.writeValueAsString(targetDevicesDto));
+            if(connectedDevices != null) outState.putString(ContextVS.DTO_KEY,
+                    JSON.writeValueAsString(connectedDevices));
         } catch (Exception ex) { ex.printStackTrace();}
         outState.putBoolean(ContextVS.CONNECTED_KEY, isConnected);
     }
@@ -299,7 +307,7 @@ public class ContactFragment extends Fragment {
         @Override protected void onPreExecute() { setProgressDialogVisible(true); }
 
         @Override protected List<DeviceVSDto> doInBackground(String... params) {
-            targetDevicesDto = null;
+            connectedDevices = null;
             try {
                 ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getData(
                         new TypeReference<ResultListDto<DeviceVSDto>>(){},
@@ -319,13 +327,14 @@ public class ContactFragment extends Fragment {
                     TelephonyManager telephonyManager = (TelephonyManager)getActivity().
                             getSystemService(Context.TELEPHONY_SERVICE);
                     String deviceId = telephonyManager.getDeviceId();
-                    targetDevicesDto =  new ArrayList<>();
+                    connectedDevices =  new HashSet<>();
                     for(DeviceVSDto deviceVSDto : deviceListDto) {
                         if(!deviceId.equals(deviceVSDto.getDeviceId())) {
                             isConnected = true;
-                            targetDevicesDto.add(deviceVSDto);
+                            connectedDevices.add(deviceVSDto);
                         }
                     }
+                    contact.setConnectedDevices(connectedDevices);
                     setContactButtonState(isDBUserVS);
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());

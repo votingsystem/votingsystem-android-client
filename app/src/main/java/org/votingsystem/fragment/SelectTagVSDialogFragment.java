@@ -13,11 +13,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -44,9 +41,9 @@ public class SelectTagVSDialogFragment extends DialogFragment {
     public static final String TAG = SelectTagVSDialogFragment.class.getSimpleName();
 
     private SimpleAdapter simpleAdapter;
-    private String previousSearch;
+    //private String previousSearch;
     private String dialogCaller;
-    private List<String> tagList = new ArrayList<String>();
+    private static List<String> tagList = new ArrayList<>();
 
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
         SelectTagVSDialogFragment dialogFragment = new SelectTagVSDialogFragment();
@@ -60,7 +57,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.select_tagvs_dialog, null);
-        final EditText search_text = (EditText) view.findViewById(R.id.search_text);
+        /*final EditText search_text = (EditText) view.findViewById(R.id.search_text);
         Button search_tag_btn = (Button) view.findViewById(R.id.search_tag_btn);
         search_tag_btn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -69,7 +66,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
                 imm.hideSoftInputFromWindow(search_text.getWindowToken(), 0);
                 processSearch(search_text.getText().toString());
             }
-        });
+        });*/
         ListView tag_list_view = (ListView) view.findViewById(R.id.tag_list_view);
         final AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(
                 getString(R.string.search_tag_lbl)).create();
@@ -77,23 +74,23 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         simpleAdapter = new SimpleAdapter(new ArrayList<String>(), getActivity());
         tag_list_view.setAdapter(simpleAdapter);
         tag_list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parentAdapter, View view, int position,long id) {
+            public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 Intent intent = new Intent(dialogCaller);
                 intent.putExtra(ContextVS.TAG_KEY, new TagVSDto(tagList.get(position)));
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 dialog.dismiss();
             }
         });
+        processSearch(null);
         return dialog;
     }
 
     private void processSearch(String searchParam) {
-        if(previousSearch != null && previousSearch.equals(searchParam)) return;
-        TagVSLoader tagVSLoader = new TagVSLoader();
-        String targetURL = ((AppVS)getActivity().getApplicationContext()).getCurrencyServer().
-                getTagVSSearchServiceURL(searchParam);
-        tagVSLoader.execute(targetURL);
-        previousSearch = searchParam;
+        /*if(previousSearch != null && previousSearch.equals(searchParam)) return;
+        previousSearch = searchParam;*/
+        new TagVSLoader().execute(((AppVS) getActivity().getApplicationContext()).getCurrencyServer().
+                getTagVSServiceURL());
+
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
@@ -130,14 +127,14 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         }
 
         @Override protected List<String> doInBackground(String... params) {
-            tagList.clear();
+            if(tagList.size() > 0) return tagList;
             try {
                 ResponseVS responseVS  = HttpHelper.getData(params[0], ContentTypeVS.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     ResultListDto<TagVSDto> resultListDto = (ResultListDto<TagVSDto>) responseVS.getMessage(
                             new TypeReference<ResultListDto<TagVSDto>>() { });
                     for(TagVSDto tagVSDto : resultListDto.getResultList()) {
-                        tagList.add(tagVSDto.getName());
+                        if(!TagVSDto.WILDTAG.equals(tagVSDto.getName())) tagList.add(tagVSDto.getName());
                     }
                 } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                         getString(R.string.error_lbl), responseVS.getMessage(),

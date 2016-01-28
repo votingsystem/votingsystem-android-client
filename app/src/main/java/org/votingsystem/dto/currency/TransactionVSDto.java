@@ -701,9 +701,9 @@ public class TransactionVSDto implements Serializable {
         return transactionDto;
     }
 
-    @JsonIgnore public TransactionVSDto getFromUserVSClean() {
+    @JsonIgnore public TransactionVSDto getTransactionFromUserVS() {
         TransactionVSDto dto = new TransactionVSDto();
-        dto.setOperation(operation);
+        dto.setOperation(TypeVS.FROM_USERVS);
         dto.setSubject(subject);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);

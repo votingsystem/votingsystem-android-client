@@ -34,7 +34,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -83,6 +85,13 @@ public class Utils {
         }
     }
 
+    public static <T> Set<T> asSet(T... args ) {
+        Set<T> result = new HashSet<>();
+        for(T arg : args) {
+            result.add(arg);
+        }
+        return result;
+    }
 
     public static ResponseVS getBroadcastResponse(TypeVS operation, String serviceCaller,
               ResponseVS responseVS, Context context) {

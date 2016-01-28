@@ -126,7 +126,8 @@ public class QRActionsFragment extends Fragment {
                     break;
                 case CREATE_QR:
                     Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, QRGeneratorFragment.class.getName());
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionVSFormFragment.class.getName());
+                    intent.putExtra(ContextVS.TYPEVS_KEY, TransactionVSFormFragment.Type.QR_FORM);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(intent);
                     break;

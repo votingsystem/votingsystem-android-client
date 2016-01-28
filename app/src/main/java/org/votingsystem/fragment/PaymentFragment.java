@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -25,13 +24,11 @@ import android.widget.TextView;
 import org.votingsystem.activity.CurrencyRequesActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
@@ -128,7 +125,7 @@ public class PaymentFragment extends Fragment {
         payment_method_spinner = (Spinner)rootView.findViewById(R.id.payment_method_spinner);
         try {
             transactionDto = (TransactionVSDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
                     R.layout.payment_spinner_item,
                     TransactionVSDto.getPaymentMethods(transactionDto.getPaymentOptions()));
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

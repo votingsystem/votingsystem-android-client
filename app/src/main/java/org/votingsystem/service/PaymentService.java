@@ -118,7 +118,7 @@ public class PaymentService extends IntentService {
                         Uri operationUri = getContentResolver().insert(
                                 OperationVSContentProvider.CONTENT_URI,
                                 OperationVSContentProvider.getContentValues(operationVS));
-                        responseVS = sendTransactionVS(transactionDto.getFromUserVSClean());
+                        responseVS = sendTransactionVS(transactionDto.getTransactionFromUserVS());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
                                 transactionDto.getPaymentConfirmURL() != null) {
                             ResultListDto<TransactionVSDto> resultList =

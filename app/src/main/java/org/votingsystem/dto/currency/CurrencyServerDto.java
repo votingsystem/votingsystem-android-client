@@ -38,6 +38,10 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
         return getServerURL() + "/rest/tagVS?tag=" + searchParam;
     }
 
+    public String getTagVSServiceURL() {
+        return getServerURL() + "/rest/tagVS/list";
+    }
+
     public String getDateUserInfoServiceURL(Date date) {
         return getServerURL() + "/rest/userVS" + DateUtils.getPath(date);
     }
