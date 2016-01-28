@@ -297,7 +297,7 @@ public class CertUtils {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             if(attribute.getTagNo() == tagNo) {
                 String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
-                certExtensionDto = JSON.getMapper().readValue(certAttributeJSONStr, type);
+                certExtensionDto = JSON.readValue(certAttributeJSONStr, type);
             }
         }
         return certExtensionDto;

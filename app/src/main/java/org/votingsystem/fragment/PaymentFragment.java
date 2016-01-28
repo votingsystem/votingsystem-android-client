@@ -158,23 +158,6 @@ public class PaymentFragment extends Fragment {
         return rootView;
     }
 
-    @Override public void onStart() {
-        super.onStart();
-        TransactionVSDto transactionVS = null;
-        if(getArguments().getParcelable(ContextVS.URI_KEY) != null) {
-            transactionVS = TransactionVSDto.fromUri((Uri) getArguments().getParcelable(
-                    ContextVS.URI_KEY));
-        }
-        OperationVS operationVS = null;
-        if(getArguments().getString(ContextVS.OPERATIONVS_KEY) != null) {
-            try {
-                operationVS = JSON.readValue(getArguments().getString(ContextVS.OPERATIONVS_KEY),
-                        OperationVS.class);
-                transactionVS = TransactionVSDto.fromOperationVS(operationVS);
-            } catch (Exception e) { e.printStackTrace();  }
-        }
-    }
-
     @Override public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(

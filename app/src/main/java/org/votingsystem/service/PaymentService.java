@@ -118,7 +118,7 @@ public class PaymentService extends IntentService {
                         Uri operationUri = getContentResolver().insert(
                                 OperationVSContentProvider.CONTENT_URI,
                                 OperationVSContentProvider.getContentValues(operationVS));
-                        responseVS = sendTransactionVS(transactionDto);
+                        responseVS = sendTransactionVS(transactionDto.getFromUserVSClean());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
                                 transactionDto.getPaymentConfirmURL() != null) {
                             ResultListDto<TransactionVSDto> resultList =
@@ -129,6 +129,7 @@ public class PaymentService extends IntentService {
                             String message = transactionDto.validateReceipt(receipt, false);
                             receipt.isValidSignature();
                             if(transactionDto.getSocketMessageDto() != null) {
+                                //this is to send the signed receipts to the user that showed the QR code
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,
                                         AppVS.getInstance().getConnectedDevice().getId(),
@@ -140,6 +141,8 @@ public class PaymentService extends IntentService {
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
+                                //this is to send the signed receipts to the online service server receptor
+                                //of the transaction
                                 TransactionResponseDto responseDto = new TransactionResponseDto();
                                 responseDto.setOperation(TypeVS.FROM_USERVS);
                                 responseDto.setSmimeMessage(base64Receipt);

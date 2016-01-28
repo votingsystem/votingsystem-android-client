@@ -191,7 +191,7 @@ public class Currency extends ReceiptWrapper {
         smimeMessage.isValidSignature();
         this.smimeMessage = smimeMessage;
         initCertData(smimeMessage.getCurrencyCert());
-        CurrencyDto batchItemDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
+        CurrencyDto batchItemDto = JSON.readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
         this.batchUUID = batchItemDto.getBatchUUID();
         this.batchAmount = batchItemDto.getBatchAmount();
         if(TypeVS.CURRENCY_SEND != batchItemDto.getOperation())

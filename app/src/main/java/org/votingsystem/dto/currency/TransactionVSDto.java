@@ -575,14 +575,12 @@ public class TransactionVSDto implements Serializable {
     }
 
     private String validateFromUserVSReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
+        TransactionVSDto receiptDto = smimeMessage.getSignedContent(TransactionVSDto.class);
         if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
                     receiptDto.getType());
         } else if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
                 receiptDto.getType());
-        if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
-                " found " + receiptDto.getUserToType());
         if(!new HashSet<>(toUserIBAN).equals(new HashSet<>(receiptDto.getToUserIBAN())) ||
                 toUserIBAN.size() != receiptDto.getToUserIBAN().size()) throw new ValidationExceptionVS(
                 "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
@@ -701,5 +699,19 @@ public class TransactionVSDto implements Serializable {
         fromUserVS.setIBAN(transactionDto.getFromUserIBAN());
         transactionDto.setFromUserVS(fromUserVS);
         return transactionDto;
+    }
+
+    @JsonIgnore public TransactionVSDto getFromUserVSClean() {
+        TransactionVSDto dto = new TransactionVSDto();
+        dto.setOperation(operation);
+        dto.setSubject(subject);
+        dto.setAmount(amount);
+        dto.setCurrencyCode(currencyCode);
+        dto.setToUser(toUser);
+        dto.setToUserIBAN(toUserIBAN);
+        dto.setTimeLimited(timeLimited);
+        dto.setTags(tags);
+        dto.setUUID(UUID);
+        return dto;
     }
 }
