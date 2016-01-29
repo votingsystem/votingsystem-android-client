@@ -1,8 +1,8 @@
 package org.votingsystem.dto.currency;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import android.util.Base64;
 
-import org.bouncycastle2.util.encoders.Base64;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.signature.smime.SMIMEMessage;
 
 /**
@@ -19,7 +19,7 @@ public class CurrencyBatchResponseDto {
     public CurrencyBatchResponseDto() {};
 
     public CurrencyBatchResponseDto(SMIMEMessage receipt, String leftOverCert) throws Exception {
-        this.receipt = new String(Base64.encode(receipt.getBytes()));
+        this.receipt = Base64.encodeToString(receipt.getBytes(), Base64.NO_WRAP);
         this.leftOverCert = leftOverCert;
     }
 

@@ -145,12 +145,18 @@ public class Utils {
     }
 
     public static void toggleWebSocketServiceConnection() {
-        Intent startIntent = new Intent(AppVS.getInstance(), WebSocketService.class);
-        TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-        if(AppVS.getInstance().isWithSocketConnection()) typeVS = TypeVS.WEB_SOCKET_CLOSE;
-        LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-        AppVS.getInstance().startService(startIntent);
+        if(AppVS.getInstance().getCurrencyServer() == null) {
+            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR,
+                    AppVS.getInstance().getString(R.string.missing_server_connection),
+                    AppVS.getInstance().getString(R.string.connection_error_msg));
+        } else {
+            Intent startIntent = new Intent(AppVS.getInstance(), WebSocketService.class);
+            TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
+            if(AppVS.getInstance().isWithSocketConnection()) typeVS = TypeVS.WEB_SOCKET_CLOSE;
+            LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
+            AppVS.getInstance().startService(startIntent);
+        }
     }
 
     public static void showAccountsUpdatedNotification(Context context){

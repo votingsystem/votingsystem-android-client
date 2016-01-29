@@ -75,8 +75,6 @@ public class CurrencyActivity extends AppCompatActivity {
             } else if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
                 switch(socketMsg.getOperation()) {
-                    case INIT_SIGNED_SESSION:
-                        break;
                     case MESSAGEVS_TO_DEVICE:
                         break;
                     case CURRENCY_WALLET_CHANGE:
@@ -103,8 +101,6 @@ public class CurrencyActivity extends AppCompatActivity {
             } else {
                 setProgressDialogVisible(false, null, null);
                 switch(responseVS.getTypeVS()) {
-                    case INIT_SIGNED_SESSION:
-                        break;
                     case DEVICE_SELECT:
                         try {
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

@@ -1,8 +1,7 @@
 package org.votingsystem.model;
 
+import android.util.Base64;
 import android.util.Log;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
@@ -76,7 +75,7 @@ public class CurrencyBatch {
     }
 
     public void validateTransactionVSResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
-        SMIMEMessage receipt = new SMIMEMessage(Base64.decode(((String) dataMap.get("receipt")).getBytes()));
+        SMIMEMessage receipt = new SMIMEMessage(Base64.decode(((String) dataMap.get("receipt")).getBytes(), Base64.NO_WRAP));
         if(dataMap.containsKey("leftOverCoin")) {
 
         }
@@ -90,7 +89,7 @@ public class CurrencyBatch {
             //TODO
             String hashCertVS = (String) receiptData.keySet().iterator().next();
             SMIMEMessage smimeReceipt = new SMIMEMessage(
-                    Base64.decode(((String) receiptData.get(hashCertVS)).getBytes()));
+                    Base64.decode(((String) receiptData.get(hashCertVS)).getBytes(), Base64.NO_WRAP));
             CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     smimeReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
             Currency currency = currencyMap.remove(certExtensionDto.getHashCertVS());

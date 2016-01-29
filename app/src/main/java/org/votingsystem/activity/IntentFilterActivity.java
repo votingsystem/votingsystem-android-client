@@ -10,8 +10,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
@@ -129,7 +129,7 @@ public class IntentFilterActivity extends AppCompatActivity {
                     String encodedMsg = uriData.getQueryParameter("operationvs");
                     if(encodedMsg != null) {
                         operationVS = JSON.readValue(
-                                Base64.decode(encodedMsg.getBytes()), OperationVS.class);
+                                Base64.decode(encodedMsg.getBytes(), Base64.NO_WRAP), OperationVS.class);
                     }
                 }
             } catch(Exception ex) {ex.printStackTrace();}

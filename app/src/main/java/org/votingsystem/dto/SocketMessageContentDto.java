@@ -1,23 +1,19 @@
 package org.votingsystem.dto;
 
+import android.util.Base64;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
-
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
-
-import javax.mail.MessagingException;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageContentDto implements Serializable {
@@ -67,16 +63,6 @@ public class SocketMessageContentDto implements Serializable {
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
         messageContentDto.setMessage(qrMessageDto.getUUID());
-        return messageContentDto;
-    }
-
-    public static SocketMessageContentDto getSignResponse(Integer statusCode, String message,
-              SMIMEMessage smimeMessage) throws IOException, MessagingException {
-        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
-        messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN_RESPONSE);
-        messageContentDto.setStatusCode(statusCode);
-        messageContentDto.setMessage(message);
-        messageContentDto.setSmimeMessage(new String(Base64.encode(smimeMessage.getBytes())));
         return messageContentDto;
     }
 
@@ -208,7 +194,7 @@ public class SocketMessageContentDto implements Serializable {
 
     @JsonIgnore
     SMIMEMessage getSMIME () throws Exception {
-        byte[] smimeMessageBytes = Base64.decode(smimeMessage.getBytes());
+        byte[] smimeMessageBytes = Base64.decode(smimeMessage.getBytes(), Base64.NO_WRAP);
         return new SMIMEMessage(smimeMessageBytes);
     }
 

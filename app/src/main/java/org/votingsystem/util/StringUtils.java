@@ -1,11 +1,9 @@
 package org.votingsystem.util;
 
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.bouncycastle2.util.encoders.Hex;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -119,7 +117,7 @@ public class StringUtils {
             throws NoSuchAlgorithmException {
         MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
         byte[] resultDigest =  sha.digest(originStr.getBytes());
-        return new String(Base64.encode(resultDigest));
+        return Base64.encodeToString(resultDigest, Base64.NO_WRAP);
     }
 
     public static String toHex(String base64Str) throws UnsupportedEncodingException {

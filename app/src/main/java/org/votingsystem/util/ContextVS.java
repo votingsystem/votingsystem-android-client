@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import android.util.Base64;
+
 import java.nio.charset.Charset;
 
 import javax.mail.Session;

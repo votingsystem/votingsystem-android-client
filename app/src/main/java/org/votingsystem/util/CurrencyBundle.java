@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
-import org.bouncycastle2.util.encoders.Base64;
+import android.util.Base64;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
@@ -189,7 +190,7 @@ public class CurrencyBundle {
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage);
             timeStamper.call();
             currency.setSMIME(timeStamper.getSMIME());
-            currencySetSignatures.add(new String(Base64.encode(currency.getSMIME().getBytes())));
+            currencySetSignatures.add(Base64.encodeToString(currency.getSMIME().getBytes(), Base64.NO_WRAP));
         }
         dto.setCurrencySet(currencySetSignatures);
         dto.setCurrencyCollection(currencySet);

@@ -5,8 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-
-import org.bouncycastle2.util.encoders.Base64;
+import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +27,7 @@ public class ObjectUtils {
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(serializable);
             oos.close();
-            base64EncodedSerializedObject = Base64.encode(baos.toByteArray());
+            base64EncodedSerializedObject = Base64.encode(baos.toByteArray(), Base64.NO_WRAP);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -43,7 +42,7 @@ public class ObjectUtils {
     public static Serializable deSerializeObject(byte[] base64SerializedObject) {
         Serializable deserializedObject = null;
         try {
-            byte [] data = Base64.decode(base64SerializedObject);
+            byte [] data = Base64.decode(base64SerializedObject, Base64.NO_WRAP);
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
             deserializedObject  = (Serializable) ois.readObject();
             ois.close();

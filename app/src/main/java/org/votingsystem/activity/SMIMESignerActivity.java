@@ -99,7 +99,8 @@ public class SMIMESignerActivity extends AppCompatActivity {
                 try {
                     SMIMEMessage smimeMessage = appVS.signMessage(socketMessage.getDeviceFromName(),
                             socketMessage.getTextToSign(), getString(R.string.sign_request_lbl));
-                    sendSocketMessage(socketMessage.getSignResponse(ResponseVS.SC_OK, null, smimeMessage));
+                    sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_OK, null, smimeMessage,
+                            TypeVS.MESSAGEVS_SIGN_RESPONSE));
                 } catch (Exception e) { e.printStackTrace(); }
             }
         }).start();
@@ -143,16 +144,13 @@ public class SMIMESignerActivity extends AppCompatActivity {
             case android.R.id.home:
             case R.id.reject_sign_request:
                 try {
-                    SocketMessageDto messageDto = socketMessage.getResponse(ResponseVS.SC_ERROR,
-                            getString(R.string.reject_websocket_request_msg,
-                            Utils.getDeviceName()),AppVS.getInstance().getConnectedDevice().getId(),
-                            TypeVS.OPERATION_CANCELED);
-                    sendSocketMessage(messageDto);
+                    sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_ERROR,
+                            getString(R.string.reject_websocket_request_msg, Utils.getDeviceName()), null,
+                            TypeVS.MESSAGEVS_SIGN_RESPONSE));
                     finish();
                 } catch(Exception ex) {ex.printStackTrace();}
                 return true;
             case R.id.ban_device:
-
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

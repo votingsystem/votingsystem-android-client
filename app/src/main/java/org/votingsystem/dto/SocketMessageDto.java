@@ -1,12 +1,11 @@
 package org.votingsystem.dto;
 
 import android.content.Context;
+import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.CurrencyDto;
@@ -34,8 +33,6 @@ import java.util.Set;
 import javax.websocket.Session;
 
 /**
- * Base64.DEFAULT -> problems with Java 8 Base64
- *
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -94,11 +91,6 @@ public class SocketMessageDto implements Serializable {
     }
 
     public SocketMessageDto getResponse(Integer statusCode, String message,
-                            Long deviceFromId, TypeVS operation) throws Exception {
-        return getResponse(statusCode, message, deviceFromId, null, operation);
-    }
-
-    public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId,
             SMIMEMessage smimeMessage, TypeVS operation) throws Exception {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
@@ -108,31 +100,15 @@ public class SocketMessageDto implements Serializable {
         messageDto.setSessionId(sessionId);
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setStatusCode(statusCode);
-        messageContentDto.setDeviceFromId(deviceFromId);
+        messageContentDto.setOperation(operation);
+        messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setMessage(message);
         if(smimeMessage != null) messageContentDto.setSmimeMessage(
-                new String(Base64.encode(smimeMessage.getBytes())));
-        messageContentDto.setOperation(operation);
+                Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP));
         messageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
         messageDto.setUUID(UUID);
         return messageDto;
-    }
-
-    public SocketMessageDto getSignResponse(Integer statusCode, String message,
-                    SMIMEMessage smimeMessage) throws Exception {
-        WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
-        socketSession.setTypeVS(TypeVS.MESSAGEVS_SIGN_RESPONSE);
-        SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
-        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setSessionId(sessionId);
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignResponse(
-                statusCode, message, smimeMessage);
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON
-                .writeValueAsString(messageContentDto), socketSession.getAESParams()));
-        socketMessageDto.setUUID(UUID);
-        return socketMessageDto;
     }
 
     public static SocketMessageDto INIT_SESSION_REQUEST() throws NoSuchAlgorithmException {
@@ -200,7 +176,7 @@ public class SocketMessageDto implements Serializable {
         this.subject = subject;
     }
 
-    public boolean isEncrypted() {
+    @JsonIgnore public boolean isEncrypted() {
         return encryptedMessage != null;
     }
 
@@ -298,13 +274,13 @@ public class SocketMessageDto implements Serializable {
 
     @JsonIgnore
     public SMIMEMessage getSMIME() throws Exception {
-        if(smime == null) smime = new SMIMEMessage(Base64.decode(smimeMessage));
+        if(smime == null) smime = new SMIMEMessage(Base64.decode(smimeMessage, Base64.NO_WRAP));
         return smime;
     }
 
     public SocketMessageDto setSMIME(SMIMEMessage smimeMessage) throws Exception {
         this.smime = smimeMessage;
-        this.smimeMessage = new String(Base64.encode(smimeMessage.getBytes()));
+        this.smimeMessage = Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP);
         return this;
     }
 

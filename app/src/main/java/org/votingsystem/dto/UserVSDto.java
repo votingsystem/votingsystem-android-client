@@ -1,17 +1,14 @@
 package org.votingsystem.dto;
 
 import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -147,7 +144,7 @@ public class UserVSDto implements Serializable {
     @JsonIgnore
     public String getSignedContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
-        return new String(Base64.encode(signerInformation.getContentDigest()));
+        return Base64.encodeToString(signerInformation.getContentDigest(), Base64.NO_WRAP);
     }
 
     public X509Certificate getCertificate() {

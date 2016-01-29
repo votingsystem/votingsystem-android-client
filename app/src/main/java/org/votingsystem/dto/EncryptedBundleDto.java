@@ -1,8 +1,8 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import android.util.Base64;
 
-import org.bouncycastle2.util.encoders.Base64;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.signature.smime.EncryptedBundle;
 
 /**
@@ -19,15 +19,15 @@ public class EncryptedBundleDto {
     public EncryptedBundleDto() {}
 
     public EncryptedBundleDto(EncryptedBundle encryptedBundle) {
-        iv = new String (Base64.encode(encryptedBundle.getIV()));
-        salt = new String (Base64.encode(encryptedBundle.getSalt()));
-        cipherText = new String (Base64.encode(encryptedBundle.getCipherText()));
+        iv = Base64.encodeToString(encryptedBundle.getIV(), Base64.NO_WRAP);
+        salt = Base64.encodeToString(encryptedBundle.getSalt(), Base64.NO_WRAP);
+        cipherText = Base64.encodeToString(encryptedBundle.getCipherText(), Base64.NO_WRAP);
     }
 
     public EncryptedBundle getEncryptedBundle() {
-        byte[] iv = Base64.decode(this.iv);
-        byte[] cipherText = Base64.decode(this.cipherText);
-        byte[] salt = Base64.decode(this.salt);
+        byte[] iv = Base64.decode(this.iv, Base64.NO_WRAP);
+        byte[] cipherText = Base64.decode(this.cipherText, Base64.NO_WRAP);
+        byte[] salt = Base64.decode(this.salt, Base64.NO_WRAP);
         return new EncryptedBundle(cipherText, iv, salt);
     }
 

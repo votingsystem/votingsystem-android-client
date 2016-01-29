@@ -8,10 +8,9 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -45,7 +44,6 @@ import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -94,28 +92,17 @@ public class WebSocketService extends Service {
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         LOGD(TAG + ".onStartCommand", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        if(appVS.getCurrencyServer() == null) {
-            SocketMessageDto messageDto = new SocketMessageDto(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
-                    getString(R.string.missing_server_connection), TypeVS.INIT_SIGNED_SESSION);
-            messageDto.setCaption(getString(R.string.connection_error_msg));
-            sendWebSocketBroadcast(messageDto);
-            return START_STICKY;
-        } else {
-            if(session == null || !session.isOpen()) {
-                if(latch.getCount() == 0) latch = new CountDownLatch(1);
-                WebSocketListener socketListener = new WebSocketListener(
-                        appVS.getCurrencyServer().getWebSocketURL());
-                new Thread(null, socketListener, "websocket_service_thread").start();
-            }
-            try {
-                if(latch.getCount() > 0) {
-                    LOGD(TAG + ".onStartCommand", "starting websocket session");
-                    latch.await();
-                }
-            } catch(Exception ex) {
-                LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET SERVICE: " + ex.getMessage());
-                ex.printStackTrace();
-            }
+        if(session == null || !session.isOpen()) {
+            latch = new CountDownLatch(1);
+            WebSocketListener socketListener = new WebSocketListener(
+                    appVS.getCurrencyServer().getWebSocketURL());
+            executorService.submit(socketListener);
+        }
+        try {
+            if(latch.getCount() > 0) latch.await();
+        } catch(Exception ex) {
+            LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET SERVICE: " + ex.getMessage());
+            ex.printStackTrace();
         }
         Bundle arguments = intent.getExtras();
         final TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
@@ -129,8 +116,7 @@ public class WebSocketService extends Service {
                     try {
                         session.close();
                     } catch (Exception ex) { ex.printStackTrace();}
-                }
-            });
+                }});
         } else if(message != null) {
             executorService.submit(new Runnable() {
                 @Override public void run() {
@@ -152,6 +138,7 @@ public class WebSocketService extends Service {
                                 session.getBasicRemote().sendText(message);
                         }
                     } catch(Exception ex) {
+                        ex.printStackTrace();
                         UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
                                 getString(R.string.error_lbl));
                     }
@@ -256,17 +243,17 @@ public class WebSocketService extends Service {
                     @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
-                            try {
-                                sendWebSocketBroadcast(
-                                        JSON.readValue(message, SocketMessageDto.class));
-                            } catch (IOException e) { e.printStackTrace(); }
+                                sendWebSocketBroadcast(message);
                             }
                         });
                         setWebSocketSession(session);
                     }
                     @Override public void onClose(Session session, CloseReason closeReason) {
-                        sendWebSocketBroadcast(new SocketMessageDto(
-                                ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
+                        appVS.setWithSocketConnection(false);
+                        try {
+                            sendWebSocketBroadcast(JSON.writeValueAsString(new SocketMessageDto(
+                                    ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE)));
+                        } catch (Exception ex) {  ex.printStackTrace(); }
                     }
                 }, clientEndpointConfig, URI.create(serviceURL));
             } catch (Exception ex) {
@@ -275,10 +262,44 @@ public class WebSocketService extends Service {
         }
     }
 
-    public void sendWebSocketBroadcast(SocketMessageDto socketMsg) {
-        Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
-        WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
+    public void sendWebSocketBroadcast(String socketMsgStr) {
         try {
+            Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
+            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsgStr);
+            SocketMessageDto socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
+            WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
+            switch(socketMsg.getOperation()) { //Messages from system
+                case MESSAGEVS_FROM_VS:
+                    if(socketSession != null) {
+                        LOGD(TAG, "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
+                        switch(socketSession.getTypeVS()) {
+                            case INIT_SIGNED_SESSION:
+                                if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
+                                    appVS.setConnectedDevice(socketMsg.getConnectedDevice());
+                                    appVS.setWithSocketConnection(true);
+                                } else appVS.setWithSocketConnection(false);
+                                break;
+                        }
+                    } else {
+                        LOGD(TAG, "MESSAGEVS_FROM_VS - MessageType: " + socketMsg.getMessageType());
+                        switch (socketMsg.getMessageType()) {
+                            case TRANSACTIONVS_INFO:
+
+                                break;
+                            default: LOGD(TAG, "MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
+                        }
+                    }
+                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
+                            ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                                getString(R.string.error_lbl));
+                    }
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    return;
+                case WEB_SOCKET_CLOSE:
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                    return;
+            }
             if(socketSession == null) {
                 byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());
                 AESParamsDto aesDto = JSON.readValue(decryptedBytes, AESParamsDto.class);
@@ -289,37 +310,7 @@ public class WebSocketService extends Service {
             } else socketMsg.decryptMessage(socketSession.getAESParams());
             LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                     " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
-            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.writeValueAsString(socketMsg));
             switch(socketMsg.getOperation()) {
-                case MESSAGEVS_FROM_VS:
-                    if(socketSession != null) {
-                        LOGD(TAG , "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
-                        socketMsg.setOperation(socketSession.getTypeVS());
-                        switch(socketSession.getTypeVS()) {
-                            case INIT_SIGNED_SESSION:
-                                if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                                    appVS.setConnectedDevice(socketMsg.getConnectedDevice());
-                                    appVS.setWithSocketConnection(true);
-                                } else appVS.setWithSocketConnection(false);
-                                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                                break;
-                            default:LOGD(TAG, "MESSAGEVS_FROM_VS unprocessed");
-                        }
-                    }
-                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
-                            ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-                        String message = socketMsg.getMessage();
-                        if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode())
-                            message = getString(R.string.device_not_found_error_msg);
-                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, message,
-                                getString(R.string.error_lbl));
-                    }
-                    break;
-                case WEB_SOCKET_CLOSE:
-                    if(ResponseVS.SC_OK == socketMsg.getStatusCode())
-                        appVS.setWithSocketConnection(false);
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                    break;
                 case MESSAGEVS:
                     ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
                     responseVS.setCaption(getString(R.string.message_lbl)).
@@ -388,18 +379,15 @@ public class WebSocketService extends Service {
                                     new String(currency.getCertificationRequest().getCsrPEM()),
                                     getString(R.string.currency_change_subject));
                             transactionDto.setMessageSMIME(
-                                    new String(Base64.encode(simeMessage.getBytes())));
+                                    new String(Base64.encode(simeMessage.getBytes(), Base64.NO_WRAP)));
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
                                     JSON.getMapper().writeValueAsString(transactionDto),
-                                    AppVS.getInstance().getConnectedDevice().getId(),
                                     simeMessage, TypeVS.TRANSACTIONVS_INFO);
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
-                                    ex.getMessage(),
-                                    AppVS.getInstance().getConnectedDevice().getId(),
-                                    TypeVS.QR_MESSAGE_INFO);
+                                    ex.getMessage(), null, TypeVS.QR_MESSAGE_INFO);
                         } finally {
                             session.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
                         }
@@ -446,13 +434,6 @@ public class WebSocketService extends Service {
                         UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
                                 getString(R.string.error_lbl));
                     }
-                    break;
-                case OPERATION_CANCELED:
-                    socketMsg.setOperation(socketSession.getTypeVS());
-                    socketMsg.setStatusCode(ResponseVS.SC_CANCELED);
-                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY,
-                            JSON.writeValueAsString(socketMsg));
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 default: LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }

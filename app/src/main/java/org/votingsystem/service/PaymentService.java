@@ -4,10 +4,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.OperationVSContentProvider;
@@ -125,14 +124,13 @@ public class PaymentService extends IntentService {
                                     (ResultListDto<TransactionVSDto>) responseVS.getMessage(
                                     new TypeReference<ResultListDto<TransactionVSDto>>() {});
                             String base64Receipt = resultList.getResultList().iterator().next().getMessageSMIME();
-                            SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt));
+                            SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt, Base64.NO_WRAP));
                             String message = transactionDto.validateReceipt(receipt, false);
                             receipt.isValidSignature();
                             if(transactionDto.getSocketMessageDto() != null) {
                                 //this is to send the signed receipts to the user that showed the QR code
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
-                                        .getResponse(ResponseVS.SC_OK, null,
-                                        AppVS.getInstance().getConnectedDevice().getId(),
+                                        .getResponse(ResponseVS.SC_OK, null,receipt,
                                         TypeVS.TRANSACTIONVS_RESPONSE);
                                 socketRespDto.setSmimeMessage(base64Receipt);
                                 //backup to recover from fails
@@ -164,9 +162,7 @@ public class PaymentService extends IntentService {
                             if(transactionDto.getSocketMessageDto() != null) {
 
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
-                                        .getResponse(ResponseVS.SC_OK, null,
-                                        AppVS.getInstance().getConnectedDevice().getId(),
-                                        responseVS.getSMIME(),
+                                        .getResponse(ResponseVS.SC_OK, null, responseVS.getSMIME(),
                                         TypeVS.TRANSACTIONVS_RESPONSE);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
@@ -181,7 +177,7 @@ public class PaymentService extends IntentService {
                         break;
                     case CURRENCY_CHANGE:
                         SMIMEMessage currencyRequest = new SMIMEMessage(Base64.decode(
-                                transactionDto.getMessageSMIME()));
+                                transactionDto.getMessageSMIME(), Base64.NO_WRAP));
                         CurrencyDto currencyDto = new CurrencyDto(
                                 CertUtils.fromPEMToPKCS10CertificationRequest(
                                 currencyRequest.getSignedContent().getBytes()));
@@ -207,7 +203,6 @@ public class PaymentService extends IntentService {
                                         null: transactionDto.getQrMessageDto().getCurrencyChangeCert();
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, responseMessage,
-                                        AppVS.getInstance().getConnectedDevice().getId(),
                                         responseVS.getSMIME(), TypeVS.TRANSACTIONVS_RESPONSE);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);

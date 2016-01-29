@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import android.util.Base64;
 import android.util.Log;
 
 import org.bouncycastle2.cms.CMSAlgorithm;
@@ -26,7 +27,6 @@ import org.bouncycastle2.mail.smime.SMIMEEnveloped;
 import org.bouncycastle2.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle2.operator.OperatorCreationException;
 import org.bouncycastle2.util.Strings;
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
@@ -178,7 +178,7 @@ public class Encryptor {
                 CMSAlgorithm.DES_EDE3_CBC).setProvider(ContextVS.PROVIDER).build());
         out.write(dataToEncrypt);
         out.close();
-        return android.util.Base64.encode(bOut.toByteArray(), android.util.Base64.NO_WRAP );
+        return android.util.Base64.encode(bOut.toByteArray(), android.util.Base64.NO_WRAP);
     }
 
     /**
@@ -240,7 +240,7 @@ public class Encryptor {
 
     public static byte[] decryptCMS( byte[] base64EncryptedData, PrivateKey privateKey)
             throws Exception {
-        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData);
+        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData, Base64.NO_WRAP);
         CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cmsEncryptedData);
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Collection c = recipients.getRecipients();
@@ -327,7 +327,7 @@ public class Encryptor {
         byte[] output = new byte[pbbc.getOutputSize(input.length)];
         int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
         pbbc.doFinal(output, bytesWrittenOut);
-        return new String(Base64.encode(output));
+        return Base64.encodeToString(output, Base64.NO_WRAP);
     }
 
     //BC provider to avoid key length restrictions on normal jvm
@@ -339,7 +339,7 @@ public class Encryptor {
         KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
         CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
         pbbc.init(false, params); //to encrypt put param to true
-        byte[] input = Base64.decode(messageToDecrypt.getBytes("UTF-8"));
+        byte[] input = Base64.decode(messageToDecrypt.getBytes("UTF-8"), Base64.NO_WRAP);
         byte[] output = new byte[pbbc.getOutputSize(input.length)];
         int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
         pbbc.doFinal(output, bytesWrittenOut);

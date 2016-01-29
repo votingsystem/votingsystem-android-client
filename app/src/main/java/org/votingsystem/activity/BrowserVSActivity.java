@@ -51,9 +51,6 @@ public class BrowserVSActivity extends AppCompatActivity {
 	
 	public static final String TAG = BrowserVSActivity.class.getSimpleName();
 
-    private static final int FLAGS = Base64.NO_WRAP | Base64.URL_SAFE;
-
-
     private String viewerURL;
     private String jsCommand;
     private AppVS appVS = null;
@@ -189,7 +186,8 @@ public class BrowserVSActivity extends AppCompatActivity {
     @JavascriptInterface public void setMessage (String appMessage) {
         LOGD(TAG + ".setMessage", "appMessage: " + appMessage);
         try {
-            final String decodedStr = new String(Base64.decode(appMessage.getBytes(), FLAGS), "UTF-8");
+            final String decodedStr = Base64.encodeToString(appMessage.getBytes(),
+                    Base64.NO_WRAP | Base64.URL_SAFE);
             webView.post(new Runnable() {
                 @Override public void run() {
                     webView.loadUrl("javascript:clientTool.unescapedMsg(unescape('" + decodedStr + "'))");
@@ -230,7 +228,8 @@ public class BrowserVSActivity extends AppCompatActivity {
 
     public void invokeOperationCallback(String dtoStr, String callerCallback) {
         try {
-            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"), FLAGS));
+            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"),
+                    Base64.NO_WRAP | Base64.URL_SAFE));
             final String jsCommand = "javascript:setClientToolMessage('" + callerCallback + "','" +
                     base64EncodedMsg + "')";
             LOGD(TAG, "jsCommand: " + jsCommand);

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,8 +21,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.R;
@@ -145,7 +144,7 @@ public class RepresentativeFragment extends Fragment {
         if(representative.getDescription() != null) {
             try {
                 String representativeDescription = "<html style='background-color:#eeeeee;'>" +
-                        new String(Base64.decode(representative.getDescription().getBytes()), "UTF-8") + "</html>";
+                        new String(Base64.decode(representative.getDescription().getBytes(), Base64.NO_WRAP), "UTF-8") + "</html>";
                 ((WebView)rootView.findViewById(R.id.representative_description)).loadData(
                         representativeDescription, "text/html; charset=UTF-8", "UTF-8");
             } catch (Exception ex) { ex.printStackTrace(); }

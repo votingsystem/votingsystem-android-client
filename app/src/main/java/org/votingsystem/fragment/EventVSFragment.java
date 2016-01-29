@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,8 +25,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.BrowserVSActivity;
 import org.votingsystem.activity.DNIeSigningActivity;
@@ -310,7 +309,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
         try {
             String eventContent = new String(Base64.decode(
-                    voteVSHelper.getEventVS().getContent().getBytes()), "UTF-8");
+                    voteVSHelper.getEventVS().getContent().getBytes(), Base64.NO_WRAP), "UTF-8");
             contentTextView.setText(Html.fromHtml(eventContent));
         } catch (Exception ex) { ex.printStackTrace(); }
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -343,7 +342,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         TextView contentTextView = (TextView) rootView.findViewById(R.id.event_content);
         String eventContent = null;
         try {
-            eventContent = new String(Base64.decode(event.getContent().getBytes()), "UTF-8");
+            eventContent = new String(Base64.decode(event.getContent().getBytes(), Base64.NO_WRAP), "UTF-8");
         } catch (Exception ex) { ex.printStackTrace(); }
         contentTextView.setText(Html.fromHtml(eventContent));
         //contentTextView.setMovementMethod(LinkMovementMethod.getInstance());

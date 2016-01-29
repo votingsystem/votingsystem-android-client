@@ -59,7 +59,6 @@ public class ActivityBase extends AppCompatActivity
 
     public static final String TAG = ActivityBase.class.getSimpleName();
 
-
     private AppVS appVS = null;
     private NavigationView navigationView;
     private Thread mDataBootstrapThread = null;
@@ -94,8 +93,7 @@ public class ActivityBase extends AppCompatActivity
                 LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getOperation());
                 ProgressDialogFragment.hide(getSupportFragmentManager());
                 setConnectionStatusUI();
-                if(ResponseVS.SC_ERROR == socketMsg.getStatusCode() ||
-                        ResponseVS.SC_WS_CONNECTION_INIT_ERROR == socketMsg.getStatusCode()) {
+                if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
                     MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
                             socketMsg.getCaption(), socketMsg.getMessage(),
                             getSupportFragmentManager());

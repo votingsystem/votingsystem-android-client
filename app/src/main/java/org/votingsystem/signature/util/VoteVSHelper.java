@@ -1,6 +1,7 @@
 package org.votingsystem.signature.util;
 
-import org.bouncycastle2.util.encoders.Base64;
+import android.util.Base64;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.voting.AccessRequestDto;
@@ -67,7 +68,7 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
                 voteVSDto.getEventVS().getId(),
                 voteVSHelper.hashCertVSBase64);
         byte[] base64EncodedKey = Base64.encode(
-                voteVSHelper.certificationRequest.getPrivateKey().getEncoded());
+                voteVSHelper.certificationRequest.getPrivateKey().getEncoded(), Base64.NO_WRAP);
         byte[] encryptedKey = Encryptor.encryptMessage(
                 base64EncodedKey, AppVS.getInstance().getX509UserCert());
         voteVSHelper.encryptedKey = encryptedKey;

@@ -49,17 +49,6 @@ public class QRFragment extends Fragment {
             } catch (Exception ex) { ex.printStackTrace();}
             if(socketMsg != null) {
                 switch (socketMsg.getOperation()) {
-                    case WEB_SOCKET_CLOSE:
-                        DialogButton positiveButton = new DialogButton(getString(R.string.accept_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        getActivity().onBackPressed();
-                                    }
-                                });
-                        UIUtils.showMessageDialog(getString(R.string.error_lbl),
-                                getString(R.string.connection_error_msg), positiveButton, null,
-                                getActivity());
-                        break;
                     case TRANSACTIONVS_RESPONSE:
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                             DialogButton dialogButton = new DialogButton(getString(R.string.accept_lbl),

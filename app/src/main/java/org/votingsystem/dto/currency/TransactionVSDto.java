@@ -2,11 +2,10 @@ package org.votingsystem.dto.currency;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import org.bouncycastle2.util.encoders.Base64;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationVS;
@@ -180,7 +179,7 @@ public class TransactionVSDto implements Serializable {
 
     public SMIMEMessage getSmimeMessage() throws Exception {
         if(smimeMessage == null && messageSMIME != null) {
-            byte[] smimeMessageBytes = Base64.decode(messageSMIME.getBytes());
+            byte[] smimeMessageBytes = Base64.decode(messageSMIME.getBytes(), Base64.NO_WRAP);
             smimeMessage = new SMIMEMessage(smimeMessageBytes);
         }
         return smimeMessage;
@@ -188,12 +187,12 @@ public class TransactionVSDto implements Serializable {
 
     public void setSmimeMessage(SMIMEMessage smimeMessage) throws IOException, MessagingException {
         this.smimeMessage = smimeMessage;
-        this.messageSMIME = new String(Base64.encode(smimeMessage.getBytes()));
+        this.messageSMIME = Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP);
     }
 
     public SMIMEMessage getCancelationSmimeMessage() throws Exception {
         if(cancelationSmimeMessage == null && cancelationSmimeMessage != null) {
-            byte[] smimeMessageBytes = Base64.decode(cancelationSmimeMessage.getBytes());
+            byte[] smimeMessageBytes = Base64.decode(cancelationSmimeMessage.getBytes(), Base64.NO_WRAP);
             cancelationSmimeMessage = new SMIMEMessage(smimeMessageBytes);
         }
         return cancelationSmimeMessage;
@@ -202,7 +201,7 @@ public class TransactionVSDto implements Serializable {
     public void setCancelationSmimeMessage(SMIMEMessage cancelationSmimeMessage)
             throws IOException, MessagingException {
         this.cancelationSmimeMessage = cancelationSmimeMessage;
-        this.cancelationMessageSMIME = new String(Base64.encode(cancelationSmimeMessage.getBytes()));
+        this.cancelationMessageSMIME = Base64.encodeToString(cancelationSmimeMessage.getBytes(), Base64.NO_WRAP);
     }
 
     public String getCancelationMessageSMIME() {
