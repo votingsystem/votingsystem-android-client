@@ -342,8 +342,6 @@ public class ContactsGridFragment extends Fragment
             }
             ((TextView)itemView.findViewById(R.id.fullname)).setText(userVS.getName());
             ((TextView) itemView.findViewById(R.id.nif)).setText(userVS.getNIF());
-            if(userVS.getEmail() != null) ((TextView) itemView.findViewById(R.id.email)).setText(userVS.getEmail());
-            if(userVS.getPhone() != null) ((TextView) itemView.findViewById(R.id.phone)).setText(userVS.getPhone());
             return itemView;
         }
     }

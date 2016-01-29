@@ -3,14 +3,11 @@ package org.votingsystem.activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.ContactsGridFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -52,20 +49,6 @@ public class ContactsActivity extends ActivityBase {
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
-    }
-
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
-        LOGD(TAG + ".onCreateOptionsMenu(..)", " - onCreateOptionsMenu");
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.eventvs_grid, menu);
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ||
-        //        Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) { }
-        double diagonalInches = UIUtils.getDiagonalInches(getWindowManager().getDefaultDisplay());
-        if(diagonalInches < 4) {
-            //2 -> index of publish documents menu item on main.xml
-            menu.getItem(2).setVisible(false);
-        }
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

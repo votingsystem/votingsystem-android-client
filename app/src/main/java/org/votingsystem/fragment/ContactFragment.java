@@ -70,10 +70,11 @@ public class ContactFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             SocketMessageDto socketMessageDto = null;
             try {
-                socketMessageDto = JSON.readValue(intent.getStringExtra(
-                        ContextVS.WEBSOCKET_MSG_KEY), SocketMessageDto.class);
+                if(intent.hasExtra(ContextVS.WEBSOCKET_MSG_KEY)) socketMessageDto =
+                        JSON.readValue(intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY),
+                        SocketMessageDto.class);
             } catch (Exception ex) { ex.printStackTrace();}
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(intent.hasExtra(ContextVS.PIN_KEY)) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
                         setProgressDialogVisible(true, getString(R.string.connecting_caption),

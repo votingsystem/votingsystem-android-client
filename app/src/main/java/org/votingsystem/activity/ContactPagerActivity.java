@@ -10,16 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.ContactFragment;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

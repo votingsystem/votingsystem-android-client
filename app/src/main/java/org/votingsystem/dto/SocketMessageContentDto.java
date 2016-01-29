@@ -71,7 +71,7 @@ public class SocketMessageContentDto implements Serializable {
     }
 
     public static SocketMessageContentDto getSignResponse(Integer statusCode, String message,
-                          SMIMEMessage smimeMessage) throws IOException, MessagingException {
+              SMIMEMessage smimeMessage) throws IOException, MessagingException {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN_RESPONSE);
         messageContentDto.setStatusCode(statusCode);
@@ -235,4 +235,5 @@ public class SocketMessageContentDto implements Serializable {
     public void setHashCertVS(String hashCertVS) {
         this.hashCertVS = hashCertVS;
     }
+
 }
