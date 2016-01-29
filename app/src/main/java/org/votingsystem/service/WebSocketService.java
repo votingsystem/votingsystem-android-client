@@ -279,16 +279,14 @@ public class WebSocketService extends Service {
         Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
         WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
         try {
-            if(socketSession == null && socketMsg.isEncrypted()) {
+            if(socketSession == null) {
                 byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());
                 AESParamsDto aesDto = JSON.readValue(decryptedBytes, AESParamsDto.class);
                 AESParams aesParams = AESParams.load(aesDto);
                 socketMsg.decryptMessage(aesParams);
                 socketSession = new WebSocketSession(socketMsg);
                 appVS.putWSSession(socketMsg.getUUID(), socketSession);
-            } else if (socketSession != null) {
-                socketMsg.decryptMessage(socketSession.getAESParams());
-            }
+            } else socketMsg.decryptMessage(socketSession.getAESParams());
             LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                     " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
             intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.writeValueAsString(socketMsg));
