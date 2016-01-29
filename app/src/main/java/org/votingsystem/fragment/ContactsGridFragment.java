@@ -105,7 +105,7 @@ public class ContactsGridFragment extends Fragment
         if(savedInstanceState != null) {
             mode = (Mode) savedInstanceState.getSerializable(ContextVS.STATE_KEY);
         }
-        LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId +
+        LOGD(TAG + ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId +
                 " - queryStr: " + queryStr + " - mode: " + mode);
         if(queryStr != null && mode != Mode.SEARCH) {
             mode = Mode.SEARCH;
@@ -246,8 +246,12 @@ public class ContactsGridFragment extends Fragment
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " - id: " + id);
-        launchPager(position, null);
+        LOGD(TAG + ".onListItemClick", "Clicked item - position:" + position + " - id: " + id);
+        if(gridView.getAdapter() instanceof CursorAdapter) {
+            launchPager(position, null);
+        } else {
+            launchPager(null, userVSList.get(position));
+        }
     }
 
     private void launchPager(Integer position, UserVSDto userVS) {
@@ -282,7 +286,8 @@ public class ContactsGridFragment extends Fragment
 
     @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
         LOGD(TAG + ".onLoaderReset", "");
-        ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
+        if(gridView.getAdapter() instanceof CursorAdapter)
+            ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
     }
 
     public class ContactDBListAdapter extends CursorAdapter {

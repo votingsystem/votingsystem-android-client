@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,6 +35,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -62,9 +62,8 @@ public class ContactFragment extends Fragment {
     private UserVSDto contact;
     private TextView connected_text;
     private Menu menu;
-    private Set<DeviceVSDto> connectedDevices;
+    private Set<DeviceVSDto> connectedDevices = new HashSet<>();
     private boolean isDBUserVS;
-    private boolean isConnected = false;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -105,7 +104,7 @@ public class ContactFragment extends Fragment {
                     MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
                             R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
                             getFragmentManager());
-                    isConnected = false;
+                    connectedDevices = new HashSet<>();
                     setContactButtonState(isDBUserVS);
                     break;
                 case ResponseVS.SC_WS_MESSAGE_SEND_OK:
@@ -168,9 +167,8 @@ public class ContactFragment extends Fragment {
         if(savedInstanceState != null) {
             try {
                 connectedDevices = JSON.readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
-                        new TypeReference<ResultListDto<DeviceVSDto>>() {});
+                        new TypeReference<Set<DeviceVSDto>>() {});
             } catch (Exception ex) {ex.printStackTrace();}
-            isConnected = savedInstanceState.getBoolean(ContextVS.CONNECTED_KEY);
         }
         if(connectedDevices == null) new UserVSDataFetcher().execute("");
         return rootView;
@@ -200,12 +198,12 @@ public class ContactFragment extends Fragment {
         if(menu != null) {
             menu.removeItem(R.id.send_message); //to avoid duplicated items
             menu.removeItem(R.id.delete_item);
-            if(isConnected) menu.add(R.id.general_items, R.id.send_message, 1,
+            if(!connectedDevices.isEmpty()) menu.add(R.id.general_items, R.id.send_message, 1,
                         getString(R.string.send_message_lbl));
             if(isDBUserVS) menu.add(R.id.general_items, R.id.delete_item, 3,
                     getString(R.string.remove_contact_lbl));
         }
-        if(isConnected) connected_text.setText(getString(R.string.user_connected_lbl, contact.getName()));
+        if(!connectedDevices.isEmpty()) connected_text.setText(getString(R.string.user_connected_lbl, contact.getName()));
         else connected_text.setText(getString(R.string.uservs_disconnected_lbl, contact.getName()));
     }
 
@@ -281,10 +279,8 @@ public class ContactFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         try {
-            if(connectedDevices != null) outState.putString(ContextVS.DTO_KEY,
-                    JSON.writeValueAsString(connectedDevices));
+            outState.putString(ContextVS.DTO_KEY, JSON.writeValueAsString(connectedDevices));
         } catch (Exception ex) { ex.printStackTrace();}
-        outState.putBoolean(ContextVS.CONNECTED_KEY, isConnected);
     }
 
     @Override public void onResume() {
@@ -323,14 +319,10 @@ public class ContactFragment extends Fragment {
         @Override protected void onPostExecute(List<DeviceVSDto> deviceListDto) {
             try {
                 if(deviceListDto != null) {
-                    isConnected = false;
-                    TelephonyManager telephonyManager = (TelephonyManager)getActivity().
-                            getSystemService(Context.TELEPHONY_SERVICE);
-                    String deviceId = telephonyManager.getDeviceId();
+                    String deviceId = PrefUtils.getApplicationId();
                     connectedDevices =  new HashSet<>();
                     for(DeviceVSDto deviceVSDto : deviceListDto) {
                         if(!deviceId.equals(deviceVSDto.getDeviceId())) {
-                            isConnected = true;
                             connectedDevices.add(deviceVSDto);
                         }
                     }
@@ -339,7 +331,7 @@ public class ContactFragment extends Fragment {
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());
                 setProgressDialogVisible(false);
-                LOGD(TAG + ".UserVSDataFetcher", "isConnected: " + isConnected);
+                LOGD(TAG + ".UserVSDataFetcher", "connectedDevices: " + connectedDevices.size());
             } catch (Exception ex) { ex.printStackTrace(); }
         }
     }

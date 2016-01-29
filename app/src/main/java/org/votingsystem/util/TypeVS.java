@@ -27,7 +27,6 @@ public enum TypeVS {
     VOTING_PUBLISHING,
 
     BROWSER_URL,
-
     CURRENCY,
     CURRENCY_CANCEL,
     CURRENCY_CHECK,

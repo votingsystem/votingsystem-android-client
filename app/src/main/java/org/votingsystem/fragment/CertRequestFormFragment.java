@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -31,12 +30,12 @@ import org.votingsystem.service.UserCertRequestService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.UIUtils;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.votingsystem.util.ContextVS.CALLER_KEY;
@@ -208,7 +207,6 @@ public class CertRequestFormFragment extends Fragment {
     }
 
     private boolean validateForm () {
-    	LOGD(TAG + ".validateForm()", "");
         givennameText.setError(null);
         surnameText.setError(null);
         nifText.setError(null);
@@ -244,19 +242,7 @@ public class CertRequestFormFragment extends Fragment {
         } else {
             email =  StringUtils.normalize(mailText.getText().toString()).toUpperCase();
         }
-    	TelephonyManager telephonyManager = (TelephonyManager)getActivity().getSystemService(
-                Context.TELEPHONY_SERVICE);
-    	// phone = telephonyManager.getLine1Number(); -> operator dependent
-    	//IMSI
-    	//phone = telephonyManager.getSubscriberId();
-        //the IMEI for GSM and the MEID or ESN for CDMA phones. Null if device ID is not available.
-    	deviceId = telephonyManager.getDeviceId();
-    	if(deviceId == null || deviceId.trim().isEmpty()) {
-    		deviceId = android.os.Build.SERIAL;
-    		if(deviceId == null || deviceId.trim().isEmpty()) {
-    			deviceId = UUID.randomUUID().toString();
-    		}
-    	}
+    	deviceId = PrefUtils.getApplicationId();
 		LOGD(TAG + ".validateForm() ", "deviceId: " + deviceId);
     	return true;
     }

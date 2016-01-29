@@ -1,9 +1,7 @@
 package org.votingsystem.fragment;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -29,9 +27,7 @@ import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
 import java.math.BigDecimal;
@@ -135,18 +131,15 @@ public class TransactionVSFormFragment extends Fragment {
         return rootView;
     }
 
-    private void checkBoxSelected(CompoundButton buttonView, boolean isChecked) {
+    private void checkBoxSelected(CompoundButton checkbox, boolean isChecked) {
         if(isChecked) {
             if(formType == Type.TRANSACTIONVS_FORM) {
                 from_uservs_checkbox.setChecked(false);
                 currency_send_checkbox.setChecked(false);
                 currency_change_checkbox.setChecked(false);
             }
-            if(buttonView == from_uservs_checkbox) from_uservs_checkbox.setChecked(true);
-            if(buttonView == currency_send_checkbox) currency_send_checkbox.setChecked(true);
-            if(buttonView == currency_change_checkbox) currency_change_checkbox.setChecked(true);
+            ((CheckBox) checkbox).setChecked(true);
         }
-
     }
 
     private void setTagVS(TagVSDto tagVS) {

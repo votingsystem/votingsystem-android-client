@@ -29,7 +29,7 @@ public class BrowserVSAction implements DebugAction {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 //intent.putExtra(ContextVS.URL_KEY, appContext.getCurrencyServer().getServerURL());
                 //intent.putExtra(ContextVS.URL_KEY,"http://currency:8086/Currency/testing/testSocket");
-                intent.putExtra(ContextVS.URL_KEY, "http://currency:8000/grid/taxes_dashboard.html");
+                intent.putExtra(ContextVS.URL_KEY, "http://currency:8080/AccessControl/certificateVS/certRequest.xhtml");
                 AppVS.getInstance().startActivity(intent);
                 return null;
             }

@@ -45,28 +45,12 @@ public class ContactPagerActivity extends AppCompatActivity {
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
-        String dtoStr = getIntent().getExtras().getString(ContextVS.DTO_KEY);
-        List<UserVSDto> userVSListDto = null;
-        try {
-            if(dtoStr != null) userVSListDto = JSON.readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
-        } catch (Exception ex) { ex.printStackTrace();}
         UserVSDto userVS = (UserVSDto) getIntent().getExtras().getSerializable(ContextVS.USER_KEY);
-        if(userVS != null) userVSListDto = Arrays.asList(userVS);
-        if(userVSListDto != null || userVS != null) {
-            try {
-                final List<UserVSDto> userVSList = new ArrayList<>(userVSListDto);
-                updateActionBarTitle(userVSListDto.get(0).getName());
-                ContactPagerAdapter pagerAdapter = new ContactPagerAdapter(
-                        getSupportFragmentManager(), userVSList);
-                mViewPager.setAdapter(pagerAdapter);
-                mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                    @Override public void onPageSelected(int position) {
-                        updateActionBarTitle(userVSList.get(position).getName());
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if(userVS != null) {
+            updateActionBarTitle(userVS.getName());
+            ContactPagerAdapter pagerAdapter = new ContactPagerAdapter(
+                    getSupportFragmentManager(), Arrays.asList(userVS));
+            mViewPager.setAdapter(pagerAdapter);
         }  else {
             ContactDBPagerAdapter pagerAdapter = new ContactDBPagerAdapter(
                     getSupportFragmentManager());

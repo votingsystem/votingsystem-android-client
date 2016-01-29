@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
@@ -37,6 +38,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -191,6 +193,23 @@ public class Utils {
         } else {
             return (manufacturer + " " + model);
         }
+    }
+
+    public static String getDeviceId() {
+        TelephonyManager telephonyManager = (TelephonyManager)AppVS.getInstance().getSystemService(
+                Context.TELEPHONY_SERVICE);
+        // phone = telephonyManager.getLine1Number(); -> operator dependent
+        //IMSI
+        //phone = telephonyManager.getSubscriberId();
+        //the IMEI for GSM and the MEID or ESN for CDMA phones. Null if device ID is not available.
+        String deviceId = telephonyManager.getDeviceId();
+        if(deviceId == null || deviceId.trim().isEmpty()) {
+            deviceId = android.os.Build.SERIAL;
+            if(deviceId == null || deviceId.trim().isEmpty()) {
+                deviceId = UUID.randomUUID().toString();
+            }
+        }
+        return deviceId;
     }
 
     private byte[] reduceImageFileSize(Uri imageUri) {
