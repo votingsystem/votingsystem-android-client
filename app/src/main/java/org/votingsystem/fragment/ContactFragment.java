@@ -59,66 +59,65 @@ public class ContactFragment extends Fragment {
     private View rootView;
     private String broadCastId = null;
     private Button toggle_contact_button;
-    private UserVSDto contact;
+    private UserVSDto userVS;
     private TextView connected_text;
     private Menu menu;
     private Set<DeviceVSDto> connectedDevices = new HashSet<>();
-    private boolean isDBUserVS;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        SocketMessageDto socketMessageDto = null;
-        try {
-            socketMessageDto = JSON.readValue(intent.getStringExtra(
-                    ContextVS.WEBSOCKET_MSG_KEY), SocketMessageDto.class);
-        } catch (Exception ex) { ex.printStackTrace();}
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            switch(responseVS.getTypeVS()) {
-                case WEB_SOCKET_INIT:
-                    setProgressDialogVisible(true, getString(R.string.connecting_caption),
-                            getString(R.string.connecting_to_service_msg));
-                    Utils.toggleWebSocketServiceConnection();
-                    break;
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            SocketMessageDto socketMessageDto = null;
+            try {
+                socketMessageDto = JSON.readValue(intent.getStringExtra(
+                        ContextVS.WEBSOCKET_MSG_KEY), SocketMessageDto.class);
+            } catch (Exception ex) { ex.printStackTrace();}
+            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                switch(responseVS.getTypeVS()) {
+                    case WEB_SOCKET_INIT:
+                        setProgressDialogVisible(true, getString(R.string.connecting_caption),
+                                getString(R.string.connecting_to_service_msg));
+                        Utils.toggleWebSocketServiceConnection();
+                        break;
+                }
+            } else setProgressDialogVisible(false, null, null);
+            if(responseVS != null) {
+                switch(responseVS.getTypeVS()) {
+                    case MESSAGEVS:
+                        Intent startIntent = new Intent(getActivity(), WebSocketService.class);
+                        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MESSAGEVS);
+                        startIntent.putExtra(ContextVS.MESSAGE_KEY, responseVS.getMessage());
+                        try {
+                            startIntent.putExtra(ContextVS.DTO_KEY,
+                                    JSON.writeValueAsString(connectedDevices));
+                        } catch(Exception ex) { ex.printStackTrace();}
+                        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                        getActivity().startService(startIntent);
+                        break;
+                }
             }
-        } else setProgressDialogVisible(false, null, null);
-        if(responseVS != null) {
-            switch(responseVS.getTypeVS()) {
-                case MESSAGEVS:
-                    Intent startIntent = new Intent(getActivity(), WebSocketService.class);
-                    startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MESSAGEVS);
-                    startIntent.putExtra(ContextVS.MESSAGE_KEY, responseVS.getMessage());
-                    try {
-                        startIntent.putExtra(ContextVS.DTO_KEY,
-                                JSON.writeValueAsString(connectedDevices));
-                    } catch(Exception ex) { ex.printStackTrace();}
-                    startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-                    getActivity().startService(startIntent);
-                    break;
+            if(socketMessageDto != null) {
+                switch(socketMessageDto.getStatusCode()) {
+                    case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
+                        MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
+                                R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
+                                getFragmentManager());
+                        connectedDevices = new HashSet<>();
+                        setContactButtonState();
+                        break;
+                    case ResponseVS.SC_WS_MESSAGE_SEND_OK:
+                        MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
+                                R.string.send_message_lbl), getString(R.string.messagevs_send_ok_msg),
+                                getFragmentManager());
+                        break;
+                    case ResponseVS.SC_WS_CONNECTION_INIT_OK:
+                        break;
+                    default:
+                        MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
+                                R.string.error_lbl), socketMessageDto.getMessage(), getFragmentManager());
+                }
             }
-        }
-        if(socketMessageDto != null) {
-            switch(socketMessageDto.getStatusCode()) {
-                case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
-                    MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
-                            R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
-                            getFragmentManager());
-                    connectedDevices = new HashSet<>();
-                    setContactButtonState(isDBUserVS);
-                    break;
-                case ResponseVS.SC_WS_MESSAGE_SEND_OK:
-                    MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
-                            R.string.send_message_lbl), getString(R.string.messagevs_send_ok_msg),
-                            getFragmentManager());
-                    break;
-                case ResponseVS.SC_WS_CONNECTION_INIT_OK:
-                    break;
-                default:
-                    MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
-                            R.string.error_lbl), socketMessageDto.getMessage(), getFragmentManager());
-            }
-        }
         }
     };
 
@@ -148,19 +147,14 @@ public class ContactFragment extends Fragment {
         toggle_contact_button = (Button) rootView.findViewById(R.id.toggle_contact_button);
         connected_text = (TextView) rootView.findViewById(R.id.connected_text);
         Long contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY, -1);
-        boolean isDBUserVS = false;
         if(contactId > 0) {
-            contact = UserContentProvider.loadUser(contactId, getActivity());
-            if(contact != null) isDBUserVS = true;
+            userVS = UserContentProvider.loadUser(contactId, getActivity());
         } else {
-            contact =  (UserVSDto) getArguments().getSerializable(ContextVS.USER_KEY);
-            UserVSDto contactDB = UserContentProvider.loadUser(contact, getActivity());
-            if(contactDB != null) {
-                contact = contactDB;
-                isDBUserVS = true;
-            }
+            userVS =  (UserVSDto) getArguments().getSerializable(ContextVS.USER_KEY);
+            UserVSDto contactDB = UserContentProvider.loadUser(userVS, getActivity());
+            if(contactDB != null) userVS = contactDB;
         }
-        setContactButtonState(isDBUserVS);
+        setContactButtonState();
         setHasOptionsMenu(true);
         broadCastId = ContactFragment.class.getSimpleName() + "_" + (contactId != null? contactId:
                 UUID.randomUUID().toString());
@@ -170,24 +164,23 @@ public class ContactFragment extends Fragment {
                         new TypeReference<Set<DeviceVSDto>>() {});
             } catch (Exception ex) {ex.printStackTrace();}
         }
-        if(connectedDevices == null) new UserVSDataFetcher().execute("");
+        if(connectedDevices.isEmpty()) new UserVSDataFetcher().execute("");
         return rootView;
     }
 
     private void deleteContact() {
-        UserContentProvider.deleteById(contact.getId(), getActivity());
+        UserContentProvider.deleteById(userVS.getId(), getActivity());
         getActivity().onBackPressed();
     }
 
     private void addContact() {
         getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
-                UserContentProvider.getContentValues(contact.setType(UserVSDto.Type.CONTACT)));
-        setContactButtonState(true);
+                UserContentProvider.getContentValues(userVS.setType(UserVSDto.Type.CONTACT)));
+        setContactButtonState();
     }
 
-    private void setContactButtonState(boolean isDBUserVS) {
-        this.isDBUserVS = isDBUserVS;
-        if(isDBUserVS) toggle_contact_button.setVisibility(View.GONE);
+    private void setContactButtonState() {
+        if(UserVSDto.Type.CONTACT == userVS.getType()) toggle_contact_button.setVisibility(View.GONE);
         else {
             toggle_contact_button.setVisibility(View.VISIBLE);
             toggle_contact_button.setText(getString(R.string.add_contact_lbl));
@@ -200,11 +193,11 @@ public class ContactFragment extends Fragment {
             menu.removeItem(R.id.delete_item);
             if(!connectedDevices.isEmpty()) menu.add(R.id.general_items, R.id.send_message, 1,
                         getString(R.string.send_message_lbl));
-            if(isDBUserVS) menu.add(R.id.general_items, R.id.delete_item, 3,
+            if(UserVSDto.Type.CONTACT == userVS.getType()) menu.add(R.id.general_items, R.id.delete_item, 3,
                     getString(R.string.remove_contact_lbl));
         }
-        if(!connectedDevices.isEmpty()) connected_text.setText(getString(R.string.user_connected_lbl, contact.getName()));
-        else connected_text.setText(getString(R.string.uservs_disconnected_lbl, contact.getName()));
+        if(!connectedDevices.isEmpty()) connected_text.setText(getString(R.string.user_connected_lbl, userVS.getName()));
+        else connected_text.setText(getString(R.string.uservs_disconnected_lbl, userVS.getName()));
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -222,8 +215,8 @@ public class ContactFragment extends Fragment {
     private void setProgressDialogVisible(boolean isVisible) {
         if(isVisible){
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getFragmentManager());
-        } else ProgressDialogFragment.hide(getFragmentManager());
+                    getString(R.string.loading_info_msg), broadCastId, getFragmentManager());
+        } else ProgressDialogFragment.hide(broadCastId, getFragmentManager());
     }
 
     private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
@@ -237,7 +230,7 @@ public class ContactFragment extends Fragment {
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.contact, menu);
         this.menu = menu;
-        setContactButtonState(isDBUserVS);
+        setContactButtonState();
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -264,7 +257,7 @@ public class ContactFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionVSFormFragment.class.getName());
                 intent.putExtra(ContextVS.TYPEVS_KEY, TransactionVSFormFragment.Type.TRANSACTIONVS_FORM);
-                intent.putExtra(ContextVS.USER_KEY, contact);
+                intent.putExtra(ContextVS.USER_KEY, userVS);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 return true;
@@ -303,31 +296,30 @@ public class ContactFragment extends Fragment {
         @Override protected void onPreExecute() { setProgressDialogVisible(true); }
 
         @Override protected List<DeviceVSDto> doInBackground(String... params) {
-            connectedDevices = null;
+            ResultListDto<DeviceVSDto> resultListDto = null;
             try {
-                ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getData(
+                resultListDto = HttpHelper.getData(
                         new TypeReference<ResultListDto<DeviceVSDto>>(){},
                         appVS.getCurrencyServer().getDeviceVSConnectedServiceURL(
-                        appVS.getUserVS().getNIF()), MediaTypeVS.JSON);
-                return resultListDto.getResultList();
+                        userVS.getNIF()), MediaTypeVS.JSON);
             } catch (Exception ex) { ex.printStackTrace();}
-            return null;
+            return resultListDto != null ? resultListDto.getResultList(): null;
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
         @Override protected void onPostExecute(List<DeviceVSDto> deviceListDto) {
+            connectedDevices =  new HashSet<>();
             try {
                 if(deviceListDto != null) {
                     String deviceId = PrefUtils.getApplicationId();
-                    connectedDevices =  new HashSet<>();
-                    for(DeviceVSDto deviceVSDto : deviceListDto) {
-                        if(!deviceId.equals(deviceVSDto.getDeviceId())) {
-                            connectedDevices.add(deviceVSDto);
+                    for(DeviceVSDto deviceDto : deviceListDto) {
+                        if(!deviceId.equals(deviceDto.getDeviceId())) {
+                            connectedDevices.add(deviceDto);
                         }
                     }
-                    contact.setConnectedDevices(connectedDevices);
-                    setContactButtonState(isDBUserVS);
+                    userVS.setConnectedDevices(connectedDevices);
+                    setContactButtonState();
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());
                 setProgressDialogVisible(false);
