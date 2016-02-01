@@ -303,7 +303,7 @@ public class WebSocketService extends Service {
             if(socketSession == null) {
                 byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());
                 AESParamsDto aesDto = JSON.readValue(decryptedBytes, AESParamsDto.class);
-                AESParams aesParams = AESParams.load(aesDto);
+                AESParams aesParams = AESParams.fromDto(aesDto);
                 socketMsg.decryptMessage(aesParams);
                 socketSession = new WebSocketSession(socketMsg);
                 appVS.putWSSession(socketMsg.getUUID(), socketSession);

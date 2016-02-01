@@ -13,6 +13,7 @@ android {
     dexOptions {
         incremental true
         javaMaxHeapSize "4g"
+        //dexInProcess = true
     }
 
     signingConfigs {

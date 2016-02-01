@@ -507,7 +507,7 @@ public class SocketMessageDto implements Serializable {
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
         AESParamsDto aesDto = JSON.readValue(new String(decryptedBytes), AESParamsDto.class);
-        this.aesEncryptParams = AESParams.load(aesDto);
+        this.aesEncryptParams = AESParams.fromDto(aesDto);
         decryptMessage(this.aesEncryptParams);
     }
 
