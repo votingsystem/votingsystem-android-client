@@ -79,8 +79,8 @@ public class MsgUtils {
                 certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),
                 certificate.getSerialNumber().toString(),
-                org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
-                org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
+                org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotBefore(), "HH:mm"),
+                org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotAfter(), "HH:mm"));
     }
 
     public static String getCurrencyStateMessage(Currency currency, Context context) {

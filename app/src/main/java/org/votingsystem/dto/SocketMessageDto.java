@@ -6,6 +6,7 @@ import android.util.Base64;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.CurrencyDto;
@@ -483,10 +484,11 @@ public class SocketMessageDto implements Serializable {
     }
 
     public static SocketMessageDto getMessageVSToDevice(DeviceVSDto deviceVS, String toUser,
-                            String textToEncrypt) throws Exception {
+                    String textToEncrypt, String broadCastId) throws Exception {
         UserVSDto userVS = AppVS.getInstance().getUserVS();
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null,
                 TypeVS.MESSAGEVS);
+        socketSession.setBroadCastId(broadCastId);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);

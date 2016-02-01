@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.PinDialogFragment;
+import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -62,6 +63,7 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 });
         builder.show();
+        ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
 

@@ -136,6 +136,7 @@
     <string name="password_lbl">contraseña</string>
     <string name="dialogo_password_text_entry">introducir contraseña</string>
     <string name="repeat_password_lbl">repita la contraseña</string>
+    <string name="check_devices_lbl">comprobando dispositivos</string>
     <string name="close_lbl">cerrar</string>
     <string name="ok_lbl">ok</string>
     <string name="accept_lbl">aceptar</string>
@@ -585,6 +586,7 @@
     <string name="details_lbl">detalles</string>
     <string name="check_lbl">comprobar</string>
     <string name="subject_missing_msg">rellene el campo asunto</string>
+    <string name="empty_field_msg">rellene el campo</string>
     <string name="psswd_dialog_title">introducir contraseña</string>
     <string name="psswd_lbl">contraseña</string>
     <string name="psswd_dialog_show">mostrar contraseña</string>

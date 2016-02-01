@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.KeyEvent;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
+
+import java.util.List;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -59,11 +62,12 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     public static void hide(FragmentManager fragmentManager) {
-        if(fragmentManager != null && fragmentManager.findFragmentByTag(
-                ProgressDialogFragment.TAG) != null) {
-            ((ProgressDialogFragment) fragmentManager.
-                    findFragmentByTag(ProgressDialogFragment.TAG)).dismiss();
-        } else LOGD(TAG +  ".hide", TAG + " not found");
+        List<Fragment> fragmentList = fragmentManager.getFragments();
+        if(fragmentList != null) {
+            for(Fragment fragment : fragmentList) {
+                if(fragment instanceof ProgressDialogFragment) ((ProgressDialogFragment)fragment).dismiss();
+            }
+        }
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {

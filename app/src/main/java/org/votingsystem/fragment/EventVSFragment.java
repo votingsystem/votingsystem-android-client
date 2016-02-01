@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.BrowserVSActivity;
 import org.votingsystem.activity.DNIeSigningActivity;
@@ -200,7 +201,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                         getString(R.string.voting_pending_lbl,
                         DateUtils.getElapsedTimeStr(eventVS.getDateBegin())));
                 subtTitle = getString(R.string.init_lbl) + ": " +
-                        DateUtils.getDayWeekDateStr(eventVS.getDateBegin());
+                        DateUtils.getDayWeekDateStr(eventVS.getDateBegin(), "HH:mm");
                 break;
             default:
                 ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.voting_closed_lbl));

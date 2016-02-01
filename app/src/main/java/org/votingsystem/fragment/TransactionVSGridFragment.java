@@ -266,7 +266,7 @@ public class TransactionVSGridFragment extends Fragment
                     transaction_type.setText(transactionVS.getDescription(getActivity(),
                             transactionVS.getType()));
                     TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-                    week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated()));
+                    week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated(), "HH:mm"));
                     TextView amount = (TextView) view.findViewById(R.id.amount);
                     amount.setText(transactionVS.getAmount().toPlainString());
                     TextView currency = (TextView) view.findViewById(R.id.currencyCode);

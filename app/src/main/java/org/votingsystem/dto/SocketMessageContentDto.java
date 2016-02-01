@@ -4,12 +4,14 @@ import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Locale;

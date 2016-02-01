@@ -5,7 +5,7 @@
     android:background="@color/bkg_screen_vs"
     android:orientation="vertical">
 
-    <TextView android:id="@+id/connected_text"
+    <TextView android:id="@+id/user_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"

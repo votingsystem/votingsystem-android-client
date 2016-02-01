@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -108,6 +109,7 @@ public class WebSocketService extends Service {
         final TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
         final String message = arguments.getString(ContextVS.MESSAGE_KEY);
+        final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
         if(operationType == TypeVS.WEB_SOCKET_INIT) {
             initValidatedSession();
         } else if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
@@ -129,7 +131,7 @@ public class WebSocketService extends Service {
                                         dtoStr, new TypeReference<List<DeviceVSDto>>(){});
                                 for (DeviceVSDto deviceVSDto : targetDevicesDto) {
                                     SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
-                                            deviceVSDto, null, message);
+                                            deviceVSDto, null, message, broadCastId);
                                     session.getBasicRemote().sendText(
                                             JSON.writeValueAsString(messageDto));
                                 }

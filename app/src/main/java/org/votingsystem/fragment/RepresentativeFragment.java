@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.R;

@@ -84,7 +84,7 @@ public class RepresentationStateFragment extends Fragment implements
             rootView.setVisibility(View.VISIBLE);
             ((TextView)rootView.findViewById(R.id.last_checked_date)).setText(getString(
                     R.string.representation_last_checked_msg,
-                    DateUtils.getDayWeekDateStr(representation.getLastCheckedDate())));
+                    DateUtils.getDayWeekDateStr(representation.getLastCheckedDate(), "HH:mm")));
         }
         switch(representation.getState()) {
             case WITHOUT_REPRESENTATION:
@@ -98,7 +98,7 @@ public class RepresentationStateFragment extends Fragment implements
             case WITH_ANONYMOUS_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_anonymous_representation_msg, DateUtils.getDayWeekDateStr(
-                                representation.getDateTo())));
+                                representation.getDateTo(), "HH:mm")));
                 representativeDelegationDto = PrefUtils.getAnonymousDelegation();
                 if(representativeDelegationDto == null) {
                     ((TextView)rootView.findViewById(R.id.representative_name)).setText(

@@ -13,6 +13,7 @@ public class WebSocketSession<T> {
     private AESParams aesParams;
     private T data;
     private DeviceVSDto deviceVS;
+    private String broadCastId;
     private String UUID;
 
     public WebSocketSession(SocketMessageDto socketMsg) {
@@ -63,6 +64,15 @@ public class WebSocketSession<T> {
 
     public WebSocketSession setUUID(String UUID) {
         this.UUID = UUID;
+        return this;
+    }
+
+    public String getBroadCastId() {
+        return broadCastId;
+    }
+
+    public WebSocketSession setBroadCastId(String broadCastId) {
+        this.broadCastId = broadCastId;
         return this;
     }
 }

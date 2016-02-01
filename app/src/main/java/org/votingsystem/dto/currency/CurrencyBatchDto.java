@@ -4,6 +4,7 @@ import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.votingsystem.model.Currency;
 import org.votingsystem.model.CurrencyBatch;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -11,6 +12,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;

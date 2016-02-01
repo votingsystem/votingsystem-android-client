@@ -246,12 +246,13 @@ public class DateUtils {
         return getDayHourElapsedTime(cal1, cal2, context);
     }
 
-    public static String getDayWeekDateStr (Date date) {
+    public static String getDayWeekDateStr (Date date, String hourFormat) {
+        if(hourFormat == null) hourFormat = "HH:mm";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
-            return getDateStr(date, "dd MMM yyyy' 'HH:mm");
-        else return getDateStr(date, "EEE dd MMM' 'HH:mm");
+            return getDateStr(date, "dd MMM yyyy' '" + hourFormat);
+        else return getDateStr(date, "EEE dd MMM' '" + hourFormat);
     }
 
     public static String getDayWeekDateSimpleStr (Date date) {

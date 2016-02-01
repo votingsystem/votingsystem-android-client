@@ -1,11 +1,14 @@
 package org.votingsystem.signature.util;
 
 import android.util.Base64;
+
 import org.votingsystem.dto.AESParamsDto;
+
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;

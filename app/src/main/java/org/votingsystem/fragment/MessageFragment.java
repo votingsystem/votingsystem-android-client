@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.SocketMessageDto;
@@ -33,6 +34,7 @@ import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
 import java.lang.ref.WeakReference;
@@ -61,8 +63,8 @@ public class MessageFragment extends Fragment {
     private LinearLayout fragment_container;
     private Long messageId;
     private String broadCastId;
-    private boolean isVisibleToUser = false;
     private Cursor cursor;
+
 
     public static Fragment newInstance(int cursorPosition) {
         MessageFragment fragment = new MessageFragment();
@@ -77,6 +79,12 @@ public class MessageFragment extends Fragment {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            SocketMessageDto socketMessageDto = null;
+            try {
+                if(intent.hasExtra(ContextVS.WEBSOCKET_MSG_KEY)) socketMessageDto =
+                        JSON.readValue(intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY),
+                                SocketMessageDto.class);
+            } catch (Exception ex) { ex.printStackTrace();}
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case CURRENCY:
@@ -89,8 +97,13 @@ public class MessageFragment extends Fragment {
                                 getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
                     }
                     break;
+                case WEB_SOCKET_INIT:
+                    setProgressDialogVisible(getString(R.string.connecting_caption),
+                            getString(R.string.connecting_to_service_msg), true);
+                    Utils.toggleWebSocketServiceConnection();
+                    break;
             }
-        }
+        } else setProgressDialogVisible(null, null,false);
         }
     };
 
@@ -106,7 +119,7 @@ public class MessageFragment extends Fragment {
         cursor.moveToPosition(cursorPosition);
         Long createdMillis = cursor.getLong(cursor.getColumnIndex(
                 MessageContentProvider.TIMESTAMP_CREATED_COL));
-        String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
+        String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis), "HH:mm:ss");
         ((TextView)rootView.findViewById(R.id.date)).setText(dateInfoStr);
         try {
             socketMessage = JSON.readValue(cursor.getString(
@@ -116,9 +129,9 @@ public class MessageFragment extends Fragment {
                     MessageContentProvider.TYPE_COL)));
             switch (typeVS) {
                 case MESSAGEVS:
-                     if(isVisibleToUser) ((AppCompatActivity)getActivity()).getSupportActionBar().
-                             setTitle(getString(R.string.message_lbl) +
-                            " - " + socketMessage.getFrom());
+                    ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
+                            R.string.message_lbl));
+                    ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(socketMessage.getFrom());
                     message_content.setText(socketMessage.getMessage());
                     break;
                 case CURRENCY_WALLET_CHANGE:
@@ -131,15 +144,7 @@ public class MessageFragment extends Fragment {
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                     broadcastReceiver, new IntentFilter(broadCastId));
             LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
-                    " - arguments: " + getArguments() + " - isVisibleToUser: " + isVisibleToUser);
-            if (isVisibleToUser) {
-                if(messageState == MessageContentProvider.State.NOT_READED) {
-                    getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
-                            messageId), MessageContentProvider.getContentValues(socketMessage.getOperation(),
-                            JSON.writeValueAsString(socketMessage),
-                            MessageContentProvider.State.READED), null, null);
-                }
-            }
+                    " - arguments: " + getArguments());
         } catch(Exception ex) { ex.printStackTrace(); }
         setHasOptionsMenu(true);
         return rootView;
@@ -149,17 +154,13 @@ public class MessageFragment extends Fragment {
         LOGD(TAG + ".setUserVisibleHint", "setUserVisibleHint: " + isVisibleToUser +
                 " - messageState: " + messageState);
         super.setUserVisibleHint(isVisibleToUser);
-        this.isVisibleToUser = isVisibleToUser;
         try {
-            if(isVisibleToUser && typeVS != null) {
-                switch (typeVS) {//to avoid problems with the pager
-                    case MESSAGEVS:
-                        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
-                                R.string.message_lbl) + " - " + socketMessage.getFrom());
-                        break;
-                    case CURRENCY_WALLET_CHANGE:
-                        loadCurrencyWalletChangeData();
-                        break;
+            if(isVisibleToUser) {
+                if(messageState == MessageContentProvider.State.NOT_READED) {
+                    getActivity().getContentResolver().update(MessageContentProvider.getMessageURI(
+                            messageId), MessageContentProvider.getContentValues(socketMessage.getOperation(),
+                            JSON.writeValueAsString(socketMessage),
+                            MessageContentProvider.State.READED), null, null);
                 }
             }
         }catch (Exception ex) {
@@ -168,7 +169,7 @@ public class MessageFragment extends Fragment {
     }
 
     private void loadCurrencyWalletChangeData() throws Exception {
-        if(isVisibleToUser && socketMessage != null && socketMessage.getCurrencySet() != null) {
+        if(socketMessage != null && socketMessage.getCurrencySet() != null) {
             currency = socketMessage.getCurrencySet().iterator().next();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
                     R.string.wallet_change_lbl));
@@ -219,6 +220,14 @@ public class MessageFragment extends Fragment {
         switch (item.getItemId()) {
             case android.R.id.home:
                 break;
+            case R.id.send_message:
+                Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
+                resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
+                resultIntent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, cursor.getString(
+                        cursor.getColumnIndex(MessageContentProvider.JSON_COL)));
+                resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(resultIntent);
+                return true;
             case R.id.delete_wallet_message:
             case R.id.delete_message:
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
@@ -283,5 +292,6 @@ public class MessageFragment extends Fragment {
             } catch (Exception ex) { ex.printStackTrace(); }
         }
     }
+
 
 }

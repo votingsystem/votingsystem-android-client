@@ -181,7 +181,7 @@ public class ReceiptGridFragment extends Fragment implements
                         ReceiptContentProvider.STATE_COL));
                 Long createdMillis = cursor.getLong(cursor.getColumnIndex(
                         ReceiptContentProvider.TIMESTAMP_CREATED_COL));
-                String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
+                String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis), "HH:mm");
                 ReceiptWrapper.State state =  ReceiptWrapper.State.valueOf(stateStr);
                 TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);

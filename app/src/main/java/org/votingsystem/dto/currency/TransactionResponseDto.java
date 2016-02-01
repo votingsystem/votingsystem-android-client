@@ -3,6 +3,7 @@ package org.votingsystem.dto.currency;
 import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.TypeVS;
 

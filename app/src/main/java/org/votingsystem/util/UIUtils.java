@@ -127,8 +127,8 @@ public class UIUtils  {
                     certificate.getSubjectDN().toString(),
                     certificate.getIssuerDN().toString(),
                     certificate.getSerialNumber().toString(),
-                    DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
-                    DateUtils.getDayWeekDateStr(certificate.getNotAfter())) + "<br/>");
+                    DateUtils.getDayWeekDateStr(certificate.getNotBefore(), "HH:mm"),
+                    DateUtils.getDayWeekDateStr(certificate.getNotAfter(), "HH:mm")) + "<br/>");
         }
         MessageDialogFragment.showDialog(ResponseVS.SC_OK, context.getString(
                 R.string.signers_info_lbl), signersInfo.toString(), fragmentManager);
@@ -145,7 +145,7 @@ public class UIUtils  {
             TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
             String certificateInfo = null;
             SignerId signerId = timeStampToken.getSID();
-            String dateInfoStr = DateUtils.getDayWeekDateStr(tsInfo.getGenTime());
+            String dateInfoStr = DateUtils.getDayWeekDateStr(tsInfo.getGenTime(), "HH:mm");
             CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
             Collection<X509CertificateHolder> matches = store.getMatches(signerId);
             X509CertificateHolder certificateHolder = null;

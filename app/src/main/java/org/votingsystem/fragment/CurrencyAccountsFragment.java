@@ -137,7 +137,7 @@ public class CurrencyAccountsFragment extends Fragment {
         }
         try {
             last_request_date.setText(Html.fromHtml(getString(R.string.currency_last_request_info_lbl,
-                    DateUtils.getDayWeekDateStr(lastCheckedTime))));
+                    DateUtils.getDayWeekDateStr(lastCheckedTime, "HH:mm"))));
             BalancesDto userInfo = PrefUtils.getBalances();
             if(userInfo != null) {
                 Map<String, TagVSInfoDto> tagVSBalancesMap = userInfo.getTagVSInfoMap(

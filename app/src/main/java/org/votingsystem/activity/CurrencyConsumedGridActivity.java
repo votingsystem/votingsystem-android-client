@@ -165,7 +165,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
                 if(DateUtils.getCurrentWeekPeriod().inRange(currency.getDateTo())) {
                     TextView time_limited_msg = (TextView) view.findViewById(R.id.time_limited_msg);
                     time_limited_msg.setText(getString(R.string.lapse_lbl,
-                            DateUtils.getDayWeekDateStr(currency.getDateTo())));
+                            DateUtils.getDayWeekDateStr(currency.getDateTo(), "HH:mm")));
                 }
                 ((TextView) view.findViewById(R.id.tag_data)).setText(MsgUtils.getTagVSMessage(
                         currency.getTag()));

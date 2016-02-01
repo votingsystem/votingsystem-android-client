@@ -211,7 +211,7 @@ public class MessagesGridFragment extends Fragment implements
                     ((ImageView) view.findViewById(R.id.message_icon)).setColorFilter(colorFilter);
                     Long createdMillis = cursor.getLong(cursor.getColumnIndex(
                             MessageContentProvider.TIMESTAMP_CREATED_COL));
-                    String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis));
+                    String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis), "HH:mm");
                     TextView dateInfo = (TextView) view.findViewById(R.id.message_date_info);
                     ((TextView) view.findViewById(R.id.message_subject)).setText(messageSubject);
                     if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));

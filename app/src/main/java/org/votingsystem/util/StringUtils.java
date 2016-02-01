@@ -3,7 +3,9 @@ package org.votingsystem.util;
 import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
+
 import org.bouncycastle2.util.encoders.Hex;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

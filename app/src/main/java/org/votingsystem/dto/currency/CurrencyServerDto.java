@@ -50,6 +50,11 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
         return getServerURL() + "/rest/deviceVS/nif/" + nif + "/connected";
     }
 
+    public String getDeviceVSConnectedServiceURL(Long deviceId, Boolean getAllDevicesFromOwner) {
+        return getServerURL() + "/rest/deviceVS/id/" + deviceId +
+                "/connected?getAllDevicesFromOwner=" + getAllDevicesFromOwner;
+    }
+
     public String getSearchServiceURL(String searchText) {
         return getServerURL() + "/rest/userVS/search?searchText=" + searchText;
     }

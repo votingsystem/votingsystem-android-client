@@ -211,8 +211,8 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
                 TextView operation_type = (TextView) view.findViewById(R.id.operation_type);
                 TextView date_info = (TextView) view.findViewById(R.id.date_info);
                 operation_type.setText(operation.getTypeVS() + " - " + operation.getState());
-                date_info.setText(DateUtils.getDayWeekDateStr(operation.getDateCreated())
-                        + " - updated: " + DateUtils.getDayWeekDateStr(operation.getLastUpdated())) ;
+                date_info.setText(DateUtils.getDayWeekDateStr(operation.getDateCreated(), "HH:mm")
+                        + " - updated: " + DateUtils.getDayWeekDateStr(operation.getLastUpdated(), "HH:mm")) ;
             }
         }
     }

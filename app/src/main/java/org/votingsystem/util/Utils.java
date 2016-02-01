@@ -169,7 +169,7 @@ public class Utils {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
                 .setAutoCancel(true).setContentTitle(context.getString(R.string.currency_accounts_updated))
-                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()))
+                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime(), "HH:mm"))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_money_32);
         mgr.notify(ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, builder.build());
     }
@@ -185,7 +185,7 @@ public class Utils {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(AppVS.getInstance())
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
                 .setAutoCancel(true).setContentTitle(AppVS.getInstance().getString(R.string.message_lbl))
-                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime()))
+                .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime(), "HH:mm"))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }

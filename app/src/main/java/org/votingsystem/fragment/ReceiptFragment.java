@@ -232,8 +232,8 @@ public class ReceiptFragment extends Fragment {
                     VoteVSHelper voteVSHelper = (VoteVSHelper) receiptWrapper;
                     receiptSubjectStr = voteVSHelper.getEventVS().getSubject();
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
-                            getTimeStampToken().getTimeStampInfo().getGenTime());
-                    contentFormatted = getString(R.string.votevs_info_formatted, dateStr,
+                            getTimeStampToken().getTimeStampInfo().getGenTime(), "HH:mm");
+                    contentFormatted = getString(R.string.votevs_info_formatted,
                             voteVSHelper.getVote().getOptionSelected().getContent(),
                             receiptWrapper.getReceipt().getSignedContent());
                     break;
@@ -243,13 +243,13 @@ public class ReceiptFragment extends Fragment {
                     contentFormatted = getString(R.string.anonymous_representative_selection_formatted,
                             delegation.getWeeksOperationActive(),
                             DateUtils.getDateStr(delegation.getDateFrom(), "EEE dd MMM yyyy' 'HH:mm"),
-                            DateUtils.getDateStr(delegation.getDateTo()), "EEE dd MMM yyyy' 'HH:mm");
+                            DateUtils.getDateStr(delegation.getDateTo(), "EEE dd MMM yyyy' 'HH:mm"));
                     break;
                 case ACCESS_REQUEST:
                     AccessRequestDto requestDto =  receiptWrapper.getReceipt()
                             .getSignedContent(AccessRequestDto.class);
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
-                            getTimeStampToken().getTimeStampInfo().getGenTime());
+                            getTimeStampToken().getTimeStampInfo().getGenTime(), "HH:mm");
                     contentFormatted = getString(R.string.access_request_info_formatted, dateStr,
                             requestDto.getEventURL());
                     receiptSubjectStr = getString(R.string.access_request_lbl);

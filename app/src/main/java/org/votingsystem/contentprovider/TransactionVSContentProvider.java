@@ -247,7 +247,7 @@ public class TransactionVSContentProvider extends ContentProvider {
         while(iteratorCalendar.before(lastTransactionCalendar)) {
             TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
             String periodLbl = appVS.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
-                    timePeriod.getDateFrom()), DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
+                    timePeriod.getDateFrom(), "HH:mm"), DateUtils.getDayWeekDateStr(timePeriod.getDateTo(), "HH:mm"));
             result.add(periodLbl);
             LOGD(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);
         }

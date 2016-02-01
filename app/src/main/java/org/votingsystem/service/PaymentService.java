@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.OperationVSContentProvider;
