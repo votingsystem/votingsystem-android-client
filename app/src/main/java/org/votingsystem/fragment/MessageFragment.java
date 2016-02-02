@@ -79,12 +79,6 @@ public class MessageFragment extends Fragment {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            SocketMessageDto socketMessageDto = null;
-            try {
-                if(intent.hasExtra(ContextVS.WEBSOCKET_MSG_KEY)) socketMessageDto =
-                        JSON.readValue(intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY),
-                                SocketMessageDto.class);
-            } catch (Exception ex) { ex.printStackTrace();}
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
             switch(responseVS.getTypeVS()) {
                 case CURRENCY:

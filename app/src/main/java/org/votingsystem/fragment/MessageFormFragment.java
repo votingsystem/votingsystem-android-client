@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -59,6 +60,7 @@ public class MessageFormFragment extends Fragment {
     private EditText messageEditText;
     private Button send_msg_button;
     private SocketMessageDto socketMessage;
+    private LinearLayout msg_form;
     private boolean messageDeliveredNotified = false;
     private Set<DeviceVSDto> connectedDevices = new HashSet<>();
 
@@ -99,6 +101,7 @@ public class MessageFormFragment extends Fragment {
                         }
                         break;
                     case ResponseVS.SC_WS_CONNECTION_INIT_OK:
+                        updateConnectedView();
                         break;
                     default:
                         MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
@@ -112,6 +115,7 @@ public class MessageFormFragment extends Fragment {
                                        Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.messagevs_form_fragment, null);
         messageEditText = (EditText) view.findViewById(R.id.message);
+        msg_form =  (LinearLayout) view.findViewById(R.id.msg_form);
         userVS =  (UserVSDto) getArguments().getSerializable(ContextVS.USER_KEY);
         socketMessage = (SocketMessageDto) getArguments().getSerializable(ContextVS.WEBSOCKET_MSG_KEY);
         String serviceURL = null;
@@ -125,16 +129,17 @@ public class MessageFormFragment extends Fragment {
         }
         caption_text = (TextView) view.findViewById(R.id.caption_text);
         send_msg_button = (Button) view.findViewById(R.id.send_msg_button);
-        send_msg_button.setVisibility(View.GONE);
+        msg_form.setVisibility(View.GONE);
         send_msg_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(TextUtils.isEmpty(messageEditText.getText().toString())){
                     messageEditText.setError(getString(R.string.empty_field_msg));
                     return;
                 }
+                String msg = messageEditText.getText().toString();
                 Intent startIntent = new Intent(getActivity(), WebSocketService.class);
                 startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MESSAGEVS);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, messageEditText.getText());
+                startIntent.putExtra(ContextVS.MESSAGE_KEY, msg);
                 try {
                     startIntent.putExtra(ContextVS.DTO_KEY,
                             JSON.writeValueAsString(connectedDevices));
@@ -180,6 +185,16 @@ public class MessageFormFragment extends Fragment {
             if(message == null) message = getString(R.string.loading_info_msg);
             ProgressDialogFragment.showDialog(caption, message, getFragmentManager());
         } else ProgressDialogFragment.hide(getFragmentManager());
+    }
+
+    private void updateConnectedView() {
+        if(!connectedDevices.isEmpty() && AppVS.getInstance().isWithSocketConnection()) {
+            msg_form.setVisibility(View.VISIBLE);
+            caption_text.setText(getString(R.string.user_connected_lbl, userVS.getFullName()));
+        } else {
+            msg_form.setVisibility(View.GONE);
+            caption_text.setText(getString(R.string.uservs_disconnected_lbl, userVS.getFullName()));
+        }
     }
 
     @Override public void onResume() {
@@ -233,15 +248,7 @@ public class MessageFormFragment extends Fragment {
                             connectedDevices.add(deviceDto);
                         }
                     }
-                    if(!connectedDevices.isEmpty()) {
-                        send_msg_button.setVisibility(View.VISIBLE);
-                        caption_text.setText(getString(R.string.user_connected_lbl, userVS.getFullName()));
-                    } else {
-                        send_msg_button.setVisibility(View.GONE);
-                        caption_text.setText(getString(R.string.uservs_disconnected_lbl, userVS.getFullName()));
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
-                                getString(R.string.error_fetching_device_info_lbl), getFragmentManager());
-                    }
+                    updateConnectedView();
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());
                 setProgressDialogVisible(null, null, false);
