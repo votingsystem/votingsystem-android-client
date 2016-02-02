@@ -13,14 +13,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 
 import java.util.UUID;

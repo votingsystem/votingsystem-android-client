@@ -19,13 +19,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.service.WebSocketService;
@@ -39,10 +36,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.WebSocketSession;
-
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -218,7 +212,7 @@ public class MessageFormFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    public class UserDeviceLoader extends AsyncTask<String, String, List<DeviceVSDto>> {
+    public class UserDeviceLoader extends AsyncTask<String, String, UserVSDto> {
 
         private String serviceURL;
         public UserDeviceLoader(String serviceURL) { this.serviceURL = serviceURL;}
@@ -227,27 +221,27 @@ public class MessageFormFragment extends Fragment {
             setProgressDialogVisible(getString(R.string.connecting_caption),
                     getString(R.string.check_devices_lbl), true); }
 
-        @Override protected List<DeviceVSDto> doInBackground(String... params) {
-            ResultListDto<DeviceVSDto> resultListDto = null;
+        @Override protected UserVSDto doInBackground(String... params) {
+            UserVSDto result = null;
             try {
-                resultListDto = HttpHelper.getData(new TypeReference<ResultListDto<DeviceVSDto>>(){},
-                        serviceURL, MediaTypeVS.JSON);
+                result = HttpHelper.getData(UserVSDto.class, serviceURL, MediaTypeVS.JSON);
             } catch (Exception ex) { ex.printStackTrace();}
-            return resultListDto != null ? resultListDto.getResultList(): null;
+            return result;
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(List<DeviceVSDto> deviceListDto) {
+        @Override protected void onPostExecute(UserVSDto userDto) {
             connectedDevices =  new HashSet<>();
             try {
-                if(deviceListDto != null) {
+                if(userDto != null) {
                     String deviceId = PrefUtils.getApplicationId();
-                    for(DeviceVSDto deviceDto : deviceListDto) {
+                    for(DeviceVSDto deviceDto : userDto.getConnectedDevices()) {
                         if(!deviceId.equals(deviceDto.getDeviceId())) {
                             connectedDevices.add(deviceDto);
                         }
                     }
+                    if(userVS == null) userVS = userDto;
                     updateConnectedView();
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());

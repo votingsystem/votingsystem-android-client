@@ -141,6 +141,8 @@ public class MessageFragment extends Fragment {
                     " - arguments: " + getArguments());
         } catch(Exception ex) { ex.printStackTrace(); }
         setHasOptionsMenu(true);
+        //setUserVisibleHint is called before onCreateView
+        setUserVisibleHint(getUserVisibleHint());
         return rootView;
     }
 
@@ -216,9 +218,8 @@ public class MessageFragment extends Fragment {
                 break;
             case R.id.send_message:
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
-                resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
-                resultIntent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, cursor.getString(
-                        cursor.getColumnIndex(MessageContentProvider.JSON_COL)));
+                resultIntent.putExtra(ContextVS.FRAGMENT_KEY, MessageFormFragment.class.getName());
+                resultIntent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMessage);
                 resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(resultIntent);
                 return true;
