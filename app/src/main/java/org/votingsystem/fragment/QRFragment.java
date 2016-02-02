@@ -42,11 +42,7 @@ public class QRFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            SocketMessageDto socketMsg = null;
-            try {
-                String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
-                if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
-            } catch (Exception ex) { ex.printStackTrace();}
+            SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
             if(socketMsg != null) {
                 switch (socketMsg.getOperation()) {
                     case TRANSACTIONVS_RESPONSE:

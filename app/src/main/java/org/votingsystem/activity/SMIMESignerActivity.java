@@ -51,13 +51,8 @@ public class SMIMESignerActivity extends AppCompatActivity {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        SocketMessageDto socketMessageResponse = null;
-        try {
-            String dtoStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
-            if(dtoStr != null) {
-                socketMessageResponse = JSON.readValue(dtoStr, SocketMessageDto.class);
-            }
-        } catch (Exception ex) { ex.printStackTrace();}
+        SocketMessageDto socketMessageResponse = (SocketMessageDto) intent.getSerializableExtra(
+                ContextVS.WEBSOCKET_MSG_KEY);
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
@@ -114,9 +109,8 @@ public class SMIMESignerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         webView = (WebView) findViewById(R.id.smime_signed_content);
         appVS = (AppVS) getApplicationContext();
-        String dtoStr = getIntent().getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
+        socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
-            socketMessage = JSON.readValue(dtoStr, SocketMessageDto.class);
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
                     true).writeValueAsString(socketMessage.getTextToSign());
             webView.loadData(signatureContent, "application/json", "UTF-8");

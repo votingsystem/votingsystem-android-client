@@ -57,12 +57,8 @@ public class QRActionsFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            SocketMessageDto socketMsg = null;
+            SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            try {
-                String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
-                if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
-            } catch (Exception ex) { ex.printStackTrace();}
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:

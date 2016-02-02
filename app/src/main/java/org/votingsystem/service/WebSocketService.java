@@ -45,6 +45,7 @@ import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -245,7 +246,9 @@ public class WebSocketService extends Service {
                     @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
                         session.addMessageHandler(new MessageHandler.Whole<String>() {
                             @Override public void onMessage(String message) {
-                                sendWebSocketBroadcast(message);
+                                try {
+                                    sendWebSocketBroadcast(JSON.readValue(message, SocketMessageDto.class));
+                                } catch (IOException e) { e.printStackTrace(); }
                             }
                         });
                         setWebSocketSession(session);
@@ -253,8 +256,8 @@ public class WebSocketService extends Service {
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         appVS.setWithSocketConnection(false);
                         try {
-                            sendWebSocketBroadcast(JSON.writeValueAsString(new SocketMessageDto(
-                                    ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE)));
+                            sendWebSocketBroadcast(new SocketMessageDto(
+                                    ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
                         } catch (Exception ex) {  ex.printStackTrace(); }
                     }
                 }, clientEndpointConfig, URI.create(serviceURL));
@@ -264,11 +267,10 @@ public class WebSocketService extends Service {
         }
     }
 
-    public void sendWebSocketBroadcast(String socketMsgStr) {
+    public void sendWebSocketBroadcast(SocketMessageDto socketMsg) {
         try {
             Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
-            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsgStr);
-            SocketMessageDto socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
+            intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
             WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
             switch(socketMsg.getOperation()) { //Messages from system
                 case MESSAGEVS_FROM_VS:
@@ -323,7 +325,7 @@ public class WebSocketService extends Service {
                 case MESSAGEVS_SIGN:
                     intent = new Intent(this, SMIMESignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, JSON.writeValueAsString(socketMsg));
+                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
                     startActivity(intent);
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:

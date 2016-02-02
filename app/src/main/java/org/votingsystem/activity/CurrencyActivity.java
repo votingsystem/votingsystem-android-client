@@ -59,11 +59,8 @@ public class CurrencyActivity extends AppCompatActivity {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            SocketMessageDto socketMsg = null;
-            try {
-                String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
-                if(socketMsgStr != null) socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
-            } catch (Exception ex) { ex.printStackTrace();}
+            SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(
+                    ContextVS.WEBSOCKET_MSG_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:

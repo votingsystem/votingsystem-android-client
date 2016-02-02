@@ -19,7 +19,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceVSDto;
@@ -36,6 +38,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.WebSocketSession;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,12 +65,8 @@ public class MessageFormFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            SocketMessageDto socketMessageDto = null;
-            try {
-                if(intent.hasExtra(ContextVS.WEBSOCKET_MSG_KEY)) socketMessageDto =
-                        JSON.readValue(intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY),
-                                SocketMessageDto.class);
-            } catch (Exception ex) { ex.printStackTrace();}
+            SocketMessageDto socketMessageDto = (SocketMessageDto) intent.getSerializableExtra(
+                    ContextVS.WEBSOCKET_MSG_KEY);
             if(intent.hasExtra(ContextVS.PIN_KEY)) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:

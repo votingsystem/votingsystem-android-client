@@ -37,7 +37,6 @@ import org.votingsystem.fragment.ReceiptGridFragment;
 import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
@@ -73,13 +72,7 @@ public class ActivityBase extends AppCompatActivity
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            SocketMessageDto socketMsg = null;
-            String socketMsgStr = intent.getStringExtra(ContextVS.WEBSOCKET_MSG_KEY);
-            if(socketMsgStr != null) {
-                try {
-                    socketMsg = JSON.readValue(socketMsgStr, SocketMessageDto.class);
-                } catch (Exception ex) { ex.printStackTrace();}
-            }
+            SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
