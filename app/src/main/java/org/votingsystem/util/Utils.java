@@ -26,7 +26,9 @@ import org.votingsystem.service.PaymentService;
 import org.votingsystem.service.WebSocketService;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -91,6 +93,21 @@ public class Utils {
         Set<T> result = new HashSet<>();
         for(T arg : args) {
             result.add(arg);
+        }
+        return result;
+    }
+
+    public static Uri createTempFile(byte[] fileBytes, Context context) throws IOException {
+        Uri result = null;
+        File tempFile = File.createTempFile("smime", ".p7s", context.getExternalCacheDir());
+        try {
+            tempFile.createNewFile();
+            FileOutputStream fo = new FileOutputStream(tempFile);
+            fo.write(fileBytes);
+            fo.close();
+            result = Uri.fromFile(tempFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return result;
     }

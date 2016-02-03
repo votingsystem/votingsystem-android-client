@@ -148,7 +148,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
-        operation = (TypeVS) getIntent().getExtras().getSerializable(ContextVS.TYPEVS_KEY);
+        operation = (TypeVS) getIntent().getExtras().getSerializable(ContextVS.OPERATIONVS_KEY);
         textToSign = getIntent().getExtras().getString(ContextVS.MESSAGE_CONTENT_KEY);
         toUser = getIntent().getExtras().getString(ContextVS.USER_KEY);
         msgSubject = getIntent().getExtras().getString(ContextVS.MESSAGE_SUBJECT_KEY);

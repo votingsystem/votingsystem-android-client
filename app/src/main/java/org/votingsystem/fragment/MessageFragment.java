@@ -169,6 +169,7 @@ public class MessageFragment extends Fragment {
             currency = socketMessage.getCurrencySet().iterator().next();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
                     R.string.wallet_change_lbl));
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(null);
             String fragmentTag = CurrencyFragment.class.getSimpleName() + messageId;
             message_content.setVisibility(View.GONE);
             if(currencyRef == null || currencyRef.get() == null) {

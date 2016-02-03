@@ -5,4 +5,10 @@
         android:title="@string/reject_sign_request_lbl"/>
     <item android:id="@+id/ban_device"
         android:title="@string/ban_device_lbl"/>
+    <group android:id="@+id/signature_items"
+        android:visible="false">
+        <item android:id="@+id/share_receipt"
+            android:orderInCategory="3"
+            android:title="@string/share_receipt_lbl"/>
+    </group>
 </menu>

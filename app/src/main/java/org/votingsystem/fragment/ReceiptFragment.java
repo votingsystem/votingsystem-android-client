@@ -48,7 +48,11 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -355,16 +359,12 @@ public class ReceiptFragment extends Fragment {
                             appVS.getTimeStampCert(), getFragmentManager(), getActivity());
                     break;
                 case R.id.share_receipt:
-                    try {
-                        Intent sendIntent = new Intent();
-                        String receiptStr = new String(receiptWrapperSMIME.getBytes());
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
-                        sendIntent.setType(ContentTypeVS.TEXT.getName());
-                        startActivity(sendIntent);
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.setType(ContentTypeVS.TEXT.getName());
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, Utils.createTempFile(
+                            receiptWrapperSMIME.getBytes(), getActivity()));
+                    startActivity(sendIntent);
                     return true;
                 case R.id.save_receipt:
                     ContentValues values = new ContentValues();
@@ -373,8 +373,6 @@ public class ReceiptFragment extends Fragment {
                     values.put(ReceiptContentProvider.TYPE_COL, receiptWrapper.getTypeVS().toString());
                     values.put(ReceiptContentProvider.URL_COL, receiptWrapper.getMessageId());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptWrapper.State.ACTIVE.toString());
-                    Uri uri = getActivity().getContentResolver().insert(
-                            ReceiptContentProvider.CONTENT_URI, values);
                     menu.removeItem(R.id.save_receipt);
                     break;
                 case R.id.signature_content:
