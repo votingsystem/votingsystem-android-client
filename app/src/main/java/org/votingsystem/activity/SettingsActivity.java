@@ -79,17 +79,13 @@ public class SettingsActivity extends PreferenceActivity
                 String CAN = null;
                 if((CAN = intent.getStringExtra(ContextVS.CAN_KEY)) != null) {
                     LOGD(TAG + ".broadcastReceiver", "CAN:" + CAN);
-                    if(dnie_switch.isChecked()) {
-                        PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
-                        PrefUtils.putDNIeCAN(CAN);
-                        dnie_switch.setSummary("CAN: " + CAN);
-                    }
+                    PrefUtils.putDNIeCAN(CAN);
+                    dnie_switch.setSummary("CAN: " + CAN);
                 } else {
-                    if(dnie_switch.isChecked()) {
-                        dnie_switch.setChecked(false);
-                        dnie_switch.setSummary(getString(R.string.pref_description_dnie));
-                    }
+                    dnie_switch.setChecked(false);
+                    dnie_switch.setSummary(getString(R.string.pref_description_dnie));
                 }
+                PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
             }
         };
 
@@ -104,7 +100,10 @@ public class SettingsActivity extends PreferenceActivity
                 public boolean onPreferenceClick(Preference arg0) {
                     if(dnie_switch.isChecked()) CANDialogFragment.showDialog(
                             broadCastId, getFragmentManager());
-                    else dnie_switch.setSummary(getString(R.string.pref_description_dnie));
+                    else {
+                        PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
+                        dnie_switch.setSummary(getString(R.string.pref_description_dnie));
+                    }
                     return true;
                 }
             });

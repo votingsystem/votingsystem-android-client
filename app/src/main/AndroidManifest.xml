@@ -128,12 +128,12 @@
             android:launchMode="singleTask"
             android:noHistory="true"
             android:theme="@style/ThemeVS">
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <meta-data android:name="android.nfc.action.TAG_DISCOVERED"
-                android:resource="@xml/filter_nfc"/>
+                android:resource="@xml/filter_nfc"/>-->
         </activity>
 
 

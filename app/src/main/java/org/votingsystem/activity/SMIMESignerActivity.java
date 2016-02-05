@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.widget.TextView;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -150,6 +151,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
             menu.setGroupVisible(R.id.signature_items, true);
             menu.removeItem(R.id.sign_document);
             menu.removeItem(R.id.reject_sign_request);
+            findViewById(R.id.signature_state).setVisibility(View.VISIBLE);
         }
     }
 
