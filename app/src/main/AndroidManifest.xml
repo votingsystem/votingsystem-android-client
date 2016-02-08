@@ -4,10 +4,10 @@
 
    	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-feature android:name="android.hardware.nfc" android:required="true" />
 
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="22" />
@@ -121,6 +121,8 @@
         <activity android:name="org.votingsystem.activity.OperationVSGridActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
+
+        <activity android:name="org.votingsystem.activity.PatternLockActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.DNIeSigningActivity"
             android:label = "nfcIntentActivityLbl"

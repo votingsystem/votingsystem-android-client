@@ -14,10 +14,11 @@
         android:text="@string/signed_document_msg"
         android:gravity="center"
         android:visibility="gone"
-        android:textColor="@color/terminated_vs"
+        android:background="@color/terminated_vs"
+        android:textColor="@color/white"
         android:layout_margin="10dp"
         android:textStyle="bold"
-        android:textSize="23sp" />
+        android:textSize="24sp" />
 
     <TextView android:id="@+id/deviceName"
         android:layout_width="match_parent"

@@ -14,7 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.TextView;
+
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.SocketMessageDto;
@@ -31,9 +33,11 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -148,9 +152,11 @@ public class SMIMESignerActivity extends AppCompatActivity {
 
     private void setMenu() {
         if(smime != null) {
-            menu.setGroupVisible(R.id.signature_items, true);
-            menu.removeItem(R.id.sign_document);
-            menu.removeItem(R.id.reject_sign_request);
+            if(menu != null) {
+                menu.setGroupVisible(R.id.signature_items, true);
+                menu.removeItem(R.id.sign_document);
+                menu.removeItem(R.id.reject_sign_request);
+            }
             findViewById(R.id.signature_state).setVisibility(View.VISIBLE);
         }
     }

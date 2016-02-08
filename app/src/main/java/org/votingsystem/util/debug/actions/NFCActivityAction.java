@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;

@@ -18,14 +18,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;

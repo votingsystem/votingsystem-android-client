@@ -21,8 +21,8 @@ import org.votingsystem.util.debug.actions.DeleteDBAction;
 import org.votingsystem.util.debug.actions.ForceSyncNowAction;
 import org.votingsystem.util.debug.actions.NFCActivityAction;
 import org.votingsystem.util.debug.actions.OperationVSAction;
+import org.votingsystem.util.debug.actions.PatternLockAction;
 import org.votingsystem.util.debug.actions.PrefsAction;
-import org.votingsystem.util.debug.actions.SimulateBadgeScannedAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -41,7 +41,7 @@ public class DebugActionRunnerFragment extends Fragment {
         ViewGroup tests = (ViewGroup) rootView.findViewById(R.id.debug_action_list);
         tests.addView(createTestAction(new ForceSyncNowAction(
                 (AppVS) getActivity().getApplicationContext())));
-        tests.addView(createTestAction(new SimulateBadgeScannedAction()));
+        tests.addView(createTestAction(new PatternLockAction()));
         tests.addView(createTestAction(new PrefsAction()));
         tests.addView(createTestAction(new DeleteDBAction()));
         tests.addView(createTestAction(new CurrencyConsumedAction()));
