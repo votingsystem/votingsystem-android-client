@@ -57,6 +57,7 @@ public class ContextVS {
 
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
     public static final String PIN_KEY = "PIN";
+    public static final String LOCK_PATTERN_KEY = "LOCK_PATTERN_KEY";
     public static final String CAN_KEY = "CAN_KEY";
     public static final String DNIE_KEY = "DNIE_KEY";
     public static final String DOUBLE_BACK_KEY = "DOUBLE_BACK_KEY";

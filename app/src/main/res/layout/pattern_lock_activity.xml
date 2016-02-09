@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:textColor="#fff"
-        android:textSize="15dp"
+        android:textSize="20dp"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:layout_marginTop="10dp"
@@ -37,33 +37,5 @@
         app:lock_nodeSrc="@drawable/pattern_lock_circle_node_normal"
         app:lock_nodeHighlightSrc="@drawable/pattern_lock_circle_node_highlighted"
         app:lock_autoLink="true" />
-
-    <org.votingsystem.ui.PatternLockView
-        android:id="@+id/lock_view_dot"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="center"
-        app:lock_size="4"
-        app:lock_enableVibrate="true"
-        app:lock_vibrateTime="100"
-        app:lock_lineColor="#b2ffffff"
-        app:lock_lineWidth="5dp"
-        app:lock_nodeSize="10dp"
-        app:lock_spacing="90dp"
-        app:lock_padding="20dp"
-        app:lock_nodeTouchExpand="15dp"
-        app:lock_nodeSrc="@drawable/pattern_lock_dot_node_normal"
-        app:lock_nodeHighlightSrc="@drawable/pattern_lock_dot_node_highlighted"
-        app:lock_autoLink="true"/>
-
-    <Button
-        android:id="@+id/switch_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_gravity="center_horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="20dp"/>
 
 </LinearLayout>

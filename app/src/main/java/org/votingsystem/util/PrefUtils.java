@@ -210,6 +210,24 @@ public class PrefUtils {
         return settings.getString(ContextVS.PIN_KEY, null);
     }
 
+    public static void putLockPatter(String lockPattern) {
+        try {
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            if(lockPattern != null) lockPattern =  StringUtils.getHashBase64(lockPattern,
+                    ContextVS.VOTING_DATA_DIGEST);
+            editor.putString(ContextVS.LOCK_PATTERN_KEY, lockPattern);
+            editor.commit();
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static String getLockPattern() throws NoSuchAlgorithmException, ExceptionVS {
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        return settings.getString(ContextVS.LOCK_PATTERN_KEY, null);
+    }
+
     public static void putWallet(byte[] encryptedWalletBytesBase64) {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(

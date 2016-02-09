@@ -350,7 +350,7 @@
         <a href="http://www.sistemavotacion.org/privacyPolicy.html">política de privacidad</a>
     ]]></string>
     <string name="can_dialog_body"><![CDATA[
-        <a href="http://www.sistemavotacion.org/AccessControl/docs/dnieCAN.xhtml">¿qué es el CAN del DNIe?</a>
+        <a href="http://www.sistemavotacion.org/CurrencyServer/docs/dnieCAN.xhtml">¿qué es el CAN del DNIe?</a>
     ]]></string>
     <string name="about_licenses">open source licenses</string>
     <string name="about_eula">end user license agreement</string>
@@ -611,4 +611,9 @@
     <string name="understood_lbl">entendido</string>
     <string name="amount_lbl">cantidad</string>
     <string name="set_focus_on_qrcode">Enfoque el código QR</string>
+    <string name="pattern_lock_msg">emplear patrón de bloqueo en vez de contraseña en la firma de documentos</string>
+    <string name="pattern_lock_lbl">patrón de bloqueo</string>
+    <string name="enter_pattern_lock_msg">introduzca el patrón de bloqueo con el que protegerá su dispositivo de firma</string>
+    <string name="confirm_lock_msg">vuelva a introducir el patrón de bloqueo</string>
+    <string name="retry_msg">vuelva a intentarlo</string>
 </resources>

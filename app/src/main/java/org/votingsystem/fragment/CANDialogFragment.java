@@ -47,7 +47,6 @@ public class CANDialogFragment extends DialogFragment implements DialogInterface
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         broadCastId = getArguments().getString(ContextVS.CALLER_KEY);
-
         LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View view = layoutInflater.inflate(R.layout.can_dialog, null);
@@ -65,12 +64,7 @@ public class CANDialogFragment extends DialogFragment implements DialogInterface
                         setCAN(canEditText.getText().toString().trim());
                     }
                 }
-        ).setNegativeButton(R.string.cancel_lbl,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        setCAN(null);
-                    }
-                }).create();
+        ).create();
         dialog.setOnKeyListener(this);
         return dialog;
     }
@@ -88,7 +82,7 @@ public class CANDialogFragment extends DialogFragment implements DialogInterface
         //so you have to filter:
         if (event.getAction()!=KeyEvent.ACTION_DOWN) return true;
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            getDialog().dismiss();
+            setCAN(null);
         }
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             LOGD(TAG + ".onKey", "KEYCODE_ENTER");

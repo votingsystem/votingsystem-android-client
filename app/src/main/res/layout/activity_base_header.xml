@@ -12,7 +12,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:orientation="horizontal"
         android:paddingTop="@dimen/activity_vertical_margin">
         <ImageView android:id="@+id/connection_status_img"

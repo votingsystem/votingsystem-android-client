@@ -156,7 +156,7 @@ public class PatternLockView  extends ViewGroup {
         mNodeSize = a.getDimension(R.styleable.PatternLockView_lock_nodeSize, 0);
         mNodeAreaExpand = a.getDimension(R.styleable.PatternLockView_lock_nodeTouchExpand, 0);
         mNodeOnAnim = a.getResourceId(R.styleable.PatternLockView_lock_nodeOnAnim, 0);
-        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.argb(0xb2, 0xff, 0xff, 0xff));
+        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.rgb(216,175,175));
         mLineWidth = a.getDimension(R.styleable.PatternLockView_lock_lineWidth, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
         mPadding = a.getDimension(R.styleable.PatternLockView_lock_padding, 0);
@@ -178,7 +178,6 @@ public class PatternLockView  extends ViewGroup {
         mPaint.setStrokeWidth(mLineWidth);
         mPaint.setColor(mLineColor);
         mPaint.setAntiAlias(true);
-
         for (int n = 0; n < mSize * mSize; n++) {
             NodeView node = new NodeView(getContext(), n);
             if (mNodeOnAnim != 0) {
@@ -230,7 +229,6 @@ public class PatternLockView  extends ViewGroup {
                     nodesize = maxNodeSize;
                 }
             }
-            
             // if result nodesize is smaller than zero, remeasure without using spacings.
             if (nodesize <= 0) {
                 needRemeasure = true;

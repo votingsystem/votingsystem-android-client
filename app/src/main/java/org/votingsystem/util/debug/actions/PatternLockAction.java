@@ -3,9 +3,11 @@ package org.votingsystem.util.debug.actions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.util.debug.DebugAction;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 public class PatternLockAction implements DebugAction {
