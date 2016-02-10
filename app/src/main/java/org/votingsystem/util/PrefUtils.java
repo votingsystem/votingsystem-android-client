@@ -225,6 +225,10 @@ public class PrefUtils {
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         int numRetries = settings.getInt(ContextVS.RETRIES_KEY, 0) + 1;
+        if(numRetries == ContextVS.NUM_MAX_LOCK_PATERN_RETRIES) {
+            LOGD(TAG, "NUM. MAX RETRIES EXCEEDED (3). Resseting password lock");
+            putLockPatter(null);
+        }
         editor.putInt(ContextVS.RETRIES_KEY, numRetries);
         editor.commit();
         return numRetries;
