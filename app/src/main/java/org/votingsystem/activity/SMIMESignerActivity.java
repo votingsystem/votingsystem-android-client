@@ -67,6 +67,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
             signAndSendSocketMessage(socketMessage);
         }
         else {

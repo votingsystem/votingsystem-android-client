@@ -7,6 +7,8 @@
     android:background="#ba0011"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     tools:context="org.votingsystem.activity.PatternLockActivity">
 
     <TextView
@@ -29,7 +31,7 @@
         app:lock_size="3"
         app:lock_enableVibrate="true"
         app:lock_vibrateTime="100"
-        app:lock_lineColor="#a2ffffff"
+        app:lock_lineColor="#d88"
         app:lock_lineWidth="8dp"
         app:lock_nodeSize="40dp"
         app:lock_padding="20dp"

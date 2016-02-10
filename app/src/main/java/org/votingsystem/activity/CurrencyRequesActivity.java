@@ -71,6 +71,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
             TagVSDto tagVS = (TagVSDto) intent.getSerializableExtra(ContextVS.TAG_KEY);
             if(tagVS != null) setTagVS(tagVS);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
                 switch(responseVS.getTypeVS()) {
                     case CURRENCY_REQUEST:
                         sendCurrencyRequest((char[]) responseVS.getData());

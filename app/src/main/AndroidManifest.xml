@@ -122,7 +122,8 @@
 
         <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.PatternLockActivity" android:theme="@style/ThemeVS"/>
+        <activity android:name="org.votingsystem.activity.PatternLockActivity"
+            android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.DNIeSigningActivity"
             android:label = "nfcIntentActivityLbl"

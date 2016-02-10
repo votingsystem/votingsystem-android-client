@@ -80,6 +80,7 @@ public class MessageFragment extends Fragment {
         typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
             switch(responseVS.getTypeVS()) {
                 case CURRENCY:
                     try {

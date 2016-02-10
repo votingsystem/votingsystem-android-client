@@ -229,16 +229,18 @@ public class ResponseVS<T> implements Parcelable {
         return data;
     }
 
-    public void setData(T data) {
+    public ResponseVS setData(T data) {
         this.data = data;
+        return this;
     }
 
 	public byte[] getMessageBytes() {
 		return messageBytes;
 	}
 
-	public void setMessageBytes(byte[] messageBytes) {
+	public ResponseVS setMessageBytes(byte[] messageBytes) {
 		this.messageBytes = messageBytes;
+        return this;
 	}
 
     public SMIMEMessage getSMIME() {

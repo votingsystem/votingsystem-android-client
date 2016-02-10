@@ -18,7 +18,7 @@ public class ContextVS {
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int CURRENCY_TAG                              = 3;
+    public static final int CURRENCY_TAG                            = 3;
     public static final int DEVICEVS_TAG                            = 4;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
@@ -58,6 +58,7 @@ public class ContextVS {
     public static final String ADDRESS_KEY = "ADDRESS_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String LOCK_PATTERN_KEY = "LOCK_PATTERN_KEY";
+    public static final String LOCK_PATTERN_PASSWORD_KEY = "LOCK_PATTERN_PASSWORD_KEY";
     public static final String CAN_KEY = "CAN_KEY";
     public static final String DNIE_KEY = "DNIE_KEY";
     public static final String DOUBLE_BACK_KEY = "DOUBLE_BACK_KEY";
@@ -84,6 +85,7 @@ public class ContextVS {
     public static final String HASH_VALIDATION_KEY = "HASH_VALIDATION_KEY";
     public static final String TYPEVS_KEY = "TYPEVS_KEY";
     public static final String VALUE_KEY = "VALUE_KEY";
+    public static final String MODE_KEY = "MODE_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
     public static final String RESPONSE_STATUS_KEY = "RESPONSE_STATUS";
     public static final String OFFSET_KEY = "OFFSET";
@@ -113,12 +115,12 @@ public class ContextVS {
     public static final String SMIME_MSG_KEY               = "SMIME_MSG_KEY";
     public static final String MAX_VALUE_KEY               = "MAX_VALUE_KEY";
     public static final String DEFAULT_VALUE_KEY           = "DEFAULT_VALUE_KEY";
+    public static final String RETRIES_KEY                 = "RETRIES_KEY";
     public static final String PENDING_OPERATIONS_LAST_CHECKED_KEY =
             "PENDING_OPERATIONS_LAST_CHECKED_KEY";
 
 
-    //Pages size
-    //public static final Integer REPRESENTATIVE_PAGE_SIZE = 100;
+    public static final Integer NUM_MAX_LOCK_PATERN_RETRIES = 3;
     public static final Integer REPRESENTATIVE_PAGE_SIZE = 20;
     //Num. max of weeks for anonymous delegations. 52 -> one year
     public static final int MAX_WEEKS_ANONYMOUS_DELEGATION = 52;

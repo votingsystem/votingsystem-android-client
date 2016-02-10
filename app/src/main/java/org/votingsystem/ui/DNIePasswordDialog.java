@@ -93,16 +93,15 @@ public class DNIePasswordDialog implements DialogUIHandler {
                         dialog.setCancelable(false);
                         dialog.setView(passwordView);
                         dialog.create().show();
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Excepción en diálogo de contraseña" + ex.getMessage());
-                    } catch (Error err) {
-                        Log.e(TAG, "Error en diálogo de contraseña" + err.getMessage());
+                    } catch (Throwable ex) {
+                        Log.e(TAG, "Exception in DNIe password dialog: " + ex.getMessage());
                     }
                 }
             });
             try {
                 instance.wait();
-                return passwordBuilder.toString().toCharArray();
+                password = passwordBuilder.toString().toCharArray();
+                return password;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -120,6 +119,10 @@ public class DNIePasswordDialog implements DialogUIHandler {
             password = returning.clone();
         else return null;
         return returning;
+    }
+
+    public char[] getPassword() {
+        return password;
     }
 
     public int doShowConfirmDialog(String message) {
@@ -191,11 +194,11 @@ public class DNIePasswordDialog implements DialogUIHandler {
     private String getTriesMessage(final int retries) {
         String text;
         if (retries < 0) {
-            text = activity.getString(R.string.enter_passwrod_msg);
+            text = activity.getString(R.string.enter_password_msg);
         } else if (retries == 1) {
-            text = activity.getString(R.string.enter_passwrod_last_try_msg);
+            text = activity.getString(R.string.enter_password_last_try_msg);
         } else {
-            text = activity.getString(R.string.enter_passwrod_retry_msg, retries);
+            text = activity.getString(R.string.enter_password_retry_msg, retries);
         }
         return text;
     }

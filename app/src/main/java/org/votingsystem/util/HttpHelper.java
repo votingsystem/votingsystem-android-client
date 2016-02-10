@@ -240,7 +240,7 @@ public class HttpHelper {
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                     EntityUtils.toByteArray(response.getEntity()), responseContentType);
             if(headerNames != null && headerNames.length > 0) {
-                List<String> headerValues = new ArrayList<String>();
+                List<String> headerValues = new ArrayList<>();
                 for(String headerName: headerNames) {
                     Header headerValue = response.getFirstHeader(headerName);
                     if(headerValue != null) headerValues.add(headerValue.getValue());

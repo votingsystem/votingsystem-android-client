@@ -506,14 +506,14 @@ public class UIUtils  {
                 negativeButton.getClickListener());
         final Dialog dialog = builder.show();
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+        /*dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     dialog.dismiss();
                     return true;
                 } else return false;
             }
-        });
+        });*/
     }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {

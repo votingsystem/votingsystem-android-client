@@ -6,11 +6,14 @@ import android.content.SharedPreferences;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
+import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
+import org.votingsystem.signature.smime.EncryptedBundle;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 
 import java.io.IOException;
@@ -36,7 +39,6 @@ public class PrefUtils {
         return TimeZone.getDefault();
     }
 
-    private static Integer numMessagesNotReaded;
     private static RepresentationStateDto representation;
     private static RepresentativeDelegationDto representativeDelegationDto;
 
@@ -142,7 +144,7 @@ public class PrefUtils {
     }
 
     public static void registerPreferenceChangeListener(
-        SharedPreferences.OnSharedPreferenceChangeListener listener) {
+            SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.registerOnSharedPreferenceChangeListener(listener);
@@ -210,6 +212,52 @@ public class PrefUtils {
         return settings.getString(ContextVS.PIN_KEY, null);
     }
 
+    public static void resetLockRetries() {
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(ContextVS.RETRIES_KEY, 0);
+        editor.commit();
+    }
+
+    public static int incrementNumPatternLockRetries() {
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        int numRetries = settings.getInt(ContextVS.RETRIES_KEY, 0) + 1;
+        editor.putInt(ContextVS.RETRIES_KEY, numRetries);
+        editor.commit();
+        return numRetries;
+    }
+
+    public static void putLockPatterProtectedPassword(String lockPattern, char[] passwordToEncrypt) {
+        try {
+            EncryptedBundle eb = Encryptor.pbeAES_Encrypt(lockPattern, new String(passwordToEncrypt).getBytes());
+            EncryptedBundleDto ebDto = new EncryptedBundleDto(eb);
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(ContextVS.LOCK_PATTERN_PASSWORD_KEY, JSON.writeValueAsString(ebDto));
+            editor.commit();
+            putLockPatter(lockPattern);
+        } catch(Exception ex) {ex.printStackTrace();}
+    }
+
+    public static char[] getLockPatterProtectedPassword(String lockPattern) {
+        char[] password = null;
+        try {
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            String dtoStr = settings.getString(ContextVS.LOCK_PATTERN_PASSWORD_KEY, null);
+            if(dtoStr != null) {
+                EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
+                byte[] resultBytes = Encryptor.pbeAES_Decrypt(lockPattern, ebDto.getEncryptedBundle());
+                password = new String(resultBytes, "UTF-8").toCharArray();
+            }
+        } catch(Exception ex) {ex.printStackTrace();}
+        return password;
+    }
+
     public static void putLockPatter(String lockPattern) {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
@@ -222,7 +270,7 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static String getLockPattern() throws NoSuchAlgorithmException, ExceptionVS {
+    public static String getLockPatternHash() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.LOCK_PATTERN_KEY, null);

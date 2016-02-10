@@ -62,6 +62,7 @@ public class CurrencyActivity extends AppCompatActivity {
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(
                     ContextVS.WEBSOCKET_MSG_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
                         setProgressDialogVisible(true, getString(R.string.connecting_caption),

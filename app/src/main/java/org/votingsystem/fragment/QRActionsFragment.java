@@ -60,6 +60,7 @@ public class QRActionsFragment extends Fragment {
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
                 switch(responseVS.getTypeVS()) {
                     case WEB_SOCKET_INIT:
                         setProgressDialogVisible(true, getString(R.string.connecting_caption),

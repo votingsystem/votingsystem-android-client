@@ -22,6 +22,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.CertRequestActivity;
 import org.votingsystem.activity.CertResponseActivity;
 import org.votingsystem.activity.MessageActivity;
+import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
@@ -47,11 +48,10 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     private EditText userPinEditText;
     private Boolean withPasswordConfirm = null;
     private Boolean withHashValidation = null;
-    private String broadCastId = null;
     private String firstPin = null;
     private String newPin = null;
+    private String callerId = null;
     private PinChangeStep pinChangeStep = PinChangeStep.PIN_REQUEST;
-
 
     public static void showPinScreen(FragmentManager fragmentManager, String broadCastId,
              String message, boolean isWithPasswordConfirm, TypeVS type) {
@@ -158,7 +158,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
                 withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
                 withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
-                broadCastId = getArguments().getString(ContextVS.CALLER_KEY);
+                callerId = getArguments().getString(ContextVS.CALLER_KEY);
                 builder.setView(view).setOnKeyListener(this);
             }
             if(TypeVS.PIN_CHANGE == typeVS) {
@@ -176,6 +176,20 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
             }
         }
+
+
+        if(PrefUtils.getLockPatternHash() != null) {
+            Intent intent = new Intent(getActivity(), PatternLockActivity.class);
+            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_pattern_lock_msg));
+            intent.putExtra(ContextVS.PASSWORD_CONFIRM_KEY, true);
+            intent.putExtra(PatternLockActivity.FROM_DIALOG_KEY, true);
+            intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_PATTERN);
+            intent.putExtra(ContextVS.CALLER_KEY, PinDialogFragment.class.getSimpleName());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            AppVS.getInstance().startActivity(intent);
+        }
+
+
         Dialog dialog = builder.create();
         dialog.setOnKeyListener(this);
         return dialog;
@@ -239,15 +253,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             InputMethodManager imm = (InputMethodManager)getActivity().
                     getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), 0);
-            if(broadCastId != null) {
-                Intent intent = new Intent(broadCastId);
-                intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
-                ResponseVS responseVS = new ResponseVS(typeVS, pin.toCharArray());
-                intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
-            }
-            firstPin = null;
-            getDialog().dismiss();
+            processResult(pin);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -268,15 +274,37 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         }
     }
 
+    private void processResult(String pin) {
+        if(callerId != null) {
+            Intent intent = new Intent(callerId);
+            intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, typeVS)
+                    .setMessageBytes(pin.getBytes());
+            intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        }
+        firstPin = null;
+        getDialog().dismiss();
+    }
+
+    private void cancel() {
+        ((PinDialogFragment) getFragmentManager().findFragmentByTag(PinDialogFragment.TAG)).dismiss();
+        if(callerId != null) {
+            Intent intent = new Intent(callerId);
+            intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
+            intent.putExtra(ContextVS.RESPONSEVS_KEY, new ResponseVS(ResponseVS.SC_CANCELED, TypeVS.PIN));
+            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        }
+    }
+
     @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
         //OnKey is fire twice: the first time for key down, and the second time for key up,
         //so you have to filter:
         if (event.getAction()!=KeyEvent.ACTION_DOWN) return true;
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            ((PinDialogFragment) getFragmentManager().
-                    findFragmentByTag(PinDialogFragment.TAG)).dismiss();
+            LOGD(TAG + ".onKey", "KEYCODE_BACK");
+            cancel();
         }
-        //if (keyCode == KeyEvent.KEYCODE_DEL) { } 
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             LOGD(TAG + ".onKey", "KEYCODE_ENTER");
             String pin = userPinEditText.getText().toString();
@@ -293,4 +321,21 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
             getActivity().finish();
         }
     }
+
+    @Override public void onResume() {
+        super.onResume();
+        ResponseVS patternLock = AppVS.getInstance().removePatternLock();
+        if(patternLock != null) {
+            if(ResponseVS.SC_OK == patternLock.getStatusCode()) {
+                try {
+                    char[] password = PrefUtils.getLockPatterProtectedPassword(
+                            new String(patternLock.getMessageBytes()));
+                    processResult(new String(password));
+                } catch (Exception ex) {}
+
+            } else cancel();
+        }
+        LOGD(TAG, "onResume");
+    }
+
 }

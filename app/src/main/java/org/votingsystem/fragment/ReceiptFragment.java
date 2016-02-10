@@ -93,6 +93,7 @@ public class ReceiptFragment extends Fragment {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
             switch(responseVS.getTypeVS()) {
                 case CANCEL_VOTE:
                     launchVoteCancelation((VoteVSHelper) receiptWrapper);

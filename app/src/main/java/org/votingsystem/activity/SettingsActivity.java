@@ -97,6 +97,7 @@ public class SettingsActivity extends PreferenceActivity
                     PrefUtils.putDNIeCAN(CAN);
                     dnie_switch.setSummary("CAN: " + CAN);
                     preference_screen.removePreference(changePinButton);
+                    setLockPattern(null);
                 } else {
                     dnie_switch.setChecked(false);
                     dnie_switch.setSummary(getString(R.string.pref_description_dnie));
@@ -168,7 +169,8 @@ public class SettingsActivity extends PreferenceActivity
                 public boolean onPreferenceClick(Preference arg0) {
                     if(patternLockSwitch.isChecked()){
                         Intent intent = new Intent(getActivity(), PatternLockActivity.class);
-                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_pattern_lock_msg));
+                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.request_pattern_lock_msg));
+                        intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_SET_PATTERN);
                         intent.putExtra(ContextVS.PASSWORD_CONFIRM_KEY, true);
                         getActivity().startActivityForResult(intent, PATTERN_LOCK);
                     } else {
@@ -192,10 +194,19 @@ public class SettingsActivity extends PreferenceActivity
                 preference_screen.removePreference(changePinButton);
             }
             try {
-                if(PrefUtils.getLockPattern() != null) {
+                if(PrefUtils.getLockPatternHash() != null) {
                     patternLockSwitch.setChecked(true);
                 } else patternLockSwitch.setChecked(false);
             } catch (Exception ex) { ex.printStackTrace(); }
+        }
+
+        private void setLockPattern(String lockPattern) {
+            if(lockPattern == null) {
+                patternLockSwitch.setChecked(false);
+                PrefUtils.putLockPatter(null);
+            } else {
+                patternLockSwitch.setChecked(true);
+            }
         }
 
         @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -219,11 +230,10 @@ public class SettingsActivity extends PreferenceActivity
                     resultCode);
             switch (requestCode) {
                 case PATTERN_LOCK:
-                    if(data == null) {
+                    if(data == null || Activity.RESULT_OK != resultCode) {
                         patternLockSwitch.setChecked(false);
                         return;
-                    }
-                    if(Activity.RESULT_OK == resultCode) {
+                    } else {
                         ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     }
                     break;

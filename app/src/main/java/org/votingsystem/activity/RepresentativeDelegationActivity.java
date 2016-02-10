@@ -71,7 +71,10 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) sendDelegation();
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
+            sendDelegation();
+        }
         else {
             setProgressDialogVisible(null, null, false);
             if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {

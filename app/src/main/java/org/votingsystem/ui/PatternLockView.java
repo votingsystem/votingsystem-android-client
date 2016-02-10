@@ -156,7 +156,7 @@ public class PatternLockView  extends ViewGroup {
         mNodeSize = a.getDimension(R.styleable.PatternLockView_lock_nodeSize, 0);
         mNodeAreaExpand = a.getDimension(R.styleable.PatternLockView_lock_nodeTouchExpand, 0);
         mNodeOnAnim = a.getResourceId(R.styleable.PatternLockView_lock_nodeOnAnim, 0);
-        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.rgb(216,175,175));
+        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.argb(0xb2, 0xff, 0xff, 0xff));
         mLineWidth = a.getDimension(R.styleable.PatternLockView_lock_lineWidth, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
         mPadding = a.getDimension(R.styleable.PatternLockView_lock_padding, 0);

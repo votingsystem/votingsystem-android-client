@@ -73,9 +73,10 @@ public class CertRequestFormFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) launchUserCertRequestService(
-                (char[]) responseVS.getData());
-        else {
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
+            launchUserCertRequestService((char[]) responseVS.getData());
+        } else {
             showProgress(false, true);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(

@@ -47,9 +47,10 @@ public class RepresentativesMainActivity extends ActivityBase {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null)
+        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
             launchRepresentativeService(responseVS.getTypeVS());
-        else {
+        } else {
             setProgressDialogVisible(null, null, false);
             if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION == responseVS.getTypeVS()) {
                 MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());

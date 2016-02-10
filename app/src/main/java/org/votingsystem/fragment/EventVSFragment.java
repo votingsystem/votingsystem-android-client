@@ -82,6 +82,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
             final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
+                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
                 try {
                     if(TypeVS.SEND_VOTE == responseVS.getTypeVS()) voteVSHelper =
                             VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
