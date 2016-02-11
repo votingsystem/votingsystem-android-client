@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import android.util.Base64;
-import android.util.Log;
 
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
@@ -22,6 +21,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -155,9 +156,9 @@ public class CurrencyBatch {
     }
 
     public void initCurrency(Collection<String> issuedCurrencyCollection) throws Exception {
-        Log.d(TAG + ".initCurrency", "num currency: " + issuedCurrencyCollection.size());
+        LOGD(TAG + ".initCurrency", "num currency: " + issuedCurrencyCollection.size());
         if(issuedCurrencyCollection.size() != currencyMap.size()) {
-            Log.d(TAG + ".initCurrency", "num currency requested: " + currencyMap.size() +
+            LOGD(TAG + ".initCurrency", "num currency requested: " + currencyMap.size() +
                     " - num. currency received: " + issuedCurrencyCollection.size());
         }
         for(String issuedCurrency : issuedCurrencyCollection) {

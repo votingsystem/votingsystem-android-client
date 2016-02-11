@@ -1,5 +1,6 @@
 package org.votingsystem.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
+import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Utils;
 
@@ -61,4 +63,9 @@ public class FragmentContainerActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
+    }
 }

@@ -28,6 +28,7 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.service.WebSocketService;
+import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -36,7 +37,6 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.Utils;
 import org.votingsystem.util.WebSocketSession;
 
 import java.util.HashSet;
@@ -67,16 +67,8 @@ public class MessageFormFragment extends Fragment {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             SocketMessageDto socketMessageDto = (SocketMessageDto) intent.getSerializableExtra(
                     ContextVS.WEBSOCKET_MSG_KEY);
-            if(intent.hasExtra(ContextVS.PIN_KEY)) {
-                switch(responseVS.getTypeVS()) {
-                    case WEB_SOCKET_INIT:
-                        setProgressDialogVisible(getString(R.string.connecting_caption),
-                                getString(R.string.connecting_to_service_msg), true);
-                        Utils.toggleWebSocketServiceConnection();
-                        break;
-                }
-            } else setProgressDialogVisible(null, null, false);
             if(socketMessageDto != null) {
+                setProgressDialogVisible(null, null, false);
                 WebSocketSession socketSession = AppVS.getInstance().getWSSession(socketMessageDto.getUUID());
                 switch(socketMessageDto.getStatusCode()) {
                     case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
@@ -162,11 +154,9 @@ public class MessageFormFragment extends Fragment {
                     getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            PinDialogFragment.showPinScreen(getFragmentManager(),
-                                    broadCastId, getString(R.string.init_authenticated_session_pin_msg),
-                                    false, TypeVS.WEB_SOCKET_INIT);
+                            ConnectionUtils.init_IDCARD_NFC_Process((AppCompatActivity) getActivity());
                         }
-                    }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                    });
             UIUtils.showMessageDialog(builder);
             return false;
         } else return true;

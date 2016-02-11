@@ -1,8 +1,7 @@
 package org.votingsystem.fragment;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -19,25 +18,29 @@ import android.widget.Spinner;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.util.Country;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AddressFormFragment extends Fragment {
+public class UserDataFormFragment extends Fragment {
 
-	public static final String TAG = AddressFormFragment.class.getSimpleName();
+	public static final String TAG = UserDataFormFragment.class.getSimpleName();
 
+    private EditText phoneText;
+    private EditText mailText;
     private EditText address;
     private EditText postal_code;
     private EditText city;
     private EditText province;
     private Spinner country_spinner;
+    private UserVSDto userVSDto;
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -51,14 +54,10 @@ public class AddressFormFragment extends Fragment {
            Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "progressVisible: ");
         super.onCreate(savedInstanceState);
-        View rootView = inflater.inflate(R.layout.address_form, container, false);
-        getActivity().setTitle(getString(R.string.address_lbl));
-        Button cancelButton = (Button) rootView.findViewById(R.id.cancel_lbl);
-        cancelButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                getActivity().finish();
-            }
-        });
+        View rootView = inflater.inflate(R.layout.user_data_form, container, false);
+        getActivity().setTitle(getString(R.string.user_data_lbl));
+        mailText = (EditText)rootView.findViewById(R.id.mail_edit);
+        phoneText = (EditText)rootView.findViewById(R.id.phone_edit);
         address = (EditText)rootView.findViewById(R.id.address);
         postal_code = (EditText)rootView.findViewById(R.id.postal_code);
         city = (EditText)rootView.findViewById(R.id.location);
@@ -78,7 +77,8 @@ public class AddressFormFragment extends Fragment {
             }
         });
         try {
-            AddressVS addressVS = PrefUtils.getAddressVS();
+            userVSDto = PrefUtils.getSessionUserVS();
+            AddressVS addressVS = userVSDto.getAddress();
             if(addressVS != null) {
                 address.setText(addressVS.getName());
                 postal_code.setText(addressVS.getPostalCode());
@@ -116,56 +116,65 @@ public class AddressFormFragment extends Fragment {
                 Context.INPUT_METHOD_SERVICE);
   		imm.hideSoftInputFromWindow(city.getWindowToken(), 0);
       	if (validateForm ()) {
+            String deviceId = PrefUtils.getApplicationId();
+            LOGD(TAG + ".validateForm() ", "deviceId: " + deviceId);
+            userVSDto = new UserVSDto();
             AddressVS addressVS = new AddressVS();
-            addressVS.setName(address.getText().toString());
-            addressVS.setPostalCode(postal_code.getText().toString());
-            addressVS.setCity(city.getText().toString());
-            addressVS.setProvince(province.getText().toString());
+            if(!TextUtils.isEmpty(address.getText().toString()))
+                addressVS.setName(address.getText().toString());
+            if(!TextUtils.isEmpty(postal_code.getText().toString()))
+                addressVS.setPostalCode(postal_code.getText().toString());
+            if(!TextUtils.isEmpty(city.getText().toString()))
+                addressVS.setCity(city.getText().toString());
+            if(!TextUtils.isEmpty(province.getText().toString()))
+                addressVS.setProvince(province.getText().toString());
             addressVS.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
-            PrefUtils.putAddressVS(addressVS);
-            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                    getString(R.string.msg_lbl), getString(R.string.address_saved_msg), getActivity());
-            builder.setPositiveButton(getString(R.string.accept_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            getActivity().finish();
-                        }
-                    });
-            UIUtils.showMessageDialog(builder);
+
+            userVSDto.setAddress(addressVS);
       	}
     }
 
-    private void showMessage(Integer statusCode, String caption, String message) {
-        LOGD(TAG + ".showMessage", "statusCode: " + statusCode + " - caption: " + caption +
-                " - message: " + message);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
-                message);
-        newFragment.show(getFragmentManager(), MessageDialogFragment.TAG);
+    private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
+        if(isVisible){
+            ProgressDialogFragment.showDialog(caption, message, getActivity().getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(getActivity().getSupportFragmentManager());
     }
 
     private boolean validateForm () {
-    	LOGD(TAG + ".validateForm()", "country position: " + country_spinner.getSelectedItemPosition());
-        if(TextUtils.isEmpty(address.getText().toString())){
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.enter_address_error_lbl));
+        address.setError(null);
+        postal_code.setError(null);
+        city.setError(null);
+        province.setError(null);
+        phoneText.setError(null);
+        mailText.setError(null);
+        if(TextUtils.isEmpty(phoneText.getText().toString())){
+            phoneText.setError(getString(R.string.phone_missing_msg));
             return false;
         }
-        if(TextUtils.isEmpty(postal_code.getText().toString())){
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.enter_postal_code_error_lbl));
+        if(TextUtils.isEmpty(mailText.getText().toString())){
+            mailText.setError(getString(R.string.mail_missing_msg));
             return false;
         }
-        if(TextUtils.isEmpty(city.getText().toString())){
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.enter_city_error_lbl));
-            return false;
-        }
-        if(TextUtils.isEmpty(province.getText().toString())){
-            showMessage(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                    getString(R.string.enter_province_error_lbl));
-            return false;
-        }
-    	return true;
+        return true;
     }
 
+    public class DataSender extends AsyncTask<String, String, ResponseVS> {
+
+        public DataSender() { }
+
+        @Override protected void onPreExecute() { setProgressDialogVisible(true,
+                getString(R.string.connecting_caption), getString(R.string.wait_msg)); }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            String currencyURL = urls[0];
+            return HttpHelper.getData(currencyURL, null);
+        }
+
+        @Override protected void onProgressUpdate(String... progress) { }
+
+        @Override protected void onPostExecute(ResponseVS responseVS) {
+
+            setProgressDialogVisible(false, null, null);
+        }
+    }
 }

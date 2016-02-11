@@ -30,12 +30,13 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRActionsFragment;
 import org.votingsystem.fragment.ReceiptGridFragment;
 import org.votingsystem.fragment.WalletFragment;
+import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.BuildConfig;
+import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
@@ -43,7 +44,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.Utils;
 import org.votingsystem.util.debug.DebugActionRunnerFragment;
 
 import java.io.IOException;
@@ -57,6 +57,7 @@ public class ActivityBase extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = ActivityBase.class.getSimpleName();
+
 
     private AppVS appVS = null;
     private NavigationView navigationView;
@@ -73,17 +74,7 @@ public class ActivityBase extends AppCompatActivity
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-                switch(responseVS.getTypeVS()) {
-                    case WEB_SOCKET_INIT:
-                        ProgressDialogFragment.showDialog(getString(R.string.connecting_caption),
-                                getString(R.string.connecting_to_service_msg),
-                                getSupportFragmentManager());
-                        Utils.toggleWebSocketServiceConnection();
-                        break;
-                }
-            } else if(socketMsg != null) {
+            if(socketMsg != null) {
                 LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getOperation());
                 ProgressDialogFragment.hide(getSupportFragmentManager());
                 setConnectionStatusUI();
@@ -129,10 +120,7 @@ public class ActivityBase extends AppCompatActivity
         connectButton = (Button)header.findViewById(R.id.connect_button);
         connectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(!appVS.isWithSocketConnection()) {
-                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId, getString(
-                            R.string.init_authenticated_session_pin_msg), false, TypeVS.WEB_SOCKET_INIT);
-                }
+                ConnectionUtils.init_IDCARD_NFC_Process(ActivityBase.this);
             }
         });
         LinearLayout userBox = (LinearLayout)header.findViewById(R.id.user_box);
@@ -157,7 +145,7 @@ public class ActivityBase extends AppCompatActivity
             headerTextView.setVisibility(View.VISIBLE);
             connectButton.setVisibility(View.GONE);
         } else {
-            connectionStatusText.setText(getString(R.string.disconnected_lbl));
+            connectionStatusText.setVisibility(View.GONE);
             connectionStatusView.setVisibility(View.GONE);
             headerTextView.setVisibility(View.GONE);
             connectButton.setVisibility(View.VISIBLE);
@@ -172,12 +160,19 @@ public class ActivityBase extends AppCompatActivity
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            Utils.toggleWebSocketServiceConnection();
+                            closeWebSocketConnection();
                             dialog.dismiss();
                         }
                     });
             UIUtils.showMessageDialog(builder);
         }
+    }
+
+    public void closeWebSocketConnection() {
+        LOGD(TAG + ".toggleWebSocketServiceConnection", "closeWebSocketConnection");
+        Intent startIntent = new Intent(AppVS.getInstance(), WebSocketService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_CLOSE);
+        startService(startIntent);
     }
 
     private void performDataBootstrap() {
@@ -201,6 +196,7 @@ public class ActivityBase extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
     }
 
     @Override

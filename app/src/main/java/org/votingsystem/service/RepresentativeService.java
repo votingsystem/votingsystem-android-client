@@ -98,7 +98,7 @@ public class RepresentativeService extends IntentService {
     private void checkRepresentationState(String serviceCaller) {
         if(appVS.getUserVS() == null) {
             appVS.broadcastResponse(ResponseVS.ERROR(getString(R.string.error_lbl),
-                    getString(R.string.cert_required_error_msg)).setServiceCaller(serviceCaller));
+                    getString(R.string.connection_required_msg)).setServiceCaller(serviceCaller));
             return;
         }
         String serviceURL = appVS.getAccessControl().getRepresentationStateServiceURL(

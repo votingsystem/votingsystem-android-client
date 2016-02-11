@@ -26,7 +26,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -177,13 +176,13 @@ public class SMIMESignerActivity extends AppCompatActivity {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.sign_document:
-                if(!Utils.checkIfDNIEnabled(this, getSupportFragmentManager())) return true;
-                if(PrefUtils.getLockPatternHash() != null) {
-                    Intent intent = new Intent(this, PatternLockActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_pattern_lock_msg));
-                    intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN);
-                    startActivityForResult(intent, PATTERN_LOCK_REQUEST);
-                } else startDNIeSigningActivity(null);
+                Utils.init_IDCARD_NFC_Process(PATTERN_LOCK_REQUEST,
+                        getString(R.string.enter_pattern_lock_msg), null, this,
+                        new Utils.PasswordHandler() {
+                            @Override public void processWithoutPatternLock() {
+                                startDNIeSigningActivity(null);
+                            }
+                    });
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:

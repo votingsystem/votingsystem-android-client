@@ -19,8 +19,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.CertRequestActivity;
-import org.votingsystem.activity.CertResponseActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
@@ -28,7 +26,6 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -123,56 +120,35 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         boolean isWithCertValidation = getArguments().getBoolean(ContextVS.CERT_VALIDATION_KEY);
         typeVS = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         AlertDialog.Builder builder = null;
-        if(!ContextVS.State.WITH_CERTIFICATE.equals(appVS.getState()) && isWithCertValidation) {
-            builder = UIUtils.getMessageDialogBuilder(
-                    getString(R.string.cert_not_found_caption),
-                    getString(R.string.cert_not_found_msg), getActivity()).setPositiveButton(
-                    R.string.request_certificate_menu, new DialogInterface.OnClickListener() {
-                @Override public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = null;
-                    switch(AppVS.getInstance().getState()) {
-                        case WITH_CSR:
-                            intent = new Intent(getActivity(), CertResponseActivity.class);
-                            break;
-                        case WITHOUT_CSR:
-                            intent = new Intent(getActivity(), CertRequestActivity.class);
-                            break;
-                    }
-                    if(intent != null) startActivity(intent);
-                }
-            }).setNegativeButton(R.string.cancel_lbl, null);
-            return builder.create();
+        View view = inflater.inflate(R.layout.pin_dialog, null);
+        msgTextView = (TextView) view.findViewById(R.id.msg);
+        userPinEditText = (EditText)view.findViewById(R.id.user_pin);
+        builder = new AlertDialog.Builder(getActivity());
+        if(savedInstanceState != null) {
+            pinChangeStep = (PinChangeStep) savedInstanceState.getSerializable(
+                    TypeVS.PIN_CHANGE.toString());
+            newPin = savedInstanceState.getString(NEW_PIN_KEY);
         } else {
-            View view = inflater.inflate(R.layout.pin_dialog, null);
-            msgTextView = (TextView) view.findViewById(R.id.msg);
-            userPinEditText = (EditText)view.findViewById(R.id.user_pin);
-            builder = new AlertDialog.Builder(getActivity());
-            if(savedInstanceState != null) {
-                pinChangeStep = (PinChangeStep) savedInstanceState.getSerializable(
-                        TypeVS.PIN_CHANGE.toString());
-                newPin = savedInstanceState.getString(NEW_PIN_KEY);
-            } else {
-                if(getArguments().getString(ContextVS.MESSAGE_KEY) != null) {
-                    msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
-                }
-                withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
-                withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
-                callerId = getArguments().getString(ContextVS.CALLER_KEY);
-                builder.setView(view).setOnKeyListener(this);
+            if(getArguments().getString(ContextVS.MESSAGE_KEY) != null) {
+                msgTextView.setText(Html.fromHtml(getArguments().getString(ContextVS.MESSAGE_KEY)));
             }
-            if(TypeVS.PIN_CHANGE == typeVS) {
-                ((TextView) view.findViewById(R.id.caption_text)).setText(R.string.pin_change_lbl);
-                switch (pinChangeStep) {
-                    case PIN_REQUEST:
-                        msgTextView.setText(getString(R.string.enter_actual_pin_msg));
-                        break;
-                    case NEW_PIN_REQUEST:
-                        msgTextView.setText(getString(R.string.enter_new_pin_msg));
-                        break;
-                    case NEW_PIN_CONFIRM:
-                        msgTextView.setText(getString(R.string.confirm_new_pin_msg));
-                        break;
-                }
+            withPasswordConfirm = getArguments().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY);
+            withHashValidation = getArguments().getBoolean(ContextVS.HASH_VALIDATION_KEY);
+            callerId = getArguments().getString(ContextVS.CALLER_KEY);
+            builder.setView(view).setOnKeyListener(this);
+        }
+        if(TypeVS.PIN_CHANGE == typeVS) {
+            ((TextView) view.findViewById(R.id.caption_text)).setText(R.string.pin_change_lbl);
+            switch (pinChangeStep) {
+                case PIN_REQUEST:
+                    msgTextView.setText(getString(R.string.enter_actual_pin_msg));
+                    break;
+                case NEW_PIN_REQUEST:
+                    msgTextView.setText(getString(R.string.enter_new_pin_msg));
+                    break;
+                case NEW_PIN_CONFIRM:
+                    msgTextView.setText(getString(R.string.confirm_new_pin_msg));
+                    break;
             }
         }
         Dialog dialog = builder.create();

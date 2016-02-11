@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -17,6 +16,8 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -98,7 +99,7 @@ public class FileUtils {
     }
 
     public static FileOutputStream openFileOutputStream(String filename, Context context) {
-        Log.d(TAG + ".openFileOutputStream", "filename: " + filename);
+        LOGD(TAG + ".openFileOutputStream", "filename: " + filename);
         FileOutputStream fout = null;
         try {
             fout = context.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -113,7 +114,7 @@ public class FileUtils {
         try {
             //File sdCard = Environment.getExternalStorageDirectory();
             file = new File(context.getFilesDir(), filename);
-            Log.d(TAG + ".getFile", "file.getAbsolutePath(): " + file.getAbsolutePath());
+            LOGD(TAG + ".getFile", "file.getAbsolutePath(): " + file.getAbsolutePath());
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -121,7 +122,7 @@ public class FileUtils {
     }
 
     public static List<File> searchFiles(String path, String fileName) {
-        Log.d(TAG + ".searchFiles", "path: " + path + " - fileName: " + fileName);
+        LOGD(TAG + ".searchFiles", "path: " + path + " - fileName: " + fileName);
         List<File> result = new ArrayList<File>();
         File root = new File(path);
         File[] list = root.listFiles();

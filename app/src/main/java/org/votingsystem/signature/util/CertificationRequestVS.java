@@ -1,7 +1,5 @@
 package org.votingsystem.signature.util;
 
-import android.util.Log;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.DERTaggedObject;
@@ -40,6 +38,7 @@ import java.util.Date;
 import javax.security.auth.x500.X500Principal;
 
 import static org.votingsystem.util.ContextVS.ANDROID_PROVIDER;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -150,7 +149,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     private SignedMailGenerator getSignedMailGenerator() throws Exception {
         if (signedMailGenerator == null) {
             Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(signedCsr);
-            Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
+            LOGD(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
             if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
             certificate = certificates.iterator().next();
             X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
@@ -167,7 +166,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         if(certificate == null && signedCsr != null) {
             try {
                 Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(signedCsr);
-                Log.d(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
+                LOGD(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
                 if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
                 certificate = certificates.iterator().next();
             } catch(Exception ex) { ex.printStackTrace();  }

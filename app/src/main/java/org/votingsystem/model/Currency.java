@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
@@ -29,6 +28,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -182,7 +183,7 @@ public class Currency extends ReceiptWrapper {
         }
         for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
             CertUtils.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
-            Log.d(TAG, "validateReceipt - Cert validated: " + cert.getSubjectDN().toString());
+            LOGD(TAG, "validateReceipt - Cert validated: " + cert.getSubjectDN().toString());
         }
         this.smimeMessage = smimeReceipt;
     }
@@ -233,7 +234,7 @@ public class Currency extends ReceiptWrapper {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
         if(certificationRequest.getSignedCsr() != null) currency.initSigner(certificationRequest.getSignedCsr());
-        else Log.d(TAG + ".fromCertificationRequestVS", "CertificationRequestVS with NULL SignedCSR");
+        else LOGD(TAG + ".fromCertificationRequestVS", "CertificationRequestVS with NULL SignedCSR");
         return currency;
     }
 

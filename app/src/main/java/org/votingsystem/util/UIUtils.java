@@ -58,7 +58,6 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -517,10 +516,10 @@ public class UIUtils  {
     }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
-        AddressVS addressVS = PrefUtils.getAddressVS();
-        ((TextView)linearLayout.findViewById(R.id.name)).setText(addressVS.getName());
-        ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(addressVS.getPostalCode());
-        ((TextView)linearLayout.findViewById(R.id.city)).setText(addressVS.getCity());
+        UserVSDto userVS = PrefUtils.getSessionUserVS();
+        ((TextView)linearLayout.findViewById(R.id.name)).setText(userVS.getAddress().getName());
+        ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(userVS.getAddress().getPostalCode());
+        ((TextView)linearLayout.findViewById(R.id.city)).setText(userVS.getAddress().getCity());
         linearLayout.setVisibility(View.VISIBLE);
     }
 

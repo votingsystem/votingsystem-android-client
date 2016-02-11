@@ -1,8 +1,6 @@
 package org.votingsystem.signature.smime;
 
 
-import android.util.Log;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
@@ -32,6 +30,7 @@ import javax.mail.internet.MimeMultipart;
 
 import static org.votingsystem.util.ContextVS.DNIe_SIGN_MECHANISM;
 import static org.votingsystem.util.ContextVS.PROVIDER;
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -74,7 +73,7 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     public void closeSession () {
-        Log.d(TAG, "closeSession");
+        LOGD(TAG, "closeSession");
     }
 
     private class SignatureOutputStream extends OutputStream {

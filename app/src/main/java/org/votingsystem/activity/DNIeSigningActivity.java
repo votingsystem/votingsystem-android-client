@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -172,8 +173,8 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		acitivityMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY, -1);
 		String message = getIntent().getExtras().getString(ContextVS.MESSAGE_KEY);
 		if(message != null) {
-			((TextView)findViewById(R.id.vote)).setText(message);
-		}
+			((TextView)findViewById(R.id.topMsg)).setText(message);
+		} else findViewById(R.id.topMsg).setVisibility(View.GONE);
         patternLock = (char[]) getIntent().getExtras().getSerializable(ContextVS.LOCK_PATTERN_KEY);
     }
 

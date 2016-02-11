@@ -1,7 +1,5 @@
 package org.votingsystem.signature.smime;
 
-import android.util.Log;
-
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.smime.SMIMECapabilitiesAttribute;
@@ -29,6 +27,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
@@ -43,7 +43,7 @@ public class SignedMailGenerator {
 
     public SignedMailGenerator(PrivateKey key, Certificate[] chain,
     		String signatureMechanism, String provider) throws Exception {
-        Log.d(TAG + ".SignedMailGenerator", " - signatureMechanism: " + signatureMechanism);
+        LOGD(TAG + ".SignedMailGenerator", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond
@@ -68,7 +68,7 @@ public class SignedMailGenerator {
 
     public SignedMailGenerator(PrivateKey key, X509Certificate x509Cert,
                    String signatureMechanism, String provider) throws Exception {
-        Log.d(TAG + ".SignedMailGenerator", " - signatureMechanism: " + signatureMechanism);
+        LOGD(TAG + ".SignedMailGenerator", " - signatureMechanism: " + signatureMechanism);
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond

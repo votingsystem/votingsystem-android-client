@@ -2,7 +2,6 @@ package org.votingsystem.dto;
 
 import android.net.Uri;
 import android.util.Base64;
-import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +19,8 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -59,6 +60,7 @@ public class UserVSDto implements Serializable {
     private UserVSDto representative;//this is for groups
     private String representativeMessageURL;
     private String imageURL;
+    private AddressVS address;
     @JsonIgnore private X509Certificate certificate;
     @JsonIgnore private byte[] imageBytes;
     private transient Uri contactURI;
@@ -352,6 +354,14 @@ public class UserVSDto implements Serializable {
         this.imageURL = imageURL;
     }
 
+    public AddressVS getAddress() {
+        return address;
+    }
+
+    public void setAddress(AddressVS address) {
+        this.address = address;
+    }
+
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         if(contactURI != null) s.writeObject(contactURI.toString());
@@ -363,6 +373,6 @@ public class UserVSDto implements Serializable {
         try {
             String contactURIStr = (String) s.readObject();
             if(contactURIStr != null) contactURI = Uri.parse(contactURIStr);
-        } catch(Exception ex) { Log.d(TAG, "readObject EXCEPTION");}
+        } catch(Exception ex) { LOGD(TAG, "readObject EXCEPTION");}
     }
 }

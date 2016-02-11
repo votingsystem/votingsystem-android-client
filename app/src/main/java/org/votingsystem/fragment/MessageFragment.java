@@ -34,7 +34,6 @@ import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
 import java.lang.ref.WeakReference;
@@ -91,11 +90,6 @@ public class MessageFragment extends Fragment {
                         MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                                 getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
                     }
-                    break;
-                case WEB_SOCKET_INIT:
-                    setProgressDialogVisible(getString(R.string.connecting_caption),
-                            getString(R.string.connecting_to_service_msg), true);
-                    Utils.toggleWebSocketServiceConnection();
                     break;
             }
         } else setProgressDialogVisible(null, null,false);

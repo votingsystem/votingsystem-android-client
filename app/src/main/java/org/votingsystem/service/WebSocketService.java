@@ -25,7 +25,6 @@ import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.PaymentFragment;
@@ -111,9 +110,7 @@ public class WebSocketService extends Service {
         final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
         final String message = arguments.getString(ContextVS.MESSAGE_KEY);
         final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
-        if(operationType == TypeVS.WEB_SOCKET_INIT) {
-            initValidatedSession();
-        } else if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
+        if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
             executorService.submit(new Runnable() {
                 @Override public void run() {
                     try {
@@ -150,28 +147,6 @@ public class WebSocketService extends Service {
         }
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
-    }
-
-    private void initValidatedSession() {
-        executorService.submit(new Runnable() {
-            @Override public void run() {
-                try {
-                    CurrencyServerDto currencyServer = appVS.getCurrencyServer();
-                    SocketMessageDto messageDto = SocketMessageDto.INIT_SESSION_REQUEST();
-                    String msgSubject = getString(R.string.init_authenticated_session_msg_subject);
-                    SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
-                            JSON.writeValueAsString(messageDto), msgSubject,
-                            currencyServer.getTimeStampServiceURL());
-                    messageDto.setSMIME(smimeMessage);
-                    session.getBasicRemote().sendText(JSON.writeValueAsString(messageDto));
-                    LOGD(TAG + ".onStartCommand", "websocket session started");
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                    appVS.broadcastResponse(ResponseVS.EXCEPTION(ex, appVS)
-                            .setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID));
-                }
-            }
-        });
     }
 
     @Override public IBinder onBind(Intent intent){

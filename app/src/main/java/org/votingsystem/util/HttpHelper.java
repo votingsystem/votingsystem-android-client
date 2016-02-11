@@ -3,7 +3,6 @@ package org.votingsystem.util;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -87,14 +86,14 @@ public class HttpHelper {
     }
     
     public static void shutdown () {
-        Log.d(TAG, "shutdown");
+        LOGD(TAG, "shutdown");
         try {
             httpclient.getConnectionManager().shutdown();
         } catch (Exception ex) { ex.printStackTrace(); }
     }
     
     public static ResponseVS getData (String serverURL, ContentTypeVS contentType) {
-        Log.d(TAG + ".getData" , "serverURL: " + serverURL + " - contentType: " + contentType);
+        LOGD(TAG + ".getData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
         ContentTypeVS responseContentType = null;
@@ -102,15 +101,15 @@ public class HttpHelper {
             HttpGet httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
             response = httpclient.execute(httpget);
-            Log.d(TAG + ".getData", "----------------------------------------");
+            LOGD(TAG + ".getData", "----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-            Log.d(TAG + ".getData", "Connections in pool: " + cm.getConnectionsInPool());
-            Log.d(TAG + ".getData" ,response.getStatusLine().toString() + " - " +
+            LOGD(TAG + ".getData", "Connections in pool: " + cm.getConnectionsInPool());
+            LOGD(TAG + ".getData" ,response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-            Log.d(TAG + ".getData", "----------------------------------------");
+            LOGD(TAG + ".getData", "----------------------------------------");
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
@@ -122,28 +121,28 @@ public class HttpHelper {
         } catch(ConnectTimeoutException ex) {
             responseVS = new ResponseVS(ResponseVS.SC_CONNECTION_TIMEOUT, ex.getMessage());
         } catch(Exception ex) {
-            Log.d(TAG + ".getData" , "exception: " + ex.getMessage());
+            LOGD(TAG + ".getData" , "exception: " + ex.getMessage());
             responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
         }
         return responseVS;
     }
 
     public static <T> T getData(Class<T> type, TypeReference typeReference, String serverURL, String mediaType) throws Exception {
-        Log.d(TAG + ".getData" , "serverURL: " + serverURL + " - mediaType: " + mediaType);
+        LOGD(TAG + ".getData" , "serverURL: " + serverURL + " - mediaType: " + mediaType);
         HttpResponse response = null;
         String responseContentType = null;
         HttpGet httpget = new HttpGet(serverURL);
         if(mediaType != null) httpget.setHeader("Content-Type", mediaType);
         response = httpclient.execute(httpget);
-        Log.d(TAG + ".getData", "----------------------------------------");
+        LOGD(TAG + ".getData", "----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
         Header header = response.getFirstHeader("Content-Type");
         if(header != null) responseContentType = header.getValue();
-        Log.d(TAG + ".getData", "Connections in pool: " + cm.getConnectionsInPool());
-        Log.d(TAG + ".getData" ,response.getStatusLine().toString() + " - " +
+        LOGD(TAG + ".getData", "Connections in pool: " + cm.getConnectionsInPool());
+        LOGD(TAG + ".getData" ,response.getStatusLine().toString() + " - " +
                 response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-        Log.d(TAG + ".getData", "----------------------------------------");
+        LOGD(TAG + ".getData", "----------------------------------------");
         byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
         if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
             if(type != null) return JSON.readValue(responseBytes, type);
@@ -183,7 +182,7 @@ public class HttpHelper {
     public static <T> T sendData(Class<T> type, TypeReference typeReference, byte[] data,
             String contentType, String serverURL, String... headerNames) throws IOException, ExceptionVS {
         HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
+        LOGD(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         String responseContentType = null;
         ResponseVS responseVS = null;
@@ -194,10 +193,10 @@ public class HttpHelper {
         response = httpclient.execute(httpPost);
         Header header = response.getFirstHeader("Content-Type");
         if(header != null) responseContentType = header.getValue();
-        Log.d(TAG + ".sendData" ,"----------------------------------------");
-        Log.d(TAG + ".sendData" , response.getStatusLine().toString() + " - " +
+        LOGD(TAG + ".sendData" ,"----------------------------------------");
+        LOGD(TAG + ".sendData" , response.getStatusLine().toString() + " - " +
                 response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-        Log.d(TAG + ".sendData" , "----------------------------------------");
+        LOGD(TAG + ".sendData" , "----------------------------------------");
         byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
         if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
             if(type != null) return JSON.readValue(responseBytes, type);
@@ -221,7 +220,7 @@ public class HttpHelper {
     public static ResponseVS sendData(byte[] data, ContentTypeVS contentType,
               String serverURL, String... headerNames) {
         HttpPost httpPost = new HttpPost(serverURL);
-        Log.d(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
+        LOGD(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
         ContentTypeVS responseContentType = null;
@@ -233,10 +232,10 @@ public class HttpHelper {
             response = httpclient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-            Log.d(TAG + ".sendData" ,"----------------------------------------");
-            Log.d(TAG + ".sendData" , response.getStatusLine().toString() + " - " +
+            LOGD(TAG + ".sendData" ,"----------------------------------------");
+            LOGD(TAG + ".sendData" , response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-            Log.d(TAG + ".sendData" , "----------------------------------------");
+            LOGD(TAG + ".sendData" , "----------------------------------------");
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),
                     EntityUtils.toByteArray(response.getEntity()), responseContentType);
             if(headerNames != null && headerNames.length > 0) {
@@ -261,7 +260,7 @@ public class HttpHelper {
         ContentTypeVS responseContentType = null;
         try {
             HttpPost httpPost = new HttpPost(serverURL);
-            Log.d(TAG + ".sendFile" , "serverURL: " + httpPost.getURI()
+            LOGD(TAG + ".sendFile" , "serverURL: " + httpPost.getURI()
                     + " - file: " + file.getAbsolutePath());
             FileBody fileBody = new FileBody(file);
             MultipartEntity reqEntity = new MultipartEntity();
@@ -270,10 +269,10 @@ public class HttpHelper {
             HttpResponse response = httpclient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-            Log.d(TAG + ".sendFile" , "----------------------------------------");
-            Log.d(TAG + ".sendFile" , response.getStatusLine().toString() + " - " +
+            LOGD(TAG + ".sendFile" , "----------------------------------------");
+            LOGD(TAG + ".sendFile" , response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-            Log.d(TAG + ".sendFile" , "----------------------------------------");
+            LOGD(TAG + ".sendFile" , "----------------------------------------");
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(),responseBytes,
@@ -293,7 +292,7 @@ public class HttpHelper {
      
      public static ResponseVS sendObjectMap(
              Map<String, Object> fileMap, String serverURL) throws Exception {
-    	 Log.d(TAG + ".sendObjectMap" , "serverURL: " + serverURL);
+    	 LOGD(TAG + ".sendObjectMap" , "serverURL: " + serverURL);
          ResponseVS responseVS = null;
          ContentTypeVS responseContentType = null;
          if(fileMap == null || fileMap.isEmpty()) throw new Exception("Empty Map");
@@ -306,7 +305,7 @@ public class HttpHelper {
                  Object objectToSend = fileMap.get(objectName);
                  if(objectToSend instanceof File) {
                      File file = (File)objectToSend;
-                     Log.d(TAG + ".sendObjectMap" , ".sendObjectMap - fileName: " + objectName + 
+                     LOGD(TAG + ".sendObjectMap" , ".sendObjectMap - fileName: " + objectName +
                              " - filePath: " + file.getAbsolutePath());  
                      FileBody  fileBody = new FileBody(file);
                      reqEntity.addPart(objectName, fileBody);
@@ -320,10 +319,10 @@ public class HttpHelper {
              response = httpclient.execute(httpPost);
              Header header = response.getFirstHeader("Content-Type");
              if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
-             Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
-             Log.d(TAG + ".sendObjectMap" ,response.getStatusLine().toString() + " - " +
+             LOGD(TAG + ".sendObjectMap" ,"----------------------------------------");
+             LOGD(TAG + ".sendObjectMap" ,response.getStatusLine().toString() + " - " +
                      response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
-             Log.d(TAG + ".sendObjectMap" ,"----------------------------------------");
+             LOGD(TAG + ".sendObjectMap" ,"----------------------------------------");
              byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
              responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes,
                      responseContentType);

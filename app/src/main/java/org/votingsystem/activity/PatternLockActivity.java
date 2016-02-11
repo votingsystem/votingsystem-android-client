@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -70,7 +69,7 @@ public class PatternLockActivity extends AppCompatActivity {
         mCircleLockView.setCallBack(new PatternLockView.CallBack() {
             @Override
             public int onFinish(PatternLockView.Password password) {
-                Log.d(TAG, "password length " + password.list.size());
+                LOGD(TAG, "password length " + password.list.size());
                 if(withPasswordConfirm) {
                     if(first_pattern_input == null) {
                         first_pattern_input = password.string;
@@ -94,7 +93,7 @@ public class PatternLockActivity extends AppCompatActivity {
         });
         mCircleLockView.setOnNodeTouchListener(new PatternLockView.OnNodeTouchListener() {
             @Override public void onNodeTouched(int NodeId) {
-                Log.d(TAG, "node " + NodeId + " has touched!");
+                LOGD(TAG, "node " + NodeId + " has touched!");
             }
         });
         requestMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY);

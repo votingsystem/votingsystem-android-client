@@ -1,7 +1,5 @@
 package org.votingsystem.signature.smime;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle.tsp.TimeStampRequest;
@@ -72,6 +70,8 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import static org.votingsystem.util.LogUtils.LOGD;
 
 
 /**
@@ -201,11 +201,11 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 //Log.d(TAG, "checkTimeStampToken - timeStampToken - hashTokenStr: " +  hashTokenStr);
                 Calendar cal = new GregorianCalendar();
                 cal.setTime(timeStampToken.getTimeStampInfo().getGenTime());
-                Log.d(TAG, "checkTimeStampToken - timeStampToken - date: "
+                LOGD(TAG, "checkTimeStampToken - timeStampToken - date: "
                         +  DateUtils.getDateStr(cal.getTime()));
                 return timeStampToken;
             }
-        } else Log.d(TAG, "--- without unsignedAttributes");
+        } else LOGD(TAG, "--- without unsignedAttributes");
         return timeStampToken;
     }
 
@@ -224,11 +224,11 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             SignerInformation signer = it.next();
             byte[] digestBytes = CMSUtils.getSignerDigest(signer);
             if(Arrays.equals(timeStampTokenHash, digestBytes)) {
-                Log.d(TAG + ".setTimeStampToken" , "found signer");
+                LOGD(TAG + ".setTimeStampToken" , "found signer");
                 AttributeTable attributeTable = signer.getUnsignedAttributes();
                 SignerInformation updatedSigner = null;
                 if(attributeTable != null) {
-                    Log.d(TAG + "setTimeStampToken", "signer with UnsignedAttributes");
+                    LOGD(TAG + "setTimeStampToken", "signer with UnsignedAttributes");
                     hashTable = attributeTable.toHashtable();
                     hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
                     timeStampAsAttributeTable = new AttributeTable(hashTable);
@@ -370,7 +370,7 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
             Store certs = smimeSigned.getCertificates();
             SignerInformationStore signerInfos = smimeSigned.getSignerInfos();
             Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
-            Log.d(TAG, "checkSignature - document with '" + signerInfos.size() + "' signers");
+            LOGD(TAG, "checkSignature - document with '" + signerInfos.size() + "' signers");
             Iterator it = signerInfos.getSigners().iterator();
             Date firstSignature = null;
             signers = new HashSet<>();
@@ -380,15 +380,15 @@ public class SMIMEMessage extends MimeMessage implements Serializable {
                 Iterator certIt = certCollection.iterator();
                 X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
                         (X509CertificateHolder) certIt.next());
-                Log.d(TAG, "checkSignature - cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
+                LOGD(TAG, "checkSignature - cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
                 try {
                     verifySigner(signer, new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                             ContextVS.PROVIDER).build(cert));
                     //concurrency issues ->
                     //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
                 } catch(CMSVerifierCertificateNotValidException ex) {
-                    Log.d(TAG, "checkSignature - cert.getNotBefore(): " + cert.getNotBefore());
-                    Log.d(TAG, "checkSignature - cert.getNotAfter(): " + cert.getNotAfter());
+                    LOGD(TAG, "checkSignature - cert.getNotBefore(): " + cert.getNotBefore());
+                    LOGD(TAG, "checkSignature - cert.getNotAfter(): " + cert.getNotAfter());
                     throw ex;
                 } catch (Exception ex) {
                     throw ex;

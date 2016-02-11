@@ -22,12 +22,12 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.CurrencyFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectDeviceDialogFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
+import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -61,16 +61,7 @@ public class CurrencyActivity extends AppCompatActivity {
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(
                     ContextVS.WEBSOCKET_MSG_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-                switch(responseVS.getTypeVS()) {
-                    case WEB_SOCKET_INIT:
-                        setProgressDialogVisible(true, getString(R.string.connecting_caption),
-                                getString(R.string.connecting_to_service_msg));
-                        Utils.toggleWebSocketServiceConnection();
-                        break;
-                }
-            } else if(socketMsg != null){
+            if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
                 switch(socketMsg.getOperation()) {
                     case MESSAGEVS_TO_DEVICE:
@@ -144,6 +135,12 @@ public class CurrencyActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
+    }
+
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         AlertDialog dialog = null;
@@ -167,9 +164,7 @@ public class CurrencyActivity extends AppCompatActivity {
                         DialogButton positiveButton = new DialogButton(getString(R.string.connect_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
-                                        PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                                broadCastId, getString(R.string.init_authenticated_session_pin_msg),
-                                                false, TypeVS.WEB_SOCKET_INIT);
+                                        ConnectionUtils.init_IDCARD_NFC_Process(CurrencyActivity.this);
                                     }
                                 });
                         UIUtils.showMessageDialog(getString(R.string.send_to_wallet), getString(

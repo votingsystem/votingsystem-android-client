@@ -19,7 +19,7 @@ import static org.votingsystem.util.LogUtils.makeLogTag;
 
 public class NfcBadgeActivity extends Activity {
     private static final String TAG = makeLogTag(NfcBadgeActivity.class);
-    private static final String URL_PREFIX = "sistemavotacion.org";
+    private static final String URL_PREFIX = "votingsystem.org";
     // For debug purposes
     public static final String ACTION_SIMULATE = "org.votingsystem.currency.ACTION_SIMULATE";
 

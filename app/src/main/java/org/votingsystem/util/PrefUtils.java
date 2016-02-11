@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
@@ -24,9 +23,6 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import static org.votingsystem.util.ContextVS.APPLICATION_ID_KEY;
-import static org.votingsystem.util.ContextVS.NIF_KEY;
-import static org.votingsystem.util.ContextVS.STATE_KEY;
-import static org.votingsystem.util.ContextVS.State;
 import static org.votingsystem.util.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.util.LogUtils.makeLogTag;
@@ -184,7 +180,6 @@ public class PrefUtils {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         UserVSDto userVS = getSessionUserVS();
-        putSessionUserVS(userVS);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());
@@ -322,25 +317,6 @@ public class PrefUtils {
         return settings.getString(ContextVS.CSR_KEY, null);
     }
 
-    public static org.votingsystem.util.ContextVS.State getAppCertState(String accessControlURL) {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String stateStr = settings.getString(
-                STATE_KEY + "_" + accessControlURL, State.WITHOUT_CSR.toString());
-        return State.valueOf(stateStr);
-    }
-
-    public static void putAppCertState(String accessControlURL, State state, String nif) {
-        LOGD(TAG + ".putAppCertState", STATE_KEY + "_" + accessControlURL +
-                " - state: " + state.toString());
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(STATE_KEY + "_" + accessControlURL , state.toString());
-        if(nif != null) editor.putString(NIF_KEY, nif);
-        editor.commit();
-    }
-
     public static void putCsrRequest(Long requestId, CertificationRequestVS certificationRequest) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -373,24 +349,6 @@ public class PrefUtils {
             return userVS;
         }
         return null;
-    }
-
-    public static void putAddressVS(AddressVS addressVS) {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        try {
-            editor.putString(ContextVS.ADDRESS_KEY, JSON.writeValueAsString(addressVS));
-            editor.commit();
-        } catch(Exception ex) {ex.printStackTrace();}
-    }
-
-    public static AddressVS getAddressVS() throws IOException {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String dtoStr = settings.getString(ContextVS.ADDRESS_KEY, null);
-        if(dtoStr == null) return null;
-        return JSON.readValue(dtoStr, AddressVS.class);
     }
 
     public static void putRepresentationState(RepresentationStateDto stateDto) {

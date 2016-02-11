@@ -84,18 +84,7 @@ public class BootStrapService extends IntentService {
                 });
             }
         }
-        if(!PrefUtils.isDataBootstrapDone()) {
-            PrefUtils.markDataBootstrapDone();
-            /*if(appVS.getCurrencyServer() == null && appVS.getAccessControl() == null) {
-                intent = new Intent(getBaseContext(), IntentFilterActivity.class);
-                responseVS.setCaption(getString(R.string.connection_error_msg));
-                if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())
-                    responseVS.setNotificationMessage(getString(R.string.conn_timeout_msg));
-                intent.putExtra(RESPONSEVS_KEY, responseVS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }*/
-        }
+        PrefUtils.markDataBootstrapDone();
         if(responseVS == null) responseVS = new ResponseVS();
         responseVS.setServiceCaller(serviceCaller);
         appVS.broadcastResponse(responseVS);

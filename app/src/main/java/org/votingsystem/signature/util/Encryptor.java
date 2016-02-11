@@ -1,7 +1,6 @@
 package org.votingsystem.signature.util;
 
 import android.util.Base64;
-import android.util.Log;
 
 import org.bouncycastle2.cms.CMSAlgorithm;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
@@ -71,6 +70,8 @@ import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
@@ -82,7 +83,7 @@ public class Encryptor {
 	
 	public static byte[] encryptSMIME(MimeMessage msgToEncrypt,
 			X509Certificate receiverCert) throws Exception {
-		Log.d(TAG + ".encryptSMIMEFile ", "receiver: " + receiverCert.getSubjectDN());
+		LOGD(TAG + ".encryptSMIMEFile ", "receiver: " + receiverCert.getSubjectDN());
     	SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
     	encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
     			receiverCert).setProvider(ContextVS.PROVIDER));
@@ -93,7 +94,7 @@ public class Encryptor {
         Enumeration headers = msgToEncrypt.getAllHeaderLines();
         while (headers.hasMoreElements()) {
             String headerLine = (String)headers.nextElement();
-            Log.d(TAG + ".encryptSMIMEFile", "headerLine: " + headerLine);
+            LOGD(TAG + ".encryptSMIMEFile", "headerLine: " + headerLine);
             //Make sure not to override any content-* headers from the original message
             if (!Strings.toLowerCase(headerLine).startsWith("content-")) {
             	encryptedPart.addHeaderLine(headerLine);
@@ -143,7 +144,7 @@ public class Encryptor {
 	
     public static byte[] encryptMessage(byte[] text, 
             X509Certificate receiverCert, Header... headers) throws Exception {
-    	Log.d(TAG + ".encryptMessage ", "encryptMessage");
+    	LOGD(TAG + ".encryptMessage ", "encryptMessage");
 		Properties props = System.getProperties();
 		Session session = Session.getDefaultInstance(props, null);
 		MimeMessage mimeMessage = new MimeMessage(session);
@@ -186,7 +187,7 @@ public class Encryptor {
     */
    public static SMIMEMessage decryptSMIME(byte[] encryptedMessageBytes,
             PrivateKey receiverPrivateKey) throws Exception {
-	   Log.d(TAG + ".decryptSMIME ", "decryptSMIME ");
+	   LOGD(TAG + ".decryptSMIME ", "decryptSMIME ");
 	   InputStream inputStream = new ByteArrayInputStream(decryptMessage(
                 encryptedMessageBytes, receiverPrivateKey));
        return new SMIMEMessage(inputStream);
@@ -197,7 +198,7 @@ public class Encryptor {
     */
    public static byte[] decryptMessage(byte[] encryptedMessageBytes,
            PrivateKey receiverPrivateKey) throws Exception {
-	   Log.d(TAG + ".decryptMessage ", "decryptMessage ");
+	   LOGD(TAG + ".decryptMessage ", "decryptMessage ");
        /*RecipientId recId = null;
        if(receiverCert != null)
            recId = new JceKeyTransRecipientId(receiverCert);*/
@@ -217,7 +218,7 @@ public class Encryptor {
 	
     public static byte[] decryptFile (byte[] encryptedFile, PublicKey publicKey,
             PrivateKey receiverPrivateKey) throws Exception {
-		Log.d(TAG + ".decryptFile ", " #### decryptFile ");
+		LOGD(TAG + ".decryptFile ", " #### decryptFile ");
         RecipientId recId = new KeyTransRecipientId(publicKey.getEncoded());
         Recipient recipient = new JceKeyTransEnvelopedRecipient(
                 receiverPrivateKey).setProvider(ContextVS.PROVIDER);

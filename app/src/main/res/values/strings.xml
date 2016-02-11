@@ -40,7 +40,7 @@
     <string name="guardar_recibo_voto_label">guardar recibo</string>
     <string name="remove_receipt_lbl">borrar recibo</string>
     <string name="remove_receipt_msg">¿seguro que desea borrar recibo?</string>
-    <string name="search_label"></string>
+    <string name="user_data_lbl">datos del usuario</string>
     <string name="search_msg">realizando búsqueda</string>
     <string name="search_invoke">búsquedas</string>
     <string name="empty_search_lbl">consulta sin resultados</string>
@@ -90,7 +90,6 @@
     <string name="receipt_error_msg">error validando recibo de voto</string>
     <string name="cert_not_found_caption">falta certificado</string>
     <string name="update_lbl">actualizar</string>
-    <string name="request_certificate_menu">solicitar certificado</string>
     <string name="receipts_lbl">recibos</string>
     <string name="receipt_list_screen_caption">recibos guardados por el usuario</string>
     <string name="receipt_options_dialog_msg">opciones disponibles para el recibo</string>
@@ -98,33 +97,12 @@
     <string name="canceling_access_request_msg">problemas con el servicio, por favor inténtelo mas tarde</string>
     <string name="no_receipts">no tiene guardado ningún recibo</string>
     <string name="options_lbl">opciones</string>
-    <string name="uservs_cert_request_activity_text">no dispone de ningún
-        certificado con el que poder acceder a los servicios que requieren firma, ¿desea solicitar el certificado?</string>
-    <string name="cert_data_confirm_msg"><![CDATA[<b>nombre: </b>%1$s<br/>
-        <b>apellidos: </b>%2$s<br/>
-        <b>nif: </b>%3$s<br/>
-        <b>teléfono móvil: </b>%4$s<br/>
-        <b>email: </b>%5$s<br/>]]></string>
-    <string name="request_cert_result_activity"><![CDATA[para poder votar necesita tener
-        instalado un certificado<br/><br/>usted ya ha solicitado el certificado, ahora hace falta verificar
-        su identidad, para ello puede presentarse en cualquiera de <br/><br/>
-        <a href="%1$s"> las siguientes direcciones</a>]]></string>
     <string name="search_query_info_msg"><![CDATA[<b>resultado de la busqueda</b>: %1$s]]></string>
     <string name="access_request_repeated_msg"><![CDATA[usted ya ha votado en el asunto \'%1$s\']]></string>
     <string name="access_request_repeated_caption">error, voto repetido</string>
     <string name="access_request_repeated_url_msg"><![CDATA[
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
-    <string name="cert_install_error_msg">error instalando certificado de usuario</string>
-    <string name="cert_required_error_msg">para acceder al servicio necesita tener instalado un certificado de usuario</string>
-    <string name="request_cert_result_activity_ok">el certificado se ha importado correctamente</string>
-    <string name="request_cert_again_button">volver a solicitar el certificado</string>
-    <string name="install_cert_button">instalar el certificado</string>
     <string name="go_app_button">ir a la aplicación</string>
-    <string name="request_cert_again_msg"><![CDATA[si vuelve a solicitar el certificado deberá personarse
-        en las instalaciones que se le indiquen para verificar su identidad.<br/>
-        ¿desea continuar?]]></string>
-    <string name="request_cert_verification_msg"><![CDATA[para completar el procedimiento deberá personarse
-        en las instalaciones de la policía para verificar su identidad]]></string>
     <string name="documents_lbl">documentos</string>
     <string name="request_user_cert_error_msg">error comprobando el estado de la solicitud, ¿se ha personado
         en las instalaciones de la policía para verificar su identidad?</string>
@@ -151,7 +129,6 @@
     <string name="conn_timeout_msg">problemas conectando con el servicio</string>
     <string name="receipt_file_saved_msg">documento incorporado a la lista de recibos</string>
     <string name="cert_not_found_msg">no tiene instalado ningún certificado con el que poder firmar la solicitud</string>
-    <string name="user_cert_request_form_message_label">cada vez que vote se le pedirá el código pin que introducirá a continuación, recuerdelo, si lo olvida tendrá que pedir otro certificado para poder votar</string>
     <string name="error_password_msg">contraseña inválida</string>
     <string name="error_vote_repeated_msg">Error, voto repetido</string>
     <string name="connection_error_msg">error de conexión</string>
@@ -346,11 +323,11 @@
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
         <b>votingsystem, 2015. </b>version %s<br><br>
-        <a href="http://www.sistemavotacion.org/termsOfService.html">condiciones del  servicio</a><br><br>
-        <a href="http://www.sistemavotacion.org/privacyPolicy.html">política de privacidad</a>
+        <a href="http://www.votingsystem.org/termsOfService.html">condiciones del  servicio</a><br><br>
+        <a href="http://www.votingsystem.org/privacyPolicy.html">política de privacidad</a>
     ]]></string>
     <string name="can_dialog_body"><![CDATA[
-        <a href="http://www.sistemavotacion.org/CurrencyServer/docs/dnieCAN.xhtml">¿qué es el CAN del DNIe?</a>
+        <a href="http://www.votingsystem.org/CurrencyServer/docs/dnieCAN.xhtml">¿qué es el CAN del DNIe?</a>
     ]]></string>
     <string name="about_licenses">open source licenses</string>
     <string name="about_eula">end user license agreement</string>
@@ -363,9 +340,7 @@
     <string name="description_debug">debug and tests</string>
     <string name="placeholder_lorem_ipsum">lorem ipsum ...</string>
     <string name="navdrawer_item_settings">ajustes</string>
-    <string name="user_cert_lbl">certificado de usuario</string>
     <string name="debug_tests">pruebas depuración</string>
-    <string name="cert_request_lbl">solicitud de certificado</string>
     <string name="sign_lbl">firmar</string>
     <string name="sign_request_lbl">solicitud de firma</string>
     <string name="ban_device_lbl">bloquear dispositivo solicitante</string>
@@ -442,7 +417,7 @@
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
-    <string name="change_pin">cambiar pin de firma</string>
+    <string name="change_pin">cambiar pin de monedero</string>
     <string name="enter_new_pin_msg">introduzca el nuevo pin, recuerde que si lo olvida no podrá firmar y perderá el contenido de su monedero</string>
     <string name="confirm_new_pin_msg">confirme el nuevo pin</string>
     <string name="enter_actual_pin_msg">introduzca el pin actual</string>
@@ -501,7 +476,6 @@
     <string name="enter_postal_code_error_lbl">introduzca código postal</string>
     <string name="enter_city_error_lbl">introduzca la localidad</string>
     <string name="enter_province_error_lbl">introduzca la provincia</string>
-    <string name="address_saved_msg">su dirección se ha guardado corréctamente</string>
     <string name="payment_lbl">pago</string>
     <string name="receptor_lbl">receptor</string>
     <string name="do_payment_lbl">realizar pago</string>
@@ -621,4 +595,5 @@
     <string name="pattern_lock_missing_passw_msg">para poder utilizar el patrón de bloqueo debe introducir la contraseña del dispositivo de firma</string>
     <string name="enter_password_for_dni_lock_msg">Para poder usar el patrón de bloqueo con el DNI debe introducir la contraseña. Una vez haya finalizado el procedimiento podrá firmar con su DNI sin necesidad de introducir la contraseña cada vez que firme</string>
     <string name="missing_idcard_msg">Para poder operar con la aplicación debe configurar su DNI en \'ajustes\'</string>
+    <string name="search_label" />
 </resources>

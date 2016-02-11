@@ -9,8 +9,6 @@ import javax.mail.Session;
  */
 public class ContextVS {
 
-    public enum State {WITH_CERTIFICATE, WITH_CSR, WITHOUT_CSR}
-
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
     public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
@@ -55,7 +53,6 @@ public class ContextVS {
     public static final String DTO_KEY = "DTO_KEY";
     public static final String WEBSOCKET_MSG_KEY = "WEBSOCKET_MSG_KEY";
 
-    public static final String ADDRESS_KEY = "ADDRESS_KEY";
     public static final String PIN_KEY = "PIN";
     public static final String LOCK_PATTERN_KEY = "LOCK_PATTERN_KEY";
     public static final String LOCK_PATTERN_PASSWORD_KEY = "LOCK_PATTERN_PASSWORD_KEY";

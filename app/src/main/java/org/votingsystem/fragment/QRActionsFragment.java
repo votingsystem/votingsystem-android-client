@@ -22,6 +22,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceVSDto;
@@ -29,6 +30,7 @@ import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.service.WebSocketService;
+import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -58,17 +60,7 @@ public class QRActionsFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-                switch(responseVS.getTypeVS()) {
-                    case WEB_SOCKET_INIT:
-                        setProgressDialogVisible(true, getString(R.string.connecting_caption),
-                                getString(R.string.connecting_to_service_msg));
-                        Utils.toggleWebSocketServiceConnection();
-                        break;
-                }
-            } else if(socketMsg != null){
+            if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
                 if(AppVS.getInstance().isWithSocketConnection() && pendingAction != null) {
                     processAction(pendingAction);
@@ -110,11 +102,9 @@ public class QRActionsFragment extends Fragment {
                     getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            PinDialogFragment.showPinScreen(getFragmentManager(),
-                                    broadCastId, getString(R.string.init_authenticated_session_pin_msg),
-                                    false, TypeVS.WEB_SOCKET_INIT);
+                            ConnectionUtils.init_IDCARD_NFC_Process(((ActivityBase)getActivity()));
                         }
-                    }).setNegativeButton(getString(R.string.cancel_lbl), null);;
+                    });
             UIUtils.showMessageDialog(builder);
         } else {
             switch (action) {

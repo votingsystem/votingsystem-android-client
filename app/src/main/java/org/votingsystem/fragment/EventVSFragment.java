@@ -362,8 +362,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             optionButton.setOnClickListener(new Button.OnClickListener() {
                 FieldEventVSDto optionSelected = option;
                 public void onClick(View v) {
-                    LOGD(TAG + "- optionButton - optionId: " +
-                            optionSelected.getId(), "state: " + appVS.getState().toString());
+                    LOGD(TAG, "- optionButton - optionId: " + optionSelected.getId());
                     processSelectedOption(optionSelected);
                 }
             });

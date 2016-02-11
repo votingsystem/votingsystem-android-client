@@ -2,23 +2,19 @@
     android:key="preference_screen">
 
     <SwitchPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="dnie_switch"
         android:summary="@string/pref_description_dnie"
         android:title="@string/pref_title_dnie" />
 
-    <Preference android:title="@string/address_lbl"
-        android:key="addressButton"/>
+    <Preference android:title="@string/user_data_lbl"
+        android:key="userDataButton"/>
 
     <SwitchPreference
         android:defaultValue="false"
         android:title="@string/pattern_lock_lbl"
         android:summary="@string/pattern_lock_msg"
         android:key="patternLockSwitch"/>
-
-    <Preference android:title="@string/user_cert_lbl"
-        android:key="requestCertButton"
-        android:summary="@string/request_certificate_menu"/>
 
     <Preference android:title="@string/change_pin"
         android:key="changePinButton"/>

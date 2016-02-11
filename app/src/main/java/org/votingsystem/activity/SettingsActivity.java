@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
@@ -20,18 +19,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.votingsystem.android.R;
-import org.votingsystem.dto.AddressVS;
-import org.votingsystem.fragment.AddressFormFragment;
 import org.votingsystem.fragment.CANDialogFragment;
+import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HelpUtils;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -59,11 +55,6 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override protected void onResume() {
         super.onResume();
-        Preference addressButton = (Preference)findPreference("addressButton");
-        try {
-            AddressVS addressVS = PrefUtils.getAddressVS();
-            if(addressVS != null) addressButton.setSummary(addressVS.getName());
-        } catch (Exception ex) { ex.printStackTrace();}
     }
 
     @Override protected void onDestroy() {
@@ -84,7 +75,6 @@ public class SettingsActivity extends PreferenceActivity
 
         private String broadCastId = SettingsFragment.class.getSimpleName();
         private SwitchPreference dnie_switch;
-        private PreferenceScreen preference_screen;
         private Preference changePinButton;
         private SwitchPreference patternLockSwitch;
 
@@ -96,12 +86,10 @@ public class SettingsActivity extends PreferenceActivity
                     LOGD(TAG + ".broadcastReceiver", "CAN:" + CAN);
                     PrefUtils.putDNIeCAN(CAN);
                     dnie_switch.setSummary("CAN: " + CAN);
-                    preference_screen.removePreference(changePinButton);
                     setLockPattern(null);
                 } else {
                     dnie_switch.setChecked(false);
                     dnie_switch.setSummary(getString(R.string.pref_description_dnie));
-                    preference_screen.addPreference(changePinButton);
                 }
                 PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
             }
@@ -120,36 +108,17 @@ public class SettingsActivity extends PreferenceActivity
                     else {
                         PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
                         dnie_switch.setSummary(getString(R.string.pref_description_dnie));
-                        preference_screen.addPreference(changePinButton);
                     }
                     return true;
                 }
             });
-            preference_screen = (PreferenceScreen)getPreferenceScreen();
-            Preference addressButton = findPreference("addressButton");
-            try {
-                AddressVS addressVS = PrefUtils.getAddressVS();
-                if(addressVS != null) addressButton.setSummary(addressVS.getName());
-            } catch (Exception ex) { ex.printStackTrace();}
-            addressButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            //PreferenceScreen preference_screen = getPreferenceScreen();
+            Preference userDataButton = findPreference("userDataButton");
+            userDataButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
                     Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, AddressFormFragment.class.getName());
-                    startActivity(intent);
-                    return true;
-                }
-            });
-            Preference requestCertButton = findPreference("requestCertButton");
-            requestCertButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference arg0) {
-                    Intent intent = new Intent(getActivity(), CertRequestActivity.class);
-                    try {
-                        intent.putExtra(ContextVS.OPERATIONVS_KEY, JSON.writeValueAsString(new HashMap<>()));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
                     startActivity(intent);
                     return true;
                 }
@@ -191,7 +160,7 @@ public class SettingsActivity extends PreferenceActivity
             });
             if(PrefUtils.isDNIeEnabled()) {
                 dnie_switch.setSummary("CAN: " + PrefUtils.getDNIeCAN());
-                preference_screen.removePreference(changePinButton);
+                dnie_switch.setChecked(true);
             }
             try {
                 if(PrefUtils.getLockPatternHash() != null) {

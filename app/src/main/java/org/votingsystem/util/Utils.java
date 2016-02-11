@@ -12,20 +12,20 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
+import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.service.PaymentService;
-import org.votingsystem.service.WebSocketService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,6 +52,10 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
+
+    public interface PasswordHandler {
+        public void processWithoutPatternLock();
+    }
 
     public static void launchQRScanner(Activity activity) {
         IntentIntegrator integrator = new IntentIntegrator(activity);
@@ -163,21 +167,6 @@ public class Utils {
         AppVS.getInstance().startService(startIntent);
     }
 
-    public static void toggleWebSocketServiceConnection() {
-        if(AppVS.getInstance().getCurrencyServer() == null) {
-            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR,
-                    AppVS.getInstance().getString(R.string.missing_server_connection),
-                    AppVS.getInstance().getString(R.string.connection_error_msg));
-        } else {
-            Intent startIntent = new Intent(AppVS.getInstance(), WebSocketService.class);
-            TypeVS typeVS = TypeVS.WEB_SOCKET_INIT;
-            if(AppVS.getInstance().isWithSocketConnection()) typeVS = TypeVS.WEB_SOCKET_CLOSE;
-            LOGD(TAG + ".toggleWebSocketServiceConnection", "operation: " + typeVS.toString());
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, typeVS);
-            AppVS.getInstance().startService(startIntent);
-        }
-    }
-
     public static void showAccountsUpdatedNotification(Context context){
         final NotificationManager mgr = (NotificationManager)context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
@@ -209,13 +198,21 @@ public class Utils {
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
-    public static boolean checkIfDNIEnabled(Context context, FragmentManager fragmentManager) {
-        if(PrefUtils.isDNIeEnabled()) return true;
-        else {
+    public static void init_IDCARD_NFC_Process(Integer requestCode, String msg,
+            Integer lockActivityMode, AppCompatActivity activity, PasswordHandler passwordHandler) {
+        if(PrefUtils.isDNIeEnabled()) {
+            if(PrefUtils.getLockPatternHash() != null) {
+                Intent intent = new Intent(activity, PatternLockActivity.class);
+                intent.putExtra(ContextVS.MESSAGE_KEY, msg);
+                if(lockActivityMode == null) lockActivityMode =
+                        PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN;
+                intent.putExtra(ContextVS.MODE_KEY, lockActivityMode);
+                activity.startActivityForResult(intent, requestCode);
+            } else passwordHandler.processWithoutPatternLock();
+        }else {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                    context.getString(R.string.error_lbl), context.getString(R.string.missing_idcard_msg),
-                    fragmentManager);
-            return false;
+                    activity.getString(R.string.error_lbl), activity.getString(R.string.missing_idcard_msg),
+                    activity.getSupportFragmentManager());
         }
     }
 
