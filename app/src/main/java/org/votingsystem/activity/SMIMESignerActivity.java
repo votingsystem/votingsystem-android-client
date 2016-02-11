@@ -17,11 +17,9 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -47,9 +45,9 @@ public class SMIMESignerActivity extends AppCompatActivity {
 	
 	public static final String TAG = SMIMESignerActivity.class.getSimpleName();
 
-    public static final int SIGN_REQUEST = 0;
+    public static final int PATTERN_LOCK_REQUEST   = 0;
+    public static final int SIGN_REQUEST           = 1;
 
-    private AppVS appVS = null;
     private String broadCastId = SMIMESignerActivity.class.getSimpleName();
     private WebView webView;
     private Menu menu;
@@ -61,28 +59,19 @@ public class SMIMESignerActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         SocketMessageDto socketMessageResponse = (SocketMessageDto) intent.getSerializableExtra(
                 ContextVS.WEBSOCKET_MSG_KEY);
-        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            signAndSendSocketMessage(socketMessage);
-        }
-        else {
-            setProgressDialogVisible(false, null, null);
-            if(socketMessageResponse != null) {
-                if(TypeVS.MESSAGEVS_SIGN_RESPONSE == socketMessageResponse.getOperation()) {
-                    if(ResponseVS.SC_WS_MESSAGE_SEND_OK == socketMessageResponse.getStatusCode()) {
-                        UIUtils.launchMessageActivity(socketMessageResponse.getNotificationResponse(
-                                SMIMESignerActivity.this));
-                        SMIMESignerActivity.this.finish();
-                    } else showMessage(socketMessageResponse.getStatusCode(),
-                            getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
-                } else LOGD(TAG + ".broadcastReceiver", "socketMessageResponse:" +
-                        socketMessageResponse.getOperation());
-            }
+        setProgressDialogVisible(false, null, null);
+        if(socketMessageResponse != null) {
+            if(TypeVS.MESSAGEVS_SIGN_RESPONSE == socketMessageResponse.getOperation()) {
+                if(ResponseVS.SC_WS_MESSAGE_SEND_OK == socketMessageResponse.getStatusCode()) {
+                    UIUtils.launchMessageActivity(socketMessageResponse.getNotificationResponse(
+                            SMIMESignerActivity.this));
+                    SMIMESignerActivity.this.finish();
+                } else showMessage(socketMessageResponse.getStatusCode(),
+                        getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
+            } else LOGD(TAG + ".broadcastReceiver", "socketMessageResponse:" +
+                    socketMessageResponse.getOperation());
         }
     }};
 
@@ -97,22 +86,6 @@ public class SMIMESignerActivity extends AppCompatActivity {
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
-    private void signAndSendSocketMessage(final SocketMessageDto socketMessage) {
-        LOGD(TAG + ".signAndSendSocketMessage() ", "signAndSendSocketMessage");
-        setProgressDialogVisible(true,
-                getString(R.string.wait_msg), getString(R.string.signing_document_lbl));
-        executorService.submit(new Runnable() {
-            @Override public void run() {
-                try {
-                    SMIMEMessage smimeMessage = appVS.signMessage(socketMessage.getDeviceFromName(),
-                            socketMessage.getTextToSign(), getString(R.string.sign_request_lbl));
-                    sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_OK, null, smimeMessage,
-                            TypeVS.MESSAGEVS_SIGN_RESPONSE));
-                    setMenu();
-                } catch (Exception e) { e.printStackTrace(); }
-            }});
-    }
-
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
@@ -121,7 +94,6 @@ public class SMIMESignerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         webView = (WebView) findViewById(R.id.smime_signed_content);
         signature_state = (TextView) findViewById(R.id.signature_state);
-        appVS = (AppVS) getApplicationContext();
         socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
@@ -164,38 +136,54 @@ public class SMIMESignerActivity extends AppCompatActivity {
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        LOGD(TAG + ".onActivityResult", "onActivityResult");
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode +
+                " - resultCode: " + resultCode);
         if(data == null) return;
         final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(responseVS != null && responseVS.getSMIME() != null) {
-            smime = responseVS.getSMIME();
-            executorService.submit(new Runnable() {
-                @Override public void run() {
-                    try {
-                        sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_OK, null,
-                                responseVS.getSMIME(), TypeVS.MESSAGEVS_SIGN_RESPONSE));
-                    } catch (Exception e) { e.printStackTrace(); }
-                }});
-            setMenu();
+        switch(requestCode) {
+            case SIGN_REQUEST:
+                if(responseVS != null && responseVS.getSMIME() != null) {
+                    smime = responseVS.getSMIME();
+                    executorService.submit(new Runnable() {
+                        @Override public void run() {
+                            try {
+                                sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_OK, null,
+                                        responseVS.getSMIME(), TypeVS.MESSAGEVS_SIGN_RESPONSE));
+                            } catch (Exception e) { e.printStackTrace(); }
+                        }});
+                    setMenu();
+                }
+                break;
+            case PATTERN_LOCK_REQUEST:
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    startDNIeSigningActivity(new String(responseVS.getMessageBytes()));
+                }
+                break;
         }
+    }
+
+    private void startDNIeSigningActivity(String patternLock) {
+        Intent intent = new Intent(this, DNIeSigningActivity.class);
+        intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getTextToSign());
+        intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
+        intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
+        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.signature_request_from_device,
+                socketMessage.getDeviceFromName()));
+        if(patternLock != null)  intent.putExtra(ContextVS.LOCK_PATTERN_KEY, patternLock.toCharArray());
+        startActivityForResult(intent, SIGN_REQUEST);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.sign_document:
-                if(PrefUtils.isDNIeEnabled()) {
-                    Intent intent = new Intent(this, DNIeSigningActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getTextToSign());
-                    intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
-                    intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.signature_request_from_device,
-                            socketMessage.getDeviceFromName()));
-                    startActivityForResult(intent, SIGN_REQUEST);
-                } else {
-                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                            getString(R.string.ping_to_sign_msg), false, TypeVS.MESSAGEVS_SIGN);
-                }
+                if(!Utils.checkIfDNIEnabled(this, getSupportFragmentManager())) return true;
+                if(PrefUtils.getLockPatternHash() != null) {
+                    Intent intent = new Intent(this, PatternLockActivity.class);
+                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_pattern_lock_msg));
+                    intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN);
+                    startActivityForResult(intent, PATTERN_LOCK_REQUEST);
+                } else startDNIeSigningActivity(null);
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:

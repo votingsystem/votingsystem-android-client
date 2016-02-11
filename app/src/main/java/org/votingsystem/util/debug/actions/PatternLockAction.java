@@ -23,7 +23,7 @@ public class PatternLockAction implements DebugAction {
                 Intent intent = new Intent(AppVS.getInstance(), PatternLockActivity.class);
                 intent.putExtra(ContextVS.MESSAGE_KEY, context.getString(R.string.request_pattern_lock_msg));
                 intent.putExtra(ContextVS.PASSWORD_CONFIRM_KEY, true);
-                intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_PATTERN);
+                intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 AppVS.getInstance().startActivity(intent);
                 return null;

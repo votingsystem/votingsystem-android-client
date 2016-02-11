@@ -274,6 +274,25 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
+    public static void checkLockPatternHash(String patternPassword, Context context)
+            throws ExceptionVS {
+        try {
+            String expectedHash =  PrefUtils.getLockPatternHash();
+            String patternPasswordHash = StringUtils.getHashBase64(patternPassword,
+                    ContextVS.VOTING_DATA_DIGEST);
+            if(!expectedHash.equals(patternPasswordHash)) {
+                int numRetries = PrefUtils.incrementNumPatternLockRetries();
+                throw new ExceptionVS(context.getString(R.string.pin_error_msg) + ", " +
+                        context.getString(R.string.enter_password_retry_msg,
+                                (ContextVS.NUM_MAX_LOCK_PATERN_RETRIES - numRetries)));
+            }
+            PrefUtils.resetLockRetries();
+        } catch (Exception ex) {
+            if(ex instanceof ExceptionVS) throw (ExceptionVS)ex;
+            else throw new ExceptionVS(ex.getMessage());
+        }
+    }
+
     public static String getLockPatternHash() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);

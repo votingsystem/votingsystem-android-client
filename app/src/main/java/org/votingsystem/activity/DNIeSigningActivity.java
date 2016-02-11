@@ -52,8 +52,8 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 
 
 	public static final int MODE_PASSWORD_REQUEST  = 0;
+	public static final int MODE_SIGN_DOCUMENT     = 1;
 
-	public static final int PATTERN_LOCK      = 0;
 
     private TypeVS operation;
 	private String textToSign;
@@ -62,6 +62,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	private NfcAdapter myNfcAdapter;
 	private Tag tagFromIntent;
 	private int acitivityMode;
+    private char[] patternLock;
 
 	private Handler myHandler = new Handler();
 
@@ -158,6 +159,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        LOGD(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dnie_voting_activity);
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -172,6 +174,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		if(message != null) {
 			((TextView)findViewById(R.id.vote)).setText(message);
 		}
+        patternLock = (char[]) getIntent().getExtras().getSerializable(ContextVS.LOCK_PATTERN_KEY);
     }
 
 	@Override public void onResume() {
@@ -184,7 +187,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         LOGD(TAG, "disableNFCReaderMode");
         disableNFCReaderMode();
 	}
-
 
     private void enableNFCReaderMode () {
         LOGD(TAG, "enableNFCReaderMode");
@@ -211,24 +213,11 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         NfcB exNfcB	 = NfcB.get(tagFromIntent);
         IsoDep exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA != null) || (exNfcB != null) || (exIsoDep != null)) {
-			if(PrefUtils.getLockPatternHash() == null) new SignWithDNIeTask(null).execute();
-			else {
-				Intent intent = new Intent(this, PatternLockActivity.class);
-				intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_pattern_lock_msg));
-				startActivityForResult(intent, PATTERN_LOCK);
-			}
+            if(patternLock != null) {
+                char[] password = PrefUtils.getLockPatterProtectedPassword(new String(patternLock));
+                new SignWithDNIeTask(password).execute();
+            } else new SignWithDNIeTask(null).execute();
 		}
 	}
 
-	@Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		LOGD(TAG + ".onActivityResult", "onActivityResult");
-		if(data == null) return;
-		final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-		if(Activity.RESULT_OK == resultCode && requestCode == PATTERN_LOCK) {
-			char[] password = null;
-			LOGD(TAG, "TODO ===========");
-			new SignWithDNIeTask(password).execute();
-		}
-	}
 }

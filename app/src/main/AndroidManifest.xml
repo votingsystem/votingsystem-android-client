@@ -129,7 +129,6 @@
             android:label = "nfcIntentActivityLbl"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:noHistory="true"
             android:theme="@style/ThemeVS">
             <!--<intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED"/>

@@ -12,15 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.PinDialogFragment;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.ui.PatternLockView;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
@@ -30,20 +29,17 @@ public class PatternLockActivity extends AppCompatActivity {
 
     private static final String TAG = PatternLockActivity.class.getSimpleName();
 
-    public static final String FROM_DIALOG_KEY = "FROM_DIALOG_KEY";
-
     public static final int DNIE_PASSWORD_REQUEST      = 0;
 
-    public static final int MODE_VALIDATE_PATTERN      = 0;
-    public static final int MODE_SET_PATTERN           = 1;
+    public static final int MODE_VALIDATE_USER_INPUT_PATTERN = 0;
+    public static final int MODE_SET_PATTERN                 = 1;
     private int requestMode;
 
     private String broadCastId = PatternLockActivity.class.getSimpleName();
     private PatternLockView mCircleLockView;
     private TextView mPasswordTextView;
     private Boolean withPasswordConfirm;
-    private Boolean fromDialogFragment;
-    private String pattern;
+    private String first_pattern_input;
     private char[] password;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -71,34 +67,27 @@ public class PatternLockActivity extends AppCompatActivity {
         mPasswordTextView = (TextView) findViewById(R.id.password_text);
         mPasswordTextView.setText(getIntent().getExtras().getString(ContextVS.MESSAGE_KEY));
         withPasswordConfirm = getIntent().getExtras().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY, false);
-        fromDialogFragment = getIntent().getExtras().getBoolean(FROM_DIALOG_KEY, false);
         mCircleLockView.setCallBack(new PatternLockView.CallBack() {
             @Override
             public int onFinish(PatternLockView.Password password) {
                 Log.d(TAG, "password length " + password.list.size());
                 if(withPasswordConfirm) {
-                    if(pattern == null) {
-                        pattern = password.string;
+                    if(first_pattern_input == null) {
+                        first_pattern_input = password.string;
                         mPasswordTextView.setText(getString(R.string.confirm_lock_msg));
                         return PatternLockView.CODE_PASSWORD_CORRECT;
                     } else {
-                        if(pattern.equals(password.string)) {
+                        if(first_pattern_input.equals(password.string)) {
                             processResult(password.string);
                             return PatternLockView.CODE_PASSWORD_CORRECT;
                         } else {
-                            pattern = null;
+                            first_pattern_input = null;
                             mPasswordTextView.setText(getString(R.string.retry_msg));
                             return PatternLockView.CODE_PASSWORD_ERROR;
                         }
                     }
                 } else {
-                    if(pattern != null) {
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra(ContextVS.RESPONSEVS_KEY,
-                                ResponseVS.OK().setMessage(password.string));
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        finish();
-                    }
+                    processResult(password.string);
                     return PatternLockView.CODE_PASSWORD_CORRECT;
                 }
             }
@@ -110,12 +99,12 @@ public class PatternLockActivity extends AppCompatActivity {
         });
         requestMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY);
         switch (requestMode) {
-            case MODE_VALIDATE_PATTERN:
+            case MODE_VALIDATE_USER_INPUT_PATTERN:
                 break;
             case MODE_SET_PATTERN:
                 if(PrefUtils.isDNIeEnabled()) {
                     Intent intent = new Intent(this, DNIeSigningActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_lock_msg));
                     intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
                     startActivityForResult(intent, DNIE_PASSWORD_REQUEST);
                 } else {
@@ -129,28 +118,20 @@ public class PatternLockActivity extends AppCompatActivity {
     private void processResult(String patternPassword) {
         Intent resultIntent = null;
         switch (requestMode) {
-            case MODE_VALIDATE_PATTERN:
+            case MODE_VALIDATE_USER_INPUT_PATTERN:
                 try {
-                    String expectedHash =  PrefUtils.getLockPatternHash();
-                    String patternPasswordHash = StringUtils.getHashBase64(patternPassword,
-                            ContextVS.VOTING_DATA_DIGEST);
-                    if(!expectedHash.equals(patternPasswordHash)) {
-                        int numRetries = PrefUtils.incrementNumPatternLockRetries();
-                        mPasswordTextView.setText(getString(R.string.pin_error_msg) + ", " +
-                                getString(R.string.enter_password_retry_msg,
-                                (ContextVS.NUM_MAX_LOCK_PATERN_RETRIES - numRetries)));
-                        pattern = null;
-                        return;
-                    }
-                } catch(Exception ex) { ex.printStackTrace(); }
-                PrefUtils.resetLockRetries();
+                    PrefUtils.checkLockPatternHash(patternPassword, this);
+                } catch(ExceptionVS ex) {
+                    ex.printStackTrace();
+                    mPasswordTextView.setText(ex.getMessage());
+                    first_pattern_input = null;
+                    return;
+                }
                 resultIntent = new Intent();
                 resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, ResponseVS.OK()
                         .setMessageBytes(patternPassword.getBytes()));
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
-                AppVS.getInstance().putPatternLock(ResponseVS.OK().setMessageBytes(
-                        patternPassword.getBytes()));
                 break;
             case MODE_SET_PATTERN:
                 PrefUtils.putLockPatterProtectedPassword(patternPassword, password);
@@ -178,7 +159,7 @@ public class PatternLockActivity extends AppCompatActivity {
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        LOGD(TAG + ".onActivityResult", "onActivityResult");
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " + resultCode);
         if(data == null) {
             showPasswordRequiredDialog();
             return;
@@ -191,7 +172,6 @@ public class PatternLockActivity extends AppCompatActivity {
 
     @Override public void onBackPressed() {
         super.onBackPressed();
-        if(fromDialogFragment) AppVS.getInstance().putPatternLock(new ResponseVS(ResponseVS.SC_CANCELED));
     }
 
     @Override public void onResume() {

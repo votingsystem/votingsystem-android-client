@@ -597,7 +597,7 @@
     <string name="process_msg_lectura">Leyendo DNIe...</string>
     <string name="navigation_drawer_open">desplegar menu</string>
     <string name="navigation_drawer_close">cerrar menu</string>
-    <string name="enter_password_msg">DNIe, introduzca la contraseña</string>
+    <string name="enter_password_msg">introduzca la contraseña</string>
     <string name="enter_pin_msg">introduzca la contraseña de su dispositivo de firma</string>
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
     <string name="enter_password_retry_msg">le quedan \'%1$s\' intentos</string>
@@ -619,4 +619,6 @@
     <string name="confirm_lock_msg">repita el patrón de bloqueo</string>
     <string name="retry_msg">vuelva a intentarlo</string>
     <string name="pattern_lock_missing_passw_msg">para poder utilizar el patrón de bloqueo debe introducir la contraseña del dispositivo de firma</string>
+    <string name="enter_password_for_dni_lock_msg">Para poder usar el patrón de bloqueo con el DNI debe introducir la contraseña. Una vez haya finalizado el procedimiento podrá firmar con su DNI sin necesidad de introducir la contraseña cada vez que firme</string>
+    <string name="missing_idcard_msg">Para poder operar con la aplicación debe configurar su DNI en \'ajustes\'</string>
 </resources>

@@ -91,17 +91,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
-    private ResponseVS patternLock;
-
-    public void putPatternLock(ResponseVS patternLock) {
-        this.patternLock = patternLock;
-    }
-
-    public ResponseVS removePatternLock() {
-        ResponseVS result = this.patternLock;
-        this.patternLock = null;
-        return result;
-    }
 
     private static AppVS INSTANCE;
 

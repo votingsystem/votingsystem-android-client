@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 
@@ -21,6 +22,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
+import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.service.WebSocketService;
@@ -205,6 +207,16 @@ public class Utils {
                 .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime(), "HH:mm"))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
+    }
+
+    public static boolean checkIfDNIEnabled(Context context, FragmentManager fragmentManager) {
+        if(PrefUtils.isDNIeEnabled()) return true;
+        else {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    context.getString(R.string.error_lbl), context.getString(R.string.missing_idcard_msg),
+                    fragmentManager);
+            return false;
+        }
     }
 
     //http://stackoverflow.com/questions/1995439/get-android-phone-model-programmatically

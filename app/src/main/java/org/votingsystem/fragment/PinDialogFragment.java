@@ -22,7 +22,6 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.CertRequestActivity;
 import org.votingsystem.activity.CertResponseActivity;
 import org.votingsystem.activity.MessageActivity;
-import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
@@ -176,20 +175,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
                 }
             }
         }
-
-
-        if(PrefUtils.getLockPatternHash() != null) {
-            Intent intent = new Intent(getActivity(), PatternLockActivity.class);
-            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_pattern_lock_msg));
-            intent.putExtra(ContextVS.PASSWORD_CONFIRM_KEY, true);
-            intent.putExtra(PatternLockActivity.FROM_DIALOG_KEY, true);
-            intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_PATTERN);
-            intent.putExtra(ContextVS.CALLER_KEY, PinDialogFragment.class.getSimpleName());
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            AppVS.getInstance().startActivity(intent);
-        }
-
-
         Dialog dialog = builder.create();
         dialog.setOnKeyListener(this);
         return dialog;
@@ -274,12 +259,12 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
         }
     }
 
-    private void processResult(String pin) {
+    private void processResult(String passw) {
         if(callerId != null) {
             Intent intent = new Intent(callerId);
             intent.putExtra(ContextVS.PIN_KEY, ContextVS.PIN_KEY);
             ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, typeVS)
-                    .setMessageBytes(pin.getBytes());
+                    .setMessageBytes(passw.getBytes());
             intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
             LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
         }
@@ -300,7 +285,7 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
     @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
         //OnKey is fire twice: the first time for key down, and the second time for key up,
         //so you have to filter:
-        if (event.getAction()!=KeyEvent.ACTION_DOWN) return true;
+        if (event.getAction() != KeyEvent.ACTION_DOWN) return true;
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             LOGD(TAG + ".onKey", "KEYCODE_BACK");
             cancel();
@@ -324,17 +309,6 @@ public class PinDialogFragment extends DialogFragment implements OnKeyListener {
 
     @Override public void onResume() {
         super.onResume();
-        ResponseVS patternLock = AppVS.getInstance().removePatternLock();
-        if(patternLock != null) {
-            if(ResponseVS.SC_OK == patternLock.getStatusCode()) {
-                try {
-                    char[] password = PrefUtils.getLockPatterProtectedPassword(
-                            new String(patternLock.getMessageBytes()));
-                    processResult(new String(password));
-                } catch (Exception ex) {}
-
-            } else cancel();
-        }
         LOGD(TAG, "onResume");
     }
 
