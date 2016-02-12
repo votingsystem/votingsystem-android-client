@@ -9,13 +9,18 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.service.WebSocketService;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class ConnectionUtils {
 
-    public static final int INIT_CONNECTION_REQUEST           = 1;
-    public static final int PATTERN_LOCK_REQUEST              = 2;
+    public static final String TAG = ConnectionUtils.class.getSimpleName();
+
+    //high enough in order to avoid collisions with other request codes
+    public static final int INIT_CONNECTION_REQUEST           = 9000000;
+    public static final int PATTERN_LOCK_REQUEST              = 9000001;
 
     private static SocketMessageDto initSessionMessageDto;
 
@@ -36,16 +41,12 @@ public class ConnectionUtils {
 
     public static void init_IDCARD_NFC_Process(final AppCompatActivity activity) {
         Utils.init_IDCARD_NFC_Process(PATTERN_LOCK_REQUEST,
-                activity.getString(R.string.enter_pattern_lock_msg), null, activity,
-                new Utils.PasswordHandler() {
-                    @Override public void processWithoutPatternLock() {
-                        startConnectionRequest(null, activity);
-                    }
-                });
+                activity.getString(R.string.enter_pattern_lock_msg), null, activity);
     }
 
     public static void onActivityResult(int requestCode, int resultCode, Intent data,
                         AppCompatActivity activity) {
+        LOGD(TAG, " --- onActivityResult ---");
         if(data == null) return;
         final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch (requestCode) {

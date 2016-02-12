@@ -1,29 +1,26 @@
 package org.votingsystem.activity;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.ui.PatternLockView;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
+/**
+ * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class PatternLockActivity extends AppCompatActivity {
 
     private static final String TAG = PatternLockActivity.class.getSimpleName();
@@ -34,30 +31,13 @@ public class PatternLockActivity extends AppCompatActivity {
     public static final int MODE_SET_PATTERN                 = 1;
     private int requestMode;
 
-    private String broadCastId = PatternLockActivity.class.getSimpleName();
     private PatternLockView mCircleLockView;
     private TextView mPasswordTextView;
     private Boolean withPasswordConfirm;
     private String first_pattern_input;
     private char[] password;
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) {
-                    showPasswordRequiredDialog();
-                } else {
-                    switch(responseVS.getTypeVS()) {
-                        case PIN:
-                            password = new String(responseVS.getMessageBytes()).toCharArray() ;
-                            break;
-                    }
-                }
-            }
-        }
-    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,15 +81,10 @@ public class PatternLockActivity extends AppCompatActivity {
             case MODE_VALIDATE_USER_INPUT_PATTERN:
                 break;
             case MODE_SET_PATTERN:
-                if(PrefUtils.isDNIeEnabled()) {
-                    Intent intent = new Intent(this, DNIeSigningActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_lock_msg));
-                    intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_SET_PATTERN);
-                    startActivityForResult(intent, DNIE_PASSWORD_REQUEST);
-                } else {
-                    PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                            getString(R.string.enter_pin_msg), false, TypeVS.PIN);
-                }
+                Intent intent = new Intent(this, DNIeSigningActivity.class);
+                intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_lock_msg));
+                intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+                startActivityForResult(intent, DNIE_PASSWORD_REQUEST);
                 break;
         }
     }
@@ -159,13 +134,17 @@ public class PatternLockActivity extends AppCompatActivity {
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " + resultCode);
-        if(data == null) {
-            showPasswordRequiredDialog();
-            return;
-        }
-        final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(Activity.RESULT_OK == resultCode && requestCode == DNIE_PASSWORD_REQUEST) {
-            password = new String(responseVS.getMessageBytes()).toCharArray();
+        switch (requestCode) {
+            case DNIE_PASSWORD_REQUEST:
+                if(data == null) {
+                    showPasswordRequiredDialog();
+                } else {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    if(Activity.RESULT_OK == resultCode) {
+                        password = new String(responseVS.getMessageBytes()).toCharArray();
+                    }
+                }
+                break;
         }
     }
 
@@ -175,13 +154,10 @@ public class PatternLockActivity extends AppCompatActivity {
 
     @Override public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
     }
 
     @Override public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 
 }

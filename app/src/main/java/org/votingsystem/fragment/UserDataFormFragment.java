@@ -3,6 +3,7 @@ package org.votingsystem.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,14 +23,21 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.votingsystem.activity.CryptoDeviceAccessModeSelectorActivity;
+import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
+import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.UIUtils;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -40,6 +48,9 @@ public class UserDataFormFragment extends Fragment {
 
 	public static final String TAG = UserDataFormFragment.class.getSimpleName();
 
+    public static final int DNIE_PASSWORD_REQUEST = 0;
+    public static final int ACCESS_MODE_SELECT = 0;
+
     private EditText canText;
     private EditText phoneText;
     private EditText mailText;
@@ -49,6 +60,7 @@ public class UserDataFormFragment extends Fragment {
     private EditText province;
     private Spinner country_spinner;
     private UserVSDto userVSDto;
+    private char[] password;
 
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -91,12 +103,16 @@ public class UserDataFormFragment extends Fragment {
             }
         });
         try {
+            String can = PrefUtils.getDNIeCAN();
+            if(can != null) canText.setText(can);
             userVSDto = PrefUtils.getAppUser();
             if(userVSDto == null) {//first run
-                MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.msg_lbl),
-                        getString(R.string.first_run_msg), getFragmentManager());
+                if(savedInstanceState == null) MessageDialogFragment.showDialog(ResponseVS.SC_OK,
+                        getString(R.string.msg_lbl), getString(R.string.first_run_msg), getFragmentManager());
 
             } else {
+                phoneText.setText(userVSDto.getPhone());
+                mailText.setText(userVSDto.getEmail());
                 AddressVS addressVS = userVSDto.getAddress();
                 if(addressVS != null) {
                     address.setText(addressVS.getName());
@@ -116,17 +132,8 @@ public class UserDataFormFragment extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if(isVisibleToUser) {
-            Activity a = getActivity();
-            if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
-    }
-
-    @Override public void onResume() {
-        super.onResume();
-    }
-
-    @Override public void onPause() {
-        super.onPause();
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -159,19 +166,26 @@ public class UserDataFormFragment extends Fragment {
             addressVS.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
 
             userVSDto.setAddress(addressVS);
+            PrefUtils.putAppUser(userVSDto);
 
+            String address = addressVS.getName() == null ? "":addressVS.getName();
+            String postalCode = addressVS.getPostalCode() == null ? "":addressVS.getPostalCode();
+            String city = addressVS.getCity() == null ? "":addressVS.getCity();
+            String province = addressVS.getProvince() == null ? "":addressVS.getProvince();
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.user_data_form_lbl),
                     getString(R.string.user_data_confirm_msg, userVSDto.getPhone(),
                             canText.getText().toString(),
-                            userVSDto.getEmail(), addressVS.getName(),
-                            addressVS.getPostalCode(), addressVS.getCity(),
-                            addressVS.getProvince(), addressVS.getCountry().getName()), getActivity());
+                            userVSDto.getEmail(), address, postalCode, city, province,
+                            addressVS.getCountry().getName()), getActivity());
             builder.setPositiveButton(getString(R.string.continue_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            /*PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
-                                    true, broadCastId, getString( R.string.pin_for_new_cert_msg), null);*/
+                            PrefUtils.putDNIeCAN(canText.getText().toString());
+                            Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
+                            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                            intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+                            startActivityForResult(intent, DNIE_PASSWORD_REQUEST);
                         }
                     });
             UIUtils.showMessageDialog(builder);
@@ -204,7 +218,36 @@ public class UserDataFormFragment extends Fragment {
             mailText.setError(getString(R.string.mail_missing_msg));
             return false;
         }
+        try {
+            InternetAddress emailAddr = new InternetAddress(mailText.getText().toString());
+            emailAddr.validate();
+        } catch (AddressException ex) {
+            mailText.setError(getString(R.string.mail_missing_msg));
+            return false;
+        }
         return true;
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        switch (requestCode) {
+            case DNIE_PASSWORD_REQUEST:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    if(Activity.RESULT_OK == resultCode) {
+                        PrefUtils.putDNIeEnabled(true);
+                        password = new String(responseVS.getMessageBytes()).toCharArray();
+                        CryptoDeviceAccessMode accessMode = PrefUtils.getCryptoDeviceAccessMode();
+                        if(accessMode == null) {
+                            Intent intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
+                            getActivity().startActivityForResult(intent, ACCESS_MODE_SELECT);
+                        }
+                    }
+                }
+                break;
+        }
+
     }
 
     public class DataSender extends AsyncTask<String, String, ResponseVS> {

@@ -12,6 +12,8 @@ import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Utils;
 
+import java.lang.ref.WeakReference;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -21,6 +23,7 @@ public class FragmentContainerActivity extends AppCompatActivity {
 
 	public static final String TAG = FragmentContainerActivity.class.getSimpleName();
 
+    private WeakReference<Fragment> fragmentRef;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
@@ -38,6 +41,7 @@ public class FragmentContainerActivity extends AppCompatActivity {
         try {
             Class clazz = Class.forName(fragmentClass);
             Fragment fragment = (Fragment)clazz.newInstance();
+            fragmentRef = new WeakReference<>(fragment);
             fragment.setArguments(Utils.intentToFragmentArguments(getIntent()));
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment,
                             ((Object)fragment).getClass().getSimpleName()).commit();
@@ -65,6 +69,7 @@ public class FragmentContainerActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG, "onActivityResult - requestCode:  " + requestCode);
         super.onActivityResult(requestCode, resultCode, data);
         ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
     }

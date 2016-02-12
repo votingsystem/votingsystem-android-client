@@ -27,12 +27,14 @@ public class MessageDialogFragment extends DialogFragment {
 
     public static void showDialog(Integer statusCode, String caption, String message,
             FragmentManager fragmentManager) {
+        hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
         newFragment.show(fragmentManager, MessageDialogFragment.TAG);
     }
 
     public static void showDialog(String caption, String message, FragmentManager fragmentManager) {
+        hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseVS.SC_OK,
                 caption, message);
         newFragment.show(fragmentManager, MessageDialogFragment.TAG);
@@ -41,6 +43,14 @@ public class MessageDialogFragment extends DialogFragment {
     public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {
         showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
                 responseVS.getNotificationMessage(), fragmentManager);
+    }
+
+    public static void hide(FragmentManager fragmentManager) {
+        if(fragmentManager != null && fragmentManager.findFragmentByTag(
+                MessageDialogFragment.TAG) != null) {
+            ((MessageDialogFragment) fragmentManager
+                    .findFragmentByTag(MessageDialogFragment.TAG)).dismiss();
+        }
     }
 
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,

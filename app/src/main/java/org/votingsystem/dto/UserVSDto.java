@@ -10,6 +10,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cms.SignerInformation;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Country;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -298,6 +299,13 @@ public class UserVSDto implements Serializable {
 
     public void setCountry(String country) {
         this.country = country;
+        if(address != null) {
+            try {
+                address.setCountry(Country.valueOf(country));
+            }catch (Exception ex) {
+                LOGD(TAG, ex.getMessage());
+            }
+        }
     }
 
     public String getPhone() {

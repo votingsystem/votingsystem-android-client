@@ -45,7 +45,9 @@ import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
-
+/**
+ * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
 
 	public static final String TAG = DNIeSigningActivity.class.getSimpleName();
@@ -54,7 +56,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	public static final String CERT_SIGN = "CertFirmaDigital";
 
 
-	public static final int MODE_SET_PATTERN  = 0;
+	public static final int MODE_PASSWORD_REQUEST  = 0;
 	public static final int MODE_SIGN_DOCUMENT     = 1;
 
 
@@ -118,7 +120,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 				ksUserDNIe.getKey(CERT_SIGN, null);
 				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
 				UserVSDto appUser = null;
-				if(MODE_SET_PATTERN == acitivityMode) {
+				if(MODE_PASSWORD_REQUEST == acitivityMode) {
 					UserVSDto userFromCert = UserVSDto.getUserVS(userCert);
 					toUser = getString(R.string.voting_system_lbl);
 					appUser = PrefUtils.getAppUser();
@@ -140,7 +142,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 						AppVS.getInstance().getTimeStampServiceURL()).call();
 
                 responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
-				if(MODE_SET_PATTERN == acitivityMode) {
+				if(MODE_PASSWORD_REQUEST == acitivityMode) {
 					PrefUtils.putAppUser(appUser);
 					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());
 				}

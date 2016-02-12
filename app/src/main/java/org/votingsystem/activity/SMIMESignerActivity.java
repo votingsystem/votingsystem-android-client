@@ -177,12 +177,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sign_document:
                 Utils.init_IDCARD_NFC_Process(PATTERN_LOCK_REQUEST,
-                        getString(R.string.enter_pattern_lock_msg), null, this,
-                        new Utils.PasswordHandler() {
-                            @Override public void processWithoutPatternLock() {
-                                startDNIeSigningActivity(null);
-                            }
-                    });
+                        getString(R.string.enter_pattern_lock_msg), null, this);
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:

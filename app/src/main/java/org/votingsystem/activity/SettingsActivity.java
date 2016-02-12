@@ -1,13 +1,10 @@
 package org.votingsystem.activity;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.SwitchPreference;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -15,12 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.votingsystem.android.R;
+import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HelpUtils;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
 
 import java.lang.ref.WeakReference;
 
@@ -29,37 +25,22 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SettingsActivity extends PreferenceActivity
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsActivity extends PreferenceActivity {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
-    public static final int PATTERN_LOCK = 0;
-    public static final int USER_DATA    = 1;
+
+    public static final int USER_DATA          = 0;
+    public static final int SELECT_ACCESS_MODE = 1;
 
     private WeakReference<SettingsFragment> settingsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PrefUtils.registerPreferenceChangeListener(this);
-        // Display the fragment as the main content.
         settingsRef = new WeakReference<>(new SettingsFragment());
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, settingsRef.get()).commit();
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-    }
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        PrefUtils.unregisterPreferenceChangeListener(this);
-    }
-
-    @Override public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        LOGD(TAG, ".onSharedPreferenceChanged- key: " + key);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -69,83 +50,40 @@ public class SettingsActivity extends PreferenceActivity
 
     public static class SettingsFragment extends PreferenceFragment {
 
-        private SwitchPreference dnie_switch;
-        private Preference changePinButton;
-        private SwitchPreference patternLockSwitch;
+        private Preference dnieButton;
+        private Preference cryptoAccessButton;
 
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.main_settings);
             setHasOptionsMenu(true);
-            dnie_switch = (SwitchPreference) findPreference("dnie_switch");
-            dnie_switch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference arg0) {
-                    if(dnie_switch.isChecked()) {
-                        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                        intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
-                        getActivity().startActivityForResult(intent, USER_DATA);
-                        return true;
-                    } else {
-                        PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
-                        dnie_switch.setSummary(getString(R.string.pref_description_dnie));
-                    }
+            dnieButton =  findPreference("dnieButton");
+            dnieButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override public boolean onPreferenceClick(Preference arg0) {
+                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
+                    getActivity().startActivityForResult(intent, USER_DATA);
                     return true;
                 }
             });
             //PreferenceScreen preference_screen = getPreferenceScreen();
             Preference aboutButton = findPreference("aboutAppButton");
             aboutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference arg0) {
+                @Override public boolean onPreferenceClick(Preference arg0) {
                     HelpUtils.showAbout(getActivity());
                     return true;
                 }
             });
-            changePinButton = findPreference("changePinButton");
-            patternLockSwitch = (SwitchPreference)findPreference("patternLockSwitch");
-            patternLockSwitch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference arg0) {
-                    if(patternLockSwitch.isChecked()){
-                        Intent intent = new Intent(getActivity(), PatternLockActivity.class);
-                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.request_pattern_lock_msg));
-                        intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_SET_PATTERN);
-                        intent.putExtra(ContextVS.PASSWORD_CONFIRM_KEY, true);
-                        getActivity().startActivityForResult(intent, PATTERN_LOCK);
-                    } else {
-                        PrefUtils.putLockPatter(null);
-                    }
-                    return true;
-                }
-            });
-            changePinButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference arg0) {
-                    Intent intent = new Intent(getActivity(), MessageActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.PIN_CHANGE);
-                    startActivity(intent);
+            cryptoAccessButton = findPreference("cryptoAccessButton");
+            cryptoAccessButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override public boolean onPreferenceClick(Preference arg0) {
+                    Intent intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
+                    getActivity().startActivityForResult(intent, SELECT_ACCESS_MODE);
                     return true;
                 }
             });
             if(PrefUtils.isDNIeEnabled()) {
-                dnie_switch.setSummary("CAN: " + PrefUtils.getDNIeCAN());
-                dnie_switch.setChecked(true);
-            }
-            try {
-                if(PrefUtils.getLockPatternHash() != null) {
-                    patternLockSwitch.setChecked(true);
-                } else patternLockSwitch.setChecked(false);
-            } catch (Exception ex) { ex.printStackTrace(); }
-        }
-
-        private void setLockPattern(String lockPattern) {
-            if(lockPattern == null) {
-                patternLockSwitch.setChecked(false);
-                PrefUtils.putLockPatter(null);
-            } else {
-                patternLockSwitch.setChecked(true);
+                dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
             }
         }
 
@@ -155,8 +93,7 @@ public class SettingsActivity extends PreferenceActivity
             Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_vs);
             toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                @Override public void onClick(View v) {
                     getActivity().onBackPressed();
                 }
             });
@@ -169,30 +106,26 @@ public class SettingsActivity extends PreferenceActivity
             LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                     resultCode);
             switch (requestCode) {
-                case PATTERN_LOCK:
-                    if(data == null || Activity.RESULT_OK != resultCode) {
-                        patternLockSwitch.setChecked(false);
-                        return;
-                    } else {
-                        ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                case SELECT_ACCESS_MODE:
+                    CryptoDeviceAccessMode accessMode = PrefUtils.getCryptoDeviceAccessMode();
+                    if(accessMode != null) {
+                        switch (accessMode.getMode()) {
+                            case PATTER_LOCK:
+                                cryptoAccessButton.setSummary(getString(R.string.pattern_lock_lbl));
+                                break;
+                            case PIN:
+                                cryptoAccessButton.setSummary(getString(R.string.pin_lbl));
+                                break;
+                        }
                     }
                     break;
                 case USER_DATA:
-                    if(data == null || Activity.RESULT_OK != resultCode) {
-                        dnie_switch.setChecked(false);
-                        dnie_switch.setSummary(getString(R.string.pref_description_dnie));
-                        return;
-                    } else {
-                        dnie_switch.setChecked(true);
-                        dnie_switch.setSummary("CAN: " + PrefUtils.getDNIeCAN());
-                    }
-                    PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
+                    dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
                     break;
             }
         }
 
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
+        @Override public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
                 startActivity(new Intent(getActivity(), SettingsActivity.class));

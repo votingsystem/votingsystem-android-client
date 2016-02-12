@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
@@ -30,6 +31,8 @@ import static org.votingsystem.util.LogUtils.makeLogTag;
 public class PrefUtils {
 
     private static final String TAG = makeLogTag(PrefUtils.class.getSimpleName());
+
+    public static final String CRYPTO_DEVICE_ACCESS_MODE_KEY = "CRYPTO_DEVICE_ACCESS_MODE_KEY";
 
     public static TimeZone getDisplayTimeZone() {
         return TimeZone.getDefault();
@@ -179,7 +182,6 @@ public class PrefUtils {
     public static void putBalances(BalancesDto balancesDto, TimePeriod timePeriod) throws Exception {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        UserVSDto userVS = getAppUser();
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());
@@ -222,7 +224,7 @@ public class PrefUtils {
         int numRetries = settings.getInt(ContextVS.RETRIES_KEY, 0) + 1;
         if(numRetries == ContextVS.NUM_MAX_LOCK_PATERN_RETRIES) {
             LOGD(TAG, "NUM. MAX RETRIES EXCEEDED (3). Resseting password lock");
-            putLockPatter(null);
+            putCryptoDeviceAccessMode(null);
         }
         editor.putInt(ContextVS.RETRIES_KEY, numRetries);
         editor.commit();
@@ -238,7 +240,8 @@ public class PrefUtils {
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(ContextVS.LOCK_PATTERN_PASSWORD_KEY, JSON.writeValueAsString(ebDto));
             editor.commit();
-            putLockPatter(lockPattern);
+            putCryptoDeviceAccessMode(new CryptoDeviceAccessMode(CryptoDeviceAccessMode.Mode.PATTER_LOCK,
+                    lockPattern));
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
@@ -257,25 +260,13 @@ public class PrefUtils {
         return password;
     }
 
-    public static void putLockPatter(String lockPattern) {
-        try {
-            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            if(lockPattern != null) lockPattern =  StringUtils.getHashBase64(lockPattern,
-                    ContextVS.VOTING_DATA_DIGEST);
-            editor.putString(ContextVS.LOCK_PATTERN_KEY, lockPattern);
-            editor.commit();
-        } catch(Exception ex) {ex.printStackTrace();}
-    }
-
     public static void checkLockPatternHash(String patternPassword, Context context)
             throws ExceptionVS {
         try {
-            String expectedHash =  PrefUtils.getLockPatternHash();
+            CryptoDeviceAccessMode accessMode = getCryptoDeviceAccessMode();
             String patternPasswordHash = StringUtils.getHashBase64(patternPassword,
                     ContextVS.VOTING_DATA_DIGEST);
-            if(!expectedHash.equals(patternPasswordHash)) {
+            if(!accessMode.getHashBase64().equals(patternPasswordHash)) {
                 int numRetries = PrefUtils.incrementNumPatternLockRetries();
                 throw new ExceptionVS(context.getString(R.string.pin_error_msg) + ", " +
                         context.getString(R.string.enter_password_retry_msg,
@@ -286,12 +277,6 @@ public class PrefUtils {
             if(ex instanceof ExceptionVS) throw (ExceptionVS)ex;
             else throw new ExceptionVS(ex.getMessage());
         }
-    }
-
-    public static String getLockPatternHash() {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        return settings.getString(ContextVS.LOCK_PATTERN_KEY, null);
     }
 
     public static void putWallet(byte[] encryptedWalletBytesBase64) {
@@ -422,5 +407,32 @@ public class PrefUtils {
             throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
         }
         PrefUtils.putPin(newPin);
+    }
+
+    public static void putCryptoDeviceAccessMode(CryptoDeviceAccessMode accessMode) {
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        if(accessMode == null) {
+            editor.putString(CRYPTO_DEVICE_ACCESS_MODE_KEY, null);
+        } else {
+            byte[] serialized = ObjectUtils.serializeObject(accessMode);
+            try {
+                editor.putString(CRYPTO_DEVICE_ACCESS_MODE_KEY, new String(serialized, "UTF-8"));
+            } catch(Exception ex) {ex.printStackTrace();}
+        }
+        editor.commit();
+    }
+
+    public static CryptoDeviceAccessMode getCryptoDeviceAccessMode() {
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        String serialized = settings.getString(CRYPTO_DEVICE_ACCESS_MODE_KEY, null);
+        if(serialized != null) {
+            CryptoDeviceAccessMode accessMode =
+                    (CryptoDeviceAccessMode) ObjectUtils.deSerializeObject(serialized.getBytes());
+            return accessMode;
+        }
+        return null;
     }
 }

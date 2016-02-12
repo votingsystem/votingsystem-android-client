@@ -53,10 +53,6 @@ public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
 
-    public interface PasswordHandler {
-        public void processWithoutPatternLock();
-    }
-
     public static void launchQRScanner(Activity activity) {
         IntentIntegrator integrator = new IntentIntegrator(activity);
         integrator.addExtra("SCAN_WIDTH", 500);
@@ -199,16 +195,14 @@ public class Utils {
     }
 
     public static void init_IDCARD_NFC_Process(Integer requestCode, String msg,
-            Integer lockActivityMode, AppCompatActivity activity, PasswordHandler passwordHandler) {
+            Integer lockActivityMode, AppCompatActivity activity) {
         if(PrefUtils.isDNIeEnabled()) {
-            if(PrefUtils.getLockPatternHash() != null) {
-                Intent intent = new Intent(activity, PatternLockActivity.class);
-                intent.putExtra(ContextVS.MESSAGE_KEY, msg);
-                if(lockActivityMode == null) lockActivityMode =
-                        PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN;
-                intent.putExtra(ContextVS.MODE_KEY, lockActivityMode);
-                activity.startActivityForResult(intent, requestCode);
-            } else passwordHandler.processWithoutPatternLock();
+            Intent intent = new Intent(activity, PatternLockActivity.class);
+            intent.putExtra(ContextVS.MESSAGE_KEY, msg);
+            if(lockActivityMode == null) lockActivityMode =
+                    PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN;
+            intent.putExtra(ContextVS.MODE_KEY, lockActivityMode);
+            activity.startActivityForResult(intent, requestCode);
         }else {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
                     activity.getString(R.string.error_lbl), activity.getString(R.string.missing_idcard_msg),

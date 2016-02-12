@@ -47,7 +47,7 @@
 	<string name="pin_for_new_cert_msg">introduzca el código PIN que usará para firmar con el
         certificado, no lo olvide, se le pedirá para completar la instalación en el teléfono una vez
         haya verificado su identidad en un centro autorizado</string>
-    <string name="pin_dialog_caption">pin de firma</string>
+    <string name="pin_dialog_caption">introduzca pin</string>
     <string name="invalidPin">código pin inválido</string>
     <string name="pin_short">código pin debe tener al menos %1$d caracteres</string>
     <string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
@@ -417,7 +417,6 @@
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
-    <string name="change_pin">cambiar modo de acceso al monedero</string>
     <string name="enter_new_pin_msg">introduzca el nuevo pin, recuerde que si lo olvida no podrá firmar y perderá el contenido de su monedero</string>
     <string name="confirm_new_pin_msg">confirme el nuevo pin</string>
     <string name="enter_actual_pin_msg">introduzca el pin actual</string>
@@ -586,7 +585,6 @@
     <string name="understood_lbl">entendido</string>
     <string name="amount_lbl">cantidad</string>
     <string name="set_focus_on_qrcode">Enfoque el código QR</string>
-    <string name="pattern_lock_msg">emplear patrón de bloqueo en vez de contraseña en la firma de documentos</string>
     <string name="pattern_lock_lbl">patrón de bloqueo</string>
     <string name="request_pattern_lock_msg">introduzca el patrón de bloqueo con el que protegerá su dispositivo de firma</string>
     <string name="enter_pattern_lock_msg">introduzca el patrón de bloqueo</string>
@@ -607,4 +605,9 @@
         <b>Provincia: </b>%7$s<br/>
         <b>País: </b>%8$s<br/>
         ]]></string>
+    <string name="crypto_device_access_mode_lbl">mecanismo de contraseña</string>
+    <string name="pin_switch_lbp">Utilizar PIN</string>
+    <string name="patternLock_switch_lbp">Utilizar patrón visual</string>
+    <string name="crypto_access_method">método de introducción de contraseña</string>
+    <string name="pin_lbl">pin</string>
 </resources>
