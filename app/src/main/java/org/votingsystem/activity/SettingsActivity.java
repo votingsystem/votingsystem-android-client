@@ -1,17 +1,13 @@
 package org.votingsystem.activity;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -19,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.votingsystem.android.R;
-import org.votingsystem.fragment.CANDialogFragment;
 import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HelpUtils;
@@ -40,6 +35,7 @@ public class SettingsActivity extends PreferenceActivity
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
     public static final int PATTERN_LOCK = 0;
+    public static final int USER_DATA    = 1;
 
     private WeakReference<SettingsFragment> settingsRef;
 
@@ -73,27 +69,9 @@ public class SettingsActivity extends PreferenceActivity
 
     public static class SettingsFragment extends PreferenceFragment {
 
-        private String broadCastId = SettingsFragment.class.getSimpleName();
         private SwitchPreference dnie_switch;
         private Preference changePinButton;
         private SwitchPreference patternLockSwitch;
-
-        private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override public void onReceive(Context context, Intent intent) {
-                LOGD(TAG + ".broadcastReceiver", "intentExtras:" + intent.getExtras());
-                String CAN = null;
-                if((CAN = intent.getStringExtra(ContextVS.CAN_KEY)) != null) {
-                    LOGD(TAG + ".broadcastReceiver", "CAN:" + CAN);
-                    PrefUtils.putDNIeCAN(CAN);
-                    dnie_switch.setSummary("CAN: " + CAN);
-                    setLockPattern(null);
-                } else {
-                    dnie_switch.setChecked(false);
-                    dnie_switch.setSummary(getString(R.string.pref_description_dnie));
-                }
-                PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
-            }
-        };
 
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -103,9 +81,12 @@ public class SettingsActivity extends PreferenceActivity
             dnie_switch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
-                    if(dnie_switch.isChecked()) CANDialogFragment.showDialog(
-                            broadCastId, getFragmentManager());
-                    else {
+                    if(dnie_switch.isChecked()) {
+                        Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                        intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
+                        getActivity().startActivityForResult(intent, USER_DATA);
+                        return true;
+                    } else {
                         PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
                         dnie_switch.setSummary(getString(R.string.pref_description_dnie));
                     }
@@ -113,16 +94,6 @@ public class SettingsActivity extends PreferenceActivity
                 }
             });
             //PreferenceScreen preference_screen = getPreferenceScreen();
-            Preference userDataButton = findPreference("userDataButton");
-            userDataButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference arg0) {
-                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
-                    startActivity(intent);
-                    return true;
-                }
-            });
             Preference aboutButton = findPreference("aboutAppButton");
             aboutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -206,6 +177,17 @@ public class SettingsActivity extends PreferenceActivity
                         ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     }
                     break;
+                case USER_DATA:
+                    if(data == null || Activity.RESULT_OK != resultCode) {
+                        dnie_switch.setChecked(false);
+                        dnie_switch.setSummary(getString(R.string.pref_description_dnie));
+                        return;
+                    } else {
+                        dnie_switch.setChecked(true);
+                        dnie_switch.setSummary("CAN: " + PrefUtils.getDNIeCAN());
+                    }
+                    PrefUtils.putDNIeEnabled(dnie_switch.isChecked());
+                    break;
             }
         }
 
@@ -217,17 +199,6 @@ public class SettingsActivity extends PreferenceActivity
                 return true;
             }
             return super.onOptionsItemSelected(item);
-        }
-
-        @Override public void onResume() {
-            super.onResume();
-            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                    broadcastReceiver, new IntentFilter(broadCastId));
-        }
-
-        @Override public void onPause() {
-            super.onPause();
-            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         }
     }
 

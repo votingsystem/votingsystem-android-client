@@ -177,7 +177,7 @@ public class ContactsGridFragment extends Fragment
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 fetchUserVS(userVS);
                             }
-                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                        });
                     UIUtils.showMessageDialog(builder);
                 } else launchPager(null, userVS);
                 break;

@@ -118,7 +118,7 @@
     <string name="close_lbl">cerrar</string>
     <string name="ok_lbl">ok</string>
     <string name="accept_lbl">aceptar</string>
-    <string name="request_certificate_form_lbl">datos del certificado de usuario</string>
+    <string name="user_data_form_lbl">datos del usuario</string>
     <string name="empty_fields_msg">debe rellenar todos los campos</string>
     <string name="password_error_msg">las contraseñas no coinciden</string>
     <string name="error_lbl">error</string>
@@ -417,7 +417,7 @@
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
-    <string name="change_pin">cambiar pin de monedero</string>
+    <string name="change_pin">cambiar modo de acceso al monedero</string>
     <string name="enter_new_pin_msg">introduzca el nuevo pin, recuerde que si lo olvida no podrá firmar y perderá el contenido de su monedero</string>
     <string name="confirm_new_pin_msg">confirme el nuevo pin</string>
     <string name="enter_actual_pin_msg">introduzca el pin actual</string>
@@ -575,8 +575,8 @@
     <string name="enter_pin_msg">introduzca la contraseña de su dispositivo de firma</string>
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
     <string name="enter_password_retry_msg">le quedan \'%1$s\' intentos</string>
-    <string name="pref_title_dnie">votar con DNIe 3.0</string>
-    <string name="pref_description_dnie">para poder votar con su DNI el teléfono debe disponer de NFC</string>
+    <string name="pref_title_dnie">DNIe 3.0</string>
+    <string name="pref_description_dnie">para poder usar su DNI el teléfono debe disponer de NFC</string>
     <string name="can_dialog_caption">introduzca el CAN de su DNIe</string>
     <string name="dnie_connection_error_msg">problemas de conexión con su DNIe, por favor, vuelva a intentarlo</string>
     <string name="dnie_sign_progress_caption">DNIe version 3.0</string>
@@ -596,4 +596,15 @@
     <string name="enter_password_for_dni_lock_msg">Para poder usar el patrón de bloqueo con el DNI debe introducir la contraseña. Una vez haya finalizado el procedimiento podrá firmar con su DNI sin necesidad de introducir la contraseña cada vez que firme</string>
     <string name="missing_idcard_msg">Para poder operar con la aplicación debe configurar su DNI en \'ajustes\'</string>
     <string name="search_label" />
+    <string name="first_run_msg">Para poder usar la aplicación deberá rellenar los siguientes datos. La aplicación le pedirá que los firme con su DNI electrónico</string>
+    <string name="user_data_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/>
+        <b>CAN: </b>%1$s<br/>
+        <b>Teléfono móvil: </b>%2$s<br/>
+        <b>email: </b>%3$s<br/>
+        <b>Dirección: </b>%4$s<br/>
+        <b>Código postal: </b>%5$s<br/>
+        <b>Localidad: </b>%6$s<br/>
+        <b>Provincia: </b>%7$s<br/>
+        <b>País: </b>%8$s<br/>
+        ]]></string>
 </resources>

@@ -179,7 +179,7 @@ public class PrefUtils {
     public static void putBalances(BalancesDto balancesDto, TimePeriod timePeriod) throws Exception {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        UserVSDto userVS = getSessionUserVS();
+        UserVSDto userVS = getAppUser();
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());
@@ -329,7 +329,7 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static void putSessionUserVS(UserVSDto userVS) {
+    public static void putAppUser(UserVSDto userVS) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -340,7 +340,7 @@ public class PrefUtils {
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static UserVSDto getSessionUserVS() {
+    public static UserVSDto getAppUser() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedUserVS = settings.getString(ContextVS.USER_KEY, null);

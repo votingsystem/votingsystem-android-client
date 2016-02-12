@@ -33,6 +33,7 @@ import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRActionsFragment;
 import org.votingsystem.fragment.ReceiptGridFragment;
+import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.BuildConfig;
@@ -141,7 +142,7 @@ public class ActivityBase extends AppCompatActivity
         if(appVS.isWithSocketConnection()) {
             connectionStatusText.setText(getString(R.string.connected_lbl));
             connectionStatusView.setVisibility(View.VISIBLE);
-            headerTextView.setText(PrefUtils.getSessionUserVS().getEmail());
+            headerTextView.setText(PrefUtils.getAppUser().getEmail());
             headerTextView.setVisibility(View.VISIBLE);
             connectButton.setVisibility(View.GONE);
         } else {
@@ -154,7 +155,7 @@ public class ActivityBase extends AppCompatActivity
 
     private void showConnectionStatusDialog() {
         if(appVS.isWithSocketConnection()) {
-            UserVSDto sessionUserVS = PrefUtils.getSessionUserVS();
+            UserVSDto sessionUserVS = PrefUtils.getAppUser();
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
@@ -319,6 +320,11 @@ public class ActivityBase extends AppCompatActivity
         super.onStart();
         if (!PrefUtils.isDataBootstrapDone() && mDataBootstrapThread == null) {
             performDataBootstrap();
+        }
+        if(!PrefUtils.isDNIeEnabled()) {
+            Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+            intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
+            startActivity(intent);
         }
     }
 

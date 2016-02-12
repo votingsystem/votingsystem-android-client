@@ -102,7 +102,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                                         broadCastId, getString(R.string.enter_signature_pin_msg),
                                         false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
                             }
-                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                        });
                 UIUtils.showMessageDialog(builder);
                 return true;
             case R.id.representative_list:

@@ -105,6 +105,7 @@ public class UserVSDto implements Serializable {
         } catch(Exception ex) {ex.printStackTrace();}
         return userVS;
     }
+
     @JsonIgnore
     public Set<DeviceVSDto> getDevices() throws Exception {
         return connectedDevices;
@@ -188,8 +189,9 @@ public class UserVSDto implements Serializable {
         return NIF;
     }
 
-    public void setNIF(String NIF) {
+    public UserVSDto setNIF(String NIF) {
         this.NIF = NIF;
+        return this;
     }
 
     public String getName() {

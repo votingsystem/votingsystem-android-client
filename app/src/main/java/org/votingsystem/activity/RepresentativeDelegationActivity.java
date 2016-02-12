@@ -248,7 +248,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                                         broadCastId, getString(R.string.enter_signature_pin_msg),
                                         false, null);
                             }
-                        }).setNegativeButton(getString(R.string.cancel_lbl), null);
+                        });
                 UIUtils.showMessageDialog(builder);
                 break;
         }

@@ -516,7 +516,7 @@ public class UIUtils  {
     }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
-        UserVSDto userVS = PrefUtils.getSessionUserVS();
+        UserVSDto userVS = PrefUtils.getAppUser();
         ((TextView)linearLayout.findViewById(R.id.name)).setText(userVS.getAddress().getName());
         ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(userVS.getAddress().getPostalCode());
         ((TextView)linearLayout.findViewById(R.id.city)).setText(userVS.getAddress().getCity());

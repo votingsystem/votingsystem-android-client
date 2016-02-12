@@ -1,20 +1,26 @@
 package org.votingsystem.fragment;
 
-import android.content.Context;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
@@ -23,6 +29,7 @@ import org.votingsystem.util.Country;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -33,6 +40,7 @@ public class UserDataFormFragment extends Fragment {
 
 	public static final String TAG = UserDataFormFragment.class.getSimpleName();
 
+    private EditText canText;
     private EditText phoneText;
     private EditText mailText;
     private EditText address;
@@ -52,12 +60,18 @@ public class UserDataFormFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateView", "progressVisible: ");
+        LOGD(TAG + ".onCreateView", "onCreateView");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.user_data_form, container, false);
         getActivity().setTitle(getString(R.string.user_data_lbl));
+        TextView messageTextView = (TextView)rootView.findViewById(R.id.message);
+        SpannableStringBuilder aboutBody = new SpannableStringBuilder();
+        aboutBody.append(Html.fromHtml(getString(R.string.can_dialog_body)));
+        messageTextView.setText(aboutBody);
+        messageTextView.setMovementMethod(new LinkMovementMethod());
         mailText = (EditText)rootView.findViewById(R.id.mail_edit);
         phoneText = (EditText)rootView.findViewById(R.id.phone_edit);
+        canText = (EditText)rootView.findViewById(R.id.can);
         address = (EditText)rootView.findViewById(R.id.address);
         postal_code = (EditText)rootView.findViewById(R.id.postal_code);
         city = (EditText)rootView.findViewById(R.id.location);
@@ -77,19 +91,34 @@ public class UserDataFormFragment extends Fragment {
             }
         });
         try {
-            userVSDto = PrefUtils.getSessionUserVS();
-            AddressVS addressVS = userVSDto.getAddress();
-            if(addressVS != null) {
-                address.setText(addressVS.getName());
-                postal_code.setText(addressVS.getPostalCode());
-                city.setText(addressVS.getCity());
-                province.setText(addressVS.getProvince());
-                country_spinner.setSelection(addressVS.getCountry().getPosition());
+            userVSDto = PrefUtils.getAppUser();
+            if(userVSDto == null) {//first run
+                MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.msg_lbl),
+                        getString(R.string.first_run_msg), getFragmentManager());
+
+            } else {
+                AddressVS addressVS = userVSDto.getAddress();
+                if(addressVS != null) {
+                    address.setText(addressVS.getName());
+                    postal_code.setText(addressVS.getPostalCode());
+                    city.setText(addressVS.getCity());
+                    province.setText(addressVS.getProvince());
+                    country_spinner.setSelection(addressVS.getCountry().getPosition());
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return rootView;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(isVisibleToUser) {
+            Activity a = getActivity();
+            if(a != null) a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
     }
 
     @Override public void onResume() {
@@ -112,13 +141,12 @@ public class UserDataFormFragment extends Fragment {
 	}
 
     private void submitForm() {
-    	InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-  		imm.hideSoftInputFromWindow(city.getWindowToken(), 0);
       	if (validateForm ()) {
             String deviceId = PrefUtils.getApplicationId();
             LOGD(TAG + ".validateForm() ", "deviceId: " + deviceId);
-            userVSDto = new UserVSDto();
+            if(userVSDto == null) userVSDto = new UserVSDto();
+            userVSDto.setPhone(phoneText.getText().toString());
+            userVSDto.setEmail(mailText.getText().toString());
             AddressVS addressVS = new AddressVS();
             if(!TextUtils.isEmpty(address.getText().toString()))
                 addressVS.setName(address.getText().toString());
@@ -131,6 +159,22 @@ public class UserDataFormFragment extends Fragment {
             addressVS.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
 
             userVSDto.setAddress(addressVS);
+
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    getString(R.string.user_data_form_lbl),
+                    getString(R.string.user_data_confirm_msg, userVSDto.getPhone(),
+                            canText.getText().toString(),
+                            userVSDto.getEmail(), addressVS.getName(),
+                            addressVS.getPostalCode(), addressVS.getCity(),
+                            addressVS.getProvince(), addressVS.getCountry().getName()), getActivity());
+            builder.setPositiveButton(getString(R.string.continue_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            /*PinDialogFragment.showPinScreenWithoutHashValidation(getFragmentManager(),
+                                    true, broadCastId, getString( R.string.pin_for_new_cert_msg), null);*/
+                        }
+                    });
+            UIUtils.showMessageDialog(builder);
       	}
     }
 
@@ -141,12 +185,17 @@ public class UserDataFormFragment extends Fragment {
     }
 
     private boolean validateForm () {
+        canText.setError(null);
+        phoneText.setError(null);
+        mailText.setError(null);
         address.setError(null);
         postal_code.setError(null);
         city.setError(null);
         province.setError(null);
-        phoneText.setError(null);
-        mailText.setError(null);
+        if(TextUtils.isEmpty(canText.getText().toString())){
+            canText.setError(getString(R.string.can_dialog_caption));
+            return false;
+        }
         if(TextUtils.isEmpty(phoneText.getText().toString())){
             phoneText.setError(getString(R.string.phone_missing_msg));
             return false;
@@ -162,8 +211,10 @@ public class UserDataFormFragment extends Fragment {
 
         public DataSender() { }
 
-        @Override protected void onPreExecute() { setProgressDialogVisible(true,
-                getString(R.string.connecting_caption), getString(R.string.wait_msg)); }
+        @Override protected void onPreExecute() {
+                setProgressDialogVisible(true,
+                    getString(R.string.connecting_caption), getString(R.string.wait_msg));
+        }
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String currencyURL = urls[0];

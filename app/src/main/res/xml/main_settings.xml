@@ -7,9 +7,6 @@
         android:summary="@string/pref_description_dnie"
         android:title="@string/pref_title_dnie" />
 
-    <Preference android:title="@string/user_data_lbl"
-        android:key="userDataButton"/>
-
     <SwitchPreference
         android:defaultValue="false"
         android:title="@string/pattern_lock_lbl"

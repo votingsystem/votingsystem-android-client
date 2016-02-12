@@ -118,7 +118,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
                 startService(startIntent);
             }
             PrefUtils.registerPreferenceChangeListener(this);
-            userVS = PrefUtils.getSessionUserVS();
+            userVS = PrefUtils.getAppUser();
             byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
                     "VotingSystemSSLCert.pem"));
             Collection<X509Certificate> votingSystemSSLCerts =
@@ -369,7 +369,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(USER_KEY.equals(key)) {
-            userVS = PrefUtils.getSessionUserVS();
+            userVS = PrefUtils.getAppUser();
         }
     }
 

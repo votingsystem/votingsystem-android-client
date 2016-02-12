@@ -20,12 +20,14 @@ import org.bouncycastle2.util.Store;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.signature.smime.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.ui.DNIePasswordDialog;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -52,7 +54,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	public static final String CERT_SIGN = "CertFirmaDigital";
 
 
-	public static final int MODE_PASSWORD_REQUEST  = 0;
+	public static final int MODE_SET_PATTERN  = 0;
 	public static final int MODE_SIGN_DOCUMENT     = 1;
 
 
@@ -115,8 +117,18 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 				//force load real certs
 				ksUserDNIe.getKey(CERT_SIGN, null);
 				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
-				if(MODE_PASSWORD_REQUEST == acitivityMode) {
-					return ResponseVS.OK().setMessageBytes(new String(myFragment.getPassword()).getBytes());
+				UserVSDto appUser = null;
+				if(MODE_SET_PATTERN == acitivityMode) {
+					UserVSDto userFromCert = UserVSDto.getUserVS(userCert);
+					toUser = getString(R.string.voting_system_lbl);
+					appUser = PrefUtils.getAppUser();
+					appUser.setNIF(userFromCert.getNIF()).setCertificate(userCert);
+					appUser.setFirstName(userFromCert.getFirstName());
+					appUser.setLastName(userFromCert.getLastName());
+					if(userFromCert.getCountry() != null) appUser.setCountry(userFromCert.getCountry());
+					if(userFromCert.getCn() != null) appUser.setCn(userFromCert.getCn());
+					msgSubject = getString(R.string.user_data_lbl);
+					textToSign = JSON.writeValueAsString(appUser);
 				}
 				PrivateKey privateKey = (PrivateKey) ksUserDNIe.getKey(CERT_SIGN, null);
 				Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
@@ -124,10 +136,14 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 
 				SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(privateKey, userCert, cerStore,
 						toUser, textToSign, msgSubject);
-				SMIMEMessage accessRequest = new MessageTimeStamper(smimeMessage,
+				smimeMessage = new MessageTimeStamper(smimeMessage,
 						AppVS.getInstance().getTimeStampServiceURL()).call();
 
-                responseVS = new ResponseVS(ResponseVS.SC_OK, accessRequest);
+                responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
+				if(MODE_SET_PATTERN == acitivityMode) {
+					PrefUtils.putAppUser(appUser);
+					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());
+				}
                 responseVS.setTypeVS(operation);
 			} catch (IOException ex) {
 				ex.printStackTrace();

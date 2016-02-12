@@ -104,7 +104,7 @@ public class PatternLockActivity extends AppCompatActivity {
                 if(PrefUtils.isDNIeEnabled()) {
                     Intent intent = new Intent(this, DNIeSigningActivity.class);
                     intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_lock_msg));
-                    intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+                    intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_SET_PATTERN);
                     startActivityForResult(intent, DNIE_PASSWORD_REQUEST);
                 } else {
                     PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
