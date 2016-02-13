@@ -3,24 +3,26 @@ package org.votingsystem.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
-import org.votingsystem.signature.smime.EncryptedBundle;
+import org.votingsystem.model.Currency;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.throwable.ExceptionVS;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Set;
 import java.util.TimeZone;
 
 import static org.votingsystem.util.ContextVS.APPLICATION_ID_KEY;
@@ -117,29 +119,12 @@ public class PrefUtils {
         return sp.getString(ContextVS.CAN_KEY, null);
     }
 
-    public static void putApplicationId(String applicationId) {
-        try {
-            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString(ContextVS.APPLICATION_ID_KEY, applicationId);
-            editor.commit();
-        } catch(Exception ex) {ex.printStackTrace();}
-    }
-
     public static Calendar getLastPendingOperationCheckedTime() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         Calendar lastCheckedTime = Calendar.getInstance();
         lastCheckedTime.setTimeInMillis(sp.getLong(ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY, 0L));
         return lastCheckedTime;
-    }
-
-    public static void markPendingOperationCheckedNow() {
-        SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        sp.edit().putLong(ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY,
-                Calendar.getInstance().getTimeInMillis()).commit();
     }
 
     public static void registerPreferenceChangeListener(
@@ -192,24 +177,7 @@ public class PrefUtils {
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
-    public static void putPin(char[] pin) {
-        try {
-            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString(ContextVS.PIN_KEY,
-                    StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
-            editor.commit();
-        } catch(Exception ex) {ex.printStackTrace();}
-    }
-
-    public static String getPinHash() throws NoSuchAlgorithmException, ExceptionVS {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        return settings.getString(ContextVS.PIN_KEY, null);
-    }
-
-    public static void resetLockRetries() {
+    public static void resetPasswordRetries() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -217,83 +185,85 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static int incrementNumPatternLockRetries() {
+    public static int incrementPasswordRetries() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
         int numRetries = settings.getInt(ContextVS.RETRIES_KEY, 0) + 1;
-        if(numRetries == ContextVS.NUM_MAX_LOCK_PATERN_RETRIES) {
-            LOGD(TAG, "NUM. MAX RETRIES EXCEEDED (3). Resseting password lock");
+        if(numRetries >= ContextVS.NUM_MAX_PASSW_RETRIES) {
+            LOGD(TAG, "NUM. MAX RETRIES EXCEEDED (3). Resseting CryptoDeviceAccessMode");
             putCryptoDeviceAccessMode(null);
+            resetPasswordRetries();
+        } else {
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt(ContextVS.RETRIES_KEY, numRetries);
+            editor.commit();
         }
-        editor.putInt(ContextVS.RETRIES_KEY, numRetries);
-        editor.commit();
         return numRetries;
     }
 
-    public static void putLockPatterProtectedPassword(String lockPattern, char[] passwordToEncrypt) {
+    public static void putProtectedPassword(CryptoDeviceAccessMode.Mode accessMode,
+                                            String passw, char[] passwordToEncrypt) {
         try {
-            EncryptedBundle eb = Encryptor.pbeAES_Encrypt(lockPattern, new String(passwordToEncrypt).getBytes());
-            EncryptedBundleDto ebDto = new EncryptedBundleDto(eb);
+            EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(
+                    passw, new String(passwordToEncrypt).getBytes()).toDto();
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString(ContextVS.LOCK_PATTERN_PASSWORD_KEY, JSON.writeValueAsString(ebDto));
+            editor.putString(ContextVS.PROTECTED_PASSWORD_KEY, JSON.writeValueAsString(ebDto));
             editor.commit();
-            putCryptoDeviceAccessMode(new CryptoDeviceAccessMode(CryptoDeviceAccessMode.Mode.PATTER_LOCK,
-                    lockPattern));
+            putCryptoDeviceAccessMode(new CryptoDeviceAccessMode(accessMode, passw));
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static char[] getLockPatterProtectedPassword(String lockPattern) {
+    public static char[] getProtectedPassword(String passw) {
         char[] password = null;
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-            String dtoStr = settings.getString(ContextVS.LOCK_PATTERN_PASSWORD_KEY, null);
+            String dtoStr = settings.getString(ContextVS.PROTECTED_PASSWORD_KEY, null);
             if(dtoStr != null) {
                 EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
-                byte[] resultBytes = Encryptor.pbeAES_Decrypt(lockPattern, ebDto.getEncryptedBundle());
+                byte[] resultBytes = Encryptor.pbeAES_Decrypt(passw, ebDto.getEncryptedBundle());
                 password = new String(resultBytes, "UTF-8").toCharArray();
             }
         } catch(Exception ex) {ex.printStackTrace();}
         return password;
     }
 
-    public static void checkLockPatternHash(String patternPassword, Context context)
-            throws ExceptionVS {
-        try {
-            CryptoDeviceAccessMode accessMode = getCryptoDeviceAccessMode();
-            String patternPasswordHash = StringUtils.getHashBase64(patternPassword,
-                    ContextVS.VOTING_DATA_DIGEST);
-            if(!accessMode.getHashBase64().equals(patternPasswordHash)) {
-                int numRetries = PrefUtils.incrementNumPatternLockRetries();
-                throw new ExceptionVS(context.getString(R.string.pin_error_msg) + ", " +
-                        context.getString(R.string.enter_password_retry_msg,
-                                (ContextVS.NUM_MAX_LOCK_PATERN_RETRIES - numRetries)));
-            }
-            PrefUtils.resetLockRetries();
-        } catch (Exception ex) {
-            if(ex instanceof ExceptionVS) throw (ExceptionVS)ex;
-            else throw new ExceptionVS(ex.getMessage());
-        }
-    }
-
-    public static void putWallet(byte[] encryptedWalletBytesBase64) {
+    public static void putWallet(Collection<Currency> currencyCollection, char[] passw) throws Exception {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            if(encryptedWalletBytesBase64 == null) editor.putString(ContextVS.WALLET_FILE_NAME, null);
-            else editor.putString(ContextVS.WALLET_FILE_NAME, new String(encryptedWalletBytesBase64));
+            String encryptedWallet = null;
+            if(currencyCollection != null) {
+                Set<CurrencyDto> currencyDtoSet = CurrencyDto.serializeCollection(currencyCollection);
+                byte[] walletBytes = JSON.writeValueAsBytes(currencyDtoSet);
+                EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(new String(passw), walletBytes).toDto();
+                encryptedWallet = JSON.writeValueAsString(ebDto);
+            }
+            editor.putString(ContextVS.WALLET_FILE_NAME, encryptedWallet);
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
+
     }
 
-    public static String getWallet() {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        return settings.getString(ContextVS.WALLET_FILE_NAME, null);
+    public static Set<Currency> getWallet(char[] passw) {
+        Set<Currency> result = null;
+        try {
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            String dtoStr = settings.getString(ContextVS.WALLET_FILE_NAME, null);
+            if(dtoStr != null) {
+                EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
+                byte[] walletBytes = Encryptor.pbeAES_Decrypt(
+                        new String(passw), ebDto.getEncryptedBundle());
+                Set<CurrencyDto> currencyDtoSet = JSON.readValue(
+                        walletBytes, new TypeReference<Set<CurrencyDto>>(){});
+                result = CurrencyDto.deSerializeCollection(currencyDtoSet);
+            }
+        } catch(Exception ex) {ex.printStackTrace();}
+        return result;
     }
 
     public static String getCsrRequest() {
@@ -352,7 +322,6 @@ public class PrefUtils {
         if(representation != null) return representation;
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
         String stateJSON = settings.getString(
                 RepresentationStateDto.class.getSimpleName(), null);
         if(stateJSON != null) {
@@ -399,24 +368,14 @@ public class PrefUtils {
         return representativeDelegationDto;
     }
 
-    public static void changePin(char[] newPin, String oldPin)
-            throws ExceptionVS, NoSuchAlgorithmException {
-        String storedPinHash = PrefUtils.getPinHash();
-        String pinHash = StringUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST);
-        if(!storedPinHash.equals(pinHash)) {
-            throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
-        }
-        PrefUtils.putPin(newPin);
-    }
-
-    public static void putCryptoDeviceAccessMode(CryptoDeviceAccessMode accessMode) {
+    public static void putCryptoDeviceAccessMode(CryptoDeviceAccessMode passwAccessMode) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        if(accessMode == null) {
+        if(passwAccessMode == null) {
             editor.putString(CRYPTO_DEVICE_ACCESS_MODE_KEY, null);
         } else {
-            byte[] serialized = ObjectUtils.serializeObject(accessMode);
+            byte[] serialized = ObjectUtils.serializeObject(passwAccessMode);
             try {
                 editor.putString(CRYPTO_DEVICE_ACCESS_MODE_KEY, new String(serialized, "UTF-8"));
             } catch(Exception ex) {ex.printStackTrace();}
@@ -428,11 +387,10 @@ public class PrefUtils {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serialized = settings.getString(CRYPTO_DEVICE_ACCESS_MODE_KEY, null);
+        CryptoDeviceAccessMode result = null;
         if(serialized != null) {
-            CryptoDeviceAccessMode accessMode =
-                    (CryptoDeviceAccessMode) ObjectUtils.deSerializeObject(serialized.getBytes());
-            return accessMode;
+            result = (CryptoDeviceAccessMode) ObjectUtils.deSerializeObject(serialized.getBytes());
         }
-        return null;
+        return result;
     }
 }

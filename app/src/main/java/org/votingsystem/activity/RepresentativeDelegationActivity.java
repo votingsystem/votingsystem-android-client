@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -135,8 +134,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
         appVS = (AppVS) getApplicationContext();
         representative = (UserVSDto) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.representative_delegation_lbl));
         acceptButton = (Button) findViewById(R.id.accept_button);
@@ -245,7 +243,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                        broadCastId, getString(R.string.enter_signature_pin_msg),
+                                        broadCastId, null,
                                         false, null);
                             }
                         });

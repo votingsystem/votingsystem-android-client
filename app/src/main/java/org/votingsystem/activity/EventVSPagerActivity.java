@@ -8,13 +8,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.fragment.EventVSFragment;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.ContextVS.CURSOR_POSITION_KEY;
 import static org.votingsystem.util.ContextVS.EVENT_STATE_KEY;
@@ -33,8 +33,7 @@ public class EventVSPagerActivity extends AppCompatActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pager_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Integer cursorPosition = getIntent().getIntExtra(CURSOR_POSITION_KEY, -1);
         String eventStateStr = getIntent().getStringExtra(EVENT_STATE_KEY);

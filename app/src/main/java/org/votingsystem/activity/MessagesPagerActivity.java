@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
@@ -15,6 +14,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.fragment.MessageFragment;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -34,8 +34,7 @@ public class MessagesPagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         appVS = (AppVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +

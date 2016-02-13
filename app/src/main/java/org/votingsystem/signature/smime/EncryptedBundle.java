@@ -1,5 +1,7 @@
 package org.votingsystem.signature.smime;
 
+import org.votingsystem.dto.EncryptedBundleDto;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -18,4 +20,7 @@ public class EncryptedBundle {
     public byte[] getCipherText() { return cipherText; }
     public byte[] getSalt() { return salt; }
 
+    public EncryptedBundleDto toDto() {
+        return new EncryptedBundleDto(this);
+    }
 }

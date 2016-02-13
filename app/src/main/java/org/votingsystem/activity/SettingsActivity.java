@@ -7,7 +7,6 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -55,7 +54,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.main_settings);
+            addPreferencesFromResource(R.xml.settings);
             setHasOptionsMenu(true);
             dnieButton =  findPreference("dnieButton");
             dnieButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -98,7 +97,6 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
             toolbar.setTitle(R.string.navdrawer_item_settings);
-            setHasOptionsMenu(true);
             return rootView;
         }
 
@@ -107,9 +105,9 @@ public class SettingsActivity extends PreferenceActivity {
                     resultCode);
             switch (requestCode) {
                 case SELECT_ACCESS_MODE:
-                    CryptoDeviceAccessMode accessMode = PrefUtils.getCryptoDeviceAccessMode();
-                    if(accessMode != null) {
-                        switch (accessMode.getMode()) {
+                    CryptoDeviceAccessMode passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+                    if(passwAccessMode != null) {
+                        switch (passwAccessMode.getMode()) {
                             case PATTER_LOCK:
                                 cryptoAccessButton.setSummary(getString(R.string.pattern_lock_lbl));
                                 break;
@@ -123,15 +121,6 @@ public class SettingsActivity extends PreferenceActivity {
                     dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
                     break;
             }
-        }
-
-        @Override public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
         }
     }
 

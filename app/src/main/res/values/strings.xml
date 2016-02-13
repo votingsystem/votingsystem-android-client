@@ -44,15 +44,8 @@
     <string name="search_msg">realizando búsqueda</string>
     <string name="search_invoke">búsquedas</string>
     <string name="empty_search_lbl">consulta sin resultados</string>
-	<string name="pin_for_new_cert_msg">introduzca el código PIN que usará para firmar con el
-        certificado, no lo olvide, se le pedirá para completar la instalación en el teléfono una vez
-        haya verificado su identidad en un centro autorizado</string>
-    <string name="pin_dialog_caption">introduzca pin</string>
-    <string name="invalidPin">código pin inválido</string>
-    <string name="pin_short">código pin debe tener al menos %1$d caracteres</string>
-    <string name="enter_pin_import_cert_msg">introduzca el pin que eligió al solicitar el certificado</string>
-    <string name="password_mismatch">los códigos pin no coinciden, inténtelo de nuevo</string>
-    <string name="repeat_password">vuelva a introducir el código pin</string>
+    <string name="password_mismatch">las contraseñas no coinciden, inténtelo de nuevo</string>
+    <string name="repeat_password">vuelva a introducir la contraseña</string>
     <string name="givenname_missing_msg">introduzca el nombre</string>
     <string name="surname_missing_msg">introduzca los apellidos</string>
     <string name="searchLabel">buscar</string>
@@ -74,7 +67,7 @@
     <string name="cancel_vote_result_msg">su voto para el asunto \'%1$s\' ha sido anulado, puede volver votar de nuevo</string>
     <string name="saved_cancel_vote_recepit_msg">puede encontrar el recibo de la cancelación de este voto en la lista de recibos</string>
     <string name="open_cancel_vote_receipt_lbl">abrir recibo de cancelación</string>
-    <string name="pin_error_msg">¿seguro que la contraseña es correcta?</string>
+    <string name="password_error_msg">¿seguro que la contraseña es correcta?</string>
     <string name="sign_send_msg">firmar y enviar</string>
     <string name="select_representative_button">seleccionar como representante</string>
     <string name="voted_lbl">seleccionada opción</string>
@@ -120,7 +113,6 @@
     <string name="accept_lbl">aceptar</string>
     <string name="user_data_form_lbl">datos del usuario</string>
     <string name="empty_fields_msg">debe rellenar todos los campos</string>
-    <string name="password_error_msg">las contraseñas no coinciden</string>
     <string name="error_lbl">error</string>
     <string name="msg_lbl">mensaje</string>
     <string name="operation_ok_msg">operación completada con éxito</string>
@@ -240,7 +232,6 @@
     <string name="request_cash_lbl">retirar efectivo</string>
     <string name="update_signers_info_lbl">actualizar datos</string>
     <string name="send_message_lbl">enviar mensaje</string>
-    <string name="update_user_info_pin_msg">para obtener los datos necesita firmar una solicitud</string>
     <string name="currency_user_info_request_msg_subject">solicitud de información de cuentas</string>
     <string name="account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s]]></string>
     <string name="currency_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
@@ -256,8 +247,8 @@
     <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
     <string name="min_payment_option_msg">debe seleccionar al menos una opción de pago</string>
     <string name="currency_request_msg_subject">retirada de efectivo</string>
-    <string name="currency_request_pin_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
-    <string name="transactionvs_send_pin_msg"><![CDATA[va a realizar un pago de <b>%1$s %2$s</b>. a
+    <string name="currency_request_passw_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
+    <string name="transactionvs_send_passw_msg"><![CDATA[va a realizar un pago de <b>%1$s %2$s</b>. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
     <string name="currency_request_ok_caption">retirada de dinero con éxito</string>
     <string name="currency_request_error_caption">error retirando dinero</string>
@@ -298,7 +289,6 @@
     <string name="currency_repeated_wallet_error_msg">ha intentado añadir al monedero un billete de %1$s que ya estaba guardado</string>
     <string name="browswevs_lbl">sistema de votación</string>
     <string name="test_lbl">test</string>
-    <string name="enter_signature_pin_msg">introduzca el pin de su dispositivo de firma</string>
     <string name="admin_currency_menu_item">administración de efectivo</string>
     <string name="connecting_lbl">conectando...</string>
     <string name="phone_lbl">teléfono móvil</string>
@@ -310,12 +300,9 @@
     <string name="hint_nif">nif</string>
     <string name="hint_surname">apellidos</string>
     <string name="hint_name">nombre</string>
-    <string name="hint_pin">pin</string>
     <string name="disconnect_from_service_lbl">desconectar de servicio</string>
     <string name="init_authenticated_session_msg_subject">inicio de sesión websocket</string>
-    <string name="init_authenticated_session_pin_msg">introduzca la contraseña para solicitar una conexión</string>
     <string name="decrypt_cert_notfound_msg">imposible descifrar desde este dispositivo</string>
-    <string name="enter_pin_to_decrypt_msg">introduzca el pin para descifrar el mensaje</string>
     <string name="connecting_to_service_msg">conectando a servicio</string>
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
     <string name="anonymous_transactionvs_msg">deseo que el pago sea anónimo</string>
@@ -351,7 +338,6 @@
     <string name="connected_with_lbl">conectado con</string>
     <string name="disconnect_lbl">desconectar</string>
     <string name="signature_request_from_device">desde \'%1$s\' se le solicita que firme el siguiente documento</string>
-    <string name="ping_to_sign_msg">introduzca la contraseña para firmar el documento</string>
     <string name="sign_document_lbl">firma de documento</string>
     <string name="sign_document_result_ok_msg">el documento se ha enviado firmado al solicitante</string>
     <string name="signing_document_lbl">firmando documento</string>
@@ -369,7 +355,7 @@
     <string name="for_lbl">para</string>
     <string name="currency_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>
     <string name="currency_accounts_lbl">cuentas</string>
-    <string name="enter_wallet_pin_msg">introduzca la contraseña para desbloquear su monedero</string>
+    <string name="enter_wallet_password_msg">introduzca la contraseña de su monedero</string>
     <string name="unlocking_wallet_msg">desbloqueando monedero</string>
     <string name="lapse_info">válido hasta: %1$s</string>
     <string name="cancelled_lbl">cancelado</string>
@@ -417,9 +403,9 @@
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_uservs_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
-    <string name="enter_new_pin_msg">introduzca el nuevo pin, recuerde que si lo olvida no podrá firmar y perderá el contenido de su monedero</string>
-    <string name="confirm_new_pin_msg">confirme el nuevo pin</string>
-    <string name="enter_actual_pin_msg">introduzca el pin actual</string>
+    <string name="enter_new_passw_msg">introduzca la nueva contraseña</string>
+    <string name="confirm_new_passw_msg">confirme la contraseña</string>
+    <string name="enter_actual_passw_msg">introduzca contraseña en vigor</string>
     <string name="app_needed_caption">instalar aplicación</string>
     <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar el lector de código de barras de \'ZXing Team\'</string>
     <string name="qr_code_lbl">código QR</string>
@@ -437,9 +423,9 @@
     <string name="movements_lbl">movimientos</string>
     <string name="movement_lbl">movimiento</string>
     <string name="about_msg">información sobre la aplicación</string>
-    <string name="pin_change_lbl">cambiar pin</string>
-    <string name="new_pin_ok_msg">a partir de ahora deberá firmar y utilizar el monedero con su nuevo pin</string>
-    <string name="new_pin_error_msg">los valores no coinciden comience de nuevo, introduzca el nuevo pin</string>
+    <string name="change_password_lbl">establecer contraseña</string>
+    <string name="new_password_ok_msg">a partir de ahora deberá firmar y utilizar el monedero con su nueva contraseña</string>
+    <string name="new_password_error_msg">los valores no coinciden comience de nuevo. Introduzca la nueva contraseña</string>
     <string name="open_wallet_lbl">abrir monedero</string>
     <string name="lapse_lbl">caduca: %1$s</string>
     <string name="tag_info"><![CDATA[<b>%1$s %2$s</b> para <b>%3$s</b>]]></string>
@@ -571,7 +557,6 @@
     <string name="navigation_drawer_open">desplegar menu</string>
     <string name="navigation_drawer_close">cerrar menu</string>
     <string name="enter_password_msg">introduzca la contraseña</string>
-    <string name="enter_pin_msg">introduzca la contraseña de su dispositivo de firma</string>
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
     <string name="enter_password_retry_msg">le quedan \'%1$s\' intentos</string>
     <string name="pref_title_dnie">DNIe 3.0</string>
@@ -590,8 +575,9 @@
     <string name="enter_pattern_lock_msg">introduzca el patrón de bloqueo</string>
     <string name="confirm_lock_msg">repita el patrón de bloqueo</string>
     <string name="retry_msg">vuelva a intentarlo</string>
-    <string name="pattern_lock_missing_passw_msg">para poder utilizar el patrón de bloqueo debe introducir la contraseña del dispositivo de firma</string>
-    <string name="enter_password_for_dni_lock_msg">Para poder usar el patrón de bloqueo con el DNI debe introducir la contraseña. Una vez haya finalizado el procedimiento podrá firmar con su DNI sin necesidad de introducir la contraseña cada vez que firme</string>
+    <string name="missing_actual_passw_error_msg">para poder continuar tiene que introducir la contraseña en vigor</string>
+    <string name="passw_missing_msg">para poder continuar debe introducir la contraseña</string>
+    <string name="enter_password_for_dni_msg">Introduzca la contraseña de su DNI, una vez haya finalizado el procedimiento podrá firmar con su DNI usando su nueva contraseña</string>
     <string name="missing_idcard_msg">Para poder operar con la aplicación debe configurar su DNI en \'ajustes\'</string>
     <string name="search_label" />
     <string name="first_run_msg">Para poder usar la aplicación deberá rellenar los siguientes datos. La aplicación le pedirá que los firme con su DNI electrónico</string>
@@ -606,8 +592,10 @@
         <b>País: </b>%8$s<br/>
         ]]></string>
     <string name="crypto_device_access_mode_lbl">mecanismo de contraseña</string>
-    <string name="pin_switch_lbp">Utilizar PIN</string>
-    <string name="patternLock_switch_lbp">Utilizar patrón visual</string>
-    <string name="crypto_access_method">método de introducción de contraseña</string>
-    <string name="pin_lbl">pin</string>
+    <string name="patternLock_switch_lbp">patrón visual</string>
+    <string name="pin_lbl">PIN</string>
+    <string name="forgotten_passw_lbl">¿ha olvidado la contraseña?</string>
+    <string name="access_mode_passw_required_msg">para usar la aplicación necesita introducir el mecanismo de contraseña</string>
+    <string name="retries_exceeded_caption">ha superado el número máximo de intentos</string>
+    <string name="retries_exceeded_msg">debe establecer de nuevo la contraseña utilizando su DNI</string>
 </resources>

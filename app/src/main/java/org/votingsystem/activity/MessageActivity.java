@@ -28,15 +28,8 @@ public class MessageActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
-        LOGD(TAG + ".onCreate", "savedInstanceState -getIntent().getExtras(): " +
-                getIntent().getExtras());
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container_activity);
-        if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
-            String query = getIntent().getStringExtra(SearchManager.QUERY);
-            LOGD(TAG + ".onCreate()", "Intent.ACTION_SEARCH - query: " + query);
-            return;
-        }
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
                 AppVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
         View view = getLayoutInflater().inflate(R.layout.message_activity, null);

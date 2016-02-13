@@ -1,5 +1,6 @@
 package org.votingsystem.fragment;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.activity.CurrencyActivity;
+import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
@@ -45,6 +47,8 @@ public class WalletFragment extends Fragment {
 
     public static final String TAG = WalletFragment.class.getSimpleName();
 
+    public static final int PIN          = 0;
+
     private View rootView;
     private GridView gridView;
     private CurrencyListAdapter adapter = null;
@@ -57,36 +61,18 @@ public class WalletFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            switch(responseVS.getTypeVS()) {
-                case CURRENCY:
-                    try {
-                        currencyList = new ArrayList<>(Wallet.getCurrencySet(
-                                new String(responseVS.getMessageBytes()).toCharArray()));
-                        Utils.launchCurrencyStatusCheck(broadCastId, null);
-                        printSummary();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
-                    }
-                    break;
-            }
-        } else {
-            switch(responseVS.getTypeVS()) {
-                case CURRENCY_CHECK:
-                    currencyList = new ArrayList<>(Wallet.getCurrencySet());
-                    printSummary();
-                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                getString(R.string.error_lbl), responseVS.getMessage(),
-                                getFragmentManager());
-                    }
-                    break;
-                case CURRENCY_ACCOUNTS_INFO:
-                    break;
-            }
+        switch(responseVS.getTypeVS()) {
+            case CURRENCY_CHECK:
+                currencyList = new ArrayList<>(Wallet.getCurrencySet());
+                printSummary();
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                            getString(R.string.error_lbl), responseVS.getMessage(),
+                            getFragmentManager());
+                }
+                break;
+            case CURRENCY_ACCOUNTS_INFO:
+                break;
         }
         }
     };
@@ -110,9 +96,11 @@ public class WalletFragment extends Fragment {
             }
         });
         if(Wallet.getCurrencySet() == null) {
-            PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                    getString(R.string.enter_wallet_pin_msg), false, TypeVS.CURRENCY);
             currencyList = new ArrayList<>();
+            Intent intent = new Intent(getActivity(),  PinActivity.class);
+            intent.putExtra(ContextVS.MODE_KEY, PinActivity.MODE_VALIDATE_INPUT);
+            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_wallet_password_msg));
+            startActivityForResult(intent, PIN);
         } else {
             currencyList = new ArrayList<>(Wallet.getCurrencySet());
             printSummary();
@@ -151,6 +139,28 @@ public class WalletFragment extends Fragment {
         walletLoaded = true;
     }
 
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        switch (requestCode) {
+            case PIN:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    try {
+                        currencyList = new ArrayList<>(Wallet.getCurrencySet(
+                                new String(responseVS.getMessageBytes()).toCharArray()));
+                        Utils.launchCurrencyStatusCheck(broadCastId, null);
+                        printSummary();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                                getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+                    }
+                }
+                break;
+        }
+    }
+
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menu.clear();
         if(!walletLoaded) menuInflater.inflate(R.menu.wallet, menu);
@@ -161,7 +171,7 @@ public class WalletFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.open_wallet:
                 PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.enter_wallet_pin_msg), false, TypeVS.CURRENCY);
+                        getString(R.string.enter_wallet_password_msg), false, TypeVS.CURRENCY);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

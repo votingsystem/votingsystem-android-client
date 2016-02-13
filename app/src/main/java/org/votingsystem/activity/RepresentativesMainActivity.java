@@ -99,7 +99,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                        broadCastId, getString(R.string.enter_signature_pin_msg),
+                                        broadCastId, null,
                                         false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
                             }
                         });

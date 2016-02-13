@@ -7,7 +7,7 @@
         android:summary="@string/pref_description_dnie"
         android:title="@string/pref_title_dnie" />
 
-    <Preference android:title="@string/crypto_access_method"
+    <Preference android:title="@string/crypto_device_access_mode_lbl"
         android:key="cryptoAccessButton"/>
 
     <Preference android:title="@string/about_msg"

@@ -17,7 +17,7 @@
         android:layout_marginLeft="15dp"
         android:textSize="20dp"
         android:checked="false"
-        android:text="@string/pin_switch_lbp" />
+        android:text="@string/pin_lbl" />
     <Switch
         android:id="@+id/patternLockSwitch"
         android:layout_width="match_parent"

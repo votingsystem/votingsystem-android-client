@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,8 +43,8 @@ public class SMIMESignerActivity extends AppCompatActivity {
 	
 	public static final String TAG = SMIMESignerActivity.class.getSimpleName();
 
-    public static final int PATTERN_LOCK_REQUEST   = 0;
-    public static final int SIGN_REQUEST           = 1;
+    public static final int RC_PASSWORD_REQUEST   = 0;
+    public static final int RC_SIGN_REQUEST       = 1;
 
     private String broadCastId = SMIMESignerActivity.class.getSimpleName();
     private WebView webView;
@@ -89,8 +88,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.smime_signer);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         webView = (WebView) findViewById(R.id.smime_signed_content);
         signature_state = (TextView) findViewById(R.id.signature_state);
         socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
@@ -140,7 +138,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
         if(data == null) return;
         final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch(requestCode) {
-            case SIGN_REQUEST:
+            case RC_SIGN_REQUEST:
                 if(responseVS != null && responseVS.getSMIME() != null) {
                     smime = responseVS.getSMIME();
                     executorService.submit(new Runnable() {
@@ -153,31 +151,27 @@ public class SMIMESignerActivity extends AppCompatActivity {
                     setMenu();
                 }
                 break;
-            case PATTERN_LOCK_REQUEST:
+            case RC_PASSWORD_REQUEST:
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    startDNIeSigningActivity(new String(responseVS.getMessageBytes()));
+                    String accessModePassw = new String(responseVS.getMessageBytes());
+                    Intent intent = new Intent(this, DNIeSigningActivity.class);
+                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getTextToSign());
+                    intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
+                    intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
+                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.signature_request_from_device,
+                            socketMessage.getDeviceFromName()));
+                    intent.putExtra(ContextVS.PASSWORD_KEY, accessModePassw.toCharArray());
+                    startActivityForResult(intent, RC_SIGN_REQUEST);
                 }
                 break;
         }
-    }
-
-    private void startDNIeSigningActivity(String patternLock) {
-        Intent intent = new Intent(this, DNIeSigningActivity.class);
-        intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getTextToSign());
-        intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
-        intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
-        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.signature_request_from_device,
-                socketMessage.getDeviceFromName()));
-        if(patternLock != null)  intent.putExtra(ContextVS.LOCK_PATTERN_KEY, patternLock.toCharArray());
-        startActivityForResult(intent, SIGN_REQUEST);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.sign_document:
-                Utils.init_IDCARD_NFC_Process(PATTERN_LOCK_REQUEST,
-                        getString(R.string.enter_pattern_lock_msg), null, this);
+                Utils.init_IDCARD_NFC_Process(RC_PASSWORD_REQUEST, null, null, this);
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:

@@ -23,8 +23,6 @@ import org.votingsystem.android.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.votingsystem.util.LogUtils.LOGD;
-
 /**
  * https://github.com/xyxyLiu/PatternLockView
  *
@@ -200,31 +198,22 @@ public class PatternLockView  extends ViewGroup {
         mMeasuredPadding = mPadding;
         mMeasuredSpacing = mSpacing;
         float maxNodeWidth, maxNodeHeight, maxNodeSize;
-        LOGD(TAG, String.format("onMeasure(), raw width = %d, height = %d)", width, height));
         // Spacing&Padding mode:
         if (mSpacing >= 0) {
             maxNodeWidth = ((width - mPadding * 2 - mSpacing * gaps) / mSize);
             maxNodeHeight = ((height - mPadding * 2 - mSpacing * gaps) / mSize);
             maxNodeSize = maxNodeWidth < maxNodeHeight ? maxNodeWidth : maxNodeHeight;
-            LOGD(TAG, String.format("maxNodeWidth = %f, maxNodeHeight = %f, maxNodeSize = %f)",
-                    maxNodeWidth, maxNodeHeight, maxNodeSize));
-
             // if maximum available nodesize if smaller than desired nodesize with paddings & spacing unchanged
             if (nodesize > maxNodeSize) {
                 int xRemains = (int) (width - mSize * nodesize);
                 int yRemains = (int) (height - mSize * nodesize);
                 int minRemains = xRemains < yRemains ? xRemains : yRemains;
                 int paddingsAndSpacings = (int) (mPadding * 2 + mSpacing * gaps);
-
-                LOGD(TAG, String.format("xRemains = %d, yRemains = %d, before shrink: mPadding = %f, mSpacing = %f",
-                        xRemains, yRemains, mPadding, mSpacing));
                 // keep nodesize & shrink paddings and spacing if there are enough space
                 if (minRemains > 0 && paddingsAndSpacings > 0) {
                     float shrinkRatio = (float) minRemains / paddingsAndSpacings;
                     mMeasuredPadding *= shrinkRatio;
                     mMeasuredSpacing *= shrinkRatio;
-                    LOGD(TAG, String.format("shrinkRatio = %f, mMeasuredPadding = %f, mMeasuredSpacing = %f",
-                            shrinkRatio, mMeasuredPadding, mMeasuredSpacing));
                 } else { // otherwise shrink nodesize & keep paddings and spacing
                     nodesize = maxNodeSize;
                 }
@@ -233,7 +222,6 @@ public class PatternLockView  extends ViewGroup {
             if (nodesize <= 0) {
                 needRemeasure = true;
                 // remeasure without using mSpacing
-                LOGD(TAG, String.format("remeasure without using mSpacing"));
             }
         }
 
@@ -245,17 +233,11 @@ public class PatternLockView  extends ViewGroup {
             maxNodeWidth = width / mSize;
             maxNodeHeight = height / mSize;
             maxNodeSize = maxNodeWidth < maxNodeHeight ? maxNodeWidth : maxNodeHeight;
-            LOGD(TAG, String.format("maxNodeWidth = %f, maxNodeHeight = %f, maxNodeSize = %f)",
-                    maxNodeWidth, maxNodeHeight, maxNodeSize));
-
             // if maximum available nodesize if smaller than desired nodesize
             if (nodesize > maxNodeSize) {
                 nodesize = maxNodeSize;
             }
         }
-
-        LOGD(TAG, String.format("measured nodeSize = %f)", nodesize));
-
         if (width > height && widthMode == MeasureSpec.AT_MOST) {
             width = height;
         } else if (width < height && heightMode == MeasureSpec.AT_MOST) {
@@ -293,9 +275,6 @@ public class PatternLockView  extends ViewGroup {
                 widthPadding = (width - mSize * areaSize) / 2;
                 heightPadding = (height - mSize * areaSize) / 2;
             }
-            LOGD(TAG, String.format("nodeSize = %f, areaWidth = %f, areaHeight = %f, widthPadding = %f, heightPadding = %f",
-                    nodeSize, areaWidth, areaHeight, widthPadding, heightPadding));
-
             for (int n = 0; n < mSize * mSize; n++) {
                 NodeView node = (NodeView) getChildAt(n);
                 int row = n / mSize;
@@ -309,8 +288,6 @@ public class PatternLockView  extends ViewGroup {
         } else { // Spacing&Padding mode:
             float widthPadding = (width - mSize * nodeSize - mMeasuredSpacing * gaps) / 2;
             float heightPadding = (height - mSize * nodeSize - mMeasuredSpacing * gaps) / 2;
-            LOGD(TAG, String.format("nodeSize = %f, widthPadding = %f, heightPadding = %f",
-                    nodeSize, widthPadding, heightPadding));
             for (int n = 0; n < mSize * mSize; n++) {
                 NodeView node = (NodeView) getChildAt(n);
                 int row = n / mSize;
@@ -422,7 +399,6 @@ public class PatternLockView  extends ViewGroup {
      * auto link the nodes between first and second
      */
     private void autoLinkNode(NodeView first, NodeView second) {
-        LOGD(TAG, String.format("autoLinkNode(%s, %s)", first, second));
         int xDiff = second.getColumn() - first.getColumn();
         int yDiff = second.getRow() - first.getRow();
         if (yDiff == 0 && xDiff == 0) {
@@ -444,12 +420,10 @@ public class PatternLockView  extends ViewGroup {
         } else {
             float tan = yDiff / (float) xDiff;
             int xstep = xDiff > 0 ? 1 : -1;
-            LOGD(TAG, String.format("tan = %f, xstep = %d", tan, xstep));
             int xdiff = 0;
             float ydiff = 0f;
             while ((xdiff += xstep) != xDiff) {
                 ydiff = xdiff * tan;
-                LOGD(TAG, String.format("xdiff = %d, ydiff = %f, ydiff == (int)ydiff? %b", xdiff, ydiff, (ydiff == (int) ydiff)));
                 if (ydiff == (int) ydiff) {
                     tryAppendMidNode(first.getRow() + (int) ydiff, first.getColumn() + xdiff);
                 }
@@ -458,7 +432,6 @@ public class PatternLockView  extends ViewGroup {
     }
 
     private void tryAppendMidNode(int row, int column) {
-        LOGD(TAG, String.format("tryAppendMidNode(row = %d, column = %d)", row, column));
         NodeView mid = (NodeView) getChildAt(row * mSize + column);
         if (mNodeList.contains(mid))
             return;

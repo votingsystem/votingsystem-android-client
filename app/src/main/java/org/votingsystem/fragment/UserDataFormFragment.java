@@ -238,8 +238,8 @@ public class UserDataFormFragment extends Fragment {
                     if(Activity.RESULT_OK == resultCode) {
                         PrefUtils.putDNIeEnabled(true);
                         password = new String(responseVS.getMessageBytes()).toCharArray();
-                        CryptoDeviceAccessMode accessMode = PrefUtils.getCryptoDeviceAccessMode();
-                        if(accessMode == null) {
+                        CryptoDeviceAccessMode passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+                        if(passwAccessMode == null) {
                             Intent intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
                             getActivity().startActivityForResult(intent, ACCESS_MODE_SELECT);
                         }

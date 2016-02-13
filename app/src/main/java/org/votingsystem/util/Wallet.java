@@ -1,17 +1,12 @@
 package org.votingsystem.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
-import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
 import java.math.BigDecimal;
@@ -49,8 +44,7 @@ public class Wallet {
     }
 
     public static Set<Currency> getCurrencySet(char[] pin) throws Exception {
-        Set<CurrencyDto> currencyDtoSet = getWallet(pin);
-        currencySet = CurrencyDto.deSerializeCollection(currencyDtoSet);
+        currencySet = PrefUtils.getWallet(pin);
         return new HashSet<>(currencySet);
     }
 
@@ -148,47 +142,9 @@ public class Wallet {
         return result;
     }
 
-    public static Set<CurrencyDto> getWallet(char[] pin) throws Exception {
-        byte[] walletBytes = getWalletBytes(pin);
-        if(walletBytes == null) return new HashSet<>();
-        else return JSON.readValue(walletBytes, new TypeReference<Set<CurrencyDto>>(){});
-    }
-
-    private static byte[] getWalletBytes(char[] pin) throws Exception {
-        if(pin != null) {
-            String storedPinHash = PrefUtils.getPinHash();
-            String pinHash = StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
-            if(!pinHash.equals(storedPinHash)) {
-                throw new ExceptionVS(AppVS.getInstance().getString(R.string.pin_error_msg));
-            }
-        }
-        try {
-            String walletBase64 = PrefUtils.getWallet();
-            if(walletBase64 == null) return null;
-            else return AppVS.getInstance().decryptMessage(walletBase64.getBytes());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-    public static void saveWallet(Collection<Currency> currencyCollection, char[] pin) throws Exception {
-        AppVS context = AppVS.getInstance();
-        if(pin != null) {
-            String storedPinHash = PrefUtils.getPinHash();
-            String pinHash = StringUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST);
-            if(!pinHash.equals(storedPinHash)) {
-                throw new ExceptionVS(context.getString(R.string.pin_error_msg));
-            }
-        }
-        if(currencyCollection != null) {
-            Set<CurrencyDto> currencyDtoSet = CurrencyDto.serializeCollection(currencyCollection);
-            byte[] walletBytes = JSON.writeValueAsBytes(currencyDtoSet);
-            byte[] encryptedWalletBytesBase64 = Encryptor.encryptToCMS(walletBytes, context.getX509UserCert());
-            PrefUtils.putWallet(encryptedWalletBytesBase64);
-            currencySet = new HashSet<>(currencyCollection);
-        } else PrefUtils.putWallet(null);
-
+    public static void saveWallet(Collection<Currency> currencyCollection, char[] passw) throws Exception {
+        PrefUtils.putWallet(currencyCollection, passw);
+        currencySet = new HashSet<>(currencyCollection);
     }
 
     public static void updateWallet(Collection<Currency> currencyCollection) throws Exception {

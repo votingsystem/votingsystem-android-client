@@ -34,7 +34,7 @@
 
         <activity android:name="org.votingsystem.activity.CurrencyActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.PinInputActivity"
+        <activity android:name="org.votingsystem.activity.PinActivity"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.EventVSMainActivity"

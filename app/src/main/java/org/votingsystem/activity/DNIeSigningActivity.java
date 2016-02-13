@@ -67,7 +67,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	private NfcAdapter myNfcAdapter;
 	private Tag tagFromIntent;
 	private int acitivityMode;
-    private char[] patternLock;
+    private char[] accessModePassw;
 
 	private Handler myHandler = new Handler();
 
@@ -193,7 +193,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		if(message != null) {
 			((TextView)findViewById(R.id.topMsg)).setText(message);
 		} else findViewById(R.id.topMsg).setVisibility(View.GONE);
-        patternLock = (char[]) getIntent().getExtras().getSerializable(ContextVS.LOCK_PATTERN_KEY);
+        accessModePassw = (char[]) getIntent().getExtras().getSerializable(ContextVS.PASSWORD_KEY);
     }
 
 	@Override public void onResume() {
@@ -232,8 +232,8 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         NfcB exNfcB	 = NfcB.get(tagFromIntent);
         IsoDep exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA != null) || (exNfcB != null) || (exIsoDep != null)) {
-            if(patternLock != null) {
-                char[] password = PrefUtils.getLockPatterProtectedPassword(new String(patternLock));
+            if(accessModePassw != null) {
+                char[] password = PrefUtils.getProtectedPassword(new String(accessModePassw));
                 new SignWithDNIeTask(password).execute();
             } else new SignWithDNIeTask(null).execute();
 		}

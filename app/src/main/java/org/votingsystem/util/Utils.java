@@ -21,7 +21,9 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.PatternLockActivity;
+import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
@@ -197,10 +199,17 @@ public class Utils {
     public static void init_IDCARD_NFC_Process(Integer requestCode, String msg,
             Integer lockActivityMode, AppCompatActivity activity) {
         if(PrefUtils.isDNIeEnabled()) {
-            Intent intent = new Intent(activity, PatternLockActivity.class);
+            Intent intent = null;
+            CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+            switch (passwordAccessMode.getMode()) {
+                case PATTER_LOCK:
+                    intent = new Intent(activity, PatternLockActivity.class);
+                    break;
+                case PIN:
+                    intent = new Intent(activity, PinActivity.class);
+                    break;
+            }
             intent.putExtra(ContextVS.MESSAGE_KEY, msg);
-            if(lockActivityMode == null) lockActivityMode =
-                    PatternLockActivity.MODE_VALIDATE_USER_INPUT_PATTERN;
             intent.putExtra(ContextVS.MODE_KEY, lockActivityMode);
             activity.startActivityForResult(intent, requestCode);
         }else {

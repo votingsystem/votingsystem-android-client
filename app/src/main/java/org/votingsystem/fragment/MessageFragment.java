@@ -244,7 +244,7 @@ public class MessageFragment extends Fragment {
         LOGD(TAG + ".updateWallet", "updateWallet");
         if(Wallet.getCurrencySet() == null) {
             PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                    getString(R.string.enter_wallet_pin_msg), false, TypeVS.CURRENCY);
+                    getString(R.string.enter_wallet_password_msg), false, TypeVS.CURRENCY);
         } else {
             try {
                 SocketMessageDto socketMessageDto = null;

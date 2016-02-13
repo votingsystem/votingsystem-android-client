@@ -70,7 +70,7 @@ public class VoteSender implements Callable<ResponseVS> {
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(AppVS.getInstance().getString(R.string.exception_lbl),
-                    AppVS.getInstance().getString(R.string.pin_error_msg));
+                    AppVS.getInstance().getString(R.string.password_error_msg));
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, AppVS.getInstance());

@@ -227,7 +227,7 @@ public class PaymentFragment extends Fragment {
                 case CURRENCY_SEND:
                     if(Wallet.getCurrencySet() == null) {
                         PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                                getString(R.string.enter_wallet_pin_msg), false,
+                                getString(R.string.enter_wallet_password_msg), false,
                                 TypeVS.CURRENCY);
                         return;
                     }

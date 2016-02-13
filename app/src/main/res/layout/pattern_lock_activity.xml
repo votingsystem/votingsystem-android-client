@@ -11,14 +11,17 @@
     android:paddingRight="10dp"
     tools:context="org.votingsystem.activity.PatternLockActivity">
 
+    <include layout="@layout/toolbar_vs" />
+
     <TextView
-        android:id="@+id/password_text"
+        android:id="@+id/msg"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:textColor="#fff"
         android:textSize="20dp"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
+        android:text="@string/enter_password_msg"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp" />
 

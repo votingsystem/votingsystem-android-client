@@ -36,6 +36,7 @@ import org.votingsystem.fragment.ReceiptGridFragment;
 import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.service.WebSocketService;
+import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
@@ -103,8 +104,7 @@ public class ActivityBase extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        Toolbar toolbar = UIUtils.setSupportActionBar(this);
         appVS = (AppVS) getApplicationContext();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -223,7 +223,6 @@ public class ActivityBase extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         Intent intent = null;
         switch (id) {
             case R.id.menu_debug:
@@ -302,6 +301,24 @@ public class ActivityBase extends AppCompatActivity
 
     @Override protected void onResume() {
         super.onResume();
+        if(!PrefUtils.isDNIeEnabled()) {
+            Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
+            intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
+            startActivity(intent);
+            return;
+        }
+        if(PrefUtils.getCryptoDeviceAccessMode() == null) {
+            DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            startActivity(new Intent(ActivityBase.this,
+                                    CryptoDeviceAccessModeSelectorActivity.class));
+                        }
+                    });
+            UIUtils.showMessageDialog(getString(R.string.message_lbl), getString(
+                    R.string.access_mode_passw_required_msg), positiveButton, null, this);
+            return;
+        }
         navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage());
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
@@ -320,11 +337,6 @@ public class ActivityBase extends AppCompatActivity
         super.onStart();
         if (!PrefUtils.isDataBootstrapDone() && mDataBootstrapThread == null) {
             performDataBootstrap();
-        }
-        if(!PrefUtils.isDNIeEnabled()) {
-            Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-            intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
-            startActivity(intent);
         }
     }
 

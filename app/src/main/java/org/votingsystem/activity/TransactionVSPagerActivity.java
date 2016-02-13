@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
@@ -15,6 +14,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.fragment.TransactionVSFragment;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -25,16 +25,14 @@ public class TransactionVSPagerActivity extends AppCompatActivity {
 
     public static final String TAG = TransactionVSPagerActivity.class.getSimpleName();
 
-    private AppVS appVS;
     private Cursor cursor = null;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getApplicationContext();
+        AppVS appVS = (AppVS) getApplicationContext();
         setContentView(R.layout.pager_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";

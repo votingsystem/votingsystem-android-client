@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -33,6 +32,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -52,8 +52,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.simple_grid);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setTitle("CurrencyConsumedGridActivity");
         gridView = (GridView) findViewById(R.id.gridview);
         CurrencyListAdapter adapter = new CurrencyListAdapter(this, null,false);

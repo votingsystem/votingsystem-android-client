@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
 import java.lang.ref.WeakReference;
@@ -29,8 +29,7 @@ public class FragmentContainerActivity extends AppCompatActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // if we're being restored from a previous state should return or else
         // we could end up with overlapping fragments.

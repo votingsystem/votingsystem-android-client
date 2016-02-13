@@ -23,6 +23,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
@@ -526,6 +527,31 @@ public class UIUtils  {
     public static AlertDialog.Builder getMessageDialogBuilder(ResponseVS responseVS,
             Context context) {
         return getMessageDialogBuilder(responseVS.getCaption(), responseVS.getMessage(), context);
+    }
+
+    public static void showPasswordRequiredDialog(final Activity activity) {
+        DialogButton positiveButton = new DialogButton(activity.getString(R.string.ok_lbl),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        activity.setResult(Activity.RESULT_CANCELED, new Intent());
+                        activity.finish();
+                    }
+                });
+        UIUtils.showMessageDialog(activity.getString(R.string.error_lbl),
+                activity.getString(R.string.passw_missing_msg), positiveButton, null, activity);
+    }
+
+    public static Toolbar setSupportActionBar(AppCompatActivity activity) {
+        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar_vs);
+        activity.setSupportActionBar(toolbar);
+        return toolbar;
+    }
+
+    public static Toolbar setSupportActionBar(AppCompatActivity activity, String title) {
+        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar_vs);
+        activity.setSupportActionBar(toolbar);
+        toolbar.setTitle(title);
+        return toolbar;
     }
 
     public static void killApp(boolean killSafely) {

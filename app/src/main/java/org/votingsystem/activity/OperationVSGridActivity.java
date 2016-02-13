@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -96,8 +95,7 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.simple_grid);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         gridView = (GridView) findViewById(R.id.gridview);
         OperationListAdapter adapter = new OperationListAdapter(this, null,false);
         gridView.setAdapter(adapter);
@@ -151,7 +149,7 @@ public class OperationVSGridActivity extends AppCompatActivity implements Loader
             case R.id.check:
                 if(Wallet.getCurrencySet() == null) {
                     PinDialogFragment.showWalletScreen(getSupportFragmentManager(), broadCastId,
-                            getString(R.string.enter_wallet_pin_msg), false,
+                            getString(R.string.enter_wallet_password_msg), false,
                             TypeVS.CURRENCY);
                     return true;
                 }

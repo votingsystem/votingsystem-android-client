@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +15,7 @@ import android.widget.ImageView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.UIUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -41,8 +41,7 @@ public class ConfirmImageActivity extends AppCompatActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.confirm_image_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         image = (ImageView) findViewById(R.id.selected_image);
         imageUri = (Uri) getIntent().getParcelableExtra(ContextVS.URI_KEY);
         String title = getIntent().getStringExtra(ContextVS.CAPTION_KEY);

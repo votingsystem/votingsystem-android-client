@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -124,8 +123,7 @@ public class CurrencyActivity extends AppCompatActivity {
         appVS = (AppVS) getApplicationContext();
         currency = (Currency) getIntent().getSerializableExtra(ContextVS.CURRENCY_KEY);
         setContentView(R.layout.fragment_container_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if(savedInstanceState == null) {
             currencyRef = new WeakReference<>(new CurrencyFragment());

@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/bkg_vs"
         android:layout_gravity="center"
-        android:text="@string/pin_dialog_caption"
+        android:text="@string/pin_lbl"
         android:gravity="center"
         android:layout_weight="1"
         android:padding="5dp"

@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -104,8 +103,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.currency_request_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_vs);
-        setSupportActionBar(toolbar);
+        UIUtils.setSupportActionBar(this);
         maxValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.MAX_VALUE_KEY);
         defaultValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.DEFAULT_VALUE_KEY);
         currencyCode = getIntent().getStringExtra(ContextVS.CURRENCY_KEY);
