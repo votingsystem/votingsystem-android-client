@@ -1,13 +1,8 @@
 package org.votingsystem.activity;
 
-import android.app.AlertDialog;
-import android.app.SearchManager;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -29,23 +24,13 @@ public class MessageActivity extends AppCompatActivity {
         //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_container_activity);
+        setContentView(R.layout.message_activity);
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
                 AppVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
-        View view = getLayoutInflater().inflate(R.layout.message_activity, null);
         ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        ((TextView) view.findViewById(R.id.caption_text)).setText(responseVS.getCaption());
-        ((TextView) view.findViewById(R.id.message_text)).setText(Html.fromHtml(
+        ((TextView) findViewById(R.id.caption_text)).setText(responseVS.getCaption());
+        ((TextView) findViewById(R.id.message_text)).setText(Html.fromHtml(
                 responseVS.getNotificationMessage()));
-        AlertDialog.Builder builder = new AlertDialog.Builder(this).setView(view);
-        builder.setCancelable(false).setPositiveButton(getString(R.string.accept_lbl),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        onBackPressed();
-                        finish();
-                    }
-                });
-        builder.show();
         ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 

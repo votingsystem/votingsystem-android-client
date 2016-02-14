@@ -1,15 +1,14 @@
 package org.votingsystem.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -54,9 +53,10 @@ public class PinActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pin_activity);
         UIUtils.setSupportActionBar(this);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         pinText = (EditText) findViewById(R.id.pin);
         msgTextView = (TextView) findViewById(R.id.msg);
-        if(getIntent().hasExtra(ContextVS.MESSAGE_KEY)) {
+        if(getIntent().getStringExtra(ContextVS.MESSAGE_KEY) != null) {
             msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(ContextVS.MESSAGE_KEY)));
         }
         withPasswordConfirm = getIntent().getBooleanExtra(ContextVS.PASSWORD_CONFIRM_KEY, false);
@@ -94,8 +94,6 @@ public class PinActivity extends AppCompatActivity  {
                 return false;
             }
         });
-        ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(
-                InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
     private void processPassword(final String passw) {
@@ -170,6 +168,17 @@ public class PinActivity extends AppCompatActivity  {
         finish();
     }
 
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                super.onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " + resultCode);
@@ -178,24 +187,20 @@ public class PinActivity extends AppCompatActivity  {
                 if(Activity.RESULT_OK == resultCode)  {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     processPassword(new String(responseVS.getMessageBytes()));
+                } else if(ResponseVS.SC_ERROR == resultCode) {
+                    setResult(Activity.RESULT_CANCELED);
+                    finish();
                 } else {
                     DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    setResult(Activity.RESULT_CANCELED, new Intent());
-                                    finish();
-                                }
-                            });
-                    DialogButton negativeButton = new DialogButton(getString(R.string.forgotten_passw_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    setResult(Activity.RESULT_CANCELED, new Intent());
+                                    setResult(Activity.RESULT_CANCELED);
                                     finish();
                                 }
                             });
                     UIUtils.showMessageDialog(getString(R.string.error_lbl),
                             getString(R.string.missing_actual_passw_error_msg), positiveButton,
-                            negativeButton, this);
+                            null, this);
                 }
                 break;
             case RC_IDCARD_PASSWORD:

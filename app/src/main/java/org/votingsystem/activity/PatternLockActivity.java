@@ -52,7 +52,7 @@ public class PatternLockActivity extends AppCompatActivity {
         UIUtils.setSupportActionBar(this);
         mCircleLockView = (PatternLockView) findViewById(R.id.lock_view_circle);
         msgTextView = (TextView) findViewById(R.id.msg);
-        if(getIntent().hasExtra(ContextVS.MESSAGE_KEY)) {
+        if(getIntent().getStringExtra(ContextVS.MESSAGE_KEY) != null) {
             msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(ContextVS.MESSAGE_KEY)));
         }
         withPasswordConfirm = getIntent().getExtras().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY, false);
@@ -88,7 +88,7 @@ public class PatternLockActivity extends AppCompatActivity {
         });
         mCircleLockView.setOnNodeTouchListener(new PatternLockView.OnNodeTouchListener() {
             @Override public void onNodeTouched(int NodeId) {
-                LOGD(TAG, "node " + NodeId + " has touched!");
+                //LOGD(TAG, "node " + NodeId + " has touched!");
             }
         });
     }
@@ -165,6 +165,9 @@ public class PatternLockActivity extends AppCompatActivity {
                 if(Activity.RESULT_OK == resultCode)  {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     processPassword(new String(responseVS.getMessageBytes()));
+                } else if(ResponseVS.SC_ERROR == resultCode) {
+                    setResult(Activity.RESULT_CANCELED);
+                    finish();
                 } else {
                     DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                             new DialogInterface.OnClickListener() {
@@ -173,16 +176,9 @@ public class PatternLockActivity extends AppCompatActivity {
                                     finish();
                                 }
                             });
-                    DialogButton negativeButton = new DialogButton(getString(R.string.forgotten_passw_lbl),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    setResult(Activity.RESULT_CANCELED, new Intent());
-                                    finish();
-                                }
-                            });
                     UIUtils.showMessageDialog(getString(R.string.error_lbl),
                             getString(R.string.missing_actual_passw_error_msg), positiveButton,
-                            negativeButton, this);
+                            null, this);
                 }
                 break;
             case RC_IDCARD_PASSWORD:

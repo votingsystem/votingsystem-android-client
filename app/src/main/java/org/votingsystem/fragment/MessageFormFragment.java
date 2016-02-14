@@ -81,7 +81,7 @@ public class MessageFormFragment extends Fragment {
                     case ResponseVS.SC_WS_MESSAGE_SEND_OK:
                         if(socketSession.getBroadCastId().equals(broadCastId)) {
                             MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
-                                    R.string.send_message_lbl), getString(R.string.messagevs_send_ok_msg),
+                                    R.string.send_msg_lbl), getString(R.string.messagevs_send_ok_msg),
                                     getFragmentManager());
                         }
                         break;
@@ -142,14 +142,14 @@ public class MessageFormFragment extends Fragment {
         }
         checkSocketConnection();
         new UserDeviceLoader(serviceURL).execute("");
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.send_message_lbl));
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.send_msg_lbl));
         return view;
     }
 
     private boolean checkSocketConnection() {
         if(!AppVS.getInstance().isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                    getString(R.string.send_message_lbl),
+                    getString(R.string.send_msg_lbl),
                     getString(R.string.connection_required_msg),
                     getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                     new DialogInterface.OnClickListener() {

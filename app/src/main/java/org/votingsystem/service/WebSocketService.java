@@ -292,7 +292,7 @@ public class WebSocketService extends Service {
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS:
                     ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
-                    responseVS.setCaption(getString(R.string.message_lbl)).
+                    responseVS.setCaption(getString(R.string.msg_lbl)).
                             setNotificationMessage(socketMsg.getMessage());
                     MessageContentProvider.insert(getContentResolver(), socketMsg);
                     Utils.showNewMessageNotification();

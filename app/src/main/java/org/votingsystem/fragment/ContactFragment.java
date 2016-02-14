@@ -101,7 +101,7 @@ public class ContactFragment extends Fragment {
             menu.removeItem(R.id.send_message); //to avoid duplicated items
             menu.removeItem(R.id.delete_item);
             menu.add(R.id.general_items, R.id.send_message, 1,
-                        getString(R.string.send_message_lbl));
+                        getString(R.string.send_msg_lbl));
             if(UserVSDto.Type.CONTACT == userVS.getType()) menu.add(R.id.general_items, R.id.delete_item, 3,
                     getString(R.string.remove_contact_lbl));
         }

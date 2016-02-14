@@ -12,13 +12,11 @@ import android.os.Bundle;
 import java.util.Arrays;
 
 import static org.votingsystem.util.LogUtils.LOGD;
-import static org.votingsystem.util.LogUtils.LOGI;
-import static org.votingsystem.util.LogUtils.LOGW;
-import static org.votingsystem.util.LogUtils.makeLogTag;
 
 
 public class NfcBadgeActivity extends Activity {
-    private static final String TAG = makeLogTag(NfcBadgeActivity.class);
+
+    private static final String TAG = NfcBadgeActivity.class.getSimpleName();
     private static final String URL_PREFIX = "votingsystem.org";
     // For debug purposes
     public static final String ACTION_SIMULATE = "org.votingsystem.currency.ACTION_SIMULATE";
@@ -29,7 +27,7 @@ public class NfcBadgeActivity extends Activity {
         // Check for NFC data
         Intent i = getIntent();
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(i.getAction())) {
-            LOGI(TAG, "Badge detected");
+            LOGD(TAG, "Badge detected");
             /* [ANALYTICS:EVENT]
              * TRIGGER:   Scan another attendee's badge.
              * CATEGORY:  'NFC'
@@ -45,7 +43,7 @@ public class NfcBadgeActivity extends Activity {
             // replace https by Unicode character 4, as per normal badge encoding rules
             recordBadge(simulatedUrl.replace("https://", "\u0004"));
         } else {
-            LOGW(TAG, "Invalid action in Intent to NfcBadgeActivity: " + i.getAction());
+            LOGD(TAG, "Invalid action in Intent to NfcBadgeActivity: " + i.getAction());
         }
         finish();
     }

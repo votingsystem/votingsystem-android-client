@@ -6,7 +6,7 @@
             android:title="@string/delete_lbl"/>
         <item android:id="@+id/send_message"
             android:orderInCategory="2"
-            android:title="@string/send_message_lbl"/>
+            android:title="@string/send_msg_lbl"/>
     </group>
 
     <group android:id="@+id/currency_change_items" android:visible="false">

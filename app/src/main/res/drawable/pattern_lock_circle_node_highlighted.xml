@@ -7,14 +7,14 @@
         android:top="10dp">"
         <shape
             android:shape="oval">
-            <solid android:color="#ffffff" />
+            <solid android:color="#888" />
         </shape>
     </item>
     <item>
         <shape
             android:shape="oval">
             <stroke android:width="2dp"
-                android:color="#ffffff" />
+                android:color="#888" />
             <solid android:color="#00000000" />
         </shape>
     </item>

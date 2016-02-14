@@ -4,11 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="#ba0011"
+    android:background="#fff"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
     tools:context="org.votingsystem.activity.PatternLockActivity">
 
     <include layout="@layout/toolbar_vs" />
@@ -17,7 +15,7 @@
         android:id="@+id/msg"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:textColor="#fff"
+        android:textColor="#ba0011"
         android:textSize="20dp"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
@@ -32,9 +30,9 @@
         android:layout_weight="1"
         android:layout_gravity="center"
         app:lock_size="3"
+        app:lock_lineColor="#e3e3e3"
         app:lock_enableVibrate="true"
         app:lock_vibrateTime="100"
-        app:lock_lineColor="#d88"
         app:lock_lineWidth="8dp"
         app:lock_nodeSize="40dp"
         app:lock_padding="20dp"

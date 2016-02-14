@@ -66,6 +66,7 @@ public class CryptoDeviceAccessMode implements Serializable {
                 UIUtils.launchMessageActivity(ResponseVS.ERROR(activity.getString(
                         R.string.retries_exceeded_caption), null).setNotificationMessage(
                         activity.getString(R.string.retries_exceeded_msg)));
+                activity.setResult(ResponseVS.SC_ERROR);
                 activity.finish();
             } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
                     ex.getMessage(), activity.getSupportFragmentManager());

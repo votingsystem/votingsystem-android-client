@@ -35,6 +35,7 @@
         <activity android:name="org.votingsystem.activity.CurrencyActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.PinActivity"
+            android:windowSoftInputMode="stateVisible"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.EventVSMainActivity"
@@ -96,9 +97,11 @@
         <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.PatternLockActivity"
+            android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.DNIeSigningActivity"
+            android:windowSoftInputMode="stateHidden"
             android:label = "nfcIntentActivityLbl"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"

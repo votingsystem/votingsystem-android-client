@@ -7,27 +7,26 @@
 
     <include layout="@layout/toolbar_vs" />
 
-    <Switch
-        android:id="@+id/pinSwitch"
-        android:layout_width="match_parent"
+    <RadioGroup android:id="@+id/radio_group"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:layout_gravity="center"
         android:layout_marginTop="20dp"
-        android:layout_marginLeft="15dp"
-        android:textSize="20dp"
-        android:checked="false"
-        android:text="@string/pin_lbl" />
-    <Switch
-        android:id="@+id/patternLockSwitch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="25dp"
-        android:layout_marginLeft="15dp"
-        android:textSize="20dp"
-        android:checked="false"
-        android:text="@string/patternLock_switch_lbp" />
+        android:layout_marginRight="20dp"
+        android:orientation="vertical">
+        <RadioButton android:id="@+id/radio_pin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pin_lbl"
+            android:textSize="25dp"
+            android:onClick="onRadioButtonClicked"/>
+        <RadioButton android:id="@+id/radio_pattern"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/patternLock_switch_lbp"
+            android:layout_marginTop="20dp"
+            android:textSize="25dp"
+            android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
 
 </LinearLayout>

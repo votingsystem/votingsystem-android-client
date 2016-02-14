@@ -28,11 +28,11 @@ import java.util.TimeZone;
 import static org.votingsystem.util.ContextVS.APPLICATION_ID_KEY;
 import static org.votingsystem.util.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
 import static org.votingsystem.util.LogUtils.LOGD;
-import static org.votingsystem.util.LogUtils.makeLogTag;
+
 
 public class PrefUtils {
 
-    private static final String TAG = makeLogTag(PrefUtils.class.getSimpleName());
+    private static final String TAG = PrefUtils.class.getSimpleName();
 
     public static final String CRYPTO_DEVICE_ACCESS_MODE_KEY = "CRYPTO_DEVICE_ACCESS_MODE_KEY";
 

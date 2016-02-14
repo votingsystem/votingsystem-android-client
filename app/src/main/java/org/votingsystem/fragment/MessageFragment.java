@@ -119,7 +119,7 @@ public class MessageFragment extends Fragment {
             switch (typeVS) {
                 case MESSAGEVS:
                     ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
-                            R.string.message_lbl));
+                            R.string.msg_lbl));
                     ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(socketMessage.getFrom());
                     message_content.setText(socketMessage.getMessage());
                     break;

@@ -14,19 +14,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
@@ -60,14 +53,10 @@ public class ActivityBase extends AppCompatActivity
 
     public static final String TAG = ActivityBase.class.getSimpleName();
 
-
     private AppVS appVS = null;
     private NavigationView navigationView;
     private Thread mDataBootstrapThread = null;
-    private TextView connectionStatusText;
-    private Button connectButton;
-    private TextView headerTextView;
-    private ImageView connectionStatusView;
+    private Menu menu;
 
     private String broadCastId = ActivityBase.class.getSimpleName();
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -116,48 +105,23 @@ public class ActivityBase extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        View header = LayoutInflater.from(this).inflate(R.layout.activity_base_header, null);
-        connectionStatusText = (TextView)header.findViewById(R.id.connection_status_text);
-        connectButton = (Button)header.findViewById(R.id.connect_button);
-        connectButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                ConnectionUtils.init_IDCARD_NFC_Process(ActivityBase.this);
-            }
-        });
-        LinearLayout userBox = (LinearLayout)header.findViewById(R.id.user_box);
-        userBox.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if(appVS.isWithSocketConnection()) showConnectionStatusDialog();
-            }
-        });
-        headerTextView = (TextView)header.findViewById(R.id.headerTextView);
-        connectionStatusView = (ImageView)header.findViewById(R.id.connection_status_img);
-        navigationView.addHeaderView(header);
-
         int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
         if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
     }
 
     private void setConnectionStatusUI() {
-        if(appVS.isWithSocketConnection()) {
-            connectionStatusText.setText(getString(R.string.connected_lbl));
-            connectionStatusView.setVisibility(View.VISIBLE);
-            headerTextView.setText(PrefUtils.getAppUser().getEmail());
-            headerTextView.setVisibility(View.VISIBLE);
-            connectButton.setVisibility(View.GONE);
+        if(appVS.isWithSocketConnection() && menu != null) {
+            menu.findItem(R.id.connect).setIcon(R.drawable.fa_bolt_16_ffff00);
         } else {
-            connectionStatusText.setVisibility(View.GONE);
-            connectionStatusView.setVisibility(View.GONE);
-            headerTextView.setVisibility(View.GONE);
-            connectButton.setVisibility(View.VISIBLE);
+            if(menu != null)
+                menu.findItem(R.id.connect).setIcon(R.drawable.fa_plug_16_ffffff);
         }
     }
 
     private void showConnectionStatusDialog() {
         if(appVS.isWithSocketConnection()) {
-            UserVSDto sessionUserVS = PrefUtils.getAppUser();
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                    getString(R.string.connected_with_lbl), sessionUserVS.getEmail(), this);
+                    getString(R.string.msg_lbl), getString(R.string.disconnect_from_service_quesion_msg), this);
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -212,8 +176,11 @@ public class ActivityBase extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_base, menu);
+        if (!BuildConfig.DEBUG) {
+            menu.findItem(R.id.menu_debug).setVisible(false);
+        }
+        this.menu = menu;
         return true;
     }
 
@@ -230,6 +197,13 @@ public class ActivityBase extends AppCompatActivity
                     intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
                     intent.putExtra(ContextVS.FRAGMENT_KEY, DebugActionRunnerFragment.class.getName());
                     startActivity(intent);
+                }
+                return true;
+            case R.id.connect:
+                if(appVS.isWithSocketConnection()) {
+                    showConnectionStatusDialog();
+                } else {
+                    ConnectionUtils.init_IDCARD_NFC_Process(ActivityBase.this);
                 }
                 return true;
             case R.id.close_app:
@@ -315,7 +289,7 @@ public class ActivityBase extends AppCompatActivity
                                     CryptoDeviceAccessModeSelectorActivity.class));
                         }
                     });
-            UIUtils.showMessageDialog(getString(R.string.message_lbl), getString(
+            UIUtils.showMessageDialog(getString(R.string.msg_lbl), getString(
                     R.string.access_mode_passw_required_msg), positiveButton, null, this);
             return;
         }

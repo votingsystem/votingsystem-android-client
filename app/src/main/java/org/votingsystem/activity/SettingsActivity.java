@@ -29,8 +29,8 @@ public class SettingsActivity extends PreferenceActivity {
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
 
-    public static final int USER_DATA          = 0;
-    public static final int SELECT_ACCESS_MODE = 1;
+    public static final int RC_USER_DATA          = 0;
+    public static final int RC_SELECT_ACCESS_MODE = 1;
 
     private WeakReference<SettingsFragment> settingsRef;
 
@@ -61,7 +61,7 @@ public class SettingsActivity extends PreferenceActivity {
                 @Override public boolean onPreferenceClick(Preference arg0) {
                     Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
                     intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
-                    getActivity().startActivityForResult(intent, USER_DATA);
+                    getActivity().startActivityForResult(intent, RC_USER_DATA);
                     return true;
                 }
             });
@@ -77,13 +77,11 @@ public class SettingsActivity extends PreferenceActivity {
             cryptoAccessButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override public boolean onPreferenceClick(Preference arg0) {
                     Intent intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
-                    getActivity().startActivityForResult(intent, SELECT_ACCESS_MODE);
+                    getActivity().startActivityForResult(intent, RC_SELECT_ACCESS_MODE);
                     return true;
                 }
             });
-            if(PrefUtils.isDNIeEnabled()) {
-                dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
-            }
+            updateView();
         }
 
         @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -100,27 +98,27 @@ public class SettingsActivity extends PreferenceActivity {
             return rootView;
         }
 
+        private void updateView() {
+            CryptoDeviceAccessMode passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+            if(passwAccessMode != null) {
+                switch (passwAccessMode.getMode()) {
+                    case PATTER_LOCK:
+                        cryptoAccessButton.setSummary(getString(R.string.pattern_lock_lbl));
+                        break;
+                    case PIN:
+                        cryptoAccessButton.setSummary(getString(R.string.pin_lbl));
+                        break;
+                }
+            }
+            if(PrefUtils.isDNIeEnabled()) {
+                dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
+            }
+        }
+
         @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
             LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                     resultCode);
-            switch (requestCode) {
-                case SELECT_ACCESS_MODE:
-                    CryptoDeviceAccessMode passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-                    if(passwAccessMode != null) {
-                        switch (passwAccessMode.getMode()) {
-                            case PATTER_LOCK:
-                                cryptoAccessButton.setSummary(getString(R.string.pattern_lock_lbl));
-                                break;
-                            case PIN:
-                                cryptoAccessButton.setSummary(getString(R.string.pin_lbl));
-                                break;
-                        }
-                    }
-                    break;
-                case USER_DATA:
-                    dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
-                    break;
-            }
+            updateView();
         }
     }
 

@@ -25,7 +25,6 @@ import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
-import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.service.PaymentService;
 
@@ -190,33 +189,27 @@ public class Utils {
                 ContextVS.NEW_MESSAGE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(AppVS.getInstance())
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
-                .setAutoCancel(true).setContentTitle(AppVS.getInstance().getString(R.string.message_lbl))
+                .setAutoCancel(true).setContentTitle(AppVS.getInstance().getString(R.string.msg_lbl))
                 .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime(), "HH:mm"))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
     public static void init_IDCARD_NFC_Process(Integer requestCode, String msg,
-            Integer lockActivityMode, AppCompatActivity activity) {
-        if(PrefUtils.isDNIeEnabled()) {
-            Intent intent = null;
-            CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-            switch (passwordAccessMode.getMode()) {
-                case PATTER_LOCK:
-                    intent = new Intent(activity, PatternLockActivity.class);
-                    break;
-                case PIN:
-                    intent = new Intent(activity, PinActivity.class);
-                    break;
-            }
-            intent.putExtra(ContextVS.MESSAGE_KEY, msg);
-            intent.putExtra(ContextVS.MODE_KEY, lockActivityMode);
-            activity.startActivityForResult(intent, requestCode);
-        }else {
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                    activity.getString(R.string.error_lbl), activity.getString(R.string.missing_idcard_msg),
-                    activity.getSupportFragmentManager());
+            Integer activityMode, AppCompatActivity activity) {
+        Intent intent = null;
+        CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+        switch (passwordAccessMode.getMode()) {
+            case PATTER_LOCK:
+                intent = new Intent(activity, PatternLockActivity.class);
+                break;
+            case PIN:
+                intent = new Intent(activity, PinActivity.class);
+                break;
         }
+        intent.putExtra(ContextVS.MESSAGE_KEY, msg);
+        intent.putExtra(ContextVS.MODE_KEY, activityMode);
+        activity.startActivityForResult(intent, requestCode);
     }
 
     //http://stackoverflow.com/questions/1995439/get-android-phone-model-programmatically

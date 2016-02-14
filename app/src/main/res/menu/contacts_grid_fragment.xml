@@ -1,9 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:votingSystem="http://schemas.android.com/apk/res-auto">
+    xmlns:vs="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/search_item"
         android:title="@string/searchLabel"
-        votingSystem:showAsAction="always"
+        vs:showAsAction="always"
         android:orderInCategory="0"
         android:icon="@android:drawable/ic_menu_search"
         android:actionViewClass="android.support.v7.widget.SearchView" />

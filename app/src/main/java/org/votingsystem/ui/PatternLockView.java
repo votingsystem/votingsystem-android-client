@@ -49,7 +49,7 @@ public class PatternLockView  extends ViewGroup {
     private static final String TAG = PatternLockView.class.getSimpleName();
 
     private boolean mIsTouchEnabled = true;
-    private long mFinishTimeout = 1000;
+    private long mFinishTimeout = 500;
     private boolean mIsFinishInterruptable = true;
     private boolean mIsAutoLink;
 
@@ -154,7 +154,7 @@ public class PatternLockView  extends ViewGroup {
         mNodeSize = a.getDimension(R.styleable.PatternLockView_lock_nodeSize, 0);
         mNodeAreaExpand = a.getDimension(R.styleable.PatternLockView_lock_nodeTouchExpand, 0);
         mNodeOnAnim = a.getResourceId(R.styleable.PatternLockView_lock_nodeOnAnim, 0);
-        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.argb(0xb2, 0xff, 0xff, 0xff));
+        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.rgb(227,223,223));
         mLineWidth = a.getDimension(R.styleable.PatternLockView_lock_lineWidth, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
         mPadding = a.getDimension(R.styleable.PatternLockView_lock_padding, 0);
