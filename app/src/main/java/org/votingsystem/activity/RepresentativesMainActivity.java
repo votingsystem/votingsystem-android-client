@@ -1,5 +1,6 @@
 package org.votingsystem.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,7 +17,6 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.RepresentationStateFragment;
 import org.votingsystem.fragment.RepresentativeGridFragment;
@@ -26,6 +26,7 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 
 import java.lang.ref.WeakReference;
 
@@ -38,7 +39,8 @@ public class RepresentativesMainActivity extends ActivityBase {
 
 	public static final String TAG = RepresentativesMainActivity.class.getSimpleName();
 
-    private AppVS appVS = null;
+    public static final int RC_PASSW          = 0;
+
     private String broadCastId = RepresentativesMainActivity.class.getSimpleName();
     private WeakReference<RepresentativeGridFragment> representativeGridRef;
 
@@ -47,16 +49,11 @@ public class RepresentativesMainActivity extends ActivityBase {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            launchRepresentativeService(responseVS.getTypeVS());
-        } else {
-            setProgressDialogVisible(null, null, false);
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION == responseVS.getTypeVS()) {
-                MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
-            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
-            }
+        setProgressDialogVisible(null, null, false);
+        if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION == responseVS.getTypeVS()) {
+            MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+        } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
         }
         }
     };
@@ -79,7 +76,6 @@ public class RepresentativesMainActivity extends ActivityBase {
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState +
                 " - intent extras: " + getIntent().getExtras());
-        appVS = (AppVS) getApplicationContext();
         super.onCreate(savedInstanceState);
         getSupportActionBar().setTitle(getString(R.string.representatives_drop_down_lbl));
         RepresentationStateFragment fragment = new RepresentationStateFragment();
@@ -98,9 +94,8 @@ public class RepresentativesMainActivity extends ActivityBase {
                 builder.setPositiveButton(getString(R.string.continue_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                        broadCastId, null,
-                                        false, TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
+                                Utils.init_IDCARD_NFC_Process(RC_PASSW, null, null,
+                                        RepresentativesMainActivity.this);
                             }
                         });
                 UIUtils.showMessageDialog(builder);
@@ -149,6 +144,19 @@ public class RepresentativesMainActivity extends ActivityBase {
         LOGD(TAG, ".requestDataRefresh() - Requesting manual data refresh - refreshing:");
         RepresentativeGridFragment fragment = representativeGridRef.get();
         fragment.fetchItems(fragment.getOffset());
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        switch (requestCode) {
+            case RC_PASSW:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    launchRepresentativeService(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
+                }
+                break;
+        }
     }
 
     @Override public void onResume() {

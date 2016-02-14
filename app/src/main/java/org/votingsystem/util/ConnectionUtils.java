@@ -40,7 +40,8 @@ public class ConnectionUtils {
     }
 
     public static void init_IDCARD_NFC_Process(final AppCompatActivity activity) {
-        Utils.init_IDCARD_NFC_Process(RC_PASSWORD_REQUEST, null, null, activity);
+        Utils.init_IDCARD_NFC_Process(RC_PASSWORD_REQUEST,
+                activity.getString(R.string.connection_passw_msg), null, activity);
     }
 
     public static void onActivityResult(int requestCode, int resultCode, Intent data,

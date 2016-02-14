@@ -12,8 +12,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -160,11 +158,6 @@ public class QRActionsFragment extends Fragment {
         if (isVisible) {
             ProgressDialogFragment.showDialog(caption, message, broadCastId, getFragmentManager());
         } else ProgressDialogFragment.hide(broadCastId, getFragmentManager());
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menu.clear();
-        menuInflater.inflate(R.menu.activity_base, menu);
     }
 
     @Override public void onPause() {

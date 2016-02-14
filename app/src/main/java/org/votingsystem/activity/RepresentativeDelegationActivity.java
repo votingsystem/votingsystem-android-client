@@ -1,5 +1,6 @@
 package org.votingsystem.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,7 +26,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.ReceiptFragment;
 import org.votingsystem.service.RepresentativeService;
@@ -33,9 +33,11 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -51,6 +53,8 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class RepresentativeDelegationActivity extends AppCompatActivity {
 	
 	public static final String TAG = RepresentativeDelegationActivity.class.getSimpleName();
+
+    public static final int RC_PASSW          = 0;
 
     public static final String ANONYMOUS_SELECTED_KEY  = "ANONYMOUS_SELECTED_KEY";
     public static final String PUBLIC_SELECTED_KEY     = "PUBLIC_SELECTED_KEY";
@@ -70,40 +74,34 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            sendDelegation();
-        }
-        else {
-            setProgressDialogVisible(null, null, false);
-            if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
-                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+        setProgressDialogVisible(null, null, false);
+        if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.error_lbl),
                     responseVS.getNotificationMessage(), RepresentativeDelegationActivity.this).
                     setPositiveButton(getString(R.string.open_receipt_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                            Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
-                            intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
-                            intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
-                            startActivity(intent);
-                            }
-                        });
-                UIUtils.showMessageDialog(builder);
-            } else {
-                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(responseVS.getCaption(),
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
+                                    intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
+                                    intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                                    startActivity(intent);
+                                }
+                            });
+            UIUtils.showMessageDialog(builder);
+        } else {
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(responseVS.getCaption(),
                     responseVS.getNotificationMessage(),  RepresentativeDelegationActivity.this).
                     setPositiveButton(getString(R.string.accept_lbl),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                Intent resultIntent = new Intent(
-                                    RepresentativeDelegationActivity.this, RepresentativesMainActivity.class);
-                                startActivity(resultIntent);
-                                RepresentativeDelegationActivity.this.finish();
-                            }
-                        });
-                UIUtils.showMessageDialog(builder);
-            }
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Intent resultIntent = new Intent(
+                                            RepresentativeDelegationActivity.this, RepresentativesMainActivity.class);
+                                    startActivity(resultIntent);
+                                    RepresentativeDelegationActivity.this.finish();
+                                }
+                            });
+            UIUtils.showMessageDialog(builder);
         }
         }
     };
@@ -242,9 +240,8 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 builder.setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                PinDialogFragment.showPinScreen(getSupportFragmentManager(),
-                                        broadCastId, null,
-                                        false, null);
+                                Utils.init_IDCARD_NFC_Process(RC_PASSW, null, null,
+                                        RepresentativeDelegationActivity.this);
                             }
                         });
                 UIUtils.showMessageDialog(builder);
@@ -267,6 +264,18 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        switch (requestCode) {
+            case RC_PASSW:
+                if(Activity.RESULT_OK == resultCode) {
+                    sendDelegation();
+                }
+                break;
         }
     }
 

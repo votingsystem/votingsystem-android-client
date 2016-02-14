@@ -31,11 +31,10 @@ public class Wallet {
 
     public static Set<Currency> getCurrencySet() {
         if(currencySet == null) return null;
-        else return new HashSet<>(currencySet);
+        return new HashSet<>(currencySet);
     }
 
     public static Set<String> getHashCertVSSet() {
-        if(currencySet == null) return null;
         Set<String> result = new HashSet<>();
         for(Currency currency : currencySet) {
             result.add(currency.getHashCertVS());

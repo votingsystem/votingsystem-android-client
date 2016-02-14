@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.votingsystem.activity.CurrencyActivity;
-import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
@@ -32,7 +32,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
@@ -47,7 +46,7 @@ public class WalletFragment extends Fragment {
 
     public static final String TAG = WalletFragment.class.getSimpleName();
 
-    public static final int PIN          = 0;
+    public static final int RC_PASSW          = 0;
 
     private View rootView;
     private GridView gridView;
@@ -97,10 +96,8 @@ public class WalletFragment extends Fragment {
         });
         if(Wallet.getCurrencySet() == null) {
             currencyList = new ArrayList<>();
-            Intent intent = new Intent(getActivity(),  PinActivity.class);
-            intent.putExtra(ContextVS.MODE_KEY, PinActivity.MODE_VALIDATE_INPUT);
-            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_wallet_password_msg));
-            startActivityForResult(intent, PIN);
+            Utils.init_IDCARD_NFC_Process(RC_PASSW, getString(R.string.enter_wallet_password_msg),
+                    null, (AppCompatActivity)getActivity());
         } else {
             currencyList = new ArrayList<>(Wallet.getCurrencySet());
             printSummary();
@@ -143,7 +140,7 @@ public class WalletFragment extends Fragment {
         LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
                 resultCode);
         switch (requestCode) {
-            case PIN:
+            case RC_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     try {
@@ -170,8 +167,8 @@ public class WalletFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.open_wallet:
-                PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                        getString(R.string.enter_wallet_password_msg), false, TypeVS.CURRENCY);
+                Utils.init_IDCARD_NFC_Process(RC_PASSW, getString(R.string.enter_wallet_password_msg),
+                        null, (AppCompatActivity)getActivity());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

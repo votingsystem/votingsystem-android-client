@@ -25,7 +25,6 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.PinDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectTagVSDialogFragment;
 import org.votingsystem.service.PaymentService;
@@ -34,8 +33,11 @@ import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
+import org.votingsystem.util.Wallet;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -46,6 +48,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
 	
 	public static final String TAG = CurrencyRequesActivity.class.getSimpleName();
 
+    public static final int RC_PASSW          = 0;
 
     private LinearLayout tag_info;
     private TextView tag_text;
@@ -69,14 +72,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
             final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             TagVSDto tagVS = (TagVSDto) intent.getSerializableExtra(ContextVS.TAG_KEY);
             if(tagVS != null) setTagVS(tagVS);
-            if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-                if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-                switch(responseVS.getTypeVS()) {
-                    case CURRENCY_REQUEST:
-                        sendCurrencyRequest((char[]) responseVS.getData());
-                        break;
-                }
-            } else if(responseVS != null){
+            if(responseVS != null){
                 switch(responseVS.getTypeVS()) {
                     case CURRENCY_REQUEST:
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
@@ -161,9 +157,8 @@ public class CurrencyRequesActivity extends AppCompatActivity {
                 if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
                 transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
-                PinDialogFragment.showPinScreen(getSupportFragmentManager(), broadCastId,
-                        MsgUtils.getCurrencyRequestMessage(transactionDto, CurrencyRequesActivity.this),
-                        false, TypeVS.CURRENCY_REQUEST);
+                Utils.init_IDCARD_NFC_Process(RC_PASSW, MsgUtils.getCurrencyRequestMessage(
+                        transactionDto, CurrencyRequesActivity.this), null, this);
             } else errorMsgTextView.setVisibility(View.VISIBLE);
         }
         return true;
@@ -198,6 +193,19 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         setProgressDialogVisible(true, getString(R.string.currency_request_msg_subject),
                 MsgUtils.getCurrencyRequestMessage(transactionDto, this));
         startService(startIntent);
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
+                resultCode);
+        switch (requestCode) {
+            case RC_PASSW:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    sendCurrencyRequest(new String(responseVS.getMessageBytes()).toCharArray());
+                }
+                break;
+        }
     }
 
     @Override public void onResume() {

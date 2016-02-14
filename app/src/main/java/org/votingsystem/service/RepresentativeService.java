@@ -96,7 +96,7 @@ public class RepresentativeService extends IntentService {
     }
 
     private void checkRepresentationState(String serviceCaller) {
-        if(appVS.getUserVS() == null) {
+        if(appVS.isWithSocketConnection() || appVS.getAccessControl() == null) {
             appVS.broadcastResponse(ResponseVS.ERROR(getString(R.string.error_lbl),
                     getString(R.string.connection_required_msg)).setServiceCaller(serviceCaller));
             return;

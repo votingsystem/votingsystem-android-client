@@ -15,8 +15,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -77,11 +75,6 @@ public class MessagesGridFragment extends Fragment implements
         getLoaderManager().initLoader(loaderId, null, this);
         setHasOptionsMenu(true);
         return rootView;
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menu.clear();
-        menuInflater.inflate(R.menu.activity_base, menu);
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {

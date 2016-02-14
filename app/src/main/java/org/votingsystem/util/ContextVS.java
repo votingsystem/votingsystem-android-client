@@ -48,6 +48,7 @@ public class ContextVS {
 
     //Intent keys
     public static final String BOOTSTRAP_DONE = "BOOTSTRAP_DONE";
+    public static final String DNIE_KEY = "DNIE_KEY";
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String DTO_KEY = "DTO_KEY";
@@ -57,7 +58,6 @@ public class ContextVS {
     public static final String PASSWORD_KEY = "PASSWORD_KEY";
     public static final String PROTECTED_PASSWORD_KEY = "PROTECTED_PASSWORD_KEY";
     public static final String CAN_KEY = "CAN_KEY";
-    public static final String DNIE_KEY = "DNIE_KEY";
     public static final String DOUBLE_BACK_KEY = "DOUBLE_BACK_KEY";
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";
     public static final String PERIOD_KEY = "PERIOD";

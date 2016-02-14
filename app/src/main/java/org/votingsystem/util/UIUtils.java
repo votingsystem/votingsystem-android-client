@@ -550,7 +550,7 @@ public class UIUtils  {
     public static Toolbar setSupportActionBar(AppCompatActivity activity, String title) {
         Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar_vs);
         activity.setSupportActionBar(toolbar);
-        toolbar.setTitle(title);
+        activity.getSupportActionBar().setTitle(title);
         return toolbar;
     }
 

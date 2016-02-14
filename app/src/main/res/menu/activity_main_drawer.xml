@@ -24,10 +24,6 @@
                 android:id="@+id/wallet"
                 android:icon="@drawable/fa_money_32"
                 android:title="@string/wallet_lbl" />
-            <item
-                android:id="@+id/contacts"
-                android:icon="@drawable/fa_user_32"
-                android:title="@string/contacts_lbl" />
         </menu>
     </item>
 
@@ -36,6 +32,10 @@
             android:id="@+id/fa_qrcode"
             android:icon="@drawable/fa_qrcode_32"
             android:title="@string/qr_codes_lbl" />
+        <item
+            android:id="@+id/contacts"
+            android:icon="@drawable/fa_user_32"
+            android:title="@string/contacts_lbl" />
         <item
             android:id="@+id/receipts"
             android:icon="@drawable/fa_cert_32"

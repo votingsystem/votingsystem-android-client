@@ -23,11 +23,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.activity.CryptoDeviceAccessModeSelectorActivity;
 import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
-import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
@@ -174,8 +172,8 @@ public class UserDataFormFragment extends Fragment {
             String province = addressVS.getProvince() == null ? "":addressVS.getProvince();
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.user_data_form_lbl),
-                    getString(R.string.user_data_confirm_msg, userVSDto.getPhone(),
-                            canText.getText().toString(),
+                    getString(R.string.user_data_confirm_msg, canText.getText().toString(),
+                            userVSDto.getPhone(),
                             userVSDto.getEmail(), address, postalCode, city, province,
                             addressVS.getCountry().getName()), getActivity());
             builder.setPositiveButton(getString(R.string.continue_lbl),
@@ -234,16 +232,8 @@ public class UserDataFormFragment extends Fragment {
         switch (requestCode) {
             case DNIE_PASSWORD_REQUEST:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    if(Activity.RESULT_OK == resultCode) {
-                        PrefUtils.putDNIeEnabled(true);
-                        password = new String(responseVS.getMessageBytes()).toCharArray();
-                        CryptoDeviceAccessMode passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-                        if(passwAccessMode == null) {
-                            Intent intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
-                            getActivity().startActivityForResult(intent, ACCESS_MODE_SELECT);
-                        }
-                    }
+                    PrefUtils.putDNIeEnabled(true);
+                    getActivity().finish();
                 }
                 break;
         }

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -42,6 +43,7 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.debug.DebugActionRunnerFragment;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -52,6 +54,8 @@ public class ActivityBase extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = ActivityBase.class.getSimpleName();
+
+    private WeakReference<Fragment> currentFragment;
 
     private AppVS appVS = null;
     private NavigationView navigationView;
@@ -162,6 +166,8 @@ public class ActivityBase extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
+        if(currentFragment != null && currentFragment.get() != null)
+                currentFragment.get().onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -181,6 +187,7 @@ public class ActivityBase extends AppCompatActivity
             menu.findItem(R.id.menu_debug).setVisible(false);
         }
         this.menu = menu;
+        setConnectionStatusUI();
         return true;
     }
 
@@ -236,13 +243,15 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.currency_accounts:
+                currentFragment = new WeakReference<Fragment>(new CurrencyAccountsPagerFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new CurrencyAccountsPagerFragment(), CurrencyAccountsPagerFragment.TAG).commit();
+                        currentFragment.get(), CurrencyAccountsPagerFragment.TAG).commit();
                 break;
             case R.id.wallet:
                 getSupportActionBar().setTitle(getString(R.string.wallet_lbl));
+                currentFragment = new WeakReference<Fragment>(new WalletFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new WalletFragment(), WalletFragment.TAG).commit();
+                        currentFragment.get(), WalletFragment.TAG).commit();
                 break;
             case R.id.contacts:
                 intent = new Intent(this, ContactsActivity.class);
@@ -250,18 +259,21 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.fa_qrcode:
+                currentFragment = new WeakReference<Fragment>(new QRActionsFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new QRActionsFragment(), QRActionsFragment.TAG).commit();
+                        currentFragment.get(), QRActionsFragment.TAG).commit();
                 break;
             case R.id.receipts:
                 getSupportActionBar().setTitle(getString(R.string.receipts_lbl));
+                currentFragment = new WeakReference<Fragment>(new ReceiptGridFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new ReceiptGridFragment(), ReceiptGridFragment.TAG).commit();
+                        currentFragment.get(), ReceiptGridFragment.TAG).commit();
                 break;
             case R.id.messages:
                 getSupportActionBar().setTitle(getString(R.string.messages_lbl));
+                currentFragment = new WeakReference<Fragment>(new MessagesGridFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new MessagesGridFragment(), MessagesGridFragment.TAG).commit();
+                        currentFragment.get(), MessagesGridFragment.TAG).commit();
                 break;
             case R.id.settings:
                 intent = new Intent(this, SettingsActivity.class);
@@ -298,7 +310,6 @@ public class ActivityBase extends AppCompatActivity
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
-        setConnectionStatusUI();
     }
 
     @Override protected void onPause() {

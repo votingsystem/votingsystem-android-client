@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -100,7 +101,7 @@ public class PrefUtils {
     public static boolean isDNIeEnabled() {
         SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
-        return pref.getBoolean(ContextVS.DNIE_KEY, true);
+        return pref.getBoolean(ContextVS.DNIE_KEY, false);
     }
 
     public static void putDNIeCAN(String CAN) {
@@ -263,6 +264,7 @@ public class PrefUtils {
                 result = CurrencyDto.deSerializeCollection(currencyDtoSet);
             }
         } catch(Exception ex) {ex.printStackTrace();}
+        if(result == null) return new HashSet<>();
         return result;
     }
 

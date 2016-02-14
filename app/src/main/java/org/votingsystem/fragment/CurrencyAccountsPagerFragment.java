@@ -8,8 +8,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,11 +59,6 @@ public class CurrencyAccountsPagerFragment extends Fragment {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.currency_accounts_lbl));
         setHasOptionsMenu(true);
         return rootView;
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menu.clear();
-        menuInflater.inflate(R.menu.activity_base, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

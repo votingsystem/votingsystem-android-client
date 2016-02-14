@@ -577,8 +577,8 @@
     <string name="enter_password_for_dni_msg">Introduzca la contraseña de su DNI</string>
     <string name="missing_idcard_msg">Para poder operar con la aplicación debe configurar su DNI en \'ajustes\'</string>
     <string name="search_label" />
-    <string name="first_run_msg">Para poder usar la aplicación deberá rellenar los siguientes datos. La aplicación le pedirá que los firme con su DNI electrónico</string>
-    <string name="user_data_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/>
+    <string name="first_run_msg">Para poder usar la aplicación debe rellenar el formulario. La aplicación le pedirá que lo firme con su DNI electrónico</string>
+    <string name="user_data_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/><br/>
         <b>CAN: </b>%1$s<br/>
         <b>Teléfono móvil: </b>%2$s<br/>
         <b>email: </b>%3$s<br/>
@@ -596,4 +596,5 @@
     <string name="retries_exceeded_caption">ha superado el número máximo de intentos</string>
     <string name="retries_exceeded_msg">debe establecer de nuevo la contraseña utilizando su DNI</string>
     <string name="disconnect_from_service_quesion_msg">¿Desea desconectar del servicio?</string>
+    <string name="connection_passw_msg">Introduzca la contraseña para poder conectar al servicio</string>
 </resources>

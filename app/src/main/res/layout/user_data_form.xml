@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:hint="@string/can_dialog_caption"
-                android:imeActionLabel="@string/can_dialog_caption"
+                android:imeActionLabel="@string/cancel_lbl"
                 android:inputType="number"
                 android:maxLength="8">
                 <requestFocus />

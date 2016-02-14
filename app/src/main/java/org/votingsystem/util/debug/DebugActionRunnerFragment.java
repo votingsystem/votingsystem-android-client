@@ -20,7 +20,6 @@ import org.votingsystem.util.debug.actions.CurrencyConsumedAction;
 import org.votingsystem.util.debug.actions.DeleteDBAction;
 import org.votingsystem.util.debug.actions.ForceSyncNowAction;
 import org.votingsystem.util.debug.actions.NFCActivityAction;
-import org.votingsystem.util.debug.actions.OperationVSAction;
 import org.votingsystem.util.debug.actions.PatternLockAction;
 import org.votingsystem.util.debug.actions.PrefsAction;
 
@@ -45,7 +44,6 @@ public class DebugActionRunnerFragment extends Fragment {
         tests.addView(createTestAction(new PrefsAction()));
         tests.addView(createTestAction(new DeleteDBAction()));
         tests.addView(createTestAction(new CurrencyConsumedAction()));
-        tests.addView(createTestAction(new OperationVSAction()));
         tests.addView(createTestAction(new BrowserVSAction()));
         tests.addView(createTestAction(new NFCActivityAction((AppVS) getActivity().getApplicationContext())));
 
