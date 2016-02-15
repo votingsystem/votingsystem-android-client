@@ -49,9 +49,7 @@ import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
-import org.votingsystem.util.Wallet;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;

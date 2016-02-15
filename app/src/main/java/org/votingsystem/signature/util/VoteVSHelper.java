@@ -1,7 +1,5 @@
 package org.votingsystem.signature.util;
 
-import android.util.Base64;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.voting.AccessRequestDto;
@@ -45,7 +43,6 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     private EventVSDto eventVS;
     private VoteVSCancelerDto cancelerDto;
     private AccessRequestDto accessRequestDto;
-    private byte[] encryptedKey = null;
     private transient SMIMEMessage voteReceipt;
     private transient SMIMEMessage cancelVoteReceipt;
     private CertificationRequestVS certificationRequest;
@@ -67,11 +64,6 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
                 voteVSDto.getEventVS().getAccessControl().getServerURL(),
                 voteVSDto.getEventVS().getId(),
                 voteVSHelper.hashCertVSBase64);
-        byte[] base64EncodedKey = Base64.encode(
-                voteVSHelper.certificationRequest.getPrivateKey().getEncoded(), Base64.NO_WRAP);
-        byte[] encryptedKey = Encryptor.encryptMessage(
-                base64EncodedKey, AppVS.getInstance().getX509UserCert());
-        voteVSHelper.encryptedKey = encryptedKey;
         return voteVSHelper;
     }
 
@@ -179,14 +171,6 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
 
     public void setCancelVoteReceipt(SMIMEMessage cancelVoteReceipt) {
         this.cancelVoteReceipt = cancelVoteReceipt;
-    }
-
-    public byte[] getEncryptedKey() {
-        return encryptedKey;
-    }
-
-    public void setEncryptedKey(byte[] encryptedKey) {
-        this.encryptedKey = encryptedKey;
     }
 
     public CertificationRequestVS getCertificationRequest() {

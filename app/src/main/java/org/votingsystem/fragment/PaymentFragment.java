@@ -39,7 +39,6 @@ import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Set;
 
 import static org.votingsystem.util.ContextVS.CALLER_KEY;

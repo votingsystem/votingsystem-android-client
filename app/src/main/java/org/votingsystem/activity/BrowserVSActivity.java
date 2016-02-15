@@ -84,11 +84,11 @@ public class BrowserVSActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
+        setContentView(R.layout.browservs);
         appVS = (AppVS) getApplicationContext();
         viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
         jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
         doubleBackEnabled = getIntent().getBooleanExtra(ContextVS.DOUBLE_BACK_KEY, true);
-        setContentView(R.layout.browservs);
         if(savedInstanceState != null) {
             operationVS = (OperationVS) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
         }

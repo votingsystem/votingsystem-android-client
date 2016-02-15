@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.fragment.EventVSFragment;
+import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
@@ -28,6 +29,8 @@ public class EventVSPagerActivity extends AppCompatActivity {
     public static final String TAG = EventVSPagerActivity.class.getSimpleName();
 
     private Cursor cursor = null;
+    private ViewPager mViewPager;
+    private ActivityResult activityResult;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
@@ -37,7 +40,7 @@ public class EventVSPagerActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Integer cursorPosition = getIntent().getIntExtra(CURSOR_POSITION_KEY, -1);
         String eventStateStr = getIntent().getStringExtra(EVENT_STATE_KEY);
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (ViewPager) findViewById(R.id.pager);
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
@@ -69,6 +72,13 @@ public class EventVSPagerActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        this.activityResult = new ActivityResult(requestCode, resultCode, data);
+    }
+
+    public ActivityResult getActivityResult() {
+        ActivityResult result = this.activityResult;
+        this.activityResult = null;
+        return result;
     }
 
     public class EventsPagerAdapter extends FragmentStatePagerAdapter {

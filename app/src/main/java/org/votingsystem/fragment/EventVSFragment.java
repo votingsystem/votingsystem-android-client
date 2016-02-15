@@ -30,6 +30,7 @@ import android.widget.TextView;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.BrowserVSActivity;
 import org.votingsystem.activity.DNIeSigningActivity;
+import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
@@ -41,6 +42,7 @@ import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.service.VoteService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.VoteVSHelper;
+import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -269,7 +271,6 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         try {
@@ -333,11 +334,9 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     }
 
-
-
     private void showReceiptScreen(final VoteVSHelper voteVSHelper) {
-        LOGD(TAG + ".showReceiptScreen", "showReceiptScreen");
-        ((LinearLayout)rootView.findViewById(R.id.receipt_buttons)).setVisibility(View.VISIBLE);
+        LOGD(TAG, "showReceiptScreen");
+        rootView.findViewById(R.id.receipt_buttons).setVisibility(View.VISIBLE);
         TextView subjectTextView = (TextView) rootView.findViewById(R.id.event_subject);
         String subject = voteVSHelper.getEventVS().getSubject();
         if(subject != null && subject.length() > MAX_SUBJECT_SIZE)
@@ -421,10 +420,16 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         } catch (Exception ex) { ex.printStackTrace(); }
     }
 
+
     @Override public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
+        ActivityResult activityResult = ((EventVSPagerActivity)getActivity()).getActivityResult();
+        if(activityResult != null) {
+            onActivityResult(activityResult.getRequestCode(),
+                    activityResult.getResultCode(), activityResult.getData());
+        }
     }
 
     @Override public void onPause() {
