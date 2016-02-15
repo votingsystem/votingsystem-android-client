@@ -48,7 +48,7 @@ public class ConnectionUtils {
                         AppCompatActivity activity) {
         LOGD(TAG, " --- onActivityResult ---");
         if(data == null) return;
-        final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch (requestCode) {
             case RC_INIT_CONNECTION_REQUEST:
                 if(responseVS != null && responseVS.getSMIME() != null) {

@@ -17,10 +17,6 @@
 
         <activity android:name="org.votingsystem.activity.ActivityBase"
             android:label="@string/app_name" android:theme="@style/ThemeVS">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
 
         <activity android:name="org.votingsystem.activity.BrowserVSActivity"
@@ -40,6 +36,10 @@
 
         <activity android:name="org.votingsystem.activity.EventVSMainActivity"
             android:label="@string/app_name" android:theme="@style/ThemeVS">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
 
         <activity android:name="org.votingsystem.activity.EventVSSearchActivity" android:theme="@style/ThemeVS">

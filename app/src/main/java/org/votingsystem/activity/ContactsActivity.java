@@ -3,6 +3,7 @@ package org.votingsystem.activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.view.MenuItem;
 
 import org.votingsystem.android.R;
@@ -38,6 +39,7 @@ public class ContactsActivity extends ActivityBase {
         contactsGridRef = new WeakReference<>(fragment);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment,
                 ((Object) fragment).getClass().getSimpleName()).commit();
+        ((NavigationView) findViewById(R.id.nav_view)).inflateMenu(R.menu.drawer_currency);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {

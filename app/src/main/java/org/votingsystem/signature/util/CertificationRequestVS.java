@@ -53,7 +53,6 @@ public class CertificationRequestVS implements java.io.Serializable {
     private transient PKCS10CertificationRequest csr;
     private transient SignedMailGenerator signedMailGenerator;
     private transient KeyPair keyPair;
-    private String hashPin;
     private String signatureMechanism;
     private X509Certificate certificate;
     private byte[] signedCsr;
@@ -118,7 +117,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getUserRequest (String signatureMechanism, String provider,
+    public static CertificationRequestVS getUserRequest(String signatureMechanism, String provider,
              String nif, String email, String phone, String deviceId,
              String givenName, String surName, DeviceVSDto.Type deviceType)
             throws NoSuchAlgorithmException,
@@ -231,14 +230,6 @@ public class CertificationRequestVS implements java.io.Serializable {
             csr = new PKCS10CertificationRequest(signedCsr);
         }
         return csr;
-    }
-
-    public String getHashPin() {
-        return hashPin;
-    }
-
-    public void setHashPin(String hashPin) {
-        this.hashPin = hashPin;
     }
 
     public byte[] getSignedCsr() {

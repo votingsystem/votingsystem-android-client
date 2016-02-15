@@ -16,15 +16,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.bouncycastle2.cert.jcajce.JcaCertStore;
+import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.dto.CertRequestDto;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.signature.smime.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.ui.DNIePasswordDialog;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -43,6 +48,8 @@ import java.util.Arrays;
 import es.gob.jmulticard.jse.provider.DnieProvider;
 import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
 
+import static org.votingsystem.util.ContextVS.PROVIDER;
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -66,7 +73,8 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	private String msgSubject;
 	private NfcAdapter myNfcAdapter;
 	private Tag tagFromIntent;
-	private int acitivityMode;
+	private boolean requestCsr;
+	private int activityMode;
     private char[] accessModePassw;
 
 	private Handler myHandler = new Handler();
@@ -85,92 +93,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		}
 	};
 
-
-	public class SignWithDNIeTask extends AsyncTask<Void, Integer, ResponseVS> {
-
-		private char[] password;
-
-		public SignWithDNIeTask(char[] password) {
-			this.password = password;
-		}
-
-		@Override
-	    protected void onPreExecute()  {
-			myHandler.post(newRead);
-			ProgressDialogFragment.showDialog(getString(R.string.dnie_sign_progress_caption),
-					getString(R.string.dnie_sign_connecting_msg),
-					getSupportFragmentManager());
-	    }
-	    
-		@Override
-	    protected ResponseVS doInBackground(Void... arg0) {
-			ResponseVS responseVS = null;
-			try  {
-				DnieProvider p = new DnieProvider();
-				p.setProviderTag(tagFromIntent);
-				p.setProviderCan(PrefUtils.getDNIeCAN());
-				Security.insertProviderAt(p, 1);
-				//Deactivate fastmode
-				System.setProperty("es.gob.jmulticard.fastmode", "false");
-				DNIePasswordDialog myFragment = new DNIePasswordDialog(DNIeSigningActivity.this, password, true);
-				DNIeDialogManager.setDialogUIHandler(myFragment);
-				KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
-				ksUserDNIe.load(null, null);
-				//force load real certs
-				ksUserDNIe.getKey(CERT_SIGN, null);
-				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
-				UserVSDto appUser = null;
-				if(MODE_PASSWORD_REQUEST == acitivityMode) {
-					UserVSDto userFromCert = UserVSDto.getUserVS(userCert);
-					toUser = getString(R.string.voting_system_lbl);
-					appUser = PrefUtils.getAppUser();
-					appUser.setNIF(userFromCert.getNIF()).setCertificate(userCert);
-					appUser.setFirstName(userFromCert.getFirstName());
-					appUser.setLastName(userFromCert.getLastName());
-					if(userFromCert.getCountry() != null) appUser.setCountry(userFromCert.getCountry());
-					if(userFromCert.getCn() != null) appUser.setCn(userFromCert.getCn());
-					msgSubject = getString(R.string.user_data_lbl);
-					textToSign = JSON.writeValueAsString(appUser);
-				}
-				PrivateKey privateKey = (PrivateKey) ksUserDNIe.getKey(CERT_SIGN, null);
-				Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
-				Store cerStore = new JcaCertStore(Arrays.asList(chain));
-
-				SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(privateKey, userCert, cerStore,
-						toUser, textToSign, msgSubject);
-				smimeMessage = new MessageTimeStamper(smimeMessage,
-						AppVS.getInstance().getTimeStampServiceURL()).call();
-
-                responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
-				if(MODE_PASSWORD_REQUEST == acitivityMode) {
-					PrefUtils.putAppUser(appUser);
-					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());
-				}
-                responseVS.setTypeVS(operation);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				showMessageDialog(getString(R.string.error_lbl), getString(R.string.dnie_connection_error_msg));
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				showMessageDialog(getString(R.string.error_lbl), ex.getMessage());
-			}
-			return responseVS;
-        }
-
-	    @Override
-	    protected void onPostExecute(ResponseVS responseVS) {
-			LOGD(TAG, "onPostExecute");
-            myHandler.post(askForRead);
-            ProgressDialogFragment.hide(getSupportFragmentManager());
-            if(responseVS != null) {
-				Intent resultIntent = new Intent();
-				resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-				setResult(Activity.RESULT_OK, resultIntent);
-				finish();
-			}
-        }
-    }
-
 	private void showMessageDialog(String caption, String message) {
 		ProgressDialogFragment.hide(getSupportFragmentManager());
 		MessageDialogFragment.showDialog(caption, message, getSupportFragmentManager());
@@ -187,9 +109,11 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         operation = (TypeVS) getIntent().getExtras().getSerializable(ContextVS.OPERATIONVS_KEY);
         textToSign = getIntent().getExtras().getString(ContextVS.MESSAGE_CONTENT_KEY);
         toUser = getIntent().getExtras().getString(ContextVS.USER_KEY);
+		if(toUser == null) toUser = getString(R.string.voting_system_lbl);
         msgSubject = getIntent().getExtras().getString(ContextVS.MESSAGE_SUBJECT_KEY);
-		acitivityMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY, -1);
+		activityMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY, -1);
 		String message = getIntent().getExtras().getString(ContextVS.MESSAGE_KEY);
+		requestCsr = getIntent().getExtras().getBoolean(ContextVS.CSR_KEY, false);
 		if(message != null) {
 			((TextView)findViewById(R.id.topMsg)).setText(message);
 		} else findViewById(R.id.topMsg).setVisibility(View.GONE);
@@ -239,4 +163,100 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		}
 	}
 
+	public class SignWithDNIeTask extends AsyncTask<Void, Integer, ResponseVS> {
+
+		private char[] password;
+
+		public SignWithDNIeTask(char[] password) {
+			this.password = password;
+		}
+
+		@Override
+		protected void onPreExecute()  {
+			myHandler.post(newRead);
+			ProgressDialogFragment.showDialog(getString(R.string.dnie_sign_progress_caption),
+					getString(R.string.dnie_sign_connecting_msg),
+					getSupportFragmentManager());
+		}
+
+		@Override
+		protected ResponseVS doInBackground(Void... arg0) {
+			ResponseVS responseVS = null;
+			try  {
+				DnieProvider p = new DnieProvider();
+				p.setProviderTag(tagFromIntent);
+				p.setProviderCan(PrefUtils.getDNIeCAN());
+				Security.insertProviderAt(p, 1);
+				//Deactivate fastmode
+				System.setProperty("es.gob.jmulticard.fastmode", "false");
+				DNIePasswordDialog myFragment = new DNIePasswordDialog(DNIeSigningActivity.this, password, true);
+				DNIeDialogManager.setDialogUIHandler(myFragment);
+				KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
+				ksUserDNIe.load(null, null);
+				//force load real certs
+				ksUserDNIe.getKey(CERT_SIGN, null);
+				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
+				UserVSDto appUser = null;
+				if(MODE_PASSWORD_REQUEST == activityMode) {
+					UserVSDto userFromCert = UserVSDto.getUserVS(PrincipalUtil.getSubjectX509Principal(userCert));
+					appUser = PrefUtils.getAppUser();
+					appUser.setNIF(userFromCert.getNIF()).setCertificate(userCert);
+					appUser.setFirstName(userFromCert.getFirstName());
+					appUser.setLastName(userFromCert.getLastName());
+					if(userFromCert.getCountry() != null) appUser.setCountry(userFromCert.getCountry());
+					if(userFromCert.getCn() != null) appUser.setCn(userFromCert.getCn());
+					msgSubject = getString(R.string.user_data_lbl);
+					if(requestCsr) {
+						CertRequestDto dto = new CertRequestDto(PrefUtils.getDeviceId(),
+								appUser.getPhone(), appUser.getFirstName(), appUser.getLastName(),
+								appUser.getNIF(), appUser.getEmail());
+						CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
+								SIGNATURE_ALGORITHM, PROVIDER, dto.getNif(), dto.getEmail(),
+								dto.getPhone(), dto.getDeviceId(), dto.getGivenName(), dto.getSurname(),
+								DeviceVSDto.Type.MOBILE);
+						byte[] csrBytes = certificationRequest.getCsrPEM();
+						UserCertificationRequestDto userCertificationRequestDto =
+								new UserCertificationRequestDto(appUser.getAddress(), csrBytes);
+						PrefUtils.putCsrRequest(certificationRequest);
+						textToSign = JSON.writeValueAsString(userCertificationRequestDto);
+					} else textToSign = JSON.writeValueAsString(appUser);
+				}
+				PrivateKey privateKey = (PrivateKey) ksUserDNIe.getKey(CERT_SIGN, null);
+				Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
+				Store cerStore = new JcaCertStore(Arrays.asList(chain));
+
+				SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(privateKey, userCert, cerStore,
+						toUser, textToSign, msgSubject);
+				smimeMessage = new MessageTimeStamper(smimeMessage,
+						AppVS.getInstance().getTimeStampServiceURL()).call();
+
+				responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
+				if(MODE_PASSWORD_REQUEST == activityMode) {
+					PrefUtils.putAppUser(appUser);
+					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());
+				}
+				responseVS.setTypeVS(operation);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				showMessageDialog(getString(R.string.error_lbl), getString(R.string.dnie_connection_error_msg));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				showMessageDialog(getString(R.string.error_lbl), ex.getMessage());
+			}
+			return responseVS;
+		}
+
+		@Override
+		protected void onPostExecute(ResponseVS responseVS) {
+			LOGD(TAG, "onPostExecute");
+			myHandler.post(askForRead);
+			ProgressDialogFragment.hide(getSupportFragmentManager());
+			if(responseVS != null) {
+				Intent resultIntent = new Intent();
+				resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+				setResult(Activity.RESULT_OK, resultIntent);
+				finish();
+			}
+		}
+	}
 }

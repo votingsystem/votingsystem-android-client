@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -80,6 +81,7 @@ public class RepresentativesMainActivity extends ActivityBase {
         RepresentationStateFragment fragment = new RepresentationStateFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 fragment, RepresentationStateFragment.TAG).commit();
+        ((NavigationView) findViewById(R.id.nav_view)).inflateMenu(R.menu.drawer_voting);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

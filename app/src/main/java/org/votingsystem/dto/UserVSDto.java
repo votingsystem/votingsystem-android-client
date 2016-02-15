@@ -7,7 +7,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.x509.X509Name;
 import org.bouncycastle2.cms.SignerInformation;
+import org.bouncycastle2.jce.X509Principal;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
@@ -104,6 +107,16 @@ public class UserVSDto implements Serializable {
                 userVS.setDeviceId(certExtensionDto.getDeviceId());
             }
         } catch(Exception ex) {ex.printStackTrace();}
+        return userVS;
+    }
+
+    @JsonIgnore
+    public static UserVSDto getUserVS (X509Principal principal) {
+        UserVSDto userVS = new UserVSDto();
+        userVS.setNIF((String) principal.getValues(new DERObjectIdentifier("2.5.4.5")).get(0));
+        userVS.setLastName((String) principal.getValues(new DERObjectIdentifier("2.5.4.4")).get(0));
+        userVS.setFirstName((String) principal.getValues(new DERObjectIdentifier("2.5.4.42")).get(0));
+        userVS.setCountry((String) principal.getValues(new DERObjectIdentifier("2.5.4.6")).get(0));
         return userVS;
     }
 

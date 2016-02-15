@@ -18,6 +18,16 @@ public class CertRequestDto {
 
     public CertRequestDto() {}
 
+    public CertRequestDto(String deviceId, String phone, String givenName, String surname,
+                          String nif, String email) {
+        this.deviceId = deviceId;
+        this.phone = phone;
+        this.givenName = givenName;
+        this.surname = surname;
+        this.nif = nif;
+        this.email = email;
+    }
+
     public String getNif() {
         return nif;
     }
