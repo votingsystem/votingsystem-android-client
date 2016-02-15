@@ -1018,6 +1018,10 @@ public class SMIMESignedGenerator
             {
                 throw new IOException(e.toString());
             }
+            catch (Exception e)
+            {
+                throw new IOException(e.toString());
+            }
         }
     }
 }

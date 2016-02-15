@@ -359,7 +359,7 @@
     <string name="cancelled_lbl">cancelado</string>
     <string name="expended_lbl">consumido</string>
     <string name="rejected_lbl">rechazado</string>
-    <string name="currency_lbl">divisa</string>
+    <string name="currency_lbl">moneda</string>
     <string name="in_lbl">en</string>
     <string name="eventvs_election_active">votaciones abiertas</string>
     <string name="eventvs_election_closed">votaciones cerradas</string>

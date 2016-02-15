@@ -224,7 +224,7 @@ public class MessageFormFragment extends Fragment {
             connectedDevices =  new HashSet<>();
             try {
                 if(userDto != null) {
-                    String deviceId = PrefUtils.getApplicationId();
+                    String deviceId = PrefUtils.getDeviceId();
                     for(DeviceVSDto deviceDto : userDto.getConnectedDevices()) {
                         if(!deviceId.equals(deviceDto.getDeviceId())) {
                             connectedDevices.add(deviceDto);

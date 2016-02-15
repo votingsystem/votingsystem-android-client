@@ -116,7 +116,7 @@ public class SocketMessageDto implements Serializable {
         WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_SIGNED_SESSION);
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(socketSession.getTypeVS());
-        messageDto.setDeviceId(PrefUtils.getApplicationId());
+        messageDto.setDeviceId(PrefUtils.getDeviceId());
         messageDto.setUUID(socketSession.getUUID());
         return messageDto;
     }

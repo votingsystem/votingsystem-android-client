@@ -23,16 +23,30 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.activity.DNIeSigningActivity;
+import org.votingsystem.activity.PatternLockActivity;
+import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
+import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.UIUtils;
+
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -46,8 +60,8 @@ public class UserDataFormFragment extends Fragment {
 
 	public static final String TAG = UserDataFormFragment.class.getSimpleName();
 
-    public static final int DNIE_PASSWORD_REQUEST = 0;
-    public static final int ACCESS_MODE_SELECT = 0;
+    public static final int RC_SIGN_USER_DATA            = 0;
+    public static final int RC_REQUEST_ACCESS_MODE_PASSW = 1;
 
     private EditText canText;
     private EditText phoneText;
@@ -147,7 +161,7 @@ public class UserDataFormFragment extends Fragment {
 
     private void submitForm() {
       	if (validateForm ()) {
-            String deviceId = PrefUtils.getApplicationId();
+            String deviceId = PrefUtils.getDeviceId();
             LOGD(TAG + ".validateForm() ", "deviceId: " + deviceId);
             if(userVSDto == null) userVSDto = new UserVSDto();
             userVSDto.setPhone(phoneText.getText().toString());
@@ -180,10 +194,21 @@ public class UserDataFormFragment extends Fragment {
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             PrefUtils.putDNIeCAN(canText.getText().toString());
-                            Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
-                            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
-                            intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
-                            startActivityForResult(intent, DNIE_PASSWORD_REQUEST);
+                            Intent intent = null;
+                            CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+                            if(passwordAccessMode != null) {
+                                switch (passwordAccessMode.getMode()) {
+                                    case PATTER_LOCK:
+                                        intent = new Intent(getActivity(), PatternLockActivity.class);
+                                        intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_INPUT);
+                                        break;
+                                    case PIN:
+                                        intent = new Intent(getActivity(), PinActivity.class);
+                                        intent.putExtra(ContextVS.MODE_KEY, PinActivity.MODE_VALIDATE_INPUT);
+                                        break;
+                                }
+                                startActivityForResult(intent, RC_REQUEST_ACCESS_MODE_PASSW);
+                            } else launchNFCReader(null);
                         }
                     });
             UIUtils.showMessageDialog(builder);
@@ -226,13 +251,28 @@ public class UserDataFormFragment extends Fragment {
         return true;
     }
 
+    private void launchNFCReader(char[] password) {
+        Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
+        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+        intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+        intent.putExtra(ContextVS.CSR_KEY, true);
+        intent.putExtra(ContextVS.PASSWORD_KEY, password);
+        startActivityForResult(intent, RC_SIGN_USER_DATA);
+    }
+
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
-            case DNIE_PASSWORD_REQUEST:
+            case RC_REQUEST_ACCESS_MODE_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
-                    PrefUtils.putDNIeEnabled(true);
-                    getActivity().finish();
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    launchNFCReader(new String(responseVS.getMessageBytes()).toCharArray());
+                }
+                break;
+            case RC_SIGN_USER_DATA:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    new DataSender(responseVS.getSMIME()).execute();
                 }
                 break;
         }
@@ -241,7 +281,11 @@ public class UserDataFormFragment extends Fragment {
 
     public class DataSender extends AsyncTask<String, String, ResponseVS> {
 
-        public DataSender() { }
+        private SMIMEMessage smimeMessage;
+
+        public DataSender(SMIMEMessage smimeMessage) {
+            this.smimeMessage = smimeMessage;
+        }
 
         @Override protected void onPreExecute() {
                 setProgressDialogVisible(true,
@@ -249,15 +293,43 @@ public class UserDataFormFragment extends Fragment {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            String currencyURL = urls[0];
-            return HttpHelper.getData(currencyURL, null);
+            ResponseVS responseVS = null;
+            try {
+                responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                        AppVS.getInstance().getCurrencyServer().getCSRSignedWithIDCardServiceURL());
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+                keyStore.load(null);
+                CertificationRequestVS certificationRequest = (CertificationRequestVS)
+                        ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest().getBytes());
+                PrivateKey privateKey = certificationRequest.getPrivateKey();
+                Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
+                        responseVS.getMessageBytes());
+                X509Certificate x509Cert = certificates.iterator().next();
+                UserVSDto user = UserVSDto.getUserVS(x509Cert);
+                LOGD(TAG, "updateKeyStore - user: " + user.getNIF() +
+                        " - certificates.size(): " + certificates.size());
+                X509Certificate[] certsArray = new X509Certificate[certificates.size()];
+                certificates.toArray(certsArray);
+                keyStore.setKeyEntry(ContextVS.USER_CERT_ALIAS, privateKey, null, certsArray);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                responseVS = ResponseVS.EXCEPTION(ex, getActivity());
+            } finally {
+                return responseVS;
+            }
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
         @Override protected void onPostExecute(ResponseVS responseVS) {
-
             setProgressDialogVisible(false, null, null);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                PrefUtils.putDNIeEnabled(true);
+                getActivity().finish();
+            } else {
+                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            }
         }
     }
 }

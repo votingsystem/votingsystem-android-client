@@ -74,7 +74,7 @@ public class PrefUtils {
         return sp.getBoolean(ContextVS.BOOTSTRAP_DONE, false);
     }
 
-    public static String getApplicationId()  {
+    public static String getDeviceId()  {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         String applicationId = settings.getString(ContextVS.APPLICATION_ID_KEY, null);
@@ -83,7 +83,7 @@ public class PrefUtils {
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(APPLICATION_ID_KEY, applicationId);
             editor.commit();
-            LOGD(TAG, ".getApplicationId - new applicationId: " + applicationId);
+            LOGD(TAG, ".getDeviceId - new applicationId: " + applicationId);
         }
         return applicationId;
     }
@@ -274,12 +274,11 @@ public class PrefUtils {
         return settings.getString(ContextVS.CSR_KEY, null);
     }
 
-    public static void putCsrRequest(Long requestId, CertificationRequestVS certificationRequest) {
+    public static void putCsrRequest(CertificationRequestVS certificationRequest) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
-        editor.putLong(ContextVS.CSR_REQUEST_ID_KEY, requestId);
         try {
             editor.putString(ContextVS.CSR_KEY, new String(serializedCertificationRequest, "UTF-8"));
         } catch(Exception ex) {ex.printStackTrace();}

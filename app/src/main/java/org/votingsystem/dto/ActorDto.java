@@ -216,6 +216,11 @@ public class ActorDto implements java.io.Serializable {
         return StringUtils.checkURL(serverURL) + "/rest/serverInfo";
     }
 
+    public String getCSRSignedWithIDCardServiceURL () {
+        return serverURL + "/rest/userVS/csrSignedWithIDCard";
+    }
+
+
     public Set<TrustAnchor> getTrustAnchors() throws Exception {
         if(trustAnchors != null) return trustAnchors;
         if(certChainPEM == null) return null;

@@ -61,6 +61,7 @@ public class ActivityBase extends AppCompatActivity
     private NavigationView navigationView;
     private Thread mDataBootstrapThread = null;
     private Menu menu;
+    private MenuItem messagesMenuItem;
 
     private String broadCastId = ActivityBase.class.getSimpleName();
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -85,8 +86,9 @@ public class ActivityBase extends AppCompatActivity
                             getSupportFragmentManager());
                 } else {
                     if(TypeVS.MESSAGEVS == responseVS.getTypeVS()) {
-                        navigationView.getMenu().findItem(R.id.messages).setTitle(
-                                MsgUtils.getMessagesDrawerItemMessage());
+                        if(messagesMenuItem != null)
+                                messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
+
                     }
                 }
             }
@@ -107,6 +109,7 @@ public class ActivityBase extends AppCompatActivity
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        messagesMenuItem = navigationView.getMenu().findItem(R.id.messages);
         navigationView.setNavigationItemSelectedListener(this);
 
         int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
@@ -232,6 +235,7 @@ public class ActivityBase extends AppCompatActivity
         getSupportActionBar().setSubtitle(null);
         Intent intent = null;
         switch (menuId) {
+            case R.id.polls_menu_item:
             case R.id.polls:
                 intent = new Intent(this, EventVSMainActivity.class);
                 startActivity(intent);
@@ -242,6 +246,9 @@ public class ActivityBase extends AppCompatActivity
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.currency_menu_item:
+                navigationView.getMenu().clear();
+                navigationView.inflateMenu(R.menu.drawer_currency);
             case R.id.currency_accounts:
                 currentFragment = new WeakReference<Fragment>(new CurrencyAccountsPagerFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -305,7 +312,8 @@ public class ActivityBase extends AppCompatActivity
                     R.string.access_mode_passw_required_msg), positiveButton, null, this);
             return;
         }
-        navigationView.getMenu().findItem(R.id.messages).setTitle(MsgUtils.getMessagesDrawerItemMessage());
+        if(messagesMenuItem != null)
+            messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(

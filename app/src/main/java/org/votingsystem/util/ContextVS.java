@@ -94,7 +94,6 @@ public class ContextVS {
     public static final String VOTE_KEY  = "VOTE_KEY";
     public static final String RECEIPT_KEY  = "RECEIPT_KEY";
     public static final String STATE_KEY                   = "STATE";
-    public static final String CSR_REQUEST_ID_KEY          = "csrRequestId";
     public static final String CSR_KEY                     = "csrKey";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
     public static final String REFRESH_KEY                 = "REFRESH_KEY";

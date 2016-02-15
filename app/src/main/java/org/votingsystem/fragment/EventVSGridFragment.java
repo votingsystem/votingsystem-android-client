@@ -249,8 +249,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(ContextVS.ACCESS_CONTROL_URL_KEY.equals(key)) {
             LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
-            Long numTotalEvents = EventVSContentProvider.getNumTotal(eventState);
-            if(numTotalEvents == null) fetchItems(eventState);
+            fetchItems(0L);
         }
     }
 
