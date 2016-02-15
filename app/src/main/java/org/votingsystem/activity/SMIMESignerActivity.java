@@ -133,8 +133,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode +
-                " - resultCode: " + resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         if(data == null) return;
         final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch(requestCode) {
@@ -171,7 +170,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.sign_document:
-                Utils.init_IDCARD_NFC_Process(RC_PASSWORD_REQUEST, null, null, this);
+                Utils.getCryptoDeviceAccessModePassword(RC_PASSWORD_REQUEST, null, null, this);
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:

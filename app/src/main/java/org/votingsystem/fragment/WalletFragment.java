@@ -46,7 +46,7 @@ public class WalletFragment extends Fragment {
 
     public static final String TAG = WalletFragment.class.getSimpleName();
 
-    public static final int RC_PASSW          = 0;
+    public static final int RC_OPEN_WALLET          = 0;
 
     private View rootView;
     private GridView gridView;
@@ -96,7 +96,8 @@ public class WalletFragment extends Fragment {
         });
         if(Wallet.getCurrencySet() == null) {
             currencyList = new ArrayList<>();
-            Utils.init_IDCARD_NFC_Process(RC_PASSW, getString(R.string.enter_wallet_password_msg),
+            Utils.getCryptoDeviceAccessModePassword(RC_OPEN_WALLET,
+                    getString(R.string.enter_wallet_password_msg),
                     null, (AppCompatActivity)getActivity());
         } else {
             currencyList = new ArrayList<>(Wallet.getCurrencySet());
@@ -137,10 +138,9 @@ public class WalletFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
-            case RC_PASSW:
+            case RC_OPEN_WALLET:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     try {
@@ -167,7 +167,7 @@ public class WalletFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.open_wallet:
-                Utils.init_IDCARD_NFC_Process(RC_PASSW, getString(R.string.enter_wallet_password_msg),
+                Utils.getCryptoDeviceAccessModePassword(RC_OPEN_WALLET, getString(R.string.enter_wallet_password_msg),
                         null, (AppCompatActivity)getActivity());
                 return true;
             default:

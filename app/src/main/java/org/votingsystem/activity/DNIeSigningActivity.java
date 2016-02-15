@@ -53,7 +53,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	public static final String TAG = DNIeSigningActivity.class.getSimpleName();
 
 	public static final String CERT_AUTENTICATION = "CertAutenticacion";
-	public static final String CERT_SIGN = "CertFirmaDigital";
+	public static final String CERT_SIGN          = "CertFirmaDigital";
 
 
 	public static final int MODE_PASSWORD_REQUEST  = 0;

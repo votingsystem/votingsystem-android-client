@@ -1,5 +1,6 @@
 package org.votingsystem.activity;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -47,12 +48,9 @@ public class MessagesPagerActivity extends AppCompatActivity {
         mViewPager.setCurrentItem(cursorPosition);
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

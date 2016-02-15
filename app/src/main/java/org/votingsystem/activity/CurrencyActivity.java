@@ -162,7 +162,7 @@ public class CurrencyActivity extends AppCompatActivity {
                         DialogButton positiveButton = new DialogButton(getString(R.string.connect_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
-                                        ConnectionUtils.init_IDCARD_NFC_Process(CurrencyActivity.this);
+                                        ConnectionUtils.getCryptoDeviceAccessModePassword(CurrencyActivity.this);
                                     }
                                 });
                         UIUtils.showMessageDialog(getString(R.string.send_to_wallet), getString(

@@ -122,8 +122,7 @@ public class CurrencyAccountsFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode); //Activity.RESULT_OK;
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         if(Activity.RESULT_OK == resultCode) {
             loadUserInfo(DateUtils.getCurrentWeekPeriod());
         }

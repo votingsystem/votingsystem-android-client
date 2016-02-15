@@ -91,14 +91,14 @@ public class ConfirmImageActivity extends AppCompatActivity {
                     new BigDecimal(ContextVS.MAX_REPRESENTATIVE_IMAGE_WIDTH), 2, RoundingMode.CEILING);
             imageHeight = imageHeight.divide(scaleFactor, 2, RoundingMode.CEILING);
             imageWidth = new BigDecimal(ContextVS.MAX_REPRESENTATIVE_IMAGE_WIDTH);
-            LOGD(TAG + ".onActivityResult", "imageWidth: " + imageWidth +
+            LOGD(TAG, "imageWidth: " + imageWidth +
                     " - imageHeight: " + imageHeight + " - scaleFactor: " + scaleFactor);
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(capturedBitmap,
                     imageWidth.intValue(), imageHeight.intValue(), true);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
-            LOGD(TAG + ".onActivityResult", "captured byteArray length: " + byteArray.length);
+            LOGD(TAG, "captured byteArray length: " + byteArray.length);
             resultIntent.putExtra(ContextVS.IMAGE_KEY, byteArray);
         }
         setResult(result, resultIntent);

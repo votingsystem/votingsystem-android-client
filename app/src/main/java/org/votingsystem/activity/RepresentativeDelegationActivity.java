@@ -33,7 +33,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -240,7 +239,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 builder.setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                Utils.init_IDCARD_NFC_Process(RC_PASSW, null, null,
+                                Utils.getCryptoDeviceAccessModePassword(RC_PASSW, null, null,
                                         RepresentativeDelegationActivity.this);
                             }
                         });
@@ -268,8 +267,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
             case RC_PASSW:
                 if(Activity.RESULT_OK == resultCode) {

@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,9 +35,11 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Set;
 
 import static org.votingsystem.util.ContextVS.CALLER_KEY;
@@ -51,7 +54,9 @@ public class PaymentFragment extends Fragment {
 
 	public static final String TAG = PaymentFragment.class.getSimpleName();
 
-    private static final int CURRENCY_REQUEST   = 1;
+    private static final int RC_OPEN_WALLET       = 0;
+    private static final int RC_CURRENCY_REQUEST = 1;
+    private static final int RC_SEND_TRANSACTION  = 2;
 
     private String broadCastId = PaymentFragment.class.getSimpleName();
     private TextView receptor;
@@ -66,28 +71,11 @@ public class PaymentFragment extends Fragment {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             String pin = intent.getStringExtra(PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(pin != null) {
-                switch(responseVS.getTypeVS()) {
-                    case FROM_USERVS:
-                        launchTransactionVS(TransactionVSDto.Type.FROM_USERVS);
-                        break;
-                    case CURRENCY_SEND:
-                        launchTransactionVS(TransactionVSDto.Type.CURRENCY_SEND);
-                        break;
-                    case CURRENCY:
-                        try {
-                            Set<Currency> currencySet = Wallet.getCurrencySet((char[]) responseVS.getData());
-                            submitForm();
-                        } catch(Exception ex) { ex.printStackTrace(); }
-                        break;
-                }
-            } else {
-                setProgressDialogVisible(false);
-                String caption = ResponseVS.SC_OK == responseVS.getStatusCode()? getString(
-                        R.string.payment_ok_caption):getString(R.string.error_lbl);
-                getActivity().finish();
-                UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, responseVS.getMessage(), caption);
-            }
+            setProgressDialogVisible(false);
+            String caption = ResponseVS.SC_OK == responseVS.getStatusCode()? getString(
+                    R.string.payment_ok_caption):getString(R.string.error_lbl);
+            getActivity().finish();
+            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, responseVS.getMessage(), caption);
         }
     };
 
@@ -147,7 +135,6 @@ public class PaymentFragment extends Fragment {
                         break;
                 }
             }
-
         } catch (Exception ex) { ex.printStackTrace(); }
         Button save_button = (Button) rootView.findViewById(R.id.save_button);
         save_button.setOnClickListener(new OnClickListener() {
@@ -180,14 +167,6 @@ public class PaymentFragment extends Fragment {
 		}
 	}
 
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode); //Activity.RESULT_OK;
-        if(Activity.RESULT_OK == resultCode) {
-            submitForm();
-        }
-    }
-
     private void submitForm() {
         try {
             transactionDto.setType(TransactionVSDto.getByDescription(
@@ -218,17 +197,19 @@ public class PaymentFragment extends Fragment {
                                     });
                             UIUtils.showMessageDialog(builder);
                             return;
-                        } else  PinDialogFragment.showPinScreen(getActivity().getSupportFragmentManager(),
-                                broadCastId, MsgUtils.getTransactionVSConfirmMessage(transactionDto, getActivity()),
-                                false, TypeVS.FROM_USERVS);
+                        } else {
+                            Utils.getCryptoDeviceAccessModePassword(RC_SEND_TRANSACTION,
+                                    MsgUtils.getTransactionVSConfirmMessage(transactionDto, getActivity()),
+                                    null, (AppCompatActivity)getActivity());
+                        }
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
                 case CURRENCY_CHANGE:
                 case CURRENCY_SEND:
                     if(Wallet.getCurrencySet() == null) {
-                        PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                                getString(R.string.enter_wallet_password_msg), false,
-                                TypeVS.CURRENCY);
+                        Utils.getCryptoDeviceAccessModePassword(RC_OPEN_WALLET,
+                                getString(R.string.enter_wallet_password_msg),
+                                null, (AppCompatActivity)getActivity());
                         return;
                     }
                     final BigDecimal availableForTagVSWallet = Wallet.getAvailableForTagVS(
@@ -280,7 +261,7 @@ public class PaymentFragment extends Fragment {
                                                     transactionDto.getCurrencyCode(),
                                                     amountToRequest.toString(),
                                                     availableForTagVS.toString()));
-                                            startActivityForResult(intent, CURRENCY_REQUEST);
+                                            startActivityForResult(intent, RC_CURRENCY_REQUEST);
                                         }
                                     });
                             UIUtils.showMessageDialog(builder);
@@ -298,6 +279,33 @@ public class PaymentFragment extends Fragment {
             ProgressDialogFragment.showDialog(getString(R.string.sending_payment_lbl),
                     getString(R.string.wait_msg), getFragmentManager());
         } else ProgressDialogFragment.hide(getFragmentManager());
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
+        switch (requestCode) {
+            case RC_OPEN_WALLET:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    try {
+                        Set<Currency> currencySet = Wallet.getCurrencySet(
+                                new String(responseVS.getMessageBytes()).toCharArray());
+                        submitForm();
+                    } catch(Exception ex) { ex.printStackTrace(); }
+                }
+                break;
+            case RC_CURRENCY_REQUEST:
+                if(Activity.RESULT_OK == resultCode) {
+                    submitForm();
+                }
+                break;
+            case RC_SEND_TRANSACTION:
+                if(Activity.RESULT_OK == resultCode) {
+                    launchTransactionVS(transactionDto.getType());
+                }
+                break;
+        }
+
     }
 
 }

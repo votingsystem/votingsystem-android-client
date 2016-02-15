@@ -1,15 +1,11 @@
 package org.votingsystem.fragment;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +30,7 @@ import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
 import java.lang.ref.WeakReference;
@@ -52,6 +49,8 @@ public class MessageFragment extends Fragment {
     public static final String TAG = MessageFragment.class.getSimpleName();
 
     private static final int CONTENT_VIEW_ID = 1000000;
+
+    public static final int RC_OPEN_WALLET          = 0;
 
     private WeakReference<CurrencyFragment> currencyRef;
     private SocketMessageDto socketMessage;
@@ -72,29 +71,6 @@ public class MessageFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        typeVS = (TypeVS)intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            switch(responseVS.getTypeVS()) {
-                case CURRENCY:
-                    try {
-                        Set<Currency> currencyList = Wallet.getCurrencySet((char[]) responseVS.getData());
-                        if(currencyList != null) updateWallet();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                                getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
-                    }
-                    break;
-            }
-        } else setProgressDialogVisible(null, null,false);
-        }
-    };
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -130,8 +106,6 @@ public class MessageFragment extends Fragment {
             messageState =  MessageContentProvider.State.valueOf(cursor.getString(
                     cursor.getColumnIndex(MessageContentProvider.STATE_COL)));
             broadCastId = MessageFragment.class.getSimpleName() + "_" + cursorPosition;
-            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                    broadcastReceiver, new IntentFilter(broadCastId));
             LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                     " - arguments: " + getArguments());
         } catch(Exception ex) { ex.printStackTrace(); }
@@ -185,7 +159,6 @@ public class MessageFragment extends Fragment {
     @Override public void onPause() {
         super.onPause();
         if(cursor != null && !cursor.isClosed()) cursor.close();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
     private void setProgressDialogVisible(String caption, String message, boolean isVisible) {
@@ -243,8 +216,8 @@ public class MessageFragment extends Fragment {
     private void updateWallet() {
         LOGD(TAG + ".updateWallet", "updateWallet");
         if(Wallet.getCurrencySet() == null) {
-            PinDialogFragment.showWalletScreen(getFragmentManager(), broadCastId,
-                    getString(R.string.enter_wallet_password_msg), false, TypeVS.CURRENCY);
+            Utils.getCryptoDeviceAccessModePassword(RC_OPEN_WALLET, getString(R.string.enter_wallet_password_msg),
+                    null, (AppCompatActivity)getActivity());
         } else {
             try {
                 SocketMessageDto socketMessageDto = null;
@@ -284,5 +257,21 @@ public class MessageFragment extends Fragment {
         }
     }
 
-
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
+        switch (requestCode) {
+            case RC_OPEN_WALLET:
+                try {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    Set<Currency> currencyList = Wallet.getCurrencySet(
+                            new String(responseVS.getMessageBytes()).toCharArray());
+                    if(currencyList != null) updateWallet();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                            getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
+                }
+                break;
+        }
+    }
 }

@@ -116,8 +116,7 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                    resultCode);
+            LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
             updateView();
         }
     }

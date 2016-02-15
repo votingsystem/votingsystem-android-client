@@ -227,8 +227,7 @@ public class UserDataFormFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
             case DNIE_PASSWORD_REQUEST:
                 if(Activity.RESULT_OK == resultCode) {

@@ -90,8 +90,7 @@ public class CryptoDeviceAccessModeSelectorActivity  extends AppCompatActivity {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         updateView();
     }
 }

@@ -24,14 +24,14 @@ public class ConnectionUtils {
 
     private static SocketMessageDto initSessionMessageDto;
 
-    public static void startConnectionRequest(String patternLock, AppCompatActivity activity) {
+    public static void startConnectionRequest(String password, AppCompatActivity activity) {
         try {
             Intent intent = new Intent(activity, DNIeSigningActivity.class);
             initSessionMessageDto = SocketMessageDto.INIT_SESSION_REQUEST();
             intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionMessageDto));
             intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
                     activity.getString(R.string.init_authenticated_session_msg_subject));
-            if(patternLock != null)  intent.putExtra(ContextVS.PASSWORD_KEY, patternLock.toCharArray());
+            intent.putExtra(ContextVS.PASSWORD_KEY, password.toCharArray());
             activity.startActivityForResult(intent, RC_INIT_CONNECTION_REQUEST);
         } catch (Exception ex) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
@@ -39,8 +39,8 @@ public class ConnectionUtils {
         }
     }
 
-    public static void init_IDCARD_NFC_Process(final AppCompatActivity activity) {
-        Utils.init_IDCARD_NFC_Process(RC_PASSWORD_REQUEST,
+    public static void getCryptoDeviceAccessModePassword(final AppCompatActivity activity) {
+        Utils.getCryptoDeviceAccessModePassword(RC_PASSWORD_REQUEST,
                 activity.getString(R.string.connection_passw_msg), null, activity);
     }
 

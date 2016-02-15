@@ -181,7 +181,7 @@ public class PinActivity extends AppCompatActivity  {
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " + resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
             case RC_PATERN_PASSWORD:
                 if(Activity.RESULT_OK == resultCode)  {

@@ -30,7 +30,7 @@
         android:layout_weight="1"
         android:layout_gravity="center"
         app:lock_size="3"
-        app:lock_lineColor="#e3e3e3"
+        app:lock_lineColor="#f3f3f3"
         app:lock_enableVibrate="true"
         app:lock_vibrateTime="100"
         app:lock_lineWidth="8dp"

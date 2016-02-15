@@ -108,8 +108,7 @@ public class ContactFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         String message = null;
         if(data != null) message = data.getStringExtra(ContextVS.MESSAGE_KEY);
         if(Activity.RESULT_OK == requestCode) {

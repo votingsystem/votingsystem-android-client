@@ -34,10 +34,8 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
-import org.votingsystem.util.Wallet;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -157,7 +155,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
                 if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
                 transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
-                Utils.init_IDCARD_NFC_Process(RC_PASSW, MsgUtils.getCurrencyRequestMessage(
+                Utils.getCryptoDeviceAccessModePassword(RC_PASSW, MsgUtils.getCurrencyRequestMessage(
                         transactionDto, CurrencyRequesActivity.this), null, this);
             } else errorMsgTextView.setVisibility(View.VISIBLE);
         }
@@ -196,8 +194,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOGD(TAG + ".onActivityResult", "requestCode: " + requestCode + " - resultCode: " +
-                resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
             case RC_PASSW:
                 if(Activity.RESULT_OK == resultCode) {

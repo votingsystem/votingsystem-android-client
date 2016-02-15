@@ -1,5 +1,6 @@
 package org.votingsystem.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -48,7 +49,9 @@ import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.Wallet;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -59,6 +62,8 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class ReceiptFragment extends Fragment {
 
     public static final String TAG = ReceiptFragment.class.getSimpleName();
+
+    public static final int RC_CANCEL_VOTE          = 0;
 
     private AppVS appVS;
     private ReceiptWrapper receiptWrapper;
@@ -92,30 +97,21 @@ public class ReceiptFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            switch(responseVS.getTypeVS()) {
-                case CANCEL_VOTE:
-                    launchVoteCancelation((VoteVSHelper) receiptWrapper);
-                    break;
-            }
-        } else {
-            if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+        if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                         responseVS.getCaption(), responseVS.getNotificationMessage(), getActivity());
-                    builder.setPositiveButton(getString(R.string.accept_lbl),
+                builder.setPositiveButton(getString(R.string.accept_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 getActivity().onBackPressed();
                             }
                         });
-                    UIUtils.showMessageDialog(builder);
-                }
+                UIUtils.showMessageDialog(builder);
             }
-            setProgressDialogVisible(null, null, false);
-            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
+        setProgressDialogVisible(null, null, false);
+        MessageDialogFragment.showDialog(responseVS, getFragmentManager());
         }
     };
 
@@ -410,8 +406,9 @@ public class ReceiptFragment extends Fragment {
                                     .setPositiveButton(getString(R.string.ok_lbl),
                                             new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                                    PinDialogFragment.showPinScreen(getFragmentManager(), broadCastId,
-                                                            getString(R.string.cancel_vote_msg), false, TypeVS.CANCEL_VOTE);
+                                                    Utils.getCryptoDeviceAccessModePassword(RC_CANCEL_VOTE,
+                                                            getString(R.string.cancel_vote_msg),
+                                                            null, (AppCompatActivity)getActivity());
                                                 }
                                             }).setNegativeButton(getString(R.string.cancel_lbl),
                             new DialogInterface.OnClickListener() {
@@ -425,6 +422,18 @@ public class ReceiptFragment extends Fragment {
             }
         } catch(Exception ex) { ex.printStackTrace();}
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
+        switch (requestCode) {
+            case RC_CANCEL_VOTE:
+                if(Activity.RESULT_OK == resultCode) {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    launchVoteCancelation((VoteVSHelper) receiptWrapper);
+                }
+                break;
+        }
     }
 
     private class VoteVSChecker extends AsyncTask<String, Void, ResponseVS> {

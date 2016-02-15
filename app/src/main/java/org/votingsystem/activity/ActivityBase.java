@@ -210,7 +210,7 @@ public class ActivityBase extends AppCompatActivity
                 if(appVS.isWithSocketConnection()) {
                     showConnectionStatusDialog();
                 } else {
-                    ConnectionUtils.init_IDCARD_NFC_Process(ActivityBase.this);
+                    ConnectionUtils.getCryptoDeviceAccessModePassword(ActivityBase.this);
                 }
                 return true;
             case R.id.close_app:

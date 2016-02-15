@@ -3,6 +3,7 @@ package org.votingsystem.util.debug;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,8 +47,9 @@ public class DebugActionRunnerFragment extends Fragment {
         tests.addView(createTestAction(new CurrencyConsumedAction()));
         tests.addView(createTestAction(new BrowserVSAction()));
         tests.addView(createTestAction(new NFCActivityAction((AppVS) getActivity().getApplicationContext())));
-
         setHasOptionsMenu(true);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
+                getString(R.string.debug_tests));
         return rootView;
     }
 
@@ -81,7 +83,7 @@ public class DebugActionRunnerFragment extends Fragment {
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        LOGD(TAG + ".onActivityResult", "resultCode: " + resultCode);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (result != null) {
             String contents = result.getContents();

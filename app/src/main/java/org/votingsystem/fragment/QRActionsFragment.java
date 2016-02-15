@@ -100,7 +100,7 @@ public class QRActionsFragment extends Fragment {
                     getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            ConnectionUtils.init_IDCARD_NFC_Process(((ActivityBase)getActivity()));
+                            ConnectionUtils.getCryptoDeviceAccessModePassword(((ActivityBase)getActivity()));
                         }
                     });
             UIUtils.showMessageDialog(builder);
