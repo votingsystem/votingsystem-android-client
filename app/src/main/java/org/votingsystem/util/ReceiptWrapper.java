@@ -49,8 +49,6 @@ public class ReceiptWrapper implements Serializable {
         switch(getTypeVS()) {
             case SEND_VOTE:
                 return context.getString(R.string.receipt_vote_subtitle);
-            case CANCEL_VOTE:
-                return context.getString(R.string.receipt_cancel_vote_subtitle);
             case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
             case CURRENCY_REQUEST:
@@ -73,8 +71,6 @@ public class ReceiptWrapper implements Serializable {
                 return  context.getString(R.string.access_request_lbl);
             case SEND_VOTE:
                 return  context.getString(R.string.receipt_vote_subtitle);
-            case CANCEL_VOTE:
-                return context.getString(R.string.receipt_cancel_vote_subtitle);
             case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return context.getString(R.string.anonimous_representative_request_lbl);
             case CURRENCY_REQUEST:
@@ -91,7 +87,6 @@ public class ReceiptWrapper implements Serializable {
     public int getLogoId() {
         switch(getTypeVS()) {
             case SEND_VOTE:
-            case CANCEL_VOTE:
                 return R.drawable.poll_32;
             case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_SELECTION_CERT_REQUEST:

@@ -10,7 +10,6 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
-import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -46,23 +45,7 @@ public class BootStrapService extends IntentService {
         LOGD(TAG + ".onHandleIntent", "accessControlURL: " + accessControlURL +
                 " - currencyServerURL: " + currencyServerURL);
         ResponseVS responseVS = null;
-        if(!PrefUtils.isDataBootstrapDone()) {
-            responseVS = HttpHelper.getData(AccessControlDto.getServerInfoURL(accessControlURL),
-                    ContentTypeVS.JSON);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                try {
-                    AccessControlDto accessControl = (AccessControlDto) responseVS.getMessage(AccessControlDto.class);
-                    appVS.setAccessControlVS(accessControl);
-                } catch(Exception ex) {ex.printStackTrace();}
-            } else {
-                runOnUiThread(new Runnable() {
-                    @Override public void run() {
-                        Toast.makeText(appVS, getString(R.string.server_connection_error_msg,
-                                accessControlURL), Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        }
+        if(!PrefUtils.isDataBootstrapDone()) { }
         if(appVS.getCurrencyServer() == null) {
             responseVS = HttpHelper.getData(ActorDto.getServerInfoURL(currencyServerURL),
                     ContentTypeVS.JSON);

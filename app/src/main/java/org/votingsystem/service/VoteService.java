@@ -9,14 +9,10 @@ import android.text.Html;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.VoteSender;
-import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.voting.ControlCenterDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.VoteVSHelper;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
@@ -71,31 +67,6 @@ public class VoteService extends IntentService {
                         responseVS.setCaption(getString(R.string.vote_error_caption)).
                                 setNotificationMessage(
                                 Html.fromHtml(responseVS.getMessage()).toString());
-                    }
-                    break;
-                case CANCEL_VOTE:
-                    if(smimeMessageBytes == null) {
-                        SMIMEMessage cancelVoteRequest = appVS.signMessage(appVS.getAccessControl().getName(),
-                                JSON.writeValueAsString(voteVSHelper.getVoteCanceler()),
-                                getString(R.string.cancel_vote_msg_subject));
-                        smimeMessageBytes = cancelVoteRequest.getBytes();
-                    }
-                    responseVS = HttpHelper.sendData(smimeMessageBytes,
-                            ContentTypeVS.JSON_SIGNED,
-                            appVS.getAccessControl().getCancelVoteServiceURL());
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        voteVSHelper.setCancelVoteReceipt(responseVS.getSMIME());
-                        if(voteVSHelper.getLocalId() > 0) {//Update local receipt database
-                            voteVSHelper.setTypeVS(TypeVS.CANCEL_VOTE);
-                            getContentResolver().delete(ReceiptContentProvider.getReceiptURI(
-                                    voteVSHelper.getLocalId()), null, null);
-                        }
-                        responseVS.setCaption(getString(R.string.cancel_vote_ok_caption)).
-                                setNotificationMessage(getString(R.string.cancel_vote_result_msg,
-                                eventSubject));
-                    } else {
-                        responseVS.setCaption(getString(R.string.cancel_vote_error_caption)).
-                                setNotificationMessage(responseVS.getMessage());
                     }
                     break;
             }

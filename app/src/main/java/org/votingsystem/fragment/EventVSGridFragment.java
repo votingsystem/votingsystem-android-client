@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,10 +32,11 @@ import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.service.EventVSService;
+import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -48,7 +49,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class EventVSGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
-        AbsListView.OnScrollListener, SharedPreferences.OnSharedPreferenceChangeListener {
+        AbsListView.OnScrollListener  {
 
     public static final String TAG = EventVSGridFragment.class.getSimpleName();
 
@@ -81,7 +82,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         appVS = (AppVS) getActivity().getApplicationContext();
         eventState = (EventVSDto.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
-        PrefUtils.registerPreferenceChangeListener(this);
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
@@ -104,6 +104,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
         }
         accessControl = appVS.getAccessControl();
+        if(accessControl == null) new AccessControlLoader().execute();
         return rootView;
     }
 
@@ -241,16 +242,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onPause() {
         super.onPause();
-        PrefUtils.unregisterPreferenceChangeListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(ContextVS.ACCESS_CONTROL_URL_KEY.equals(key)) {
-            LOGD(TAG + ".onSharedPreferenceChanged", "key: " + key);
-            fetchItems(0L);
-        }
     }
 
     public class EventListAdapter  extends CursorAdapter {
@@ -303,5 +295,36 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             }
         }
     }
+
+    public class AccessControlLoader extends AsyncTask<String, String, ResponseVS> {
+
+        public AccessControlLoader() { }
+
+        @Override protected void onPreExecute() { setProgressDialogVisible(true); }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            return HttpHelper.getData(AccessControlDto.getServerInfoURL(
+                    AppVS.getInstance().getAccessControlURL()), ContentTypeVS.JSON);
+        }
+
+        @Override protected void onProgressUpdate(String... progress) { }
+
+        @Override protected void onPostExecute(ResponseVS responseVS) {
+            setProgressDialogVisible(false);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    appVS.setAccessControlVS((AccessControlDto)
+                            responseVS.getMessage(AccessControlDto.class));
+                    fetchItems(0L);
+                } catch(Exception ex) {ex.printStackTrace();}
+            } else {
+                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                        getString(R.string.error_lbl), getString(R.string.server_connection_error_msg,
+                                AppVS.getInstance().getAccessControlURL()), getFragmentManager());
+            }
+
+        }
+    }
+
 
 }

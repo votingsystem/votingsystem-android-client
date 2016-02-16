@@ -21,7 +21,6 @@ import org.bouncycastle2.util.Store;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.dto.CertRequestDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.UserVSDto;
@@ -35,7 +34,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;
 import java.security.KeyStore;

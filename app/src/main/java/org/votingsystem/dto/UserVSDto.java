@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
-import org.bouncycastle2.asn1.x509.X509Name;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.jce.X509Principal;
 import org.votingsystem.signature.util.CertUtils;
