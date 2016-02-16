@@ -42,7 +42,6 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import static org.votingsystem.util.ContextVS.CALLER_KEY;
-import static org.votingsystem.util.ContextVS.PIN_KEY;
 import static org.votingsystem.util.ContextVS.TYPEVS_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -68,7 +67,6 @@ public class PaymentFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            String pin = intent.getStringExtra(PIN_KEY);
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
             setProgressDialogVisible(false);
             String caption = ResponseVS.SC_OK == responseVS.getStatusCode()? getString(

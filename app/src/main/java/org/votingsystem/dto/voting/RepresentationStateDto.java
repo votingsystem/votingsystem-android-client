@@ -13,7 +13,7 @@ import java.util.Date;
 public class RepresentationStateDto {
 
     public enum State {
-        REPRESENTATIVE, WITH_ANONYMOUS_REPRESENTATION, WITH_PUBLIC_REPRESENTATION, WITHOUT_REPRESENTATION;
+        REPRESENTATIVE, WITH_ANONYMOUS_REPRESENTATION, WITHOUT_REPRESENTATION;
     }
 
     private State state;

@@ -69,20 +69,17 @@ public class CurrencyAccountsFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-        } else {
-            switch(responseVS.getTypeVS()) {
-                case CURRENCY_ACCOUNTS_INFO:
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        loadUserInfo(DateUtils.getCurrentWeekPeriod());
-                    }
-                    break;
-                default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                        responseVS.getCaption(), responseVS.getNotificationMessage(),
-                        getFragmentManager());
-            }
-            setProgressDialogVisible(false, null, null);
+        switch(responseVS.getTypeVS()) {
+            case CURRENCY_ACCOUNTS_INFO:
+                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    loadUserInfo(DateUtils.getCurrentWeekPeriod());
+                }
+                break;
+            default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
+                    responseVS.getCaption(), responseVS.getNotificationMessage(),
+                    getFragmentManager());
         }
+        setProgressDialogVisible(false, null, null);
         }
     };
 

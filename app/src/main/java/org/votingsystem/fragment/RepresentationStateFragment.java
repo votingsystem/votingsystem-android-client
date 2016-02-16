@@ -47,8 +47,6 @@ public class RepresentationStateFragment extends Fragment implements
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) ;
-        else {
             setProgressDialogVisible(false);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 switch(responseVS.getTypeVS()) {
@@ -58,7 +56,6 @@ public class RepresentationStateFragment extends Fragment implements
                 }
             } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
                     responseVS, getFragmentManager());
-        }
         }
     };
 
@@ -91,10 +88,6 @@ public class RepresentationStateFragment extends Fragment implements
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.without_representative_msg));
                 break;
-            case WITH_PUBLIC_REPRESENTATION:
-                ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
-                        R.string.with_public_representation_msg));
-                break;
             case WITH_ANONYMOUS_REPRESENTATION:
                 ((TextView)rootView.findViewById(R.id.msg)).setText(getString(
                         R.string.with_anonymous_representation_msg, DateUtils.getDayWeekDateStr(
@@ -124,7 +117,7 @@ public class RepresentationStateFragment extends Fragment implements
         }
     }
 
-    private void launchRepresentativeService(TypeVS operationType) {
+    public void launchRepresentativeService(TypeVS operationType) {
         LOGD(TAG + ".launchRepresentativeService", "operation:" + operationType.toString());
         Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);

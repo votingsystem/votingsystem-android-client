@@ -38,7 +38,6 @@ import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
@@ -65,21 +64,6 @@ public class TransactionVSGridFragment extends Fragment
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) != null) {
-            if(ResponseVS.SC_CANCELED == responseVS.getStatusCode()) return;
-            switch(responseVS.getTypeVS()) {
-                case CURRENCY_ACCOUNTS_INFO:
-                    launchUpdateUserInfoService();
-                    break;
-            }
-        } else {
-            switch(responseVS.getTypeVS()) {
-                case CURRENCY_ACCOUNTS_INFO:
-                    break;
-            }
-            setProgressDialogVisible(false);
-        }
         }
     };
 
@@ -127,6 +111,7 @@ public class TransactionVSGridFragment extends Fragment
             }
         });
         gridView.setOnScrollListener(this);
+        if(savedInstanceState == null) launchUpdateUserInfoService();
         return rootView;
     }
 

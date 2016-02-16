@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
@@ -30,14 +31,18 @@ public class MessageDialogFragment extends DialogFragment {
         hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
-        newFragment.show(fragmentManager, MessageDialogFragment.TAG);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.add(newFragment, MessageDialogFragment.TAG);
+        ft.commitAllowingStateLoss();
     }
 
     public static void showDialog(String caption, String message, FragmentManager fragmentManager) {
         hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseVS.SC_OK,
                 caption, message);
-        newFragment.show(fragmentManager, MessageDialogFragment.TAG);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.add(newFragment, MessageDialogFragment.TAG);
+        ft.commitAllowingStateLoss();
     }
 
     public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {

@@ -53,7 +53,6 @@ public class ReceiptWrapper implements Serializable {
                 return context.getString(R.string.anonimous_representative_request_lbl);
             case CURRENCY_REQUEST:
                 return context.getString(R.string.currency_request_subtitle);
-            case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 return context.getString(R.string.delegation_lbl);
             case ACCESS_REQUEST:
@@ -75,8 +74,6 @@ public class ReceiptWrapper implements Serializable {
                 return context.getString(R.string.anonimous_representative_request_lbl);
             case CURRENCY_REQUEST:
                 return context.getString(R.string.currency_request_subtitle);
-            case REPRESENTATIVE_SELECTION:
-                return context.getString(R.string.representative_selection_lbl);
             case ANONYMOUS_REPRESENTATIVE_SELECTION:
                 return context.getString(R.string.anonymous_representative_selection_lbl);
             default:
@@ -88,7 +85,6 @@ public class ReceiptWrapper implements Serializable {
         switch(getTypeVS()) {
             case SEND_VOTE:
                 return R.drawable.poll_32;
-            case REPRESENTATIVE_SELECTION:
             case ANONYMOUS_SELECTION_CERT_REQUEST:
                 return R.drawable.system_users_32;
             default:

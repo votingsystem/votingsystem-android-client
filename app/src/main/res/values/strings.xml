@@ -380,7 +380,6 @@
     <string name="representatives_lbl">representantes</string>
     <string name="representation_last_checked_msg">última actualización: \'%1$s\'</string>
     <string name="without_representative_msg">no tiene activa ninguna representación</string>
-    <string name="with_public_representation_msg">tiene activa una representación \'no anónima\'</string>
     <string name="with_anonymous_representation_msg">tiene activa una \'representación anónima\' que termina el \'%1$s\'</string>
     <string name="representative_msg">está dado de alta como representante</string>
     <string name="fetching_receipt_lbl">obteniendo recibo</string>
@@ -509,8 +508,6 @@
     <string name="currency_cancellation">cancelación de efectivo</string>
     <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
     <string name="delegation_lbl">delegación</string>
-    <string name="representative_selection_lbl">delegación pública de representante</string>
-    <string name="representative_selected_msg">delegación pública de representante completada con éxito</string>
     <string name="access_request_lbl">solicitud de acceso</string>
     <string name="time_limited_lbl">con límite de tiempo</string>
     <string name="from_group_to_all_member_smime_content"><![CDATA[<b>grupo: </b>%1$s<br/>

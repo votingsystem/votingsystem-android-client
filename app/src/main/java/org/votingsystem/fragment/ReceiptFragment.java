@@ -206,7 +206,6 @@ public class ReceiptFragment extends Fragment {
             receiptWrapperSMIME = receiptWrapper.getReceipt();
             String receiptSubjectStr = receiptWrapperSMIME == null? null : receiptWrapperSMIME.getSubject();
             switch(receiptWrapper.getTypeVS()) {
-                case REPRESENTATIVE_SELECTION:
                 case ANONYMOUS_SELECTION_CERT_REQUEST:
                     RepresentativeDelegationDto delegationDto = receiptWrapper.getReceipt()
                             .getSignedContent(org.votingsystem.dto.voting.RepresentativeDelegationDto.class);

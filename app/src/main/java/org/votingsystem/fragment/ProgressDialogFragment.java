@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -37,7 +38,9 @@ public class ProgressDialogFragment extends DialogFragment {
         args.putString(ContextVS.MESSAGE_KEY, progressMessage);
         args.putString(ContextVS.CAPTION_KEY, caption);
         dialog.setArguments(args);
-        dialog.show(fragmentManager, ProgressDialogFragment.TAG);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.add(dialog, ProgressDialogFragment.TAG);
+        ft.commitAllowingStateLoss();
         return dialog;
     }
 
@@ -49,7 +52,9 @@ public class ProgressDialogFragment extends DialogFragment {
         args.putString(ContextVS.CAPTION_KEY, caption);
         args.putString(ContextVS.TAG_KEY, dialogTag);
         dialog.setArguments(args);
-        dialog.show(fragmentManager, ProgressDialogFragment.TAG + dialogTag);
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.add(dialog, ProgressDialogFragment.TAG + dialogTag);
+        ft.commitAllowingStateLoss();
         return dialog;
     }
 

@@ -58,11 +58,9 @@ public class RepresentativeFragment extends Fragment {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(intent.getStringExtra(ContextVS.PIN_KEY) == null) {
-            if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
-                printRepresentativeData((UserVSDto) intent.getSerializableExtra(ContextVS.USER_KEY));
-                setProgressDialogVisible(false);
-            }
+        if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
+            printRepresentativeData((UserVSDto) intent.getSerializableExtra(ContextVS.USER_KEY));
+            setProgressDialogVisible(false);
         }
         }
     };

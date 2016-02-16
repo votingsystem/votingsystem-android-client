@@ -11,32 +11,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
-import org.votingsystem.dto.voting.RepresentativeDelegationDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -76,27 +64,12 @@ public class RepresentativeService extends IntentService {
             case STATE:
                 checkRepresentationState(serviceCaller);
                 break;
-            case REPRESENTATIVE_SELECTION:
-                try {
-                    processRepresentativeSelection(
-                            JSON.readValue(dtoStr, RepresentativeDelegationDto.class), serviceCaller);
-                } catch (IOException e) { e.printStackTrace(); }
-                break;
-            case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                try {
-                    processAnonymousRepresentativeSelection(
-                            JSON.readValue(dtoStr, RepresentativeDelegationDto.class), serviceCaller);
-                } catch (IOException e) { e.printStackTrace(); }
-                break;
-            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                processAnonymousRepresentativeSelectionCancelation(serviceCaller);
-                break;
             default: LOGD(TAG + ".onHandleIntent", "unhandled operation: " + operation.toString());
         }
     }
 
     private void checkRepresentationState(String serviceCaller) {
-        if(appVS.isWithSocketConnection() || appVS.getAccessControl() == null) {
+        if(appVS.getAccessControl() == null) {
             appVS.broadcastResponse(ResponseVS.ERROR(getString(R.string.error_lbl),
                     getString(R.string.connection_required_msg)).setServiceCaller(serviceCaller));
             return;
@@ -109,7 +82,6 @@ public class RepresentativeService extends IntentService {
                     RepresentationStateDto.class, serviceURL, MediaTypeVS.JSON);
             switch (stateDto.getState()) {
                 case REPRESENTATIVE:
-                case WITH_PUBLIC_REPRESENTATION:
                     ResponseVS representativeImageReponse = HttpHelper.getData(
                             appVS.getAccessControl().getRepresentativeImageURL(
                                     stateDto.getRepresentative().getId()), null);
@@ -193,167 +165,6 @@ public class RepresentativeService extends IntentService {
         intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
         intent.putExtra(ContextVS.USER_KEY, representative);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-    }
-
-    private void processRepresentativeSelection(
-            RepresentativeDelegationDto delegationDto, String serviceCaller) {
-        ResponseVS responseVS = null;
-        try {
-            delegationDto.setUUID(UUID.randomUUID().toString());
-            SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
-                    JSON.writeValueAsString(delegationDto),
-                    getString(R.string.representative_delegation_lbl));
-            responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
-                    ContentTypeVS.JSON_SIGNED,
-                    appVS.getAccessControl().getRepresentativeDelegationServiceURL());
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                RepresentationStateDto stateDto = new RepresentationStateDto();
-                stateDto.setState(RepresentationStateDto.State.WITH_PUBLIC_REPRESENTATION);
-                stateDto.setLastCheckedDate(new Date());
-                stateDto.setRepresentative(delegationDto.getRepresentative());
-                responseVS = ResponseVS.OK().setCaption(getString(R.string.operation_ok_msg))
-                        .setMessage(getString(R.string.representative_selected_msg));
-                PrefUtils.putRepresentationState(stateDto);
-            } else {
-                responseVS.setCaption(getString(R.string.error_lbl));
-                if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                    MessageDto messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
-                    responseVS.setNotificationMessage(messageDto.getMessage());
-                    responseVS.setData(messageDto.getURL());
-                } else responseVS.setNotificationMessage(responseVS.getMessage());
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, this);
-        } finally {
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(TypeVS.REPRESENTATIVE_SELECTION);
-            appVS.broadcastResponse(responseVS);
-        }
-    }
-
-    private void processAnonymousRepresentativeSelectionCancelation(String serviceCaller) {
-        LOGD(TAG + ".processAnonymousRepresentativeSelectionCancelation",
-                "processAnonymousRepresentativeSelectionCancelation");
-        ResponseVS responseVS = null;
-        try {
-            RepresentativeDelegationDto representativeDelegationDto = PrefUtils.getAnonymousDelegation();
-            if(representativeDelegationDto == null) {
-                responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                        getString(R.string.missing_anonymous_delegation_cancellation_data));
-            } else {
-                responseVS = processAnonymousRepresentativeSelectionCancelation(representativeDelegationDto);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    PrefUtils.putAnonymousDelegation(null);
-                    responseVS.setCaption(getString(R.string.cancel_anonymouys_representation_lbl)).
-                            setNotificationMessage(getString(R.string.cancel_anonymous_representation_ok_msg));
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, this);
-        } finally {
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(
-                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
-            appVS.broadcastResponse(responseVS);
-        }
-    }
-
-    private ResponseVS processAnonymousRepresentativeSelectionCancelation(
-            RepresentativeDelegationDto delegation) throws Exception {
-        LOGD(TAG + ".processAnonymousRepresentativeSelectionCancelation",
-                "processAnonymousRepresentativeSelectionCancelation");
-        RepresentativeDelegationDto anonymousCancelationRequest = delegation.getAnonymousCancelationRequest();
-        RepresentativeDelegationDto anonymousRepresentationDocumentCancelationRequest =
-                delegation.getAnonymousRepresentationDocumentCancelationRequest();
-        SMIMEMessage smimeMessage = appVS.signMessage(appVS.getAccessControl().getName(),
-                JSON.getMapper().writeValueAsString(anonymousCancelationRequest),
-                getString(R.string.anonymous_delegation_cancellation_lbl));
-        SMIMEMessage anonymousSmimeMessage = delegation.getCertificationRequest().getSMIME(
-                delegation.getHashCertVSBase64(),
-                AppVS.getInstance().getAccessControl().getName(),
-                JSON.getMapper().writeValueAsString(anonymousRepresentationDocumentCancelationRequest),
-                getString(R.string.anonymous_delegation_cancellation_lbl));
-        MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousSmimeMessage,
-                AppVS.getInstance().getAccessControl().getTimeStampServiceURL());
-        anonymousSmimeMessage = timeStamper.call();
-
-        Map<String, Object> mapToSend = new HashMap<>();
-        mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
-        mapToSend.put(ContextVS.SMIME_ANONYMOUS_FILE_NAME, anonymousSmimeMessage.getBytes());
-        ResponseVS responseVS =  HttpHelper.sendObjectMap(mapToSend,
-                AppVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            SMIMEMessage delegationReceipt = responseVS.getSMIME();
-            Collection matches = delegationReceipt.checkSignerCert(
-                    AppVS.getInstance().getAccessControl().getCertificate());
-            if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-            responseVS.setSMIME(delegationReceipt);
-        }
-        return responseVS;
-    }
-
-    private void processAnonymousRepresentativeSelection(RepresentativeDelegationDto delegationDto,
-                                                         String serviceCaller) {
-        ResponseVS responseVS = null;
-        try {
-            String messageSubject = getString(R.string.representative_delegation_lbl);
-            delegationDto.setServerURL(AppVS.getInstance().getAccessControl().getServerURL());
-            RepresentativeDelegationDto anonymousCertRequest = delegationDto.getAnonymousCertRequest();
-            RepresentativeDelegationDto anonymousDelegationRequest = delegationDto.getDelegation();
-            SMIMEMessage smimeMessage = appVS.signMessage(AppVS.getInstance().getAccessControl().getName(),
-                    JSON.writeValueAsString(anonymousCertRequest),
-                    getString(R.string.anonimous_representative_request_lbl),
-                    appVS.getTimeStampServiceURL());
-            delegationDto.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
-            Map<String, Object> mapToSend = new HashMap<>();
-            mapToSend.put(ContextVS.CSR_FILE_NAME, delegationDto.getCertificationRequest().getCsrPEM());
-            mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
-            responseVS = HttpHelper.sendObjectMap(mapToSend,
-                    AppVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                delegationDto.getCertificationRequest().initSigner(responseVS.getMessageBytes());
-                //this is the delegation request signed with anonymous cert
-                smimeMessage = delegationDto.getCertificationRequest().getSMIME(
-                        delegationDto.getHashCertVSBase64(),
-                        AppVS.getInstance().getAccessControl().getName(),
-                        JSON.getMapper().writeValueAsString(anonymousDelegationRequest),
-                        messageSubject);
-                smimeMessage = new MessageTimeStamper(smimeMessage,
-                        AppVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-                responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                        AppVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    delegationDto.setDelegationReceipt(responseVS.getSMIME(),
-                            AppVS.getInstance().getAccessControl().getCertificate());
-                    PrefUtils.putAnonymousDelegation(delegationDto);
-
-                    SMIMEMessage delegationReceipt = new SMIMEMessage(responseVS.getMessageBytes());
-                    Collection matches = delegationReceipt.checkSignerCert(
-                            appVS.getAccessControl().getCertificate());
-                    if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-
-                    PrefUtils.putAnonymousDelegation(delegationDto);
-                    responseVS.setCaption(getString(R.string.anonymous_delegation_caption))
-                            .setNotificationMessage(getString(R.string.anonymous_delegation_msg,
-                            delegationDto.getRepresentative().getName(),
-                            delegationDto.getWeeksOperationActive()));
-                } else processAnonymousRepresentativeSelectionCancelation(delegationDto);
-            } else {
-                responseVS.setCaption(getString(R.string.error_lbl));
-                if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                    MessageDto messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
-                    responseVS.setNotificationMessage(messageDto.getMessage());
-                    responseVS.setData(messageDto.getURL());
-                } else responseVS.setNotificationMessage(responseVS.getMessage());
-            }
-        } catch(Exception ex) {
-            ex.printStackTrace();
-            responseVS = ResponseVS.EXCEPTION(ex, this);
-        } finally {
-            responseVS.setServiceCaller(serviceCaller).setTypeVS(
-                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
-            appVS.broadcastResponse(responseVS);
-        }
     }
 
 }
