@@ -110,7 +110,6 @@ public class UserVSDto implements Serializable {
         return userVS;
     }
 
-    @JsonIgnore
     public static UserVSDto getUserVS (X509Principal principal) {
         UserVSDto userVS = new UserVSDto();
         userVS.setNIF((String) principal.getValues(new DERObjectIdentifier("2.5.4.5")).get(0));

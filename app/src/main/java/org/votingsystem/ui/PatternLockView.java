@@ -49,7 +49,7 @@ public class PatternLockView  extends ViewGroup {
     private static final String TAG = PatternLockView.class.getSimpleName();
 
     private boolean mIsTouchEnabled = true;
-    private long mFinishTimeout = 500;
+    private long mFinishTimeout = 100;
     private boolean mIsFinishInterruptable = true;
     private boolean mIsAutoLink;
 

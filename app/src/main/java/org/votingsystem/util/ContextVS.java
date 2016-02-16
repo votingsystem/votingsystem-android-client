@@ -31,14 +31,11 @@ public class ContextVS {
 
     public static final String DNIe_SIGN_MECHANISM             = "SHA1withRSA";
     public static final String WALLET_FILE_NAME                = "wallet.wvs";
-    public static final String PLAIN_WALLET_FILE_NAME          = "plain_wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
     public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentTypeVS.TEXT.getName();
     public static final String SMIME_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String SMIME_ANONYMOUS_FILE_NAME       = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String IMAGE_FILE_NAME                 = "image";
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String REPRESENTATIVE_DATA_FILE_NAME   = "representativeData";
     public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
     public static final String PROVIDER                        = "BC";
@@ -74,7 +71,6 @@ public class ContextVS {
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
     public static final String MESSAGE_CONTENT_KEY = "MESSAGE_CONTENT_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
-    public static final String CERT_VALIDATION_KEY = "CERT_VALIDATION_KEY";
     public static final String TYPEVS_KEY = "TYPEVS_KEY";
     public static final String MODE_KEY = "MODE_KEY";
     public static final String MESSAGE_SUBJECT_KEY = "MESSAGE_SUBJECT_KEY";
@@ -138,17 +134,6 @@ public class ContextVS {
     public static final String VOTE_SIGN_MECHANISM = "SHA256WithRSA";
     public static final String USER_CERT_ALIAS = "USER_CERT_ALIAS";
 
-    public static final String TIMESTAMP_USU_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
-    public static final String TIMESTAMP_VOTE_HASH = "2.16.840.1.101.3.4.2.1";//TSPAlgorithms.SHA256
-
-    public static final String VOTING_HEADER_LABEL  = "votingSystemMessageType";
-    public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
-
-    public static final String KEYSTORE_TYPE = "PKCS12";
-
     public static final Charset UTF_8 = Charset.forName("UTF-8");
-
-
-    public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
 }

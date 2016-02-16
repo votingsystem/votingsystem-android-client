@@ -126,7 +126,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         CertExtensionDto dto = new CertExtensionDto(deviceId, Utils.getDeviceName(),
-                email, phone, deviceType);
+                email, phone, deviceType).setNif(nif).setGivenname(givenName).setSurname(surName);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
                 new DERUTF8String(JSON.writeValueAsString(dto))));
         X500Principal subject = new X500Principal(principal);

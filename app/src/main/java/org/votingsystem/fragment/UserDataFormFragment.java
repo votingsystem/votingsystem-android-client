@@ -316,6 +316,7 @@ public class UserDataFormFragment extends Fragment {
                 ex.printStackTrace();
                 responseVS = ResponseVS.EXCEPTION(ex, getActivity());
             } finally {
+                PrefUtils.putCsrRequest(null);
                 return responseVS;
             }
         }
@@ -332,4 +333,5 @@ public class UserDataFormFragment extends Fragment {
             }
         }
     }
+
 }

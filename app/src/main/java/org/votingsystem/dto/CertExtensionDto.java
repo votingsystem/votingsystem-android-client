@@ -12,7 +12,11 @@ public class CertExtensionDto {
     private String deviceName;
     private String email;
     private String mobilePhone;
+    private String nif;
+    private String givenname;
+    private String surname;
     private DeviceVSDto.Type deviceType;
+
 
 
     public CertExtensionDto() {}
@@ -64,4 +68,32 @@ public class CertExtensionDto {
     public void setDeviceType(DeviceVSDto.Type deviceType) {
         this.deviceType = deviceType;
     }
+
+    public String getNif() {
+        return nif;
+    }
+
+    public CertExtensionDto setNif(String nif) {
+        this.nif = nif;
+        return this;
+    }
+
+    public String getGivenname() {
+        return givenname;
+    }
+
+    public CertExtensionDto setGivenname(String givenname) {
+        this.givenname = givenname;
+        return this;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public CertExtensionDto setSurname(String surname) {
+        this.surname = surname;
+        return this;
+    }
+
 }

@@ -66,8 +66,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 	public static final int MODE_PASSWORD_REQUEST  = 0;
 	public static final int MODE_SIGN_DOCUMENT     = 1;
 
-
-    private TypeVS operation;
 	private String textToSign;
 	private String toUser;
 	private String msgSubject;
@@ -106,7 +104,6 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
-        operation = (TypeVS) getIntent().getExtras().getSerializable(ContextVS.OPERATIONVS_KEY);
         textToSign = getIntent().getExtras().getString(ContextVS.MESSAGE_CONTENT_KEY);
         toUser = getIntent().getExtras().getString(ContextVS.USER_KEY);
 		if(toUser == null) toUser = getString(R.string.voting_system_lbl);
@@ -207,13 +204,10 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 					if(userFromCert.getCn() != null) appUser.setCn(userFromCert.getCn());
 					msgSubject = getString(R.string.user_data_lbl);
 					if(requestCsr) {
-						CertRequestDto dto = new CertRequestDto(PrefUtils.getDeviceId(),
-								appUser.getPhone(), appUser.getFirstName(), appUser.getLastName(),
-								appUser.getNIF(), appUser.getEmail());
 						CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
-								SIGNATURE_ALGORITHM, PROVIDER, dto.getNif(), dto.getEmail(),
-								dto.getPhone(), dto.getDeviceId(), dto.getGivenName(), dto.getSurname(),
-								DeviceVSDto.Type.MOBILE);
+								SIGNATURE_ALGORITHM, PROVIDER, appUser.getNIF(), appUser.getEmail(),
+								appUser.getPhone(), PrefUtils.getDeviceId(), appUser.getFirstName(),
+								appUser.getLastName(), DeviceVSDto.Type.MOBILE);
 						byte[] csrBytes = certificationRequest.getCsrPEM();
 						UserCertificationRequestDto userCertificationRequestDto =
 								new UserCertificationRequestDto(appUser.getAddress(), csrBytes);
@@ -229,13 +223,11 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 						toUser, textToSign, msgSubject);
 				smimeMessage = new MessageTimeStamper(smimeMessage,
 						AppVS.getInstance().getTimeStampServiceURL()).call();
-
 				responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
 				if(MODE_PASSWORD_REQUEST == activityMode) {
 					PrefUtils.putAppUser(appUser);
 					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());
 				}
-				responseVS.setTypeVS(operation);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 				showMessageDialog(getString(R.string.error_lbl), getString(R.string.dnie_connection_error_msg));
