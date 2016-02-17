@@ -22,6 +22,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.ControlCenterDto;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.BootStrapService;
 import org.votingsystem.service.WebSocketService;
@@ -49,11 +50,15 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.votingsystem.util.ContextVS.ALGORITHM_RNG;
@@ -87,7 +92,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private DeviceVSDto connectedDevice;
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<>();
+    private Set<EventVSDto.State> eventsStateLoaded = new HashSet<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
+
 
     private static AppVS INSTANCE;
 
@@ -389,4 +396,11 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         this.withSocketConnection = withSocketConnection;
     }
 
+    public boolean isEventsStateLoaded(EventVSDto.State eventsState) {
+        return eventsStateLoaded.contains(eventsState);
+    }
+
+    public void addEventsStateLoaded(EventVSDto.State eventsState) {
+        this.eventsStateLoaded.add(eventsState);
+    }
 }

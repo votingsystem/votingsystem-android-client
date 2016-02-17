@@ -124,7 +124,7 @@ public class EventVSService extends IntentService {
                     responseVS = ResponseVS.EXCEPTION(ex, this);
                 }
             } else responseVS.setCaption(getString(R.string.operation_error_msg));
-            appVS.broadcastResponse(responseVS);
+            appVS.broadcastResponse(responseVS.setServiceCaller(serviceCaller));
         } else LOGD(TAG + ".onHandleIntent", "missing params");
     }
 

@@ -215,8 +215,6 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         delegationDto.setDelegationReceipt(responseVS.getSMIME(),
                                 AppVS.getInstance().getAccessControl().getCertificate());
-                        PrefUtils.putAnonymousDelegation(delegationDto);
-
                         SMIMEMessage delegationReceipt = new SMIMEMessage(responseVS.getMessageBytes());
                         Collection matches = delegationReceipt.checkSignerCert(
                                 AppVS.getInstance().getAccessControl().getCertificate());
