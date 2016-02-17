@@ -403,7 +403,7 @@ public class ReceiptFragment extends Fragment {
                                     .setPositiveButton(getString(R.string.ok_lbl),
                                             new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                                    Utils.getCryptoDeviceAccessModePassword(RC_CANCEL_VOTE,
+                                                    Utils.initConnection(RC_CANCEL_VOTE,
                                                             getString(R.string.cancel_vote_msg),
                                                             null, (AppCompatActivity)getActivity());
                                                 }

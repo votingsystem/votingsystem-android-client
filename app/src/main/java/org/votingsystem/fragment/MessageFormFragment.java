@@ -154,7 +154,7 @@ public class MessageFormFragment extends Fragment {
                     getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            ConnectionUtils.getCryptoDeviceAccessModePassword((AppCompatActivity) getActivity());
+                            ConnectionUtils.initConnection((AppCompatActivity) getActivity());
                         }
                     });
             UIUtils.showMessageDialog(builder);

@@ -62,6 +62,7 @@ public class ActivityBase extends AppCompatActivity
     private Thread mDataBootstrapThread = null;
     private Menu menu;
     private MenuItem messagesMenuItem;
+    private Integer menuType;
 
     private String broadCastId = ActivityBase.class.getSimpleName();
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -74,7 +75,8 @@ public class ActivityBase extends AppCompatActivity
                 LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getOperation());
                 ProgressDialogFragment.hide(getSupportFragmentManager());
                 setConnectionStatusUI();
-                if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                if(ResponseVS.SC_ERROR == socketMsg.getStatusCode() ||
+                        ResponseVS.SC_WS_CONNECTION_INIT_ERROR == socketMsg.getStatusCode()) {
                     MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
                             socketMsg.getCaption(), socketMsg.getMessage(),
                             getSupportFragmentManager());
@@ -118,9 +120,10 @@ public class ActivityBase extends AppCompatActivity
 
     private void setConnectionStatusUI() {
         if(appVS.isWithSocketConnection() && menu != null) {
-            menu.findItem(R.id.connect).setIcon(R.drawable.fa_bolt_16_ffff00);
+            if(menu.findItem(R.id.connect) != null)
+                menu.findItem(R.id.connect).setIcon(R.drawable.fa_bolt_16_ffff00);
         } else {
-            if(menu != null)
+            if(menu != null && menu.findItem(R.id.connect) != null)
                 menu.findItem(R.id.connect).setIcon(R.drawable.fa_plug_16_ffffff);
         }
     }
@@ -189,6 +192,11 @@ public class ActivityBase extends AppCompatActivity
         if (!BuildConfig.DEBUG) {
             menu.findItem(R.id.menu_debug).setVisible(false);
         }
+        if(menuType != null && menuType == R.menu.drawer_currency) {
+            menu.findItem(R.id.connect).setVisible(true);
+        } else if(menuType != null && menuType == R.menu.drawer_voting) {
+            menu.findItem(R.id.connect).setVisible(false);
+        }
         this.menu = menu;
         setConnectionStatusUI();
         return true;
@@ -213,7 +221,7 @@ public class ActivityBase extends AppCompatActivity
                 if(appVS.isWithSocketConnection()) {
                     showConnectionStatusDialog();
                 } else {
-                    ConnectionUtils.getCryptoDeviceAccessModePassword(ActivityBase.this);
+                    ConnectionUtils.initConnection(ActivityBase.this);
                 }
                 return true;
             case R.id.close_app:
@@ -227,6 +235,11 @@ public class ActivityBase extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         return selectedContentFragment(item.getItemId());
+    }
+
+    public void setMenu(int menuType) {
+        this.menuType = menuType;
+        navigationView.inflateMenu(menuType);
     }
 
     private boolean selectedContentFragment(int menuId) {
@@ -248,7 +261,7 @@ public class ActivityBase extends AppCompatActivity
                 break;
             case R.id.currency_menu_item:
                 navigationView.getMenu().clear();
-                navigationView.inflateMenu(R.menu.drawer_currency);
+                setMenu(R.menu.drawer_currency);
             case R.id.currency_accounts:
                 currentFragment = new WeakReference<Fragment>(new CurrencyAccountsPagerFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,

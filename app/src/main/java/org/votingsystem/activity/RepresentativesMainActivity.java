@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,7 +57,7 @@ public class RepresentativesMainActivity extends ActivityBase {
         stateFragment = new WeakReference<RepresentationStateFragment>(new RepresentationStateFragment());
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 stateFragment.get(), RepresentationStateFragment.TAG).commit();
-        ((NavigationView) findViewById(R.id.nav_view)).inflateMenu(R.menu.drawer_voting);
+        setMenu(R.menu.drawer_voting);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -72,7 +71,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                 builder.setPositiveButton(getString(R.string.continue_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                Utils.getCryptoDeviceAccessModePassword(RC_PASSW, null, null,
+                                Utils.initConnection(RC_PASSW, null, null,
                                         RepresentativesMainActivity.this);
                             }
                         });

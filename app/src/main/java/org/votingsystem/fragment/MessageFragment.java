@@ -216,7 +216,7 @@ public class MessageFragment extends Fragment {
     private void updateWallet() {
         LOGD(TAG + ".updateWallet", "updateWallet");
         if(Wallet.getCurrencySet() == null) {
-            Utils.getCryptoDeviceAccessModePassword(RC_OPEN_WALLET, getString(R.string.enter_wallet_password_msg),
+            Utils.initConnection(RC_OPEN_WALLET, getString(R.string.enter_wallet_password_msg),
                     null, (AppCompatActivity)getActivity());
         } else {
             try {

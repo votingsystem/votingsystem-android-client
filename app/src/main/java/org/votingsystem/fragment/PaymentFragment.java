@@ -195,7 +195,7 @@ public class PaymentFragment extends Fragment {
                             UIUtils.showMessageDialog(builder);
                             return;
                         } else {
-                            Utils.getCryptoDeviceAccessModePassword(RC_SEND_TRANSACTION,
+                            Utils.initConnection(RC_SEND_TRANSACTION,
                                     MsgUtils.getTransactionVSConfirmMessage(transactionDto, getActivity()),
                                     null, (AppCompatActivity)getActivity());
                         }
@@ -204,7 +204,7 @@ public class PaymentFragment extends Fragment {
                 case CURRENCY_CHANGE:
                 case CURRENCY_SEND:
                     if(Wallet.getCurrencySet() == null) {
-                        Utils.getCryptoDeviceAccessModePassword(RC_OPEN_WALLET,
+                        Utils.initConnection(RC_OPEN_WALLET,
                                 getString(R.string.enter_wallet_password_msg),
                                 null, (AppCompatActivity)getActivity());
                         return;

@@ -195,7 +195,7 @@ public class Utils {
         mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
-    public static void getCryptoDeviceAccessModePassword(Integer requestCode, String msg,
+    public static void initConnection(Integer requestCode, String msg,
             Integer activityMode, AppCompatActivity activity) {
         Intent intent = null;
         CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();

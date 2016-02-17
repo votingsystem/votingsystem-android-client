@@ -100,7 +100,7 @@ public class QRActionsFragment extends Fragment {
                     getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            ConnectionUtils.getCryptoDeviceAccessModePassword(((ActivityBase)getActivity()));
+                            ConnectionUtils.initConnection(((ActivityBase)getActivity()));
                         }
                     });
             UIUtils.showMessageDialog(builder);

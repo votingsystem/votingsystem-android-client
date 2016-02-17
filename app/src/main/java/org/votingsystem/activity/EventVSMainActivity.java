@@ -2,7 +2,6 @@ package org.votingsystem.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -75,7 +74,7 @@ public class EventVSMainActivity extends ActivityBase {
         getSupportActionBar().setCustomView(spinnerContainer, lp);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setSubtitle(getString(R.string.polls_lbl));
-        ((NavigationView) findViewById(R.id.nav_view)).inflateMenu(R.menu.drawer_voting);
+        setMenu(R.menu.drawer_voting);
     }
 
     public void setTitle(String title, String subTitle, Integer iconId) {

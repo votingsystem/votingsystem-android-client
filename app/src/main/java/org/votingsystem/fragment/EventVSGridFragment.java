@@ -41,8 +41,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -112,7 +110,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
         new Handler(){
             @Override public void handleMessage(Message msg) {
-                if (isVisible) {
+                if (isVisible && getActivity() != null) {
                     ProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
                             getString(R.string.loading_data_msg), getFragmentManager());
                 } else ProgressDialogFragment.hide(getFragmentManager());
