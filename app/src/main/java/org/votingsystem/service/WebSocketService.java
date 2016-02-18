@@ -307,7 +307,7 @@ public class WebSocketService extends Service {
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     break;
                 case CURRENCY_WALLET_CHANGE:
-                    if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_FROM_DEVICE) {
+                    if(socketMsg.getMessageType() == TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID) {
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
                             for(Currency currency : (Collection<Currency>) socketSession.getData()) {
                                 currency.setState(Currency.State.EXPENDED);
@@ -315,7 +315,7 @@ public class WebSocketService extends Service {
                             Wallet.remove((Collection<Currency>) socketSession.getData());
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                         }
-                    } else if(socketMsg.getMessageType() == TypeVS.MESSAGEVS_TO_DEVICE) {
+                    } else if(socketMsg.getMessageType() == TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID) {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
                         Utils.showNewMessageNotification();
                     }

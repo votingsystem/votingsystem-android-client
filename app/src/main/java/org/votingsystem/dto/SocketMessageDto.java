@@ -96,7 +96,7 @@ public class SocketMessageDto implements Serializable {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
+        messageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         messageDto.setSessionId(sessionId);
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
@@ -415,7 +415,7 @@ public class SocketMessageDto implements Serializable {
                   String textToSign, String subject) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS_SIGN);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
@@ -437,7 +437,7 @@ public class SocketMessageDto implements Serializable {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.QR_MESSAGE_INFO);
         socketSession.setData(qrMessageDto);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
@@ -457,7 +457,7 @@ public class SocketMessageDto implements Serializable {
                               List<Currency> currencyList) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
@@ -490,7 +490,7 @@ public class SocketMessageDto implements Serializable {
                 TypeVS.MESSAGEVS);
         socketSession.setBroadCastId(broadCastId);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
