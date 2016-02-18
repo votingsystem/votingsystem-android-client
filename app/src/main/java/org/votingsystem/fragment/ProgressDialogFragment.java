@@ -34,6 +34,10 @@ public class ProgressDialogFragment extends DialogFragment {
     public static ProgressDialogFragment showDialog(String caption, String progressMessage,
             FragmentManager fragmentManager) {
         ProgressDialogFragment dialog = new ProgressDialogFragment();
+        if(fragmentManager == null) {
+            LOGD(TAG, "fragmentManager null");
+            return dialog;
+        }
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, progressMessage);
         args.putString(ContextVS.CAPTION_KEY, caption);
@@ -47,6 +51,10 @@ public class ProgressDialogFragment extends DialogFragment {
     public static ProgressDialogFragment showDialog(String caption, String progressMessage,
                             String dialogTag, FragmentManager fragmentManager) {
         ProgressDialogFragment dialog = new ProgressDialogFragment();
+        if(fragmentManager == null) {
+            LOGD(TAG, "fragmentManager null");
+            return dialog;
+        }
         Bundle args = new Bundle();
         args.putString(ContextVS.MESSAGE_KEY, progressMessage);
         args.putString(ContextVS.CAPTION_KEY, caption);
@@ -59,6 +67,10 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     public static void hide(String dialogTag, FragmentManager fragmentManager) {
+        if(fragmentManager == null) {
+            LOGD(TAG, "fragmentManager null");
+            return;
+        }
         if(fragmentManager != null && fragmentManager.findFragmentByTag(
                 ProgressDialogFragment.TAG + dialogTag) != null) {
             ((ProgressDialogFragment) fragmentManager.
@@ -67,6 +79,10 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     public static void hide(FragmentManager fragmentManager) {
+        if(fragmentManager == null) {
+            LOGD(TAG, "fragmentManager null");
+            return;
+        }
         List<Fragment> fragmentList = fragmentManager.getFragments();
         if(fragmentList != null) {
             for(Fragment fragment : fragmentList) {

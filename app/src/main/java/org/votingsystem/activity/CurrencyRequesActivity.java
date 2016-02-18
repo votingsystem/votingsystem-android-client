@@ -155,7 +155,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
                 if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
                 transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
-                Utils.initConnection(RC_PASSW, MsgUtils.getCurrencyRequestMessage(
+                Utils.getProtectionPassword(RC_PASSW, MsgUtils.getCurrencyRequestMessage(
                         transactionDto, CurrencyRequesActivity.this), null, this);
             } else errorMsgTextView.setVisibility(View.VISIBLE);
         }

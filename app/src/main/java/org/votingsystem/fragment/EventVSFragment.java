@@ -367,7 +367,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             String passwMsg= optionSelected.getContent().length() >
                     ContextVS.SELECTED_OPTION_MAX_LENGTH ? optionSelected.getContent().substring(0,
                     ContextVS.SELECTED_OPTION_MAX_LENGTH) + "..." : optionSelected.getContent();
-            Utils.initConnection(RC_ACCESS_REQUEST, passwMsg,
+            Utils.getProtectionPassword(RC_ACCESS_REQUEST, passwMsg,
                     null, (AppCompatActivity)getActivity());
         } catch (Exception ex) { ex.printStackTrace(); }
     }

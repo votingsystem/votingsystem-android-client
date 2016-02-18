@@ -116,7 +116,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 builder.setPositiveButton(getString(R.string.ok_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                Utils.initConnection(RC_PASSW, null, null,
+                                Utils.getProtectionPassword(RC_PASSW, null, null,
                                         RepresentativeDelegationActivity.this);
                             }
                         });

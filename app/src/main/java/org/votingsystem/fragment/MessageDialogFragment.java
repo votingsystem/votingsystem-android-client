@@ -18,6 +18,8 @@ import org.votingsystem.android.R;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -31,6 +33,10 @@ public class MessageDialogFragment extends DialogFragment {
         hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
+        if(fragmentManager == null) {
+            LOGD(TAG, "fragmentManager null");
+            return;
+        }
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(newFragment, MessageDialogFragment.TAG);
         ft.commitAllowingStateLoss();
@@ -40,6 +46,10 @@ public class MessageDialogFragment extends DialogFragment {
         hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseVS.SC_OK,
                 caption, message);
+        if(fragmentManager == null) {
+            LOGD(TAG, "fragmentManager null");
+            return;
+        }
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(newFragment, MessageDialogFragment.TAG);
         ft.commitAllowingStateLoss();

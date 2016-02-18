@@ -96,7 +96,7 @@ public class WalletFragment extends Fragment {
         });
         if(Wallet.getCurrencySet() == null) {
             currencyList = new ArrayList<>();
-            Utils.initConnection(RC_OPEN_WALLET,
+            Utils.getProtectionPassword(RC_OPEN_WALLET,
                     getString(R.string.enter_wallet_password_msg),
                     null, (AppCompatActivity)getActivity());
         } else {
@@ -167,7 +167,7 @@ public class WalletFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.open_wallet:
-                Utils.initConnection(RC_OPEN_WALLET, getString(R.string.enter_wallet_password_msg),
+                Utils.getProtectionPassword(RC_OPEN_WALLET, getString(R.string.enter_wallet_password_msg),
                         null, (AppCompatActivity)getActivity());
                 return true;
             default:

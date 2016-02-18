@@ -170,7 +170,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.sign_document:
-                Utils.initConnection(RC_PASSWORD_REQUEST, null, null, this);
+                Utils.getProtectionPassword(RC_PASSWORD_REQUEST, null, null, this);
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:

@@ -66,11 +66,17 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode())  showHTTPError();
             setProgressDialogVisible(false);
+            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
+                if(gridView.getAdapter().getCount() == 0)
+                    rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
+            }
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 getLoaderManager().restartLoader(loaderId, null, EventVSGridFragment.this);
-            } else MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            } else {
+                MessageDialogFragment.showDialog(
+                        responseVS, getFragmentManager());
+            }
         }
     };
 
@@ -110,10 +116,12 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         //bug, without Handler triggers 'Can not perform this action inside of onLoadFinished'
         new Handler(){
             @Override public void handleMessage(Message msg) {
-                if (isVisible && getActivity() != null) {
-                    ProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
-                            getString(R.string.loading_data_msg), getFragmentManager());
-                } else ProgressDialogFragment.hide(getFragmentManager());
+                if(getActivity() != null) {
+                    if (isVisible) {
+                        ProgressDialogFragment.showDialog(getString(R.string.loading_info_msg),
+                                getString(R.string.loading_data_msg), getFragmentManager());
+                    } else ProgressDialogFragment.hide(getFragmentManager());
+                }
             }
         }.sendEmptyMessage(UIUtils.EMPTY_MESSAGE);
     }
@@ -147,11 +155,6 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         return eventState;
     }
 
-    private void showHTTPError() {
-        setProgressDialogVisible(false);
-        if(gridView.getAdapter().getCount() == 0)
-            rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
-    }
 
     public void fetchItems(Long offset) {
         LOGD(TAG , "fetchItems - offset: " + offset + " - eventState: " + eventState);
@@ -310,9 +313,11 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                     fetchItems(0L);
                 } catch(Exception ex) {ex.printStackTrace();}
             } else {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                        getString(R.string.error_lbl), getString(R.string.server_connection_error_msg,
-                                AppVS.getInstance().getAccessControlURL()), getFragmentManager());
+                if(getActivity() != null) {
+                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                            getString(R.string.error_lbl), getString(R.string.server_connection_error_msg,
+                            AppVS.getInstance().getAccessControlURL()), getFragmentManager());
+                }
             }
 
         }

@@ -24,7 +24,7 @@ public class ConnectionUtils {
     public static final int RC_PASSWORD_REQUEST        = 1001;
 
     public static void initConnection(final AppCompatActivity activity) {
-        Utils.initConnection(RC_PASSWORD_REQUEST,
+        Utils.getProtectionPassword(RC_PASSWORD_REQUEST,
                 activity.getString(R.string.connection_passw_msg), null, activity);
     }
 
