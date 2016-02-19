@@ -151,15 +151,15 @@ public class CurrencyAccountsFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.currency_accounts, menu);
-        menu.setGroupVisible(R.id.general_items, false);
-        menu.removeItem(R.id.search_item);
+        super.onCreateOptionsMenu(menu, menuInflater);
+        if(menu.findItem(R.id.update_currency_accounts) == null)
+                menuInflater.inflate(R.menu.currency_accounts, menu);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
-            case R.id.update_signers_info:
+            case R.id.update_currency_accounts:
                 updateCurrencyAccountsInfo();
                 return true;
             default:

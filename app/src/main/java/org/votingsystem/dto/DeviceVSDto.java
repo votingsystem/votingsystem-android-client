@@ -140,13 +140,13 @@ public class DeviceVSDto implements Serializable {
         this.IBAN = IBAN;
     }
 
-    public X509Certificate getX509Certificate() throws Exception {
+    @JsonIgnore public X509Certificate getX509Cert() throws Exception {
         if(x509Certificate == null && certPEM != null) x509Certificate =
                 CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
         return x509Certificate;
     }
 
-    public void setX509Certificate(X509Certificate x509Certificate) {
+    public void setX509Cert(X509Certificate x509Certificate) {
         this.x509Certificate = x509Certificate;
     }
 

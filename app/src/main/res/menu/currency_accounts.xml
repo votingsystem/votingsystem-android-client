@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:vs="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/update_signers_info"
+    <item android:id="@+id/update_currency_accounts"
         android:orderInCategory="1"
         vs:showAsAction="never"
         android:title="@string/update_signers_info_lbl"/>

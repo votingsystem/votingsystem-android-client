@@ -35,7 +35,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class QRFragment extends Fragment {
+public class  QRFragment extends Fragment {
 
     public static final String TAG = QRFragment.class.getSimpleName();
 

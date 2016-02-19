@@ -14,6 +14,8 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -98,6 +100,11 @@ public class ReceiptGridFragment extends Fragment implements
             }
         }).show();
         return true;
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menu.clear();
+        super.onCreateOptionsMenu(menu, menuInflater);
     }
 
     private void filterReceiptList(TypeVS receiptType) {

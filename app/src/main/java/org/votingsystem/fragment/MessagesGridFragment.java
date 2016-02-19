@@ -15,6 +15,8 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -143,6 +145,11 @@ public class MessagesGridFragment extends Fragment implements
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg), getFragmentManager());
         } else ProgressDialogFragment.hide(getFragmentManager());
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menu.clear();
+        super.onCreateOptionsMenu(menu, menuInflater);
     }
 
     public class MessageGridAdapter extends CursorAdapter {

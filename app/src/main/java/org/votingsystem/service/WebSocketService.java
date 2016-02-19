@@ -106,7 +106,8 @@ public class WebSocketService extends Service {
             ex.printStackTrace();
         }
         Bundle arguments = intent.getExtras();
-        final TypeVS operationType = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
+        final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
+                (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USERVS;
         final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
         final String message = arguments.getString(ContextVS.MESSAGE_KEY);
         final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
@@ -247,37 +248,32 @@ public class WebSocketService extends Service {
             Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
             intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
             WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
-            switch(socketMsg.getOperation()) { //Messages from system
-                case MESSAGEVS_FROM_VS:
-                    if(socketSession != null) {
-                        LOGD(TAG, "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
-                        switch(socketSession.getTypeVS()) {
-                            case INIT_SIGNED_SESSION:
-                                if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                                    appVS.setConnectedDevice(socketMsg.getConnectedDevice());
-                                    appVS.setWithSocketConnection(true);
-                                } else appVS.setWithSocketConnection(false);
-                                break;
-                        }
-                    } else {
-                        LOGD(TAG, "MESSAGEVS_FROM_VS - MessageType: " + socketMsg.getMessageType());
-                        switch (socketMsg.getMessageType()) {
-                            case TRANSACTIONVS_INFO:
-
-                                break;
-                            default: LOGD(TAG, "MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
-                        }
-                    }
-                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
-                            ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
-                                getString(R.string.error_lbl));
-                    }
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                    return;
-                case WEB_SOCKET_CLOSE:
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                    return;
+            if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_VS) { //check messages from system
+                socketMsg.setOperation(socketMsg.getMessageType());
+                LOGD(TAG, "MESSAGEVS_FROM_VS - operation: " + socketMsg.getOperation());
+                switch(socketMsg.getOperation()) {
+                    case INIT_SESSION:
+                        break;
+                    case INIT_SIGNED_SESSION:
+                        if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
+                            appVS.setConnectedDevice(socketMsg.getConnectedDevice());
+                            appVS.setWithSocketConnection(true);
+                        } else appVS.setWithSocketConnection(false);
+                        break;
+                    case TRANSACTIONVS_INFO:
+                        break;
+                    case WEB_SOCKET_CLOSE:
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        return;
+                    default: LOGD(TAG, "MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
+                }
+                if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
+                        ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                    UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
+                            getString(R.string.error_lbl));
+                }
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                return;
             }
             if(socketSession == null) {
                 byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());

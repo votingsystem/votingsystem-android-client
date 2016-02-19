@@ -37,12 +37,10 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.debug.DebugActionRunnerFragment;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -150,24 +148,6 @@ public class ActivityBase extends AppCompatActivity
         startService(startIntent);
     }
 
-    private void performDataBootstrap() {
-        final Context appContext = getApplicationContext();
-        LOGD(TAG, "performDataBootstrap - starting activity bootstrap background thread");
-        mDataBootstrapThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                LOGD(TAG, "Starting data bootstrap process.");
-                try {// Load data from bootstrap raw resource
-                    String bootstrapJson = StringUtils.parseResource(appContext, R.raw.bootstrap_data);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-                mDataBootstrapThread = null;
-            }
-        });
-        mDataBootstrapThread.start();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -260,8 +240,9 @@ public class ActivityBase extends AppCompatActivity
                 finish();
                 break;
             case R.id.currency_menu_item:
-                navigationView.getMenu().clear();
-                setMenu(R.menu.drawer_currency);
+                intent = new Intent(this, CurrencyMainActivity.class);
+                startActivity(intent);
+                finish();
             case R.id.currency_accounts:
                 currentFragment = new WeakReference<Fragment>(new CurrencyAccountsPagerFragment());
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -341,9 +322,24 @@ public class ActivityBase extends AppCompatActivity
 
     @Override public void onStart() {
         super.onStart();
-        if (!PrefUtils.isDataBootstrapDone() && mDataBootstrapThread == null) {
-            performDataBootstrap();
-        }
+        /*if (!PrefUtils.isDataBootstrapDone()) {
+            if(mDataBootstrapThread != null) return;
+            LOGD(TAG, "performDataBootstrap - starting activity bootstrap background thread");
+            mDataBootstrapThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    LOGD(TAG, "Starting data bootstrap process.");
+                    try {// Load data from bootstrap raw resource
+                        String bootstrapJson = StringUtils.parseResource(getApplicationContext(), R.raw.bootstrap_data);
+                        PrefUtils.markDataBootstrapDone();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    mDataBootstrapThread = null;
+                }
+            });
+            mDataBootstrapThread.start();
+        }*/
     }
 
 }

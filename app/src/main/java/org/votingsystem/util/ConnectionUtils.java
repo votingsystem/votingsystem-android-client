@@ -30,7 +30,7 @@ public class ConnectionUtils {
 
     public static void onActivityResult(int requestCode, int resultCode, Intent data,
                         AppCompatActivity activity) {
-        LOGD(TAG, " --- onActivityResult ---");
+        LOGD(TAG, " --- onActivityResult --- requestCode: " + requestCode);
         if(data == null) return;
         ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch (requestCode) {
@@ -61,7 +61,7 @@ public class ConnectionUtils {
 
         @Override protected Void doInBackground(String... urls) {
             try {
-                SocketMessageDto initSessionMessageDto = SocketMessageDto.INIT_SESSION_REQUEST();
+                SocketMessageDto initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
                 SMIMEMessage smimeMessage = AppVS.getInstance().signMessage(
                         AppVS.getInstance().getCurrencyServer().getName(),
                         JSON.writeValueAsString(initSessionMessageDto),

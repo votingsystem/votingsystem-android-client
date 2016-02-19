@@ -24,15 +24,24 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private T data;
     @JsonIgnore private String origingHashCertVS;
     @JsonIgnore private Currency currency ;
+    private TypeVS operation;
     private Long deviceId;
     private Date dateCreated;
     private String hashCertVS;
+    private String sessionId;
     private String currencyChangeCert;
     private String url;
     private String UUID;
 
     public QRMessageDto() {}
 
+    public QRMessageDto(String sessionId, TypeVS typeVS) {
+        this.sessionId = sessionId;
+        this.typeVS = typeVS;
+        dateCreated = new Date();
+        this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
+    }
+    
     public QRMessageDto(DeviceVSDto deviceVSDto, TypeVS typeVS){
         this.typeVS = typeVS;
         this.deviceId = deviceVSDto.getId();
@@ -130,5 +139,22 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setCurrencyChangeCert(String currencyChangeCert) {
         this.currencyChangeCert = currencyChangeCert;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public QRMessageDto setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
     }
 }

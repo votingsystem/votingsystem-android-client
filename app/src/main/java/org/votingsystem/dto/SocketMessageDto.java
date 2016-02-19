@@ -112,12 +112,20 @@ public class SocketMessageDto implements Serializable {
         return messageDto;
     }
 
-    public static SocketMessageDto INIT_SESSION_REQUEST() throws NoSuchAlgorithmException {
-        WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_SIGNED_SESSION);
+    public static SocketMessageDto INIT_SIGNED_SESSION_REQUEST() throws NoSuchAlgorithmException {
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setOperation(socketSession.getTypeVS());
+        messageDto.setOperation(TypeVS.INIT_SIGNED_SESSION);
         messageDto.setDeviceId(PrefUtils.getDeviceId());
-        messageDto.setUUID(socketSession.getUUID());
+        messageDto.setUUID(java.util.UUID.randomUUID().toString());
+        return messageDto;
+    }
+
+    public static SocketMessageDto INIT_REMOTE_SESSION_REQUEST_BY_TARGET_SESSION_ID(String sessionId)
+            throws NoSuchAlgorithmException {
+        SocketMessageDto messageDto = new SocketMessageDto();
+        messageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+        messageDto.setSessionId(sessionId);
+        messageDto.setUUID(java.util.UUID.randomUUID().toString());
         return messageDto;
     }
 
@@ -424,14 +432,14 @@ public class SocketMessageDto implements Serializable {
                 toUser, textToSign, subject);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Certificate());
+                aesParams.getBytes(), deviceVS.getX509Cert());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getQRInfoRequest(
+    public static SocketMessageDto getQRInfoRequestByTargetDeviceId(
             DeviceVSDto deviceVS, QRMessageDto qrMessageDto) throws Exception {
         qrMessageDto.createRequest();
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.QR_MESSAGE_INFO);
@@ -446,7 +454,7 @@ public class SocketMessageDto implements Serializable {
                 qrMessageDto);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Certificate());
+                aesParams.getBytes(), deviceVS.getX509Cert());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
@@ -468,7 +476,7 @@ public class SocketMessageDto implements Serializable {
 
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
-                deviceVS.getX509Certificate());
+                deviceVS.getX509Cert());
         socketMessageDto.setAesParams(new String(encryptedAESDataRequestBytes));
 
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON
@@ -499,7 +507,7 @@ public class SocketMessageDto implements Serializable {
                 userVS, toUser, textToEncrypt);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
-                deviceVS.getX509Certificate());
+                deviceVS.getX509Cert());
         socketMessageDto.setAesParams(new String(encryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
@@ -543,7 +551,7 @@ public class SocketMessageDto implements Serializable {
             throws NoSuchAlgorithmException {
         WebSocketSession webSocketSession = null;
         if(deviceVS != null) webSocketSession = AppVS.getInstance().getWSSession(deviceVS.getId());
-        if(webSocketSession == null) {
+        if(webSocketSession == null && deviceVS != null) {
             AESParams aesParams = new AESParams();
             webSocketSession = new WebSocketSession(aesParams, deviceVS);
             AppVS.getInstance().putWSSession(java.util.UUID.randomUUID().toString(), webSocketSession);

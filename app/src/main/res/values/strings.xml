@@ -548,7 +548,7 @@
     <string name="navigation_drawer_close">cerrar menu</string>
     <string name="enter_password_msg">introduzca la contraseña</string>
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
-    <string name="enter_password_retry_msg">le quedan \'%1$s\' intentos</string>
+    <string name="enter_password_retry_msg">le quedan %1$s intentos</string>
     <string name="pref_title_dnie">DNIe 3.0</string>
     <string name="pref_description_dnie">para poder usar su DNI el teléfono debe disponer de NFC</string>
     <string name="can_dialog_caption">introduzca el CAN de su DNIe</string>
@@ -590,4 +590,5 @@
     <string name="retries_exceeded_msg">debe establecer de nuevo la contraseña utilizando su DNI</string>
     <string name="disconnect_from_service_quesion_msg">¿Desea desconectar del servicio?</string>
     <string name="connection_passw_msg">Introduzca la contraseña para poder conectar al servicio</string>
+    <string name="allow_remote_device_authenticated_session">Iniciar autenticación de dispositivo remoto</string>
 </resources>

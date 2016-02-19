@@ -14,14 +14,16 @@
     <TextView
         android:id="@+id/msg"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:layout_height="60dp"
         android:textColor="#ba0011"
-        android:textSize="20dp"
+        android:textSize="25dp"
+        android:textStyle="bold"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:text="@string/enter_password_msg"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp" />
+        android:text="@string/enter_password_msg" />
 
     <org.votingsystem.ui.PatternLockView
         android:id="@+id/lock_view_circle"
