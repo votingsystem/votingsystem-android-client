@@ -36,6 +36,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -233,7 +234,8 @@ public class WebSocketService extends Service {
                         appVS.setWithSocketConnection(false);
                         try {
                             sendWebSocketBroadcast(new SocketMessageDto(
-                                    ResponseVS.SC_OK, null, TypeVS.WEB_SOCKET_CLOSE));
+                                    ResponseVS.SC_OK, null, TypeVS.MESSAGEVS_FROM_VS)
+                                    .setMessageType(TypeVS.WEB_SOCKET_CLOSE));
                         } catch (Exception ex) {  ex.printStackTrace(); }
                     }
                 }, clientEndpointConfig, URI.create(serviceURL));
@@ -251,21 +253,25 @@ public class WebSocketService extends Service {
             if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_VS) { //check messages from system
                 socketMsg.setOperation(socketMsg.getMessageType());
                 LOGD(TAG, "MESSAGEVS_FROM_VS - operation: " + socketMsg.getOperation());
-                switch(socketMsg.getOperation()) {
-                    case INIT_SESSION:
-                        break;
-                    case INIT_SIGNED_SESSION:
-                        if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                            appVS.setConnectedDevice(socketMsg.getConnectedDevice());
-                            appVS.setWithSocketConnection(true);
-                        } else appVS.setWithSocketConnection(false);
-                        break;
-                    case TRANSACTIONVS_INFO:
-                        break;
-                    case WEB_SOCKET_CLOSE:
-                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                        return;
-                    default: LOGD(TAG, "MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
+                if(socketMsg.getOperation() != null) {
+                    switch(socketMsg.getOperation()) {
+                        case INIT_SESSION:
+                            break;
+                        case INIT_SIGNED_SESSION:
+                            if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
+                                appVS.setConnectedDevice(socketMsg.getConnectedDevice());
+                                appVS.setWithSocketConnection(true);
+                                PrefUtils.putToken(null);
+                                appVS.setToken(socketMsg.getMessage().toCharArray());
+                            } else appVS.setWithSocketConnection(false);
+                            break;
+                        case TRANSACTIONVS_INFO:
+                            break;
+                        case WEB_SOCKET_CLOSE:
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                            return;
+                        default: LOGD(TAG, "MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
+                    }
                 }
                 if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
                         ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {

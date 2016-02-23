@@ -42,6 +42,7 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.debug.DebugActionRunnerFragment;
 
 import java.lang.ref.WeakReference;
+import java.util.UUID;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -289,6 +290,7 @@ public class ActivityBase extends AppCompatActivity
     @Override protected void onResume() {
         super.onResume();
         if(!PrefUtils.isDNIeEnabled()) {
+            PrefUtils.putToken(UUID.randomUUID().toString().toCharArray());
             Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
             intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
             startActivity(intent);

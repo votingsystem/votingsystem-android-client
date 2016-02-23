@@ -153,7 +153,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
             case RC_PASSWORD_REQUEST:
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     String accessModePassw = new String(responseVS.getMessageBytes());
-                    Intent intent = new Intent(this, DNIeSigningActivity.class);
+                    Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                     intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getTextToSign());
                     intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
                     intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));

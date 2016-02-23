@@ -8,6 +8,7 @@ import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
@@ -54,6 +55,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     private transient SignedMailGenerator signedMailGenerator;
     private transient KeyPair keyPair;
     private String signatureMechanism;
+    private UserCertificationRequestDto userCertificationRequestDto;
     private X509Certificate certificate;
     private byte[] signedCsr;
     private byte[] csrPEM;
@@ -238,5 +240,15 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public void setSignedCsr(byte[] signedCsr) {
         this.signedCsr = signedCsr;
+    }
+
+    public UserCertificationRequestDto getUserCertificationRequestDto() {
+        return userCertificationRequestDto;
+    }
+
+    public CertificationRequestVS setUserCertificationRequestDto(
+            UserCertificationRequestDto userCertificationRequestDto) {
+        this.userCertificationRequestDto = userCertificationRequestDto;
+        return this;
     }
 }

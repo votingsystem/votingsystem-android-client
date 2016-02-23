@@ -25,10 +25,10 @@ public class CryptoDeviceAccessMode implements Serializable {
     private Mode mode;
     private String hashBase64;
 
-    public CryptoDeviceAccessMode(Mode mode, String passw) {
+    public CryptoDeviceAccessMode(Mode mode, char[] passw) {
         try {
             this.mode = mode;
-            this.hashBase64 = StringUtils.getHashBase64(passw, ContextVS.VOTING_DATA_DIGEST);
+            this.hashBase64 = StringUtils.getHashBase64(new String(passw), ContextVS.VOTING_DATA_DIGEST);
         } catch (Exception ex) { ex.printStackTrace();}
     }
 

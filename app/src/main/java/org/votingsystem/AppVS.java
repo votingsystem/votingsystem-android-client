@@ -92,7 +92,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private Set<EventVSDto.State> eventsStateLoaded = new HashSet<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
-
+    private char[] token;
 
     private static AppVS INSTANCE;
 
@@ -402,5 +402,13 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
 
     public void addEventsStateLoaded(EventVSDto.State eventsState) {
         this.eventsStateLoaded.add(eventsState);
+    }
+
+    public char[] getToken() {
+        return token;
+    }
+
+    public void setToken(char[] token) {
+        this.token = token;
     }
 }

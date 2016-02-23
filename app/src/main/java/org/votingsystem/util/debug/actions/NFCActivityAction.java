@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.DNIeSigningActivity;
+import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.debug.DebugAction;
 
@@ -24,7 +24,7 @@ public class NFCActivityAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
-                Intent intent = new Intent(appContext, DNIeSigningActivity.class);
+                Intent intent = new Intent(appContext, ID_CardNFCReaderActivity.class);
                 //intent.putExtra(ContextVS.OPERATIONVS_KEY, TypeVS.CURRENCY_REQUEST);
                 intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, "message content");
                 intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, "smime message subject");

@@ -43,7 +43,7 @@ public class Wallet {
     }
 
     public static Set<Currency> getCurrencySet(char[] pin) throws Exception {
-        currencySet = PrefUtils.getWallet(pin);
+        currencySet = PrefUtils.getWallet(pin, AppVS.getInstance().getToken());
         return new HashSet<>(currencySet);
     }
 
@@ -142,7 +142,7 @@ public class Wallet {
     }
 
     public static void saveWallet(Collection<Currency> currencyCollection, char[] passw) throws Exception {
-        PrefUtils.putWallet(currencyCollection, passw);
+        PrefUtils.putWallet(currencyCollection, passw, AppVS.getInstance().getToken());
         currencySet = new HashSet<>(currencyCollection);
     }
 

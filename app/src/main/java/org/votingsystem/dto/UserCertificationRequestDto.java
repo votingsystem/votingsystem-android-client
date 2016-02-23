@@ -1,23 +1,34 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.votingsystem.AppVS;
+import org.votingsystem.signature.util.Encryptor;
+
+import java.util.UUID;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserCertificationRequestDto {
+public class UserCertificationRequestDto implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private AddressVS addressVS;
     private byte[] csrRequest;
-    private String UUID;
+    private byte[] token;
+    @JsonIgnore private byte[] plainToken;
 
     public UserCertificationRequestDto(){}
 
-    public UserCertificationRequestDto(AddressVS addressVS, byte[] csrRequest) {
+    public UserCertificationRequestDto(AddressVS addressVS, byte[] csrRequest) throws Exception {
         this.addressVS = addressVS;
         this.csrRequest = csrRequest;
-        this.UUID = java.util.UUID.randomUUID().toString();
+        this.plainToken = UUID.randomUUID().toString().getBytes();
+        this.token = Encryptor.encryptToCMS(this.plainToken,
+                AppVS.getInstance().getCurrencyServer().getCertificate());
     }
 
     public byte[] getCsrRequest() {
@@ -28,14 +39,6 @@ public class UserCertificationRequestDto {
         this.csrRequest = csrRequest;
     }
 
-    public String getUUID() {
-        return UUID;
-    }
-
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
-    }
-
     public AddressVS getAddressVS() {
         return addressVS;
     }
@@ -44,4 +47,19 @@ public class UserCertificationRequestDto {
         this.addressVS = addressVS;
     }
 
+    public byte[] getToken() {
+        return token;
+    }
+
+    public void setToken(byte[] token) {
+        this.token = token;
+    }
+
+    public byte[] getPlainToken() {
+        return plainToken;
+    }
+
+    public void setPlainToken(byte[] plainToken) {
+        this.plainToken = plainToken;
+    }
 }

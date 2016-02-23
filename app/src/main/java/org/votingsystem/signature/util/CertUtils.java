@@ -2,12 +2,18 @@ package org.votingsystem.signature.util;
 
 import android.util.Log;
 
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.ASN1Set;
+import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.BasicConstraints;
 import org.bouncycastle2.asn1.x509.KeyUsage;
+import org.bouncycastle2.asn1.x509.X509Extension;
 import org.bouncycastle2.asn1.x509.X509Extensions;
 import org.bouncycastle2.cert.X509CertificateHolder;
 import org.bouncycastle2.cert.X509v1CertificateBuilder;
@@ -71,19 +77,85 @@ import java.util.Set;
 import javax.mail.MessagingException;
 import javax.security.auth.x500.X500Principal;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 * Casi todo el código sacado de:
 * http://www.amazon.com/exec/obidos/redirect?path=ASIN/0764596330&link_code=as2&camp=1789&tag=bouncycastleo-20&creative=9325
 */
 public class CertUtils {
+
+    private static final String TAG = CertUtils.class.getSimpleName();
     
     public static String ROOT_ALIAS = "root";
     public static String END_ENTITY_ALIAS = "end";
     public static final int PERIODO_VALIDEZ = 7 * 24 * 60 * 60 * 1000;
     
     static public String SIG_ALGORITHM = "SHA1WithRSAEncryption";
-    
+
+    /**
+     * Generate V3 Certificate from CSR
+     */
+    public static X509Certificate signCSR(PKCS10CertificationRequest csr, String organizationalUnit,
+            PrivateKey caKey, Date dateBegin, Date dateFinish,
+            DERTaggedObject... certExtensions) throws Exception {
+        String strSubjectDN = csr.getCertificationRequestInfo().getSubject().toString();
+        if (!csr.verify() || strSubjectDN == null) throw new Exception("ERROR VERIFYING CSR");
+        if(organizationalUnit != null) strSubjectDN = organizationalUnit + "," + strSubjectDN;
+        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
+        PublicKey requestPublicKey = csr.getPublicKey();
+        X509Principal x509Principal = new X509Principal(strSubjectDN);
+
+        certGen.setIssuerDN(csr.getCertificationRequestInfo().getSubject());
+        certGen.setSubjectDN(csr.getCertificationRequestInfo().getSubject());
+
+        certGen.setSerialNumber(KeyGeneratorVS.INSTANCE.getSerno());
+        certGen.setNotBefore(dateBegin);
+        certGen.setNotAfter(dateFinish);
+        certGen.setSubjectDN(x509Principal);
+        certGen.setPublicKey(requestPublicKey);
+        certGen.setSignatureAlgorithm(ContextVS.VOTE_SIGN_MECHANISM);
+        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
+                new SubjectKeyIdentifierStructure(requestPublicKey));
+        certGen.addExtension(X509Extensions.BasicConstraints, true,
+                new BasicConstraints(false));//Certificado final
+        certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(
+                KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+        ASN1Set attributes = csr.getCertificationRequestInfo().getAttributes();
+        if (attributes != null) {
+            for (int i = 0; i != attributes.size(); i++) {
+                if(attributes.getObjectAt(i) instanceof DERTaggedObject) {
+                    DERTaggedObject taggedObject = (DERTaggedObject)attributes.getObjectAt(i);
+                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                            taggedObject.getTagNo());
+                    certGen.addExtension(oid, true, taggedObject);
+                } else {
+                    Attribute attr = Attribute.getInstance(attributes.getObjectAt(i));
+                    if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
+                        X509Extensions extensions = X509Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
+                        Enumeration e = extensions.oids();
+                        while (e.hasMoreElements()) {
+                            DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+                            X509Extension ext = extensions.getExtension(oid);
+                            certGen.addExtension(oid, ext.isCritical(), ext.getValue().getOctets());
+                        }
+                    }
+                }
+            }
+        }
+        if(certExtensions != null) {
+            for(DERTaggedObject taggedObject: certExtensions) {
+                if(taggedObject != null) {
+                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                            taggedObject.getTagNo());
+                    certGen.addExtension(oid, true, taggedObject);
+                } LOGD(TAG, "null taggedObject");
+            }
+        }
+        return certGen.generate(caKey, ContextVS.PROVIDER);
+    }
+
     /**
      * Genera un certificado V1 para usarlo como certificado raíz de una CA
      */

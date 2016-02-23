@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.ui.DialogButton;
@@ -66,9 +67,9 @@ public class PinActivity extends AppCompatActivity  {
             case MODE_CHANGE_PASSWORD:
                 getSupportActionBar().setTitle(R.string.change_password_lbl);
                 if(passwAccessMode == null) {
-                    Intent intent = new Intent(this, DNIeSigningActivity.class);
+                    Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                     intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_msg));
-                    intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
                     startActivityForResult(intent, RC_IDCARD_PASSWORD);
                 } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PATTER_LOCK) {
                     Intent intent = new Intent(this, PatternLockActivity.class);
@@ -104,9 +105,11 @@ public class PinActivity extends AppCompatActivity  {
                         if(passwAccessMode == null) {
                             dniePassword = passw.toCharArray();
                         } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PATTER_LOCK) {
-                            dniePassword = PrefUtils.getProtectedPassword(passw);
+                            dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray(),
+                                    AppVS.getInstance().getToken());
                         } else {
-                            dniePassword = PrefUtils.getProtectedPassword(passw);
+                            dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray(),
+                                    AppVS.getInstance().getToken());
                             msgTextView.setText(getString(R.string.enter_new_passw_msg));
                             pinText.setText("");
                         }
@@ -121,11 +124,11 @@ public class PinActivity extends AppCompatActivity  {
                     case NEW_PIN_CONFIRM:
                         if(passw.equals(newPin)) {
                             PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PIN,
-                                    passw, dniePassword);
+                                    passw.toCharArray(), AppVS.getInstance().getToken(), dniePassword);
                             DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
-                                            finish();
+                                            finishOK(passw);
                                         }
                                     });
                             UIUtils.showMessageDialog(getString(R.string.change_password_lbl), getString(
@@ -161,6 +164,11 @@ public class PinActivity extends AppCompatActivity  {
                 }
                 break;
         }
+        finishOK(passw);
+    }
+
+
+    private void finishOK(String passw) {
         Intent resultIntent = new Intent();
         ResponseVS responseVS = ResponseVS.OK().setMessageBytes(passw.getBytes());
         resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

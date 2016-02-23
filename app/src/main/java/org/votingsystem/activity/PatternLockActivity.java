@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.widget.TextView;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.ui.DialogButton;
@@ -62,9 +63,9 @@ public class PatternLockActivity extends AppCompatActivity {
             case MODE_CHANGE_PASSWORD:
                 getSupportActionBar().setTitle(R.string.change_password_lbl);
                 if(passwAccessMode == null) {
-                    Intent intent = new Intent(this, DNIeSigningActivity.class);
+                    Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                     intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_msg));
-                    intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
                     startActivityForResult(intent, RC_IDCARD_PASSWORD);
                 } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PIN) {
                     Intent intent = new Intent(this, PinActivity.class);
@@ -101,9 +102,11 @@ public class PatternLockActivity extends AppCompatActivity {
                         if(passwAccessMode == null) {
                             dniePassword = passw.toCharArray();
                         } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PIN) {
-                            dniePassword = PrefUtils.getProtectedPassword(passw);
+                            dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray(),
+                                    AppVS.getInstance().getToken());
                         } else {
-                            dniePassword = PrefUtils.getProtectedPassword(passw);
+                            dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray(),
+                                    AppVS.getInstance().getToken());
                             msgTextView.setText(getString(R.string.enter_new_passw_msg));
                         }
                         passwChangeStep =  PinChangeStep.NEW_PATTERN_REQUEST;
@@ -116,11 +119,11 @@ public class PatternLockActivity extends AppCompatActivity {
                     case NEW_PATTERN_CONFIRM:
                         if(passw.equals(newPin)) {
                             PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PATTER_LOCK,
-                                    passw, dniePassword);
+                                    passw.toCharArray(), AppVS.getInstance().getToken(), dniePassword);
                             DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
-                                            finish();
+                                            finishOK(passw);
                                         }
                                     });
                             UIUtils.showMessageDialog(getString(R.string.change_password_lbl), getString(
@@ -150,6 +153,10 @@ public class PatternLockActivity extends AppCompatActivity {
                 if(!passwAccessMode.validateHash(passw, this)) return;
                 break;
         }
+        finishOK(passw);
+    }
+
+    private void finishOK(String passw) {
         Intent resultIntent = new Intent();
         ResponseVS responseVS = ResponseVS.OK().setMessageBytes(passw.getBytes());
         resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);

@@ -36,12 +36,15 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.IOException;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+
+import javax.crypto.Cipher;
 
 import es.gob.jmulticard.jse.provider.DnieProvider;
 import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
@@ -53,9 +56,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
+public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
 
-	public static final String TAG = DNIeSigningActivity.class.getSimpleName();
+	public static final String TAG = ID_CardNFCReaderActivity.class.getSimpleName();
 
 	public static final String CERT_AUTENTICATION = "CertAutenticacion";
 	public static final String CERT_SIGN          = "CertFirmaDigital";
@@ -152,7 +155,8 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
         IsoDep exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA != null) || (exNfcB != null) || (exIsoDep != null)) {
             if(accessModePassw != null) {
-                char[] password = PrefUtils.getProtectedPassword(new String(accessModePassw));
+                char[] password = PrefUtils.getProtectedPassword(accessModePassw,
+						AppVS.getInstance().getToken());
                 new SignWithDNIeTask(password).execute();
             } else new SignWithDNIeTask(null).execute();
 		}
@@ -184,13 +188,14 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 				Security.insertProviderAt(p, 1);
 				//Deactivate fastmode
 				System.setProperty("es.gob.jmulticard.fastmode", "false");
-				DNIePasswordDialog myFragment = new DNIePasswordDialog(DNIeSigningActivity.this, password, true);
+				DNIePasswordDialog myFragment = new DNIePasswordDialog(ID_CardNFCReaderActivity.this, password, true);
 				DNIeDialogManager.setDialogUIHandler(myFragment);
 				KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
 				ksUserDNIe.load(null, null);
 				//force load real certs
 				ksUserDNIe.getKey(CERT_SIGN, null);
 				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
+
 				UserVSDto appUser = null;
 				if(MODE_PASSWORD_REQUEST == activityMode) {
 					UserVSDto userFromCert = UserVSDto.getUserVS(PrincipalUtil.getSubjectX509Principal(userCert));
@@ -209,6 +214,7 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 						byte[] csrBytes = certificationRequest.getCsrPEM();
 						UserCertificationRequestDto userCertificationRequestDto =
 								new UserCertificationRequestDto(appUser.getAddress(), csrBytes);
+						certificationRequest.setUserCertificationRequestDto(userCertificationRequestDto);
 						PrefUtils.putCsrRequest(certificationRequest);
 						textToSign = JSON.writeValueAsString(userCertificationRequestDto);
 					} else textToSign = JSON.writeValueAsString(appUser);
@@ -228,7 +234,9 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 				}
 			} catch (IOException ex) {
 				ex.printStackTrace();
-				showMessageDialog(getString(R.string.error_lbl), getString(R.string.dnie_connection_error_msg));
+				String msg = ex.getMessage() != null ? ex.getMessage() :
+						getString(R.string.dnie_connection_error_msg);
+				showMessageDialog(getString(R.string.error_lbl), msg);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				showMessageDialog(getString(R.string.error_lbl), ex.getMessage());
@@ -249,4 +257,31 @@ public class DNIeSigningActivity extends AppCompatActivity implements NfcAdapter
 			}
 		}
 	}
+
+	private static byte[] encrypt(Key pubkey, String text) {
+		try {
+			Cipher rsa;
+			rsa = Cipher.getInstance("RSA");
+			rsa.init(Cipher.ENCRYPT_MODE, pubkey);
+			return rsa.doFinal(text.getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	private static String decrypt(Key decryptionKey, byte[] buffer) {
+		try {
+			Cipher rsa;
+			rsa = Cipher.getInstance("RSA");
+			rsa.init(Cipher.DECRYPT_MODE, decryptionKey);
+			byte[] utf8 = rsa.doFinal(buffer);
+			return new String(utf8, "UTF8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 }

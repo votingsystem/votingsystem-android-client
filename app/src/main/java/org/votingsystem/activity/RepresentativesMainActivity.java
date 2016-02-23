@@ -129,7 +129,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                         try {
                             RepresentativeDelegationDto request = 
                                     delegation.getAnonymousCancelationRequest();
-                            Intent intent = new Intent(this, DNIeSigningActivity.class);
+                            Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                             intent.putExtra(ContextVS.PASSWORD_KEY, new
                                     String(responseVS.getMessageBytes()).toCharArray());
                             intent.putExtra(ContextVS.USER_KEY,

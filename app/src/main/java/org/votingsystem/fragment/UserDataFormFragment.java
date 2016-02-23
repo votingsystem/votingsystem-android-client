@@ -24,13 +24,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.DNIeSigningActivity;
+import org.votingsystem.activity.CryptoDeviceAccessModeSelectorActivity;
+import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
@@ -47,6 +49,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -137,6 +140,9 @@ public class UserDataFormFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        if(savedInstanceState != null) {
+            password = savedInstanceState.getCharArray(ContextVS.PASSWORD_KEY);
+        }
         return rootView;
     }
 
@@ -208,7 +214,11 @@ public class UserDataFormFragment extends Fragment {
                                         break;
                                 }
                                 startActivityForResult(intent, RC_REQUEST_ACCESS_MODE_PASSW);
-                            } else launchNFCReader(null);
+                            } else {
+                                intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
+                                startActivityForResult(intent, RC_REQUEST_ACCESS_MODE_PASSW);
+                            }
+                            //else launchNFCReader(null);
                         }
                     });
             UIUtils.showMessageDialog(builder);
@@ -241,6 +251,22 @@ public class UserDataFormFragment extends Fragment {
             mailText.setError(getString(R.string.mail_missing_msg));
             return false;
         }
+        if(TextUtils.isEmpty(address.getText().toString())){
+            address.setError(getString(R.string.enter_address_error_lbl));
+            return false;
+        }
+        if(TextUtils.isEmpty(postal_code.getText().toString())){
+            postal_code.setError(getString(R.string.enter_postal_code_error_lbl));
+            return false;
+        }
+        if(TextUtils.isEmpty(city.getText().toString())){
+            city.setError(getString(R.string.enter_city_error_lbl));
+            return false;
+        }
+        if(TextUtils.isEmpty(province.getText().toString())){
+            province.setError(getString(R.string.enter_province_error_lbl));
+            return false;
+        }
         try {
             InternetAddress emailAddr = new InternetAddress(mailText.getText().toString());
             emailAddr.validate();
@@ -252,12 +278,18 @@ public class UserDataFormFragment extends Fragment {
     }
 
     private void launchNFCReader(char[] password) {
-        Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
+        this.password = password;
+        Intent intent = new Intent(getActivity(), ID_CardNFCReaderActivity.class);
         intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
-        intent.putExtra(ContextVS.MODE_KEY, DNIeSigningActivity.MODE_PASSWORD_REQUEST);
+        intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
         intent.putExtra(ContextVS.CSR_KEY, true);
         intent.putExtra(ContextVS.PASSWORD_KEY, password);
         startActivityForResult(intent, RC_SIGN_USER_DATA);
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putCharArray(ContextVS.PASSWORD_KEY, password);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -312,6 +344,21 @@ public class UserDataFormFragment extends Fragment {
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                 certificates.toArray(certsArray);
                 keyStore.setKeyEntry(ContextVS.USER_CERT_ALIAS, privateKey, null, certsArray);
+
+                char[] newToken = new String(certificationRequest.getUserCertificationRequestDto()
+                        .getPlainToken()).toCharArray();
+                try {
+                    Set<Currency> wallet = PrefUtils.getWallet(password, AppVS.getInstance().getToken());
+                    PrefUtils.putWallet(wallet, password, newToken);
+                } catch (Exception ex) { ex.printStackTrace();}
+                try {
+                    CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+                    char[] protectedPassword = PrefUtils.getProtectedPassword(
+                            password, AppVS.getInstance().getToken());
+                    PrefUtils.putProtectedPassword(passwordAccessMode.getMode(), password, newToken,
+                            protectedPassword);
+                    PrefUtils.putToken(newToken);
+                } catch (Exception ex) { ex.printStackTrace();}
             } catch (Exception ex) {
                 ex.printStackTrace();
                 responseVS = ResponseVS.EXCEPTION(ex, getActivity());

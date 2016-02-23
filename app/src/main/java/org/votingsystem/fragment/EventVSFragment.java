@@ -29,9 +29,9 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.BrowserVSActivity;
-import org.votingsystem.activity.DNIeSigningActivity;
 import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
+import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.MessageDto;
@@ -256,7 +256,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                     if(Activity.RESULT_OK == resultCode) {
                         ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            Intent intent = new Intent(getActivity(), DNIeSigningActivity.class);
+                            Intent intent = new Intent(getActivity(), ID_CardNFCReaderActivity.class);
                             intent.putExtra(ContextVS.PASSWORD_KEY, new
                                     String(responseVS.getMessageBytes()).toCharArray());
                             intent.putExtra(ContextVS.USER_KEY,

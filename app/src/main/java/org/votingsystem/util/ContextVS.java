@@ -49,6 +49,7 @@ public class ContextVS {
     public static final String FRAGMENT_KEY = "FRAGMENT_KEY";
     public static final String RESPONSEVS_KEY = "RESPONSEVS_KEY";
     public static final String DTO_KEY = "DTO_KEY";
+    public static final String TOKEN_KEY = "DTO_KEY";
     public static final String WEBSOCKET_MSG_KEY = "WEBSOCKET_MSG_KEY";
 
     public static final String PIN_KEY = "PIN";

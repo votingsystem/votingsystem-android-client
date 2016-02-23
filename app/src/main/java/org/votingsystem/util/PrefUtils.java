@@ -203,20 +203,43 @@ public class PrefUtils {
     }
 
     public static void putProtectedPassword(CryptoDeviceAccessMode.Mode accessMode,
-                                            String passw, char[] passwordToEncrypt) {
+                                            char[] passw, char[] token, char[] passwordToEncrypt) {
         try {
             EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(
-                    passw, new String(passwordToEncrypt).getBytes()).toDto();
+                    new String(passw) + new String(token), new String(passwordToEncrypt).getBytes()).toDto();
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(ContextVS.PROTECTED_PASSWORD_KEY, JSON.writeValueAsString(ebDto));
             editor.commit();
             putCryptoDeviceAccessMode(new CryptoDeviceAccessMode(accessMode, passw));
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            PrefUtils.incrementPasswordRetries();
+        }
+    }
+
+    public static char[] getToken() {
+        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+        String tokenStr = settings.getString(ContextVS.TOKEN_KEY, null);
+        if(tokenStr == null) return null;
+        else return tokenStr.toCharArray();
+    }
+
+    public static void putToken(char[] token) {
+        try {
+            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
+                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            String tokenStr = token != null ? new String(token) : null;
+            editor.putString(ContextVS.TOKEN_KEY, tokenStr);
+            editor.commit();
+            AppVS.getInstance().setToken(token);
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static char[] getProtectedPassword(String passw) {
+    public static char[] getProtectedPassword(char[] passw, char[] token) {
         char[] password = null;
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
@@ -224,14 +247,19 @@ public class PrefUtils {
             String dtoStr = settings.getString(ContextVS.PROTECTED_PASSWORD_KEY, null);
             if(dtoStr != null) {
                 EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
-                byte[] resultBytes = Encryptor.pbeAES_Decrypt(passw, ebDto.getEncryptedBundle());
+                byte[] resultBytes = Encryptor.pbeAES_Decrypt(new String(passw) + new String(token),
+                        ebDto.getEncryptedBundle());
                 password = new String(resultBytes, "UTF-8").toCharArray();
             }
-        } catch(Exception ex) {ex.printStackTrace();}
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            PrefUtils.incrementPasswordRetries();
+        }
         return password;
     }
 
-    public static void putWallet(Collection<Currency> currencyCollection, char[] passw) throws Exception {
+    public static void putWallet(Collection<Currency> currencyCollection, char[] passw,
+                                 char[] token) throws Exception {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
@@ -240,7 +268,8 @@ public class PrefUtils {
             if(currencyCollection != null) {
                 Set<CurrencyDto> currencyDtoSet = CurrencyDto.serializeCollection(currencyCollection);
                 byte[] walletBytes = JSON.writeValueAsBytes(currencyDtoSet);
-                EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(new String(passw), walletBytes).toDto();
+                EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(
+                        new String(passw) + new String(token), walletBytes).toDto();
                 encryptedWallet = JSON.writeValueAsString(ebDto);
             }
             editor.putString(ContextVS.WALLET_FILE_NAME, encryptedWallet);
@@ -249,7 +278,7 @@ public class PrefUtils {
 
     }
 
-    public static Set<Currency> getWallet(char[] passw) {
+    public static Set<Currency> getWallet(char[] passw, char[] token) {
         Set<Currency> result = null;
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
@@ -258,7 +287,7 @@ public class PrefUtils {
             if(dtoStr != null) {
                 EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
                 byte[] walletBytes = Encryptor.pbeAES_Decrypt(
-                        new String(passw), ebDto.getEncryptedBundle());
+                        new String(passw) + new String(token), ebDto.getEncryptedBundle());
                 Set<CurrencyDto> currencyDtoSet = JSON.readValue(
                         walletBytes, new TypeReference<Set<CurrencyDto>>(){});
                 result = CurrencyDto.deSerializeCollection(currencyDtoSet);

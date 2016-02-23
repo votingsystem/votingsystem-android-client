@@ -42,6 +42,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -252,6 +253,33 @@ public class Encryptor {
             //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
             CMSTypedStream recData = recipient.getContentStream(
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
+            InputStream           dataStream = recData.getContentStream();
+            ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+            byte[]                buf = new byte[4096];
+            int len = 0;
+            while ((len = dataStream.read(buf)) >= 0) {
+                dataOut.write(buf, 0, len);
+            }
+            dataOut.close();
+            result = dataOut.toByteArray();
+            //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
+        }
+        return result;
+    }
+
+    public static byte[] decryptCMS( byte[] base64EncryptedData, PrivateKey privateKey, Provider provider)
+            throws Exception {
+        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData, Base64.NO_WRAP);
+        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+        Collection c = recipients.getRecipients();
+        Iterator it = c.iterator();
+        byte[] result = null;
+        if (it.hasNext()) {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+            //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+            CMSTypedStream recData = recipient.getContentStream(
+                    new JceKeyTransEnvelopedRecipient(privateKey).setProvider(provider));
             InputStream           dataStream = recData.getContentStream();
             ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
             byte[]                buf = new byte[4096];

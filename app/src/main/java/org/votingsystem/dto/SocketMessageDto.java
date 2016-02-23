@@ -133,8 +133,9 @@ public class SocketMessageDto implements Serializable {
         return messageType;
     }
 
-    public void setMessageType(TypeVS messageType) {
+    public SocketMessageDto setMessageType(TypeVS messageType) {
         this.messageType = messageType;
+        return this;
     }
 
     public String getToUser() {

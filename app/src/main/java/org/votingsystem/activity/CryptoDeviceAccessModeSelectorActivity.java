@@ -1,5 +1,6 @@
 package org.votingsystem.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -92,5 +93,11 @@ public class CryptoDeviceAccessModeSelectorActivity  extends AppCompatActivity {
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         updateView();
+        if(Activity.RESULT_OK == resultCode) {
+            if(getCallingActivity() != null) {
+                setResult(Activity.RESULT_OK, data);
+                finish();
+            }
+        }
     }
 }

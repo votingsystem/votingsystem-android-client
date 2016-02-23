@@ -150,7 +150,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                         delegationDto.setWeeksOperationActive(
                                 Integer.valueOf(weeks_delegation.getText().toString()));
                         RepresentativeDelegationDto anonymousCertRequest = delegationDto.getAnonymousCertRequest();
-                        Intent intent = new Intent(this, DNIeSigningActivity.class);
+                        Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                         intent.putExtra(ContextVS.PASSWORD_KEY, new
                                 String(responseVS.getMessageBytes()).toCharArray());
                         intent.putExtra(ContextVS.USER_KEY,

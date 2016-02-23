@@ -101,7 +101,7 @@
             android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.DNIeSigningActivity"
+        <activity android:name="org.votingsystem.activity.ID_CardNFCReaderActivity"
             android:windowSoftInputMode="stateHidden"
             android:label = "nfcIntentActivityLbl"
             android:screenOrientation="portrait"

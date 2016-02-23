@@ -1,11 +1,9 @@
 package org.votingsystem.activity;
 
 import android.os.Bundle;
-import android.view.Menu;
 
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
-import org.votingsystem.util.BuildConfig;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

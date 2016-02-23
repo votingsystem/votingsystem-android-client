@@ -348,6 +348,10 @@ public class PaymentService extends IntentService {
             LOGD(TAG + ".updateUserInfo", "missing connection to Currency Server");
             return;
         }
+        if(appVS.getUserVS() == null) {
+            LOGD(TAG + ".updateUserInfo", "missing user data");
+            return;
+        }
         ResponseVS responseVS = null;
         try {
             String targetService = appVS.getCurrencyServer().getUserInfoServiceURL(
