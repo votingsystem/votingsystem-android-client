@@ -13,7 +13,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +26,6 @@ import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRActionsFragment;
 import org.votingsystem.fragment.ReceiptGridFragment;
-import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
@@ -49,7 +47,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ActivityBase extends AppCompatActivity
+public class ActivityBase extends ActivityConnected
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = ActivityBase.class.getSimpleName();
@@ -152,7 +150,6 @@ public class ActivityBase extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
         if(currentFragment != null && currentFragment.get() != null)
                 currentFragment.get().onActivityResult(requestCode, resultCode, data);
     }
@@ -302,9 +299,7 @@ public class ActivityBase extends AppCompatActivity
         }
         if(!PrefUtils.isDNIeEnabled()) {
             AppVS.getInstance().setToken(UUID.randomUUID().toString().toCharArray());
-            Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-            intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
-            startActivity(intent);
+            startActivity(new Intent(getBaseContext(), UserDataFormActivity.class));
             return;
         }
         if(PrefUtils.getCryptoDeviceAccessMode() == null) {
@@ -321,6 +316,7 @@ public class ActivityBase extends AppCompatActivity
         }
         if(messagesMenuItem != null)
             messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
+        setConnectionStatusUI();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(

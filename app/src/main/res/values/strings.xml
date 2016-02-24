@@ -104,6 +104,7 @@
     <string name="nif_lbl">introduzca su nif</string>
     <string name="representative_nif_lbl">introduzca el nif del representante que desee editar</string>
     <string name="password_lbl">contraseña</string>
+    <string name="idcard_password_lbl">contraseña del dni</string>
     <string name="dialogo_password_text_entry">introducir contraseña</string>
     <string name="repeat_password_lbl">repita la contraseña</string>
     <string name="check_devices_lbl">comprobando dispositivos</string>
@@ -144,7 +145,6 @@
     <string name="num_representations_lbl">%1$s representaciones</string>
     <string name="representative_data_lbl">datos del representante</string>
     <string name="rss_service_lbl">servicio de subscripciones</string>
-    <string name="websocket_service_conn_lbl">conectado mensajería del sistema de votación</string>
     <string name="signed_document_msg">documento firmado y enviado</string>
     <string name="signature_error_notification_msg">error firmando documento</string>
     <string name="vote_error_caption">error en votación</string>
@@ -547,6 +547,7 @@
     <string name="navigation_drawer_open">desplegar menu</string>
     <string name="navigation_drawer_close">cerrar menu</string>
     <string name="enter_password_msg">introduzca la contraseña</string>
+    <string name="enter_id_card_password_msg">introduzca la contraseña de su tarjeta</string>
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
     <string name="enter_password_retry_msg">le quedan %1$s intentos</string>
     <string name="pref_title_dnie">DNIe 3.0</string>
@@ -592,4 +593,7 @@
     <string name="connection_passw_msg">Introduzca la contraseña para poder conectar al servicio</string>
     <string name="allow_remote_device_authenticated_session">Iniciar autenticación de dispositivo remoto</string>
     <string name="non_rooted_phones_required_msg">la aplicación sólo se puede ejecutar en teléfonos que no han sido  rooteados</string>
+    <string name="enter_new_passw_to_app_msg">introduzca la contraseña con la que protegerá sus operaciones de firma</string>
+    <string name="idcard_signing_caption">Proceso de firma con el DNI electrónico</string>
+    <string name="confirm_sign_msg">¿Desea continuar con el procedimiento?</string>
 </resources>

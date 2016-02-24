@@ -36,15 +36,12 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 
 import java.io.IOException;
-import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-
-import javax.crypto.Cipher;
 
 import es.gob.jmulticard.jse.provider.DnieProvider;
 import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
@@ -101,7 +98,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
     public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dnie_voting_activity);
+        setContentView(R.layout.idcard_nfc_reader_activity);
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
@@ -258,30 +255,5 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 		}
 	}
 
-	private static byte[] encrypt(Key pubkey, String text) {
-		try {
-			Cipher rsa;
-			rsa = Cipher.getInstance("RSA");
-			rsa.init(Cipher.ENCRYPT_MODE, pubkey);
-			return rsa.doFinal(text.getBytes());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-
-	private static String decrypt(Key decryptionKey, byte[] buffer) {
-		try {
-			Cipher rsa;
-			rsa = Cipher.getInstance("RSA");
-			rsa.init(Cipher.DECRYPT_MODE, decryptionKey);
-			byte[] utf8 = rsa.doFinal(buffer);
-			return new String(utf8, "UTF8");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 }

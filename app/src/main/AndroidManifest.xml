@@ -76,7 +76,10 @@
 
         <activity android:name="org.votingsystem.activity.MessageActivity" android:theme="@style/Theme.Transparent"/>
         <activity android:name="org.votingsystem.activity.CryptoDeviceAccessModeSelectorActivity"
-            android:screenOrientation="portrait" android:theme="@style/Theme.Transparent"/>
+            android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
+
+        <activity android:name="org.votingsystem.activity.UserDataFormActivity"
+            android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.RepresentativeDelegationActivity"
             android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>

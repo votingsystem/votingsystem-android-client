@@ -29,7 +29,6 @@ public class PatternLockActivity extends AppCompatActivity {
 
     private enum PinChangeStep {PATTERN_REQUEST, NEW_PATTERN_REQUEST, NEW_PATTERN_CONFIRM}
 
-    public static final int RC_IDCARD_PASSWORD = 0;
     public static final int RC_PIN_PASSWORD    = 1;
 
     public static final int MODE_VALIDATE_INPUT = 0;
@@ -63,10 +62,7 @@ public class PatternLockActivity extends AppCompatActivity {
             case MODE_CHANGE_PASSWORD:
                 getSupportActionBar().setTitle(R.string.change_password_lbl);
                 if(passwAccessMode == null) {
-                    Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_for_dni_msg));
-                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
-                    startActivityForResult(intent, RC_IDCARD_PASSWORD);
+                    processPassword(null);
                 } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PIN) {
                     Intent intent = new Intent(this, PinActivity.class);
                     intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_actual_passw_msg));
@@ -100,7 +96,7 @@ public class PatternLockActivity extends AppCompatActivity {
                 switch(passwChangeStep) {
                     case PATTERN_REQUEST:
                         if(passwAccessMode == null) {
-                            dniePassword = passw.toCharArray();
+                            msgTextView.setText(getString(R.string.enter_new_passw_to_app_msg));
                         } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PIN) {
                             dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray(),
                                     AppVS.getInstance().getToken());
@@ -118,8 +114,10 @@ public class PatternLockActivity extends AppCompatActivity {
                         return;
                     case NEW_PATTERN_CONFIRM:
                         if(passw.equals(newPin)) {
-                            PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PATTER_LOCK,
-                                    passw.toCharArray(), AppVS.getInstance().getToken(), dniePassword);
+                            if(passwAccessMode != null) {
+                                PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PATTER_LOCK,
+                                        passw.toCharArray(), AppVS.getInstance().getToken(), dniePassword);
+                            }
                             DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -160,6 +158,7 @@ public class PatternLockActivity extends AppCompatActivity {
         Intent resultIntent = new Intent();
         ResponseVS responseVS = ResponseVS.OK().setMessageBytes(passw.getBytes());
         resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        resultIntent.putExtra(ContextVS.MODE_KEY, CryptoDeviceAccessMode.Mode.PATTER_LOCK);
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
     }
@@ -186,14 +185,6 @@ public class PatternLockActivity extends AppCompatActivity {
                     UIUtils.showMessageDialog(getString(R.string.error_lbl),
                             getString(R.string.missing_actual_passw_error_msg), positiveButton,
                             null, this);
-                }
-                break;
-            case RC_IDCARD_PASSWORD:
-                if(Activity.RESULT_OK == resultCode)  {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    processPassword(new String(responseVS.getMessageBytes()));
-                } else {
-                    UIUtils.showPasswordRequiredDialog(this);
                 }
                 break;
         }

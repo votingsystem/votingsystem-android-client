@@ -129,7 +129,7 @@ public class DNIePasswordDialog implements DialogUIHandler {
         final AlertDialog.Builder dialog 	= new AlertDialog.Builder(activity);
         final DNIePasswordDialog instance 	= this;
         final StringBuilder resultBuilder 	= new StringBuilder();
-        resultBuilder.append(message);
+        resultBuilder.append(activity.getString(R.string.confirm_sign_msg));
 
         synchronized (instance)
         {
@@ -137,7 +137,7 @@ public class DNIePasswordDialog implements DialogUIHandler {
                 @Override
                 public void run() {
                     try {
-                        dialog.setTitle("Proceso de firma con el DNI electrónico");
+                        dialog.setTitle(activity.getString(R.string.idcard_signing_caption));
                         dialog.setMessage(resultBuilder);
                         dialog.setPositiveButton(R.string.ok_lbl, new DialogInterface.OnClickListener() {
                             @Override

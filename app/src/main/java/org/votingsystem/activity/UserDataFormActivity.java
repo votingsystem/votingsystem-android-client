@@ -1,7 +1,8 @@
-package org.votingsystem.fragment;
+package org.votingsystem.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -24,18 +25,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.CryptoDeviceAccessModeSelectorActivity;
-import org.votingsystem.activity.ID_CardNFCReaderActivity;
-import org.votingsystem.activity.PatternLockActivity;
-import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.fragment.MessageDialogFragment;
+import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.ui.DialogButton;
+import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
@@ -59,9 +61,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserDataFormFragment extends Fragment {
+public class UserDataFormActivity extends ActivityConnected {
 
-	public static final String TAG = UserDataFormFragment.class.getSimpleName();
+	public static final String TAG = UserDataFormActivity.class.getSimpleName();
 
     public static final int RC_SIGN_USER_DATA            = 0;
     public static final int RC_REQUEST_ACCESS_MODE_PASSW = 1;
@@ -75,43 +77,38 @@ public class UserDataFormFragment extends Fragment {
     private EditText province;
     private Spinner country_spinner;
     private UserVSDto userVSDto;
+    private Dialog connectionRequiredDialog;
     private char[] password;
+    private CryptoDeviceAccessMode.Mode accessMode;
 
 
-    @Override public void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        // if set to true savedInstanceState will be allways null
-        setHasOptionsMenu(true);
-    }
-
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-           Bundle savedInstanceState) {
-        LOGD(TAG + ".onCreateView", "onCreateView");
-        super.onCreate(savedInstanceState);
-        View rootView = inflater.inflate(R.layout.user_data_form, container, false);
-        getActivity().setTitle(getString(R.string.user_data_lbl));
-        TextView messageTextView = (TextView)rootView.findViewById(R.id.message);
+        LOGD(TAG + ".onCreate", "onCreate");
+        setContentView(R.layout.user_data_form);
+        setTitle(getString(R.string.user_data_lbl));
+        TextView messageTextView = (TextView)findViewById(R.id.message);
         SpannableStringBuilder aboutBody = new SpannableStringBuilder();
         aboutBody.append(Html.fromHtml(getString(R.string.can_dialog_body)));
         messageTextView.setText(aboutBody);
         messageTextView.setMovementMethod(new LinkMovementMethod());
-        mailText = (EditText)rootView.findViewById(R.id.mail_edit);
-        phoneText = (EditText)rootView.findViewById(R.id.phone_edit);
-        canText = (EditText)rootView.findViewById(R.id.can);
-        address = (EditText)rootView.findViewById(R.id.address);
-        postal_code = (EditText)rootView.findViewById(R.id.postal_code);
-        city = (EditText)rootView.findViewById(R.id.location);
-        province = (EditText)rootView.findViewById(R.id.province);
-        country_spinner = (Spinner)rootView.findViewById(R.id.country_spinner);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
+        mailText = (EditText)findViewById(R.id.mail_edit);
+        phoneText = (EditText)findViewById(R.id.phone_edit);
+        canText = (EditText)findViewById(R.id.can);
+        address = (EditText)findViewById(R.id.address);
+        postal_code = (EditText)findViewById(R.id.postal_code);
+        city = (EditText)findViewById(R.id.location);
+        province = (EditText)findViewById(R.id.province);
+        country_spinner = (Spinner)findViewById(R.id.country_spinner);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, Country.getListValues());
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         country_spinner.setAdapter(dataAdapter);
         Country country = Country.valueOf(getResources().getConfiguration().locale.getLanguage().
                 toUpperCase());
         if(country != null) country_spinner.setSelection(country.getPosition());
-        Button save_button = (Button) rootView.findViewById(R.id.save_button);
+        Button save_button = (Button) findViewById(R.id.save_button);
         save_button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 submitForm();
@@ -123,7 +120,7 @@ public class UserDataFormFragment extends Fragment {
             userVSDto = PrefUtils.getAppUser();
             if(userVSDto == null) {//first run
                 if(savedInstanceState == null) MessageDialogFragment.showDialog(ResponseVS.SC_OK,
-                        getString(R.string.msg_lbl), getString(R.string.first_run_msg), getFragmentManager());
+                        getString(R.string.msg_lbl), getString(R.string.first_run_msg), getSupportFragmentManager());
 
             } else {
                 phoneText.setText(userVSDto.getPhone());
@@ -142,23 +139,16 @@ public class UserDataFormFragment extends Fragment {
         }
         if(savedInstanceState != null) {
             password = savedInstanceState.getCharArray(ContextVS.PASSWORD_KEY);
+            accessMode = (CryptoDeviceAccessMode.Mode) savedInstanceState.getSerializable(ContextVS.MODE_KEY);
         }
-        return rootView;
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(isVisibleToUser) {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-    }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
 		LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
 		switch (item.getItemId()) {
 	    	case android.R.id.home:
-                getActivity().onBackPressed();
+                onBackPressed();
 	    		return true;
 	    	default:
 	    		return super.onOptionsItemSelected(item);
@@ -195,7 +185,7 @@ public class UserDataFormFragment extends Fragment {
                     getString(R.string.user_data_confirm_msg, canText.getText().toString(),
                             userVSDto.getPhone(),
                             userVSDto.getEmail(), address, postalCode, city, province,
-                            addressVS.getCountry().getName()), getActivity());
+                            addressVS.getCountry().getName()), this);
             builder.setPositiveButton(getString(R.string.continue_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -205,20 +195,19 @@ public class UserDataFormFragment extends Fragment {
                             if(passwordAccessMode != null) {
                                 switch (passwordAccessMode.getMode()) {
                                     case PATTER_LOCK:
-                                        intent = new Intent(getActivity(), PatternLockActivity.class);
-                                        intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_INPUT);
+                                        intent = new Intent(UserDataFormActivity.this, PatternLockActivity.class);
                                         break;
                                     case PIN:
-                                        intent = new Intent(getActivity(), PinActivity.class);
-                                        intent.putExtra(ContextVS.MODE_KEY, PinActivity.MODE_VALIDATE_INPUT);
+                                        intent = new Intent(UserDataFormActivity.this, PinActivity.class);
                                         break;
                                 }
+                                intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_INPUT);
                                 startActivityForResult(intent, RC_REQUEST_ACCESS_MODE_PASSW);
                             } else {
-                                intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
+                                intent = new Intent(UserDataFormActivity.this,
+                                        CryptoDeviceAccessModeSelectorActivity.class);
                                 startActivityForResult(intent, RC_REQUEST_ACCESS_MODE_PASSW);
                             }
-                            //else launchNFCReader(null);
                         }
                     });
             UIUtils.showMessageDialog(builder);
@@ -227,8 +216,8 @@ public class UserDataFormFragment extends Fragment {
 
     private void setProgressDialogVisible(boolean isVisible, String caption, String message) {
         if(isVisible){
-            ProgressDialogFragment.showDialog(caption, message, getActivity().getSupportFragmentManager());
-        } else ProgressDialogFragment.hide(getActivity().getSupportFragmentManager());
+            ProgressDialogFragment.showDialog(caption, message, getSupportFragmentManager());
+        } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
     private boolean validateForm () {
@@ -277,34 +266,60 @@ public class UserDataFormFragment extends Fragment {
         return true;
     }
 
-    private void launchNFCReader(char[] password) {
-        this.password = password;
-        Intent intent = new Intent(getActivity(), ID_CardNFCReaderActivity.class);
-        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
-        intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
-        intent.putExtra(ContextVS.CSR_KEY, true);
-        intent.putExtra(ContextVS.PASSWORD_KEY, password);
-        startActivityForResult(intent, RC_SIGN_USER_DATA);
+    @Override protected void onResume() {
+        super.onResume();
+        if(PrefUtils.isDNIeEnabled() && !AppVS.getInstance().isWithSocketConnection()) {
+            DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            try {
+                                ConnectionUtils.initConnection(UserDataFormActivity.this);
+                            } catch (Exception ex) { ex.printStackTrace();}
+
+                        }
+                    });
+            DialogButton negativeButton = new DialogButton(getString(R.string.cancel_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            finish();
+                        }
+                    });
+            connectionRequiredDialog = UIUtils.showMessageDialog(getString(R.string.connect_lbl),
+                    getString(R.string.connection_required_msg),
+                    positiveButton, negativeButton, this);
+        }
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putCharArray(ContextVS.PASSWORD_KEY, password);
+        outState.putSerializable(ContextVS.MODE_KEY, accessMode);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case RC_REQUEST_ACCESS_MODE_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    launchNFCReader(new String(responseVS.getMessageBytes()).toCharArray());
+                    this.password = new String(responseVS.getMessageBytes()).toCharArray();
+                    accessMode = (CryptoDeviceAccessMode.Mode) data.getSerializableExtra(ContextVS.MODE_KEY);
+                    Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
+                    if(PrefUtils.getCryptoDeviceAccessMode() == null) {
+                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                    }
+                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
+                    intent.putExtra(ContextVS.CSR_KEY, true);
+                    intent.putExtra(ContextVS.PASSWORD_KEY, password);
+                    startActivityForResult(intent, RC_SIGN_USER_DATA);
                 }
                 break;
             case RC_SIGN_USER_DATA:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    new DataSender(responseVS.getSMIME()).execute();
+                    new DataSender(responseVS.getSMIME(),
+                            new String(responseVS.getMessageBytes()).toCharArray()).execute();
                 }
                 break;
         }
@@ -314,9 +329,11 @@ public class UserDataFormFragment extends Fragment {
     public class DataSender extends AsyncTask<String, String, ResponseVS> {
 
         private SMIMEMessage smimeMessage;
+        private char[] protectedPassword;
 
-        public DataSender(SMIMEMessage smimeMessage) {
+        public DataSender(SMIMEMessage smimeMessage, char[] idCardPassw) {
             this.smimeMessage = smimeMessage;
+            this.protectedPassword = idCardPassw;
         }
 
         @Override protected void onPreExecute() {
@@ -353,15 +370,17 @@ public class UserDataFormFragment extends Fragment {
                 } catch (Exception ex) { ex.printStackTrace();}
                 try {
                     CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-                    char[] protectedPassword = PrefUtils.getProtectedPassword(
-                            password, AppVS.getInstance().getToken());
+                    if(passwordAccessMode == null) {
+                        passwordAccessMode = new CryptoDeviceAccessMode(accessMode, password);
+                        PrefUtils.putCryptoDeviceAccessMode(passwordAccessMode);
+                    }
                     PrefUtils.putProtectedPassword(passwordAccessMode.getMode(), password, newToken,
-                            protectedPassword);
+                                protectedPassword);
                     AppVS.getInstance().setToken(newToken);
                 } catch (Exception ex) { ex.printStackTrace();}
             } catch (Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.EXCEPTION(ex, getActivity());
+                responseVS = ResponseVS.EXCEPTION(ex, UserDataFormActivity.this);
             } finally {
                 PrefUtils.putCsrRequest(null);
                 return responseVS;
@@ -374,9 +393,9 @@ public class UserDataFormFragment extends Fragment {
             setProgressDialogVisible(false, null, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 PrefUtils.putDNIeEnabled(true);
-                getActivity().finish();
+                finish();
             } else {
-                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+                MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
             }
         }
     }

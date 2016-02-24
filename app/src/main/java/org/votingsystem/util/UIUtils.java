@@ -491,7 +491,8 @@ public class UIUtils  {
         });
     }
 
-    public static void showMessageDialog(String caption, String message, DialogButton positiveButton,
+    //Mandatory dialog, only process y user click on dialog buttons
+    public static Dialog showMessageDialog(String caption, String message, DialogButton positiveButton,
              DialogButton negativeButton, Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.message_dialog, null);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
@@ -514,6 +515,7 @@ public class UIUtils  {
                 } else return false;
             }
         });*/
+        return dialog;
     }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {

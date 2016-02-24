@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.fragment.UserDataFormFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HelpUtils;
 import org.votingsystem.util.PrefUtils;
@@ -59,8 +58,7 @@ public class SettingsActivity extends PreferenceActivity {
             dnieButton =  findPreference("dnieButton");
             dnieButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override public boolean onPreferenceClick(Preference arg0) {
-                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
+                    Intent intent = new Intent(getActivity(), UserDataFormActivity.class);
                     getActivity().startActivityForResult(intent, RC_USER_DATA);
                     return true;
                 }

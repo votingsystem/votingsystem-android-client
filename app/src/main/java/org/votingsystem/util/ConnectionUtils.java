@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
@@ -29,8 +30,13 @@ public class ConnectionUtils {
     private static SocketMessageDto initSessionMessageDto;
 
     public static void initConnection(final AppCompatActivity activity) {
-        Utils.getProtectionPassword(RC_PASSWORD_REQUEST,
-                activity.getString(R.string.connection_passw_msg), null, activity);
+        CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+        if(passwordAccessMode != null) {
+            Utils.getProtectionPassword(RC_PASSWORD_REQUEST,
+                    activity.getString(R.string.connection_passw_msg), null, activity);
+        } else {
+            launchNFC_IDCard(activity, null);
+        }
     }
 
     public static void onActivityResult(int requestCode, int resultCode, Intent data,
@@ -53,22 +59,25 @@ public class ConnectionUtils {
                 }
                 break;
             case RC_PASSWORD_REQUEST:
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    try {
-                        Intent intent = new Intent(activity, ID_CardNFCReaderActivity.class);
-                        initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
-                        intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionMessageDto));
-                        intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
-                                activity.getString(R.string.init_authenticated_session_msg_subject));
-                        intent.putExtra(ContextVS.PASSWORD_KEY,
-                                new String(responseVS.getMessageBytes()).toCharArray());
-                        activity.startActivityForResult(intent, RC_INIT_CONNECTION_REQUEST);
-                    } catch (Exception ex) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
-                                ex.getMessage(), activity.getSupportFragmentManager());
-                    }
-                }
+                if(ResponseVS.SC_OK == responseVS.getStatusCode())
+                    launchNFC_IDCard(activity, new String(responseVS.getMessageBytes()).toCharArray());
                 break;
+        }
+    }
+
+    private static void launchNFC_IDCard(AppCompatActivity activity, char[] accessModePassw) {
+        try {
+            Intent intent = new Intent(activity, ID_CardNFCReaderActivity.class);
+            initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
+            intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionMessageDto));
+            intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
+                    activity.getString(R.string.init_authenticated_session_msg_subject));
+            if(accessModePassw != null)
+                intent.putExtra(ContextVS.PASSWORD_KEY, new String(accessModePassw).toCharArray());
+            activity.startActivityForResult(intent, RC_INIT_CONNECTION_REQUEST);
+        } catch (Exception ex) {
+            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
+                    ex.getMessage(), activity.getSupportFragmentManager());
         }
     }
 
