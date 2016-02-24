@@ -219,8 +219,8 @@ public class HttpHelper {
 
     public static ResponseVS sendData(byte[] data, ContentTypeVS contentType,
               String serverURL, String... headerNames) {
-        HttpPost httpPost = new HttpPost(serverURL);
         LOGD(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
+        HttpPost httpPost = new HttpPost(serverURL);
         HttpResponse response = null;
         ResponseVS responseVS = null;
         ContentTypeVS responseContentType = null;

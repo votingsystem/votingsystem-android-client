@@ -357,7 +357,7 @@ public class UserDataFormFragment extends Fragment {
                             password, AppVS.getInstance().getToken());
                     PrefUtils.putProtectedPassword(passwordAccessMode.getMode(), password, newToken,
                             protectedPassword);
-                    PrefUtils.putToken(newToken);
+                    AppVS.getInstance().setToken(newToken);
                 } catch (Exception ex) { ex.printStackTrace();}
             } catch (Exception ex) {
                 ex.printStackTrace();

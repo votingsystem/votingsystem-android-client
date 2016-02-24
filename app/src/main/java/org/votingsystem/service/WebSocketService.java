@@ -36,7 +36,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -261,7 +260,6 @@ public class WebSocketService extends Service {
                             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
                                 appVS.setConnectedDevice(socketMsg.getConnectedDevice());
                                 appVS.setWithSocketConnection(true);
-                                PrefUtils.putToken(null);
                                 appVS.setToken(socketMsg.getMessage().toCharArray());
                             } else appVS.setWithSocketConnection(false);
                             break;

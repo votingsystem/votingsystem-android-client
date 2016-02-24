@@ -591,4 +591,5 @@
     <string name="disconnect_from_service_quesion_msg">¿Desea desconectar del servicio?</string>
     <string name="connection_passw_msg">Introduzca la contraseña para poder conectar al servicio</string>
     <string name="allow_remote_device_authenticated_session">Iniciar autenticación de dispositivo remoto</string>
+    <string name="non_rooted_phones_required_msg">la aplicación sólo se puede ejecutar en teléfonos que no han sido  rooteados</string>
 </resources>

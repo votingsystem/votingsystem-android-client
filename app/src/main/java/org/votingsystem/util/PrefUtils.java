@@ -219,26 +219,6 @@ public class PrefUtils {
         }
     }
 
-    public static char[] getToken() {
-        SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String tokenStr = settings.getString(ContextVS.TOKEN_KEY, null);
-        if(tokenStr == null) return null;
-        else return tokenStr.toCharArray();
-    }
-
-    public static void putToken(char[] token) {
-        try {
-            SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            String tokenStr = token != null ? new String(token) : null;
-            editor.putString(ContextVS.TOKEN_KEY, tokenStr);
-            editor.commit();
-            AppVS.getInstance().setToken(token);
-        } catch(Exception ex) {ex.printStackTrace();}
-    }
-
     public static char[] getProtectedPassword(char[] passw, char[] token) {
         char[] password = null;
         try {

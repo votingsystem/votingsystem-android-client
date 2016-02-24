@@ -289,8 +289,19 @@ public class ActivityBase extends AppCompatActivity
 
     @Override protected void onResume() {
         super.onResume();
+        if(AppVS.getInstance().isRootedPhone()) {
+            DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            finish();
+                        }
+                    });
+            UIUtils.showMessageDialog(getString(R.string.msg_lbl), getString(
+                    R.string.non_rooted_phones_required_msg), positiveButton, null, this);
+            return;
+        }
         if(!PrefUtils.isDNIeEnabled()) {
-            PrefUtils.putToken(UUID.randomUUID().toString().toCharArray());
+            AppVS.getInstance().setToken(UUID.randomUUID().toString().toCharArray());
             Intent intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
             intent.putExtra(ContextVS.FRAGMENT_KEY, UserDataFormFragment.class.getName());
             startActivity(intent);

@@ -32,6 +32,7 @@ import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyGeneratorVS;
+import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -39,6 +40,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.RootUtil;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.WebSocketSession;
 
@@ -92,6 +94,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private Set<EventVSDto.State> eventsStateLoaded = new HashSet<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
+    private boolean isRootedPhone = false;
     private char[] token;
 
     private static AppVS INSTANCE;
@@ -130,6 +133,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
                     CertUtils.fromPEMToX509CertCollection(certBytes);
             sslServerCert = votingSystemSSLCerts.iterator().next();
             HttpHelper.init(sslServerCert);
+            if(!BuildConfig.ALLOW_ROOTED_PHONES && RootUtil.isDeviceRooted()) {
+                isRootedPhone = true;
+            }
         } catch(Exception ex) { ex.printStackTrace(); }
 	}
 
@@ -410,5 +416,13 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
 
     public void setToken(char[] token) {
         this.token = token;
+    }
+
+    public boolean isRootedPhone() {
+        return isRootedPhone;
+    }
+
+    public void setRootedPhone(boolean rootedPhone) {
+        isRootedPhone = rootedPhone;
     }
 }
