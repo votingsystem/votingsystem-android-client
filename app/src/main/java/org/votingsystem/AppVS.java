@@ -178,12 +178,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return notificationId.get();
     }
 
-    public X509Certificate getCert(String serverURL) {
-        LOGD(TAG + ".getCert", "serverURL: " + serverURL);
-        if(serverURL == null) return null;
-        return certsMap.get(serverURL);
-    }
-
     public void putCert(String serverURL, X509Certificate cert) {
         LOGD(TAG + ".putCert", "serverURL: " + serverURL);
         certsMap.put(serverURL, cert);
@@ -422,7 +416,4 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return isRootedPhone;
     }
 
-    public void setRootedPhone(boolean rootedPhone) {
-        isRootedPhone = rootedPhone;
-    }
 }

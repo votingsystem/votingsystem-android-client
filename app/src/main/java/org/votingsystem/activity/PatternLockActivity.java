@@ -29,7 +29,8 @@ public class PatternLockActivity extends AppCompatActivity {
 
     private enum PinChangeStep {PATTERN_REQUEST, NEW_PATTERN_REQUEST, NEW_PATTERN_CONFIRM}
 
-    public static final int RC_PIN_PASSWORD    = 1;
+    public static final int RC_PIN_PASSWORD  = 0;
+    public static final int RC_IDCARD_PASSWORD  = 1;
 
     public static final int MODE_VALIDATE_INPUT = 0;
     public static final int MODE_CHANGE_PASSWORD    = 1;
@@ -114,18 +115,17 @@ public class PatternLockActivity extends AppCompatActivity {
                         return;
                     case NEW_PATTERN_CONFIRM:
                         if(passw.equals(newPin)) {
-                            if(passwAccessMode != null) {
+                            if(dniePassword != null) {
                                 PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PATTER_LOCK,
                                         passw.toCharArray(), AppVS.getInstance().getToken(), dniePassword);
+                            } else if(PrefUtils.isDNIeEnabled()) {
+                                Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
+                                intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                                intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
+                                startActivityForResult(intent, RC_IDCARD_PASSWORD);
+                                return;
                             }
-                            DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            finishOK(passw);
-                                        }
-                                    });
-                            UIUtils.showMessageDialog(getString(R.string.change_password_lbl), getString(
-                                    R.string.new_password_ok_msg), positiveButton, null, this);
+                            showResultDialog();
                             return;
                         } else {
                             passwChangeStep =  PinChangeStep.NEW_PATTERN_REQUEST;
@@ -152,6 +152,17 @@ public class PatternLockActivity extends AppCompatActivity {
                 break;
         }
         finishOK(passw);
+    }
+
+    private void showResultDialog() {
+        DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        finishOK(newPin);
+                    }
+                });
+        UIUtils.showMessageDialog(getString(R.string.change_password_lbl), getString(
+                R.string.new_password_ok_msg), positiveButton, null, this);
     }
 
     private void finishOK(String passw) {
@@ -185,6 +196,18 @@ public class PatternLockActivity extends AppCompatActivity {
                     UIUtils.showMessageDialog(getString(R.string.error_lbl),
                             getString(R.string.missing_actual_passw_error_msg), positiveButton,
                             null, this);
+                }
+                break;
+            case RC_IDCARD_PASSWORD:
+                if(Activity.RESULT_OK == resultCode)  {
+                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    this.dniePassword  = new String(responseVS.getMessageBytes()).toCharArray();
+                    PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PIN,
+                            newPin.toCharArray(), AppVS.getInstance().getToken(), dniePassword);
+                    showResultDialog();
+                } else {
+                    passwChangeStep =  PinChangeStep.NEW_PATTERN_REQUEST;
+                    msgTextView.setText(getString(R.string.new_password_error_msg));
                 }
                 break;
         }

@@ -2,22 +2,17 @@ package org.votingsystem.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,9 +30,6 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.ui.DialogButton;
-import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
@@ -77,10 +69,9 @@ public class UserDataFormActivity extends ActivityConnected {
     private EditText province;
     private Spinner country_spinner;
     private UserVSDto userVSDto;
-    private Dialog connectionRequiredDialog;
     private char[] password;
     private CryptoDeviceAccessMode.Mode accessMode;
-
+    private boolean isConnectionRequired = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -266,30 +257,6 @@ public class UserDataFormActivity extends ActivityConnected {
         return true;
     }
 
-    @Override protected void onResume() {
-        super.onResume();
-        if(PrefUtils.isDNIeEnabled() && !AppVS.getInstance().isWithSocketConnection()) {
-            DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            try {
-                                ConnectionUtils.initConnection(UserDataFormActivity.this);
-                            } catch (Exception ex) { ex.printStackTrace();}
-
-                        }
-                    });
-            DialogButton negativeButton = new DialogButton(getString(R.string.cancel_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            finish();
-                        }
-                    });
-            connectionRequiredDialog = UIUtils.showMessageDialog(getString(R.string.connect_lbl),
-                    getString(R.string.connection_required_msg),
-                    positiveButton, negativeButton, this);
-        }
-    }
-
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putCharArray(ContextVS.PASSWORD_KEY, password);
@@ -309,7 +276,7 @@ public class UserDataFormActivity extends ActivityConnected {
                     if(PrefUtils.getCryptoDeviceAccessMode() == null) {
                         intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
                     }
-                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
+                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_UPDATE_USER_DATA);
                     intent.putExtra(ContextVS.CSR_KEY, true);
                     intent.putExtra(ContextVS.PASSWORD_KEY, password);
                     startActivityForResult(intent, RC_SIGN_USER_DATA);
@@ -318,6 +285,7 @@ public class UserDataFormActivity extends ActivityConnected {
             case RC_SIGN_USER_DATA:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    if(!PrefUtils.isDNIeEnabled()) isConnectionRequired = false;
                     new DataSender(responseVS.getSMIME(),
                             new String(responseVS.getMessageBytes()).toCharArray()).execute();
                 }
@@ -325,6 +293,10 @@ public class UserDataFormActivity extends ActivityConnected {
         }
 
     }
+
+    @Override public void changeConnectionStatus() { }
+
+    @Override public boolean isConnectionRequired() { return isConnectionRequired;}
 
     public class DataSender extends AsyncTask<String, String, ResponseVS> {
 

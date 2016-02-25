@@ -67,18 +67,7 @@ public class ActivityBase extends ActivityConnected
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
             ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
-            if(socketMsg != null) {
-                LOGD(TAG + ".broadcastReceiver", "WebSocketMessage typeVS: " + socketMsg.getOperation());
-                ProgressDialogFragment.hide(getSupportFragmentManager());
-                setConnectionStatusUI();
-                if(ResponseVS.SC_ERROR == socketMsg.getStatusCode() ||
-                        ResponseVS.SC_WS_CONNECTION_INIT_ERROR == socketMsg.getStatusCode()) {
-                    MessageDialogFragment.showDialog(socketMsg.getStatusCode(),
-                            socketMsg.getCaption(), socketMsg.getMessage(),
-                            getSupportFragmentManager());
-                }
-            } else if(responseVS != null) {
+            if(responseVS != null) {
                 if(ResponseVS.SC_ERROR == responseVS.getStatusCode()) {
                     MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                             getString(R.string.error_lbl), responseVS.getMessage(),
@@ -115,7 +104,7 @@ public class ActivityBase extends ActivityConnected
         if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
     }
 
-    private void setConnectionStatusUI() {
+    public void changeConnectionStatus() {
         if(appVS.isWithSocketConnection() && menu != null) {
             if(menu.findItem(R.id.connect) != null)
                 menu.findItem(R.id.connect).setIcon(R.drawable.fa_bolt_16_ffff00);
@@ -176,7 +165,7 @@ public class ActivityBase extends ActivityConnected
             menu.findItem(R.id.connect).setVisible(false);
         }
         this.menu = menu;
-        setConnectionStatusUI();
+        changeConnectionStatus();
         return true;
     }
 
@@ -316,12 +305,12 @@ public class ActivityBase extends ActivityConnected
         }
         if(messagesMenuItem != null)
             messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
-        setConnectionStatusUI();
+        changeConnectionStatus();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
+
+    @Override public boolean isConnectionRequired() { return false;}
 
     @Override protected void onPause() {
         super.onPause();

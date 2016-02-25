@@ -135,4 +135,9 @@ public class CryptoDeviceAccessModeSelectorActivity extends ActivityConnected {
         }
 
     }
+
+    @Override public void changeConnectionStatus() { }
+
+    @Override
+    public boolean isConnectionRequired() { return true; }
 }

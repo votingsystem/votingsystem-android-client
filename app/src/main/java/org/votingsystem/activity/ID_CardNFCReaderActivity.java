@@ -61,8 +61,9 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 	public static final String CERT_SIGN          = "CertFirmaDigital";
 
 
-	public static final int MODE_PASSWORD_REQUEST  = 0;
-	public static final int MODE_SIGN_DOCUMENT     = 1;
+	public static final int MODE_UPDATE_USER_DATA = 0;
+	public static final int MODE_PASSWORD_REQUEST = 1;
+	public static final int MODE_SIGN_DOCUMENT    = 2;
 
 	private String textToSign;
 	private String toUser;
@@ -193,8 +194,11 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				ksUserDNIe.getKey(CERT_SIGN, null);
 				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
 
-				UserVSDto appUser = null;
 				if(MODE_PASSWORD_REQUEST == activityMode) {
+					return ResponseVS.OK().setMessageBytes(new String(myFragment.getPassword()).getBytes());
+				}
+				UserVSDto appUser = null;
+				if(MODE_UPDATE_USER_DATA == activityMode) {
 					UserVSDto userFromCert = UserVSDto.getUserVS(PrincipalUtil.getSubjectX509Principal(userCert));
 					appUser = PrefUtils.getAppUser();
 					appUser.setNIF(userFromCert.getNIF()).setCertificate(userCert);
@@ -225,7 +229,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				smimeMessage = new MessageTimeStamper(smimeMessage,
 						AppVS.getInstance().getTimeStampServiceURL()).call();
 				responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
-				if(MODE_PASSWORD_REQUEST == activityMode) {
+				if(MODE_UPDATE_USER_DATA == activityMode) {
 					PrefUtils.putAppUser(appUser);
 					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());
 				}
