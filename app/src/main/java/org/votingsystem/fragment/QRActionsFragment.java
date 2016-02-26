@@ -33,6 +33,7 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -234,6 +235,11 @@ public class QRActionsFragment extends Fragment {
 
     @Override public void onResume() {
         super.onResume();
+        ActivityResult activityResult = ((ActivityBase)getActivity()).getActivityResult();
+        if(activityResult != null) {
+            onActivityResult(activityResult.getRequestCode(),
+                    activityResult.getResultCode(), activityResult.getData());
+        }
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(

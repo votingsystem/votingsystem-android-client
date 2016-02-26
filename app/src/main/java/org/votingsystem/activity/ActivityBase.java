@@ -26,6 +26,7 @@ import org.votingsystem.fragment.ReceiptGridFragment;
 import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
+import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
@@ -57,6 +58,7 @@ public class ActivityBase extends ActivityConnected
     private Menu menu;
     private MenuItem messagesMenuItem;
     private Integer menuType;
+    private ActivityResult activityResult;
 
     private String broadCastId = ActivityBase.class.getSimpleName();
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -136,10 +138,16 @@ public class ActivityBase extends ActivityConnected
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(currentFragment != null && currentFragment.get() != null)
-                currentFragment.get().onActivityResult(requestCode, resultCode, data);
+        if(currentFragment != null && currentFragment.get() != null) {
+            currentFragment.get().onActivityResult(requestCode, resultCode, data);
+        } else this.activityResult = new ActivityResult(requestCode, resultCode, data);
     }
 
+    public ActivityResult getActivityResult() {
+        ActivityResult result = this.activityResult;
+        this.activityResult = null;
+        return result;
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
