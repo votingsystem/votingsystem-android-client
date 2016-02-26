@@ -19,11 +19,8 @@ import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
-import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.QRActionsFragment;
 import org.votingsystem.fragment.ReceiptGridFragment;
 import org.votingsystem.fragment.WalletFragment;
@@ -226,14 +223,11 @@ public class ActivityBase extends ActivityConnected
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.currency_accounts:
             case R.id.currency_menu_item:
                 intent = new Intent(this, CurrencyMainActivity.class);
                 startActivity(intent);
                 finish();
-            case R.id.currency_accounts:
-                currentFragment = new WeakReference<Fragment>(new CurrencyAccountsPagerFragment());
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        currentFragment.get(), CurrencyAccountsPagerFragment.TAG).commit();
                 break;
             case R.id.wallet:
                 getSupportActionBar().setTitle(getString(R.string.wallet_lbl));

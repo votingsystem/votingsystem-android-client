@@ -17,10 +17,8 @@ import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;

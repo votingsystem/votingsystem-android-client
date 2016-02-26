@@ -19,12 +19,12 @@ import android.telephony.TelephonyManager;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.CurrencyMainActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.service.PaymentService;
 
@@ -168,7 +168,7 @@ public class Utils {
         final NotificationManager mgr = (NotificationManager)context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Intent clickIntent = new Intent(context, CurrencyAccountsPagerFragment.class);
+        Intent clickIntent = new Intent(context, CurrencyMainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context,
                 ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)

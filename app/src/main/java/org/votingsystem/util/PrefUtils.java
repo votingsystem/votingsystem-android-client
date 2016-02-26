@@ -203,10 +203,10 @@ public class PrefUtils {
     }
 
     public static void putProtectedPassword(CryptoDeviceAccessMode.Mode accessMode,
-                                            char[] passw, char[] token, char[] passwordToEncrypt) {
+                                            char[] passw, char[] passwordToEncrypt) {
         try {
             EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(
-                    new String(passw) + new String(token), new String(passwordToEncrypt).getBytes()).toDto();
+                    new String(passw) , new String(passwordToEncrypt).getBytes()).toDto();
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                     VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
@@ -219,7 +219,7 @@ public class PrefUtils {
         }
     }
 
-    public static char[] getProtectedPassword(char[] passw, char[] token) {
+    public static char[] getProtectedPassword(char[] passw) {
         char[] password = null;
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
@@ -227,7 +227,7 @@ public class PrefUtils {
             String dtoStr = settings.getString(ContextVS.PROTECTED_PASSWORD_KEY, null);
             if(dtoStr != null) {
                 EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
-                byte[] resultBytes = Encryptor.pbeAES_Decrypt(new String(passw) + new String(token),
+                byte[] resultBytes = Encryptor.pbeAES_Decrypt(new String(passw),
                         ebDto.getEncryptedBundle());
                 password = new String(resultBytes, "UTF-8").toCharArray();
             }

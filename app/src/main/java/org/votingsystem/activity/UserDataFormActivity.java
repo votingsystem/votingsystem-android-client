@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -53,7 +54,7 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class UserDataFormActivity extends ActivityConnected {
+public class UserDataFormActivity extends AppCompatActivity {
 
 	public static final String TAG = UserDataFormActivity.class.getSimpleName();
 
@@ -294,10 +295,6 @@ public class UserDataFormActivity extends ActivityConnected {
 
     }
 
-    @Override public void changeConnectionStatus() { }
-
-    @Override public boolean isConnectionRequired() { return isConnectionRequired;}
-
     public class DataSender extends AsyncTask<String, String, ResponseVS> {
 
         private SMIMEMessage smimeMessage;
@@ -346,8 +343,6 @@ public class UserDataFormActivity extends ActivityConnected {
                         passwordAccessMode = new CryptoDeviceAccessMode(accessMode, password);
                         PrefUtils.putCryptoDeviceAccessMode(passwordAccessMode);
                     }
-                    PrefUtils.putProtectedPassword(passwordAccessMode.getMode(), password, newToken,
-                                protectedPassword);
                     AppVS.getInstance().setToken(newToken);
                 } catch (Exception ex) { ex.printStackTrace();}
             } catch (Exception ex) {

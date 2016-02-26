@@ -153,8 +153,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
         IsoDep exIsoDep = IsoDep.get(tagFromIntent);
 		if( (exNfcA != null) || (exNfcB != null) || (exIsoDep != null)) {
             if(accessModePassw != null) {
-                char[] password = PrefUtils.getProtectedPassword(accessModePassw,
-						AppVS.getInstance().getToken());
+                char[] password = PrefUtils.getProtectedPassword(accessModePassw);
                 new SignWithDNIeTask(password).execute();
             } else new SignWithDNIeTask(null).execute();
 		}

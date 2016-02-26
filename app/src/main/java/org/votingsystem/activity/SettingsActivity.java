@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HelpUtils;
 import org.votingsystem.util.PrefUtils;
 
