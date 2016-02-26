@@ -128,7 +128,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             PrefUtils.registerPreferenceChangeListener(this);
             userVS = PrefUtils.getAppUser();
             byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
-                    "VotingSystemSSLCert.pem"));
+                    "CurrencyServerCert.pem"));
             Collection<X509Certificate> votingSystemSSLCerts =
                     CertUtils.fromPEMToX509CertCollection(certBytes);
             sslServerCert = votingSystemSSLCerts.iterator().next();
