@@ -462,6 +462,17 @@ public class SocketMessageDto implements Serializable {
         return socketMessageDto;
     }
 
+    public static SocketMessageDto getPlainQRInfoRequestByTargetSessionId(String sessionId) throws Exception {
+        DeviceVSDto deviceVSDto = new DeviceVSDto().setSessionId(sessionId);
+        WebSocketSession socketSession = checkWebSocketSession(deviceVSDto, null, TypeVS.QR_MESSAGE_INFO);
+        SocketMessageDto socketMessageDto = new SocketMessageDto();
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
+        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        socketMessageDto.setSessionId(sessionId);
+        socketMessageDto.setUUID(socketSession.getUUID());
+        return socketMessageDto;
+    }
+
     public static SocketMessageDto getCurrencyWalletChangeRequest(DeviceVSDto deviceVS,
                               List<Currency> currencyList) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
@@ -554,9 +565,10 @@ public class SocketMessageDto implements Serializable {
         if(deviceVS != null) webSocketSession = AppVS.getInstance().getWSSession(deviceVS.getId());
         if(webSocketSession == null && deviceVS != null) {
             AESParams aesParams = new AESParams();
-            webSocketSession = new WebSocketSession(aesParams, deviceVS);
-            AppVS.getInstance().putWSSession(java.util.UUID.randomUUID().toString(), webSocketSession);
+            webSocketSession = new WebSocketSession(aesParams, deviceVS).setUUID(
+                    java.util.UUID.randomUUID().toString());
         }
+        AppVS.getInstance().putWSSession(webSocketSession.getUUID(), webSocketSession);
         webSocketSession.setData(data);
         webSocketSession.setTypeVS(typeVS);
         return webSocketSession;

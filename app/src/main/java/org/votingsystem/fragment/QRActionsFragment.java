@@ -166,19 +166,28 @@ public class QRActionsFragment extends Fragment {
             default:
                 IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
                 if (result != null && result.getContents() != null) {
-                    if(result.getContents().toLowerCase().contains("http://") ||
-                            result.getContents().toLowerCase().contains("https://")) {
-                        new GetDataTask().execute(result.getContents());
-                    } else {
-                        LOGD(TAG, "QR reader - onActivityResult - socket operation UUID: " + result.getContents());
+                    String qrMessage = result.getContents().toLowerCase();
+                    LOGD(TAG, "QR reader - onActivityResult - qrMessage: " + qrMessage);
+                    if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
+                        new GetDataTask().execute(qrMessage);
+                    } else if(qrMessage.contains(QRMessageDto.WEB_SOCKET_SESSION_KEY)) {
+                        String sessionId = qrMessage.split("=")[1];
                         try {
-                            QRMessageDto qrMessageDto = JSON.readValue(result.getContents(), QRMessageDto.class);
+                            SocketMessageDto socketMessage = SocketMessageDto.
+                                    getPlainQRInfoRequestByTargetSessionId(sessionId);
+                            sendQRRequestInfo(socketMessage);
+                        } catch (Exception ex) { ex.printStackTrace(); }
+                    } else {
+                        try {
+                            QRMessageDto qrMessageDto = JSON.readValue(qrMessage, QRMessageDto.class);
                             if(qrMessageDto.getDeviceId() != null) {
                                 if(AppVS.getInstance().getWSSession(qrMessageDto.getDeviceId()) == null) {
                                     new GetDeviceVSDataTask(qrMessageDto).execute();
                                 } else {
-                                    sendQRRequestInfo(AppVS.getInstance().getWSSession(
-                                            qrMessageDto.getDeviceId()).getDeviceVS(), qrMessageDto);
+                                    SocketMessageDto socketMessage = SocketMessageDto.
+                                            getQRInfoRequestByTargetDeviceId(AppVS.getInstance().getWSSession(
+                                                    qrMessageDto.getDeviceId()).getDeviceVS(), qrMessageDto);
+                                    sendQRRequestInfo(socketMessage);
                                 }
                             } else if(qrMessageDto.getSessionId() != null) {
                                 remoteSessionId = qrMessageDto.getSessionId();
@@ -208,9 +217,7 @@ public class QRActionsFragment extends Fragment {
         super.onCreateOptionsMenu(menu, menuInflater);
     }
 
-    private void sendQRRequestInfo(DeviceVSDto deviceVSDto, QRMessageDto qrMessageDto) throws Exception {
-        SocketMessageDto socketMessage = SocketMessageDto.getQRInfoRequestByTargetDeviceId(
-                deviceVSDto, qrMessageDto);
+    private void sendQRRequestInfo(SocketMessageDto socketMessage) throws Exception {
         Intent startIntent = new Intent(getActivity(), WebSocketService.class);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.QR_MESSAGE_INFO);
@@ -280,7 +287,9 @@ public class QRActionsFragment extends Fragment {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     DeviceVSDto deviceVSDto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
-                    sendQRRequestInfo(deviceVSDto, qrMessageDto);
+                    SocketMessageDto socketMessage = SocketMessageDto.
+                            getQRInfoRequestByTargetDeviceId(deviceVSDto, qrMessageDto);
+                    sendQRRequestInfo(socketMessage);
                 } catch (Exception e) { e.printStackTrace();}
             } else {
                 MessageDialogFragment.showDialog(getString(R.string.error_lbl),

@@ -20,6 +20,8 @@ public class QRMessageDto<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public static final String WEB_SOCKET_SESSION_KEY = "ws_sid";
+
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
     @JsonIgnore private String origingHashCertVS;
@@ -142,7 +144,7 @@ public class QRMessageDto<T> implements Serializable {
     }
 
     public String getSessionId() {
-        return sessionId;
+            return sessionId;
     }
 
     public QRMessageDto setSessionId(String sessionId) {

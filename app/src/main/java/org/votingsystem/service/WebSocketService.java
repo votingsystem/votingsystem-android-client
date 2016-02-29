@@ -286,7 +286,9 @@ public class WebSocketService extends Service {
                 socketMsg.decryptMessage(aesParams);
                 socketSession = new WebSocketSession(socketMsg);
                 appVS.putWSSession(socketMsg.getUUID(), socketSession);
-            } else socketMsg.decryptMessage(socketSession.getAESParams());
+            } else {
+                if(socketMsg.isEncrypted()) socketMsg.decryptMessage(socketSession.getAESParams());
+            }
             LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                     " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
             switch(socketMsg.getOperation()) {

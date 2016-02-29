@@ -96,8 +96,9 @@ public class DeviceVSDto implements Serializable {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
+    public DeviceVSDto setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
     }
 
     public String getFirstName() {
