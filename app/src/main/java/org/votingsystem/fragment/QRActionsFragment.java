@@ -47,6 +47,7 @@ import org.votingsystem.util.Utils;
 import java.security.NoSuchAlgorithmException;
 
 import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -166,47 +167,49 @@ public class QRActionsFragment extends Fragment {
             default:
                 IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
                 if (result != null && result.getContents() != null) {
-                    String qrMessage = result.getContents().toLowerCase();
+                    String qrMessage = result.getContents();
+                    QRMessageDto qrMessageDto = null;
                     LOGD(TAG, "QR reader - onActivityResult - qrMessage: " + qrMessage);
-                    if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
-                        new GetDataTask().execute(qrMessage);
-                    } else if(qrMessage.contains(QRMessageDto.WEB_SOCKET_SESSION_KEY)) {
-                        String sessionId = qrMessage.split("=")[1];
+                    try {
+                        qrMessageDto = JSON.readValue(qrMessage, QRMessageDto.class);
+                        if(qrMessageDto.getDeviceId() != null) {
+                            if(AppVS.getInstance().getWSSession(qrMessageDto.getDeviceId()) == null) {
+                                new GetDeviceVSDataTask(qrMessageDto).execute();
+                            } else {
+                                SocketMessageDto socketMessage = SocketMessageDto.
+                                        getQRInfoRequestByTargetDeviceId(AppVS.getInstance().getWSSession(
+                                                qrMessageDto.getDeviceId()).getDeviceVS(), qrMessageDto);
+                                sendQRRequestInfo(socketMessage);
+                            }
+                        } else if(qrMessageDto.getSessionId() != null) {
+                            remoteSessionId = qrMessageDto.getSessionId();
+                            switch (qrMessageDto.getOperation()) {
+                                case INIT_REMOTE_SIGNED_SESSION:
+                                    Utils.getProtectionPassword(RC_INIT_REMOTE_SIGNED_SESSION,
+                                            getString(R.string.allow_remote_device_authenticated_session),
+                                            null, ((AppCompatActivity)getActivity()));
+                                    break;
+                                default:
+                                    LOGD(TAG, "QR reader - onActivityResult - unprocessed QR code - " +
+                                            "sessionId: " + qrMessageDto.getSessionId() + " - operation: " +
+                                            qrMessageDto.getOperation());
+                            }
+                        } else LOGD(TAG, "QR reader - onActivityResult - unprocessed QR code");
+                        return;
+                    } catch (Exception e) {
+                        LOGE(TAG, "QRMessageDto is not JSON encoded");
+                    }
+                    //qr code isn't json encoded
+                    qrMessageDto = QRMessageDto.FROM_QR_CODE(qrMessage);
+                    if(qrMessageDto.getOperation() != null) {
                         try {
                             SocketMessageDto socketMessage = SocketMessageDto.
-                                    getPlainQRInfoRequestByTargetSessionId(sessionId);
+                                    getQRInfoRequestByTargetDeviceId(
+                                    new DeviceVSDto(qrMessageDto.getDeviceId(), null), qrMessageDto);
                             sendQRRequestInfo(socketMessage);
                         } catch (Exception ex) { ex.printStackTrace(); }
-                    } else {
-                        try {
-                            QRMessageDto qrMessageDto = JSON.readValue(qrMessage, QRMessageDto.class);
-                            if(qrMessageDto.getDeviceId() != null) {
-                                if(AppVS.getInstance().getWSSession(qrMessageDto.getDeviceId()) == null) {
-                                    new GetDeviceVSDataTask(qrMessageDto).execute();
-                                } else {
-                                    SocketMessageDto socketMessage = SocketMessageDto.
-                                            getQRInfoRequestByTargetDeviceId(AppVS.getInstance().getWSSession(
-                                                    qrMessageDto.getDeviceId()).getDeviceVS(), qrMessageDto);
-                                    sendQRRequestInfo(socketMessage);
-                                }
-                            } else if(qrMessageDto.getSessionId() != null) {
-                                remoteSessionId = qrMessageDto.getSessionId();
-                                switch (qrMessageDto.getOperation()) {
-                                    case INIT_REMOTE_SIGNED_SESSION:
-                                        Utils.getProtectionPassword(RC_INIT_REMOTE_SIGNED_SESSION,
-                                                getString(R.string.allow_remote_device_authenticated_session),
-                                                null, ((AppCompatActivity)getActivity()));
-                                        break;
-                                    default:
-                                        LOGD(TAG, "QR reader - onActivityResult - unprocessed QR code - " +
-                                                "sessionId: " + qrMessageDto.getSessionId() + " - operation: " +
-                                                qrMessageDto.getOperation());
-                                }
-                            } else LOGD(TAG, "QR reader - onActivityResult - unprocessed QR code");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
+                    } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
+                        new GetDataTask().execute(qrMessage);
                     }
                 }
         }

@@ -339,6 +339,13 @@ public class WebSocketService extends Service {
                                 getString(R.string.error_lbl));
                     }
                     break;
+                case QR_MESSAGE_INFO_RESPONSE:
+                    switch (socketMsg.getMessageType()) {
+                        case INIT_REMOTE_SIGNED_SESSION:
+
+                            break;
+                    }
+                    break;
                 case QR_MESSAGE_INFO:
                     //the payer has read our QR code and ask for details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {

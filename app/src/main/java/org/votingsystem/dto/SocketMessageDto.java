@@ -33,6 +33,8 @@ import java.util.Set;
 
 import javax.websocket.Session;
 
+import static org.votingsystem.util.LogUtils.LOGD;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -448,17 +450,21 @@ public class SocketMessageDto implements Serializable {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        socketMessageDto.setMessage(qrMessageDto.getOperationId());
+        socketMessageDto.setMessageType(qrMessageDto.getOperation());
         socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getQRInfoRequest(
                 qrMessageDto);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Cert());
-        socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
-                socketSession.getAESParams()));
+        if(deviceVS.getX509Cert() != null) {
+            byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
+                    aesParams.getBytes(), deviceVS.getX509Cert());
+            socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
+            socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
+                    socketSession.getAESParams()));
+        } else LOGD(TAG, "target device without x509 cert");
         return socketMessageDto;
     }
 
