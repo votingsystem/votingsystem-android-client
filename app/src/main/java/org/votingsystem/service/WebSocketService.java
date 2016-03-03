@@ -189,7 +189,7 @@ public class WebSocketService extends Service {
                     sslContext.setTrustStorePass("");
                     SSLEngineConfigurator sslEngineConfigurator =
                             new SSLEngineConfigurator(sslContext, true, false, false);
-                    //BUG with Android 5.0 and Tyrus client!!! Not WSS secured connections for now
+                    //BUG with Android 5.0 and Tyrus client!!!
                     //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
                     client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
                 } catch(Exception ex) {
