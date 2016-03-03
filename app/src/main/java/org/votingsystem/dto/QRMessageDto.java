@@ -1,16 +1,23 @@
 package org.votingsystem.dto;
 
+import android.util.Base64;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.model.Currency;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -27,10 +34,12 @@ public class QRMessageDto<T> implements Serializable {
     public static final int INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
     public static final int QR_MESSAGE_INFO                    = 1;
 
-    public static final String WEB_SOCKET_SESSION_KEY = "ws_sid";
-    public static final String DEVICE_ID_KEY          = "d_id";
+    public static final String WEB_SOCKET_SESSION_KEY = "wsid";
+    public static final String DEVICE_ID_KEY          = "did";
     public static final String OPERATION_KEY          = "op";
-    public static final String OPERATION_ID_KEY       = "op_id";
+    public static final String OPERATION_ID_KEY       = "opid";
+    public static final String AES_KEY_KEY            = "k";
+    public static final String IV_KEY                 = "iv";
 
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
@@ -43,6 +52,8 @@ public class QRMessageDto<T> implements Serializable {
     private String hashCertVS;
     private String sessionId;
     private String currencyChangeCert;
+    private String key;
+    private String iv;
     private String url;
     private String UUID;
 
@@ -83,7 +94,23 @@ public class QRMessageDto<T> implements Serializable {
             qrMessageDto.setOperationId(msg.split(OPERATION_ID_KEY + "=")[1].split(";")[0]);
         if (msg.contains(WEB_SOCKET_SESSION_KEY + "="))
             qrMessageDto.setSessionId(msg.split(WEB_SOCKET_SESSION_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(AES_KEY_KEY + "="))
+            qrMessageDto.setKey(msg.split(AES_KEY_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(IV_KEY + "="))
+            qrMessageDto.setIv(msg.split(IV_KEY + "=")[1].split(";")[0]);
         return qrMessageDto;
+    }
+
+    public boolean isBrowserSessionMatchMsg() {
+        return (key != null && deviceId != null && iv != null);
+    }
+
+    public AESParams getAESParams() {
+        byte[] decodeKeyBytes = Base64.decode(key, Base64.NO_WRAP);
+        Key key = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
+        byte[] ivBytes =  Base64.decode(iv, Base64.NO_WRAP);
+        IvParameterSpec ivParamSpec = new IvParameterSpec(ivBytes);
+        return new AESParams(key, ivParamSpec);
     }
 
     public static String toQRCode(TypeVS operation, String operationId, String deviceId, String sessionId) {
@@ -210,5 +237,21 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setOperationId(String operationId) {
         this.operationId = operationId;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getIv() {
+        return iv;
+    }
+
+    public void setIv(String iv) {
+        this.iv = iv;
     }
 }

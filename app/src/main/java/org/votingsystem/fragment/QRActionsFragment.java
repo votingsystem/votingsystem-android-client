@@ -43,6 +43,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.WebSocketSession;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -201,11 +202,21 @@ public class QRActionsFragment extends Fragment {
                     }
                     //qr code isn't json encoded
                     qrMessageDto = QRMessageDto.FROM_QR_CODE(qrMessage);
-                    if(qrMessageDto.getOperation() != null) {
+                    if(qrMessageDto.isBrowserSessionMatchMsg()) {
+                        WebSocketSession webSocketSession = new WebSocketSession(qrMessageDto.getAESParams(),
+                                new DeviceVSDto(qrMessageDto.getDeviceId())).setUUID(java.util.UUID.randomUUID().toString());
+                        AppVS.getInstance().putWSSession(webSocketSession.getUUID(), webSocketSession);
                         try {
                             SocketMessageDto socketMessage = SocketMessageDto.
                                     getQRInfoRequestByTargetDeviceId(
-                                    new DeviceVSDto(qrMessageDto.getDeviceId(), null), qrMessageDto);
+                                    new DeviceVSDto(qrMessageDto.getDeviceId()), qrMessageDto);
+                            sendQRRequestInfo(socketMessage);
+                        } catch (Exception ex) { ex.printStackTrace(); }
+                    } else if(qrMessageDto.getOperation() != null) {
+                        try {
+                            SocketMessageDto socketMessage = SocketMessageDto.
+                                    getQRInfoRequestByTargetDeviceId(
+                                    new DeviceVSDto(qrMessageDto.getDeviceId()), qrMessageDto);
                             sendQRRequestInfo(socketMessage);
                         } catch (Exception ex) { ex.printStackTrace(); }
                     } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {

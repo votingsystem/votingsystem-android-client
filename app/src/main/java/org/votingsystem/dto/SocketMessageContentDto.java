@@ -32,6 +32,7 @@ public class SocketMessageContentDto implements Serializable {
     private String deviceFromName;
     private Long deviceFromId;
     private String textToSign;
+    private String sessionId;
     private String toUser;
     private String deviceToName;
     private String hashCertVS;
@@ -224,4 +225,11 @@ public class SocketMessageContentDto implements Serializable {
         this.hashCertVS = hashCertVS;
     }
 
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 }

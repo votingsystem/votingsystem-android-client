@@ -34,6 +34,10 @@ public class DeviceVSDto implements Serializable {
 
     public DeviceVSDto() {}
 
+    public DeviceVSDto(Long id) {
+        this.setId(id);
+    }
+
     public DeviceVSDto(Long id, String name) {
         this.setId(id);
         this.setDeviceName(name);

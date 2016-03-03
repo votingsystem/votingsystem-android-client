@@ -458,6 +458,7 @@ public class SocketMessageDto implements Serializable {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.QR_MESSAGE_INFO);
         socketSession.setData(qrMessageDto);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
+        socketMessageDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setMessage(qrMessageDto.getOperationId());
