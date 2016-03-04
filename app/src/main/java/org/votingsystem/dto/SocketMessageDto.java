@@ -475,6 +475,11 @@ public class SocketMessageDto implements Serializable {
             socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
             socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                     socketSession.getAESParams()));
+        } else if(deviceVS.getPublicKey() != null) {
+            String base64EncryptedAESData = Encryptor.encryptRSA(aesParams, deviceVS.getPublicKey());
+            socketMessageDto.setAesParams(base64EncryptedAESData);
+            socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
+                    socketSession.getAESParams()));
         } else LOGD(TAG, "target device without x509 cert");
         return socketMessageDto;
     }

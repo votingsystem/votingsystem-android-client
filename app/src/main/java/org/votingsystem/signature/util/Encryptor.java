@@ -377,4 +377,18 @@ public class Encryptor {
         byte[] result = Arrays.copyOf(output, i + 1);
         return new String(result);
     }
+
+    public static String encryptRSA(String plainText, PublicKey publicKey) throws Exception {
+        Cipher rsaCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+        rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] cipherText = rsaCipher.doFinal(plainText.getBytes());
+        return Base64.encodeToString(cipherText, Base64.NO_WRAP);
+    }
+
+    public static String decryptRSA(String encryptedTextBase64, PrivateKey privateKey) throws Exception {
+        Cipher rsaCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+        rsaCipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] plainText = rsaCipher.doFinal(Base64.decode(encryptedTextBase64.getBytes("UTF-8"), Base64.NO_WRAP));
+        return new String(plainText, "UTF-8");
+    }
 }

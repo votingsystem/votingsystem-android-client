@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.signature.util.CertUtils;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 /**
@@ -31,6 +32,7 @@ public class DeviceVSDto implements Serializable {
     private String NIF;
     private Type deviceType;
     @JsonIgnore private X509Certificate x509Certificate;
+    @JsonIgnore private PublicKey publicKey;
 
     public DeviceVSDto() {}
 
@@ -153,6 +155,14 @@ public class DeviceVSDto implements Serializable {
 
     public void setX509Cert(X509Certificate x509Certificate) {
         this.x509Certificate = x509Certificate;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
 
 }

@@ -6,18 +6,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.util.AESParams;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.util.Date;
-
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -33,13 +30,14 @@ public class QRMessageDto<T> implements Serializable {
 
     public static final int INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
     public static final int QR_MESSAGE_INFO                    = 1;
+    public static final int CURRENCY_SEND                      = 2;
 
     public static final String WEB_SOCKET_SESSION_KEY = "wsid";
     public static final String DEVICE_ID_KEY          = "did";
     public static final String OPERATION_KEY          = "op";
     public static final String OPERATION_ID_KEY       = "opid";
-    public static final String AES_KEY_KEY            = "k";
-    public static final String IV_KEY                 = "iv";
+    public static final String PUBLIC_KEY_KEY         = "pk";
+
 
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
@@ -52,8 +50,7 @@ public class QRMessageDto<T> implements Serializable {
     private String hashCertVS;
     private String sessionId;
     private String currencyChangeCert;
-    private String key;
-    private String iv;
+    private String keyBase64;
     private String url;
     private String UUID;
 
@@ -86,6 +83,8 @@ public class QRMessageDto<T> implements Serializable {
                 case QR_MESSAGE_INFO:
                     qrMessageDto.setOperation(TypeVS.QR_MESSAGE_INFO);
                     break;
+                case CURRENCY_SEND:
+                    qrMessageDto.setOperation(TypeVS.CURRENCY_SEND);
                 default:
                     LOGD(TAG, "unknown operation code: " + operationCode);
             }
@@ -94,23 +93,20 @@ public class QRMessageDto<T> implements Serializable {
             qrMessageDto.setOperationId(msg.split(OPERATION_ID_KEY + "=")[1].split(";")[0]);
         if (msg.contains(WEB_SOCKET_SESSION_KEY + "="))
             qrMessageDto.setSessionId(msg.split(WEB_SOCKET_SESSION_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(AES_KEY_KEY + "="))
-            qrMessageDto.setKey(msg.split(AES_KEY_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(IV_KEY + "="))
-            qrMessageDto.setIv(msg.split(IV_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(PUBLIC_KEY_KEY + "="))
+            qrMessageDto.setKeyBase64(msg.split(PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
         return qrMessageDto;
     }
 
-    public boolean isBrowserSessionMatchMsg() {
-        return (key != null && deviceId != null && iv != null);
+    public PublicKey getRSAPublicKey() throws Exception {
+        PublicKey publicKey = CertUtils.fromPEMToRSAPublicKey(Base64.decode(keyBase64, Base64.NO_WRAP));
+        return publicKey;
     }
 
-    public AESParams getAESParams() {
-        byte[] decodeKeyBytes = Base64.decode(key, Base64.NO_WRAP);
-        Key key = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
-        byte[] ivBytes =  Base64.decode(iv, Base64.NO_WRAP);
-        IvParameterSpec ivParamSpec = new IvParameterSpec(ivBytes);
-        return new AESParams(key, ivParamSpec);
+    public DeviceVSDto getDeviceVS() throws Exception {
+        DeviceVSDto dto = new DeviceVSDto(deviceId);
+        dto.setPublicKey(getRSAPublicKey());
+        return dto;
     }
 
     public static String toQRCode(TypeVS operation, String operationId, String deviceId, String sessionId) {
@@ -239,19 +235,12 @@ public class QRMessageDto<T> implements Serializable {
         this.operationId = operationId;
     }
 
-    public String getKey() {
-        return key;
+    public String getKeyBase64() {
+        return keyBase64;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setKeyBase64(String key) {
+        this.keyBase64 = key;
     }
 
-    public String getIv() {
-        return iv;
-    }
-
-    public void setIv(String iv) {
-        this.iv = iv;
-    }
 }

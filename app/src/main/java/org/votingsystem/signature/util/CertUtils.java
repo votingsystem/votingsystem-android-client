@@ -44,6 +44,7 @@ import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -67,6 +68,8 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -350,6 +353,15 @@ public class CertUtils {
         X509Certificate x509Cert = certificateChain.iterator().next();
         inputStream.close();
         return x509Cert;
+    }
+
+    public static PublicKey fromPEMToRSAPublicKey(byte[] pemBytes) throws Exception {
+        KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
+        PEMReader pemReader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(pemBytes)));
+        RSAPublicKey jcerSAPublicKey = (RSAPublicKey) pemReader.readObject();
+        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(jcerSAPublicKey.getEncoded());
+        PublicKey publicKey = factory.generatePublic(pubKeySpec);
+        return publicKey;
     }
 
     public static <T> T getCertExtensionData(Class<T> type, X509Certificate x509Certificate,

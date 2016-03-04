@@ -43,7 +43,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
-import org.votingsystem.util.WebSocketSession;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -202,22 +201,18 @@ public class QRActionsFragment extends Fragment {
                     }
                     //qr code isn't json encoded
                     qrMessageDto = QRMessageDto.FROM_QR_CODE(qrMessage);
-                    if(qrMessageDto.isBrowserSessionMatchMsg()) {
-                        WebSocketSession webSocketSession = new WebSocketSession(qrMessageDto.getAESParams(),
-                                new DeviceVSDto(qrMessageDto.getDeviceId())).setUUID(java.util.UUID.randomUUID().toString());
-                        AppVS.getInstance().putWSSession(webSocketSession.getUUID(), webSocketSession);
+                    if(qrMessageDto.getOperation() != null) {
                         try {
-                            SocketMessageDto socketMessage = SocketMessageDto.
-                                    getQRInfoRequestByTargetDeviceId(
-                                    new DeviceVSDto(qrMessageDto.getDeviceId()), qrMessageDto);
-                            sendQRRequestInfo(socketMessage);
-                        } catch (Exception ex) { ex.printStackTrace(); }
-                    } else if(qrMessageDto.getOperation() != null) {
-                        try {
-                            SocketMessageDto socketMessage = SocketMessageDto.
-                                    getQRInfoRequestByTargetDeviceId(
-                                    new DeviceVSDto(qrMessageDto.getDeviceId()), qrMessageDto);
-                            sendQRRequestInfo(socketMessage);
+                            switch (qrMessageDto.getOperation()) {
+                                case INIT_REMOTE_SIGNED_BROWSER_SESSION:
+                                    break;
+                                case QR_MESSAGE_INFO:
+                                    SocketMessageDto socketMessage = SocketMessageDto.
+                                            getQRInfoRequestByTargetDeviceId(
+                                            qrMessageDto.getDeviceVS(), qrMessageDto);
+                                    sendQRRequestInfo(socketMessage);
+                                    break;
+                            }
                         } catch (Exception ex) { ex.printStackTrace(); }
                     } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
                         new GetDataTask().execute(qrMessage);
