@@ -27,7 +27,7 @@
         android:textColor="@color/event_subject"
         android:layout_margin="10dp"
         android:textSize="20sp" />
-    <WebView android:id="@+id/smime_signed_content"
+    <WebView android:id="@+id/cms_signed_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </LinearLayout>

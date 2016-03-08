@@ -25,9 +25,9 @@ import android.widget.TextView;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -49,7 +49,7 @@ public class TransactionVSFragment extends Fragment {
     private TextView to_user;
     private TextView from_user;
     private Button receipt;
-    private SMIMEMessage messageSMIME;
+    private CMSSignedMessage messageCMS;
     private String broadCastId = null;
     private AppVS appVS;
 
@@ -62,10 +62,10 @@ public class TransactionVSFragment extends Fragment {
                 case RECEIPT:
                     byte[] receiptBytes = (byte[]) responseVS.getData();
                     try {
-                        selectedTransaction.setSmimeMessage(new SMIMEMessage(receiptBytes));
+                        selectedTransaction.setCMSMessage(new CMSSignedMessage(receiptBytes));
                     } catch (Exception e) { e.printStackTrace();  }
                     try {
-                        selectedTransaction.setSmimeMessage(new SMIMEMessage(receiptBytes));
+                        selectedTransaction.setCMSMessage(new CMSSignedMessage(receiptBytes));
                     } catch (Exception e) { e.printStackTrace(); }
                     TransactionVSContentProvider.updateTransaction(appVS, selectedTransaction);
                     break;
@@ -146,7 +146,7 @@ public class TransactionVSFragment extends Fragment {
                 DateUtils.getDayWeekDateStr(transactionvs.getDateCreated(), "HH:mm"),
                 transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyCode());
         try {
-            messageSMIME = transactionvs.getSmimeMessage();
+            messageCMS = transactionvs.getCMSMessage();
         } catch (Exception e) { e.printStackTrace(); }
         transactionvsSubject.setText(selectedTransaction.getSubject());
         transactionvs_content.setText(Html.fromHtml(transactionHtml));

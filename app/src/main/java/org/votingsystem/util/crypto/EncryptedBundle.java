@@ -1,4 +1,4 @@
-package org.votingsystem.signature.smime;
+package org.votingsystem.util.crypto;
 
 import org.votingsystem.dto.EncryptedBundleDto;
 

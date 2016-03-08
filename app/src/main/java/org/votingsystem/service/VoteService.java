@@ -9,13 +9,13 @@ import android.text.Html;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.VoteSender;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.ControlCenterDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -34,7 +34,7 @@ public class VoteService extends IntentService {
         appVS = (AppVS) getApplicationContext();
         final Bundle arguments = intent.getExtras();
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
-        byte[] smimeMessageBytes = arguments.getByteArray(ContextVS.SMIME_MSG_KEY);
+        byte[] cmsMessageBytes = arguments.getByteArray(ContextVS.CMS_MSG_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
         VoteVSHelper voteVSHelper = (VoteVSHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
@@ -49,8 +49,8 @@ public class VoteService extends IntentService {
                                 voteVSHelper.getEventVS().getControlCenter().getServerURL());
                         appVS.setControlCenter(controlCenter);
                     }
-                    if(smimeMessageBytes != null) {
-                        SMIMEMessage accessRequest = new SMIMEMessage(smimeMessageBytes);
+                    if(cmsMessageBytes != null) {
+                        CMSSignedMessage accessRequest = new CMSSignedMessage(cmsMessageBytes);
                         responseVS = new VoteSender(voteVSHelper, accessRequest).call();
                     } else responseVS = new VoteSender(voteVSHelper).call();
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

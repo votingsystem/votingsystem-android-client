@@ -5,8 +5,8 @@ import android.content.Context;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -28,7 +28,7 @@ public class ReceiptWrapper implements Serializable {
     public enum State {ACTIVE, CANCELLED}
 
     private Long localId = -1L;
-    private transient SMIMEMessage receipt;
+    private transient CMSSignedMessage receipt;
     private TypeVS typeVS;
     private String subject;
     private String url;
@@ -42,7 +42,7 @@ public class ReceiptWrapper implements Serializable {
 
     public ReceiptWrapper(TransactionVSDto transactionVS) {
         this.typeVS = transactionVS.getOperation();
-        this.url = transactionVS.getMessageSMIMEURL();
+        this.url = transactionVS.getCmsMessageURL();
     }
 
     public String getTypeDescription(Context context) {
@@ -98,26 +98,15 @@ public class ReceiptWrapper implements Serializable {
 
     public void setReceiptBytes(byte[] receiptBytes) throws Exception {
         if(receiptBytes != null) {
-            receipt = new SMIMEMessage(receiptBytes);
-            subject = receipt.getSubject();
+            receipt = new CMSSignedMessage(receiptBytes);
             Map dataMap = receipt.getSignedContent(new TypeReference<Map<String, Object>>() { });
             if(dataMap.containsKey("operation"))
                 this.typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
+            if(dataMap.containsKey("subject")) subject = (String) dataMap.get("subject");
         }
     }
 
-    public String getMessageId() {
-        String result = null;
-        if(receipt != null) {
-            try {
-                String[] headers = receipt.getHeader("Message-ID");
-                if(headers != null && headers.length >0) return headers[0];
-            } catch(Exception ex) { ex.printStackTrace(); }
-        }
-        return result;
-    }
-
-    public SMIMEMessage getReceipt() throws Exception {
+    public CMSSignedMessage getReceipt() throws Exception {
         return receipt;
     }
 
@@ -132,9 +121,7 @@ public class ReceiptWrapper implements Serializable {
     public TypeVS getTypeVS() {
         if(typeVS == null && receipt != null) {
             try {
-                Map signedContent = JSON.readValue(receipt.getSignedContent(),
-                        new TypeReference<Map<String, Object>>() {
-                        });
+                Map signedContent = receipt.getSignedContent(new TypeReference<Map<String, Object>>() {});
                 if (signedContent.containsKey("operation")) {
                     typeVS = TypeVS.valueOf((String) signedContent.get("operation"));
                 }
@@ -174,7 +161,7 @@ public class ReceiptWrapper implements Serializable {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(receipt != null) s.writeObject(receipt.getBytes());
+            if(receipt != null) s.writeObject(receipt.getEncoded());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -184,7 +171,7 @@ public class ReceiptWrapper implements Serializable {
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
         byte[] receiptBytes = (byte[]) s.readObject();
-        if(receiptBytes != null) receipt = new SMIMEMessage(receiptBytes);
+        if(receiptBytes != null) receipt = new CMSSignedMessage(receiptBytes);
     }
 
 }

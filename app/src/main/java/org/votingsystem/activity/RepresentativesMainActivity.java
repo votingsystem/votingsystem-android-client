@@ -13,13 +13,13 @@ import android.view.MenuItem;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.RepresentationStateFragment;
 import org.votingsystem.fragment.RepresentativeGridFragment;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -148,7 +148,7 @@ public class RepresentativesMainActivity extends ActivityBase {
             case RC_SIGN_REQUEST:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    new AnonymousDelegationCancellationTask(responseVS.getSMIME()).execute();
+                    new AnonymousDelegationCancellationTask(responseVS.getCMS()).execute();
                 }
                 break;
         }
@@ -156,10 +156,10 @@ public class RepresentativesMainActivity extends ActivityBase {
 
     public class AnonymousDelegationCancellationTask extends AsyncTask<String, String, ResponseVS> {
 
-        private SMIMEMessage smimeMessage;
+        private CMSSignedMessage cmsMessage;
         
-        public AnonymousDelegationCancellationTask(SMIMEMessage smimeMessage) {
-            this.smimeMessage = smimeMessage;
+        public AnonymousDelegationCancellationTask(CMSSignedMessage cmsMessage) {
+            this.cmsMessage = cmsMessage;
         }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true,
@@ -171,25 +171,22 @@ public class RepresentativesMainActivity extends ActivityBase {
             RepresentativeDelegationDto cancelationRequest =
                     delegation.getAnonymousRepresentationDocumentCancelationRequest();
             try {
-                SMIMEMessage anonymousSmimeMessage = delegation.getCertificationRequest().getSMIME(
-                        delegation.getHashCertVSBase64(),
-                        AppVS.getInstance().getAccessControl().getName(),
-                        JSON.getMapper().writeValueAsString(cancelationRequest),
-                        getString(R.string.anonymous_delegation_cancellation_lbl));
-                MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousSmimeMessage,
+                CMSSignedMessage anonymousCMSMessage = delegation.getCertificationRequest().signData(
+                        JSON.getMapper().writeValueAsString(cancelationRequest));
+                MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousCMSMessage,
                         AppVS.getInstance().getAccessControl().getTimeStampServiceURL());
-                anonymousSmimeMessage = timeStamper.call();
+                anonymousCMSMessage = timeStamper.call();
                 Map<String, Object> mapToSend = new HashMap<>();
-                mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
-                mapToSend.put(ContextVS.SMIME_ANONYMOUS_FILE_NAME, anonymousSmimeMessage.getBytes());
+                mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
+                mapToSend.put(ContextVS.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());
                 responseVS =  HttpHelper.sendObjectMap(mapToSend,
                         AppVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    SMIMEMessage delegationReceipt = responseVS.getSMIME();
+                    CMSSignedMessage delegationReceipt = responseVS.getCMS();
                     Collection matches = delegationReceipt.checkSignerCert(
                             AppVS.getInstance().getAccessControl().getCertificate());
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-                    responseVS.setSMIME(delegationReceipt);
+                    responseVS.setCMS(delegationReceipt);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();

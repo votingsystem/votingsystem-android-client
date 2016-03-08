@@ -1,10 +1,14 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
 import org.bouncycastle2.asn1.ASN1EncodableVector;
+import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle2.asn1.DERBoolean;
 import org.bouncycastle2.asn1.DERSet;
-import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
+import org.bouncycastle2.asn1.pkcs.Attribute;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
+import org.votingsystem.cms.CMSGenerator;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.TagVSDto;
@@ -12,8 +16,6 @@ import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SignedMailGenerator;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Utils;
@@ -52,7 +54,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     
 
     private transient PKCS10CertificationRequest csr;
-    private transient SignedMailGenerator signedMailGenerator;
+    private transient CMSGenerator signedMailGenerator;
     private transient KeyPair keyPair;
     private String signatureMechanism;
     private UserCertificationRequestDto userCertificationRequestDto;
@@ -64,7 +66,7 @@ public class CertificationRequestVS implements java.io.Serializable {
             String signatureMechanism) throws IOException {
         this.keyPair = keyPair;
         this.csr = csr;
-        this.csrPEM = CertUtils.getPEMEncoded(getCsr());
+        this.csrPEM = PEMUtils.getPEMEncoded(getCsr());
         this.signatureMechanism = signatureMechanism;
     }
 
@@ -74,10 +76,12 @@ public class CertificationRequestVS implements java.io.Serializable {
             IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +", OU=eventId:" + eventId);
-        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         VoteCertExtensionDto dto = new VoteCertExtensionDto(accessControlURL, hashCertVS, eventId);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.VOTE_TAG,
-                new DERUTF8String(JSON.writeValueAsString(dto))));
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        asn1EncodableVector.add(new Attribute(new ASN1ObjectIdentifier(ContextVS.VOTE_OID),
+                new DERSet(new DERUTF8String(JSON.writeValueAsString(dto)))));
+        asn1EncodableVector.add(new Attribute(new ASN1ObjectIdentifier(ContextVS.ANONYMOUS_CERT_OID),
+                new DERSet(new DERBoolean(true))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -90,11 +94,14 @@ public class CertificationRequestVS implements java.io.Serializable {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
                 ", OU=AnonymousRepresentativeDelegation");
-        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         AnonymousDelegationCertExtensionDto dto = new AnonymousDelegationCertExtensionDto(accessControlURL, hashCertVS,
                 weeksOperationActive, validFrom, validTo);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG,
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        asn1EncodableVector.add(new Attribute(new ASN1ObjectIdentifier(
+                ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID),
+                new DERSet(new DERUTF8String(JSON.writeValueAsString(dto)))));
+        asn1EncodableVector.add(new Attribute(new ASN1ObjectIdentifier(ContextVS.ANONYMOUS_CERT_OID),
+                new DERSet(new DERBoolean(true))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -109,11 +116,13 @@ public class CertificationRequestVS implements java.io.Serializable {
         X500Principal subject = new X500Principal("CN=currencyServerURL:" + currencyServerURL +
                 ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
-        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, hashCertVS,
                 currencyServerURL, timeLimited, tagVS);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.CURRENCY_TAG,
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
+        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        asn1EncodableVector.add(new Attribute(new ASN1ObjectIdentifier(ContextVS.CURRENCY_OID),
+                new DERSet(new DERUTF8String(JSON.writeValueAsString(dto)))));
+        asn1EncodableVector.add(new Attribute(new ASN1ObjectIdentifier(ContextVS.ANONYMOUS_CERT_OID),
+                new DERSet(new DERBoolean(true))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -126,14 +135,13 @@ public class CertificationRequestVS implements java.io.Serializable {
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
-        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
         CertExtensionDto dto = new CertExtensionDto(deviceId, Utils.getDeviceName(),
                 email, phone, deviceType).setNif(nif).setGivenname(givenName).setSurname(surName);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
-                new DERUTF8String(JSON.writeValueAsString(dto))));
+        Attribute attribute = new Attribute(new ASN1ObjectIdentifier(ContextVS.DEVICEVS_OID),
+                new DERSet(new DERUTF8String(JSON.writeValueAsString(dto))));
         X500Principal subject = new X500Principal(principal);
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
-                keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
+                keyPair.getPublic(), new DERSet(attribute), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
@@ -142,22 +150,21 @@ public class CertificationRequestVS implements java.io.Serializable {
         return this;
     }
 
-    public SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
-                                 String subject) throws Exception {
-        return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject);
+    public CMSSignedMessage signData(String textToSign) throws Exception {
+        return getSignedMailGenerator().signData(textToSign);
     }
 
-    private SignedMailGenerator getSignedMailGenerator() throws Exception {
+    private CMSGenerator getSignedMailGenerator() throws Exception {
         if (signedMailGenerator == null) {
-            Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(signedCsr);
+            Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(signedCsr);
             LOGD(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
             if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
             certificate = certificates.iterator().next();
             X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
             certificates.toArray(arrayCerts);
-            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts,
+            signedMailGenerator = new CMSGenerator(keyPair.getPrivate(), arrayCerts,
                     signatureMechanism, ANDROID_PROVIDER);
-            signedMailGenerator = new SignedMailGenerator(keyPair.getPrivate(), arrayCerts,
+            signedMailGenerator = new CMSGenerator(keyPair.getPrivate(), arrayCerts,
                     signatureMechanism, ANDROID_PROVIDER);
         }
         return signedMailGenerator;
@@ -166,7 +173,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     public X509Certificate getCertificate() {
         if(certificate == null && signedCsr != null) {
             try {
-                Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(signedCsr);
+                Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(signedCsr);
                 LOGD(TAG + "getSignedMailGenerator()", "Num certs: " + certificates.size());
                 if(certificates.isEmpty()) throw new Exception (" --- missing certs --- ");
                 certificate = certificates.iterator().next();

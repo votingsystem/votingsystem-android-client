@@ -1,4 +1,4 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
 import java.math.BigInteger;
 import java.security.KeyPair;

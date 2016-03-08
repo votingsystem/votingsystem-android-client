@@ -1,10 +1,8 @@
 package org.votingsystem.dto.currency;
 
-import android.util.Base64;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.util.TypeVS;
 
 /**
@@ -14,15 +12,15 @@ import org.votingsystem.util.TypeVS;
 public class TransactionResponseDto {
 
     private TypeVS operation;
-    private String smimeMessage;
+    private String cmsMessagePEM;
     private String currencyChangeCert;
 
     public TransactionResponseDto() {}
 
     public TransactionResponseDto(TypeVS operation, String currencyChangeCert,
-                                  SMIMEMessage smimeMessage) throws Exception {
+                                  CMSSignedMessage cmsMessage) throws Exception {
         this.operation = operation;
-        this.smimeMessage = Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP);
+        this.cmsMessagePEM = cmsMessage.toPEMStr();
         this.currencyChangeCert = currencyChangeCert;
     }
 
@@ -34,12 +32,12 @@ public class TransactionResponseDto {
         this.operation = operation;
     }
 
-    public String getSmimeMessage() {
-        return smimeMessage;
+    public String getCMSMessagePEM() {
+        return cmsMessagePEM;
     }
 
-    public void setSmimeMessage(String smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public void setCMSMessage(String cmsMessage) {
+        this.cmsMessagePEM = cmsMessage;
     }
 
     public String getCurrencyChangeCert() {
@@ -49,4 +47,5 @@ public class TransactionResponseDto {
     public void setCurrencyChangeCert(String currencyChangeCert) {
         this.currencyChangeCert = currencyChangeCert;
     }
+
 }

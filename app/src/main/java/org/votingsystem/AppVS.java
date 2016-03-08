@@ -11,9 +11,21 @@ import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.bouncycastle2.cert.jcajce.JcaCertStore;
+import org.bouncycastle2.cms.CMSProcessableByteArray;
+import org.bouncycastle2.cms.CMSSignedData;
+import org.bouncycastle2.cms.CMSSignedDataGenerator;
+import org.bouncycastle2.cms.CMSTypedData;
+import org.bouncycastle2.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle2.operator.ContentSigner;
+import org.bouncycastle2.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle2.util.Store;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSGenerator;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.DeviceVSDto;
@@ -26,12 +38,6 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.BootStrapService;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SignedMailGenerator;
-import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -43,6 +49,10 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.RootUtil;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.WebSocketSession;
+import org.votingsystem.util.crypto.AESParams;
+import org.votingsystem.util.crypto.Encryptor;
+import org.votingsystem.util.crypto.KeyGeneratorVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -52,10 +62,13 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -130,7 +143,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
                     "VotingSystemSSLCert.pem"));
             Collection<X509Certificate> votingSystemSSLCerts =
-                    CertUtils.fromPEMToX509CertCollection(certBytes);
+                    PEMUtils.fromPEMToX509CertCollection(certBytes);
             sslServerCert = votingSystemSSLCerts.iterator().next();
             HttpHelper.init(sslServerCert);
             if(!BuildConfig.ALLOW_ROOTED_PHONES && RootUtil.isDeviceRooted()) {
@@ -303,20 +316,19 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
-    public SMIMEMessage signMessage(String toUser, String textToSign, String subject,
-              String timeStampServiceURL) throws Exception {
+    public CMSSignedMessage signMessage(String toUser, String textToSign, String subject,
+                                        String timeStampServiceURL) throws Exception {
         String userNIF = getUserVS().getNIF();
         LOGD(TAG + ".signMessage", "subject: " + subject);
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
-        SignedMailGenerator signedMailGenerator = new SignedMailGenerator(keyEntry.getPrivateKey(),
-                (X509Certificate) keyEntry.getCertificateChain()[0],
+        CMSGenerator cmsGenerator = new CMSGenerator(keyEntry.getPrivateKey(),
+                Arrays.asList(keyEntry.getCertificateChain()[0]),
                 SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-        SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNIF, toUser,
-                textToSign, subject);
-        return new MessageTimeStamper(smimeMessage, timeStampServiceURL).call();
+        CMSSignedMessage cmsMessage = cmsGenerator.signData(textToSign);
+        return new MessageTimeStamper(cmsMessage, timeStampServiceURL).call();
     }
 
-    public SMIMEMessage signMessage(String toUser, String textToSign, String subject) throws Exception {
+    public CMSSignedMessage signMessage(String toUser, String textToSign, String subject) throws Exception {
         return signMessage(toUser, textToSign, subject, getTimeStampServiceURL());
     }
 
@@ -416,4 +428,32 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return isRootedPhone;
     }
 
+
+    public CMSSignedMessage signCMSData(String signatureContent) throws Exception {
+        List certList = new ArrayList();
+        CMSTypedData msg = new CMSProcessableByteArray(signatureContent.getBytes());
+
+        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
+
+        certList.add((X509Certificate) keyEntry.getCertificateChain()[0]);
+        Store certs = new JcaCertStore(certList);
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+
+        /*SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
+
+        signerInfoGeneratorBuilder.setProvider(ANDROID_PROVIDER);
+        signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
+        SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
+                SIGNATURE_ALGORITHM, key, x509Cert);*/
+
+
+        ContentSigner signer = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(ANDROID_PROVIDER).build(keyEntry.getPrivateKey());
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder()
+                .setProvider("BC").build()).build(signer, (X509Certificate) keyEntry.getCertificateChain()[0]));
+        gen.addCertificates(certs);
+        CMSSignedData signedData = gen.generate(msg, true);
+        //validatePKCS7SignedData(pemEncoded);
+        return  new CMSSignedMessage(signedData);
+    }
 }

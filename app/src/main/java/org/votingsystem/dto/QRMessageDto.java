@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
@@ -99,7 +99,7 @@ public class QRMessageDto<T> implements Serializable {
     }
 
     public PublicKey getRSAPublicKey() throws Exception {
-        PublicKey publicKey = CertUtils.fromPEMToRSAPublicKey(Base64.decode(keyBase64, Base64.NO_WRAP));
+        PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(Base64.decode(keyBase64, Base64.NO_WRAP));
         return publicKey;
     }
 

@@ -1,4 +1,4 @@
-package org.votingsystem.signature.smime;
+package org.votingsystem.cms;
 
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;

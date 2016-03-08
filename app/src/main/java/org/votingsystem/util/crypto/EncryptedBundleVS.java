@@ -1,6 +1,6 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.util.ResponseVS;
 
 /**
@@ -8,10 +8,10 @@ import org.votingsystem.util.ResponseVS;
  */
 public class EncryptedBundleVS {
 
-    public enum Type {SMIME_MESSAGE, TEXT, FILE}
+    public enum Type {CMS_MESSAGE, TEXT, FILE}
 
     private byte[] encryptedMessageBytes;
-    private SMIMEMessage decryptedSMIMEMessage;
+    private CMSSignedMessage decryptedCMSMessage;
     private byte[] decryptedMessageBytes;
     private String message;
     private Type type;
@@ -26,12 +26,12 @@ public class EncryptedBundleVS {
         this.decryptedMessageBytes = decryptedMessageBytes;
     }
 
-    public SMIMEMessage getDecryptedSMIMEMessage() {
-        return decryptedSMIMEMessage;
+    public CMSSignedMessage getDecryptedCMSMessage() {
+        return decryptedCMSMessage;
     }
 
-    public void setDecryptedSMIMEMessage(SMIMEMessage decryptedSMIMEMessage) {
-        this.decryptedSMIMEMessage = decryptedSMIMEMessage;
+    public void setDecryptedCMSMessage(CMSSignedMessage decryptedCMSMessage) {
+        this.decryptedCMSMessage = decryptedCMSMessage;
     }
 
     public byte[] getEncryptedMessageBytes() {

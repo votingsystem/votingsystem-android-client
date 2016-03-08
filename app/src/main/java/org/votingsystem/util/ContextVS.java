@@ -2,8 +2,6 @@ package org.votingsystem.util;
 
 import java.nio.charset.Charset;
 
-import javax.mail.Session;
-
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -11,13 +9,12 @@ public class ContextVS {
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
-    public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
-
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
     public static final int CURRENCY_TAG                            = 3;
     public static final int DEVICEVS_TAG                            = 4;
+    public static final int ANONYMOUS_CERT_TAG                      = 5;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
@@ -26,6 +23,7 @@ public class ContextVS {
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
     public static final String CURRENCY_OID = VOTING_SYSTEM_BASE_OID + CURRENCY_TAG;
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
+    public static final String ANONYMOUS_CERT_OID = VOTING_SYSTEM_BASE_OID + ANONYMOUS_CERT_TAG;
 
     public static final String VOTING_SYSTEM_PRIVATE_PREFS = "VotingSystemSharedPrivatePreferences";
 
@@ -33,11 +31,11 @@ public class ContextVS {
     public static final String WALLET_FILE_NAME                = "wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
     public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentTypeVS.TEXT.getName();
-    public static final String SMIME_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String SMIME_ANONYMOUS_FILE_NAME       = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CMS_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CMS_ANONYMOUS_FILE_NAME       = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String DEFAULT_SIGNED_FILE_NAME        = "smimeMessage.p7m";
+    public static final String DEFAULT_SIGNED_FILE_NAME        = "cmsMessage.p7m";
     public static final String PROVIDER                        = "BC";
     public static final String ANDROID_PROVIDER                = "AndroidOpenSSL";
     public static final String WEB_SOCKET_BROADCAST_ID         = "WEB_SOCKET_BROADCAST_ID";
@@ -94,7 +92,7 @@ public class ContextVS {
     public static final String CSR_KEY                     = "csrKey";
     public static final String APPLICATION_ID_KEY          = "APPLICATION_ID_KEY";
     public static final String REFRESH_KEY                 = "REFRESH_KEY";
-    public static final String SMIME_MSG_KEY               = "SMIME_MSG_KEY";
+    public static final String CMS_MSG_KEY               = "CMS_MSG_KEY";
     public static final String MAX_VALUE_KEY               = "MAX_VALUE_KEY";
     public static final String DEFAULT_VALUE_KEY           = "DEFAULT_VALUE_KEY";
     public static final String RETRIES_KEY                 = "RETRIES_KEY";

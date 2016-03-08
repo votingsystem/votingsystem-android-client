@@ -173,7 +173,7 @@ public class CurrencyActivity extends AppCompatActivity {
                 case R.id.share_currency:
                     try {
                         Intent sendIntent = new Intent();
-                        String receiptStr = new String(currency.getReceipt().getBytes());
+                        String receiptStr = currency.getReceipt().toPEMStr();
                         sendIntent.setAction(Intent.ACTION_SEND);
                         sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
                         sendIntent.setType(ContentTypeVS.TEXT.getName());

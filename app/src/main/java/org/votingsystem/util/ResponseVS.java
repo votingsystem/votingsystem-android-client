@@ -8,8 +8,8 @@ import android.os.Parcelable;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -51,8 +51,8 @@ public class ResponseVS<T> implements Parcelable {
     private String serviceCaller;
     private T data;
     private TypeVS typeVS;
-    private SMIMEMessage smimeMessage;
-    private byte[] smimeMessageBytes;
+    private CMSSignedMessage cmsMessage;
+    private byte[] cmsMessageBytes;
     private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private byte[] messageBytes;
     private Uri uri;
@@ -78,8 +78,8 @@ public class ResponseVS<T> implements Parcelable {
         contentType = (ContentTypeVS) source.readSerializable();
         messageBytes = new byte[source.readInt()];
         source.readByteArray(messageBytes);
-        smimeMessageBytes = new byte[source.readInt()];
-        source.readByteArray(smimeMessageBytes);
+        cmsMessageBytes = new byte[source.readInt()];
+        source.readByteArray(cmsMessageBytes);
         uri = source.readParcelable(Uri.class.getClassLoader());
     }
 
@@ -93,13 +93,13 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-              TypeVS typeVS, SMIMEMessage smimeMessage) {
+              TypeVS typeVS, CMSSignedMessage cmsMessage) {
         this.statusCode = statusCode;
         this.serviceCaller = serviceCaller;
         this.caption = caption;
         this.message = message;
         this.typeVS = typeVS;
-        this.smimeMessage = smimeMessage;
+        this.cmsMessage = cmsMessage;
     }
 
     public ResponseVS(int statusCode, TypeVS typeVS) {
@@ -114,9 +114,9 @@ public class ResponseVS<T> implements Parcelable {
         this.messageBytes = messageBytes;
     }
 
-    public ResponseVS(int statusCode, SMIMEMessage smimeMessage) {
+    public ResponseVS(int statusCode, CMSSignedMessage cmsMessage) {
         this.statusCode = statusCode;
-        this.smimeMessage = smimeMessage;
+        this.cmsMessage = cmsMessage;
     }
 
     public ResponseVS(int statusCode, String message) {
@@ -243,20 +243,20 @@ public class ResponseVS<T> implements Parcelable {
         return this;
 	}
 
-    public SMIMEMessage getSMIME() {
-        if(smimeMessage == null && (smimeMessageBytes != null || messageBytes != null)) {
+    public CMSSignedMessage getCMS() {
+        if(cmsMessage == null && (cmsMessageBytes != null || messageBytes != null)) {
             try {
-                byte[] smimeBytes = (smimeMessageBytes != null)? smimeMessageBytes:messageBytes;
-                smimeMessage = new SMIMEMessage(smimeBytes);
+                byte[] cmsBytes = (cmsMessageBytes != null)? cmsMessageBytes:messageBytes;
+                cmsMessage = new CMSSignedMessage(cmsBytes);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
         }
-        return smimeMessage;
+        return cmsMessage;
     }
 
-	public void setSMIME(SMIMEMessage smimeMessage) {
-		this.smimeMessage = smimeMessage;
+	public void setCMS(CMSSignedMessage cmsMessage) {
+		this.cmsMessage = cmsMessage;
 	}
 
     public ContentTypeVS getContentType() {
@@ -337,11 +337,11 @@ public class ResponseVS<T> implements Parcelable {
             parcel.writeInt(0);
             parcel.writeByteArray(new byte[0]);
         }
-        if(smimeMessage != null) {
+        if(cmsMessage != null) {
             try {
-                byte[] smimeMessageBytes = smimeMessage.getBytes();
-                parcel.writeInt(smimeMessageBytes.length);
-                parcel.writeByteArray(smimeMessageBytes);
+                byte[] cmsMessageBytes = cmsMessage.getEncoded();
+                parcel.writeInt(cmsMessageBytes.length);
+                parcel.writeByteArray(cmsMessageBytes);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

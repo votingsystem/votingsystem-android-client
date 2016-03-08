@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.OperationVSContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
@@ -24,8 +25,6 @@ import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -41,6 +40,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -124,8 +124,8 @@ public class PaymentService extends IntentService {
                             ResultListDto<TransactionVSDto> resultList =
                                     (ResultListDto<TransactionVSDto>) responseVS.getMessage(
                                     new TypeReference<ResultListDto<TransactionVSDto>>() {});
-                            String base64Receipt = resultList.getResultList().iterator().next().getMessageSMIME();
-                            SMIMEMessage receipt = new SMIMEMessage(Base64.decode(base64Receipt, Base64.NO_WRAP));
+                            String base64Receipt = resultList.getResultList().iterator().next().getCmsMessagePEM();
+                            CMSSignedMessage receipt = new CMSSignedMessage(Base64.decode(base64Receipt, Base64.NO_WRAP));
                             String message = transactionDto.validateReceipt(receipt, false);
                             receipt.isValidSignature();
                             if(transactionDto.getSocketMessageDto() != null) {
@@ -133,7 +133,7 @@ public class PaymentService extends IntentService {
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,receipt,
                                         TypeVS.TRANSACTIONVS_RESPONSE);
-                                socketRespDto.setSmimeMessage(base64Receipt);
+                                socketRespDto.setCMSMessage(base64Receipt);
                                 //backup to recover from fails
                                 transactionDto.setSocketMessageDto(socketRespDto);
                                 AppVS.getInstance().getWSSession(socketRespDto.getUUID()).setData(transactionDto);
@@ -144,7 +144,7 @@ public class PaymentService extends IntentService {
                                 //of the transaction
                                 TransactionResponseDto responseDto = new TransactionResponseDto();
                                 responseDto.setOperation(TypeVS.FROM_USERVS);
-                                responseDto.setSmimeMessage(base64Receipt);
+                                responseDto.setCMSMessage(base64Receipt);
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON, transactionDto.getPaymentConfirmURL());
                             }
@@ -159,17 +159,17 @@ public class PaymentService extends IntentService {
                     case CURRENCY_SEND:
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
+                            String message = transactionDto.validateReceipt(responseVS.getCMS(), false);
                             if(transactionDto.getSocketMessageDto() != null) {
 
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
-                                        .getResponse(ResponseVS.SC_OK, null, responseVS.getSMIME(),
+                                        .getResponse(ResponseVS.SC_OK, null, responseVS.getCMS(),
                                         TypeVS.TRANSACTIONVS_RESPONSE);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
                                 TransactionResponseDto responseDto = new TransactionResponseDto(
-                                        TypeVS.CURRENCY_SEND, null, responseVS.getSMIME());
+                                        TypeVS.CURRENCY_SEND, null, responseVS.getCMS());
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
@@ -177,11 +177,10 @@ public class PaymentService extends IntentService {
                         }
                         break;
                     case CURRENCY_CHANGE:
-                        SMIMEMessage currencyRequest = new SMIMEMessage(Base64.decode(
-                                transactionDto.getMessageSMIME(), Base64.NO_WRAP));
+                        CMSSignedMessage currencyRequest = CMSSignedMessage.FROM_PEM(transactionDto.getCmsMessagePEM());
                         CurrencyDto currencyDto = new CurrencyDto(
-                                CertUtils.fromPEMToPKCS10CertificationRequest(
-                                currencyRequest.getSignedContent().getBytes()));
+                                PEMUtils.fromPEMToPKCS10CertificationRequest(
+                                currencyRequest.getSignedContentStr().getBytes()));
                         if(!transactionDto.getTagName().equals(currencyDto.getTag()))
                             throw new ValidationExceptionVS("Transaction tag: " + transactionDto.getTagName() +
                             " doesn't match currency request tag: " + currencyDto.getTag());
@@ -198,20 +197,20 @@ public class PaymentService extends IntentService {
                             throw new ValidationExceptionVS("currency request hash mismatch");
                         responseVS = sendCurrencyBatch(transactionDto);
                         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                            String message = transactionDto.validateReceipt(responseVS.getSMIME(), false);
+                            String message = transactionDto.validateReceipt(responseVS.getCMS(), false);
                             if(transactionDto.getSocketMessageDto() != null) {
                                 String responseMessage = transactionDto.getQrMessageDto() == null?
                                         null: transactionDto.getQrMessageDto().getCurrencyChangeCert();
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, responseMessage,
-                                        responseVS.getSMIME(), TypeVS.TRANSACTIONVS_RESPONSE);
+                                        responseVS.getCMS(), TypeVS.TRANSACTIONVS_RESPONSE);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
                                 TransactionResponseDto responseDto = new TransactionResponseDto(
                                         TypeVS.CURRENCY_CHANGE,
                                         transactionDto.getQrMessageDto().getCurrencyChangeCert(),
-                                        responseVS.getSMIME());
+                                        responseVS.getCMS());
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
@@ -252,11 +251,11 @@ public class PaymentService extends IntentService {
             CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto,
                     transactionDto.getAmount(), currencyServer.getServerURL());
             String signatureContent =  JSON.writeValueAsString(requestDto);
-            SMIMEMessage smimeMessage = appVS.signMessage(currencyServer.getName(),
+            CMSSignedMessage cmsMessage = appVS.signMessage(currencyServer.getName(),
                     signatureContent, messageSubject);
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, JSON.writeValueAsBytes(requestDto.getRequestCSRSet()));
-            mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, cmsMessage.toPEM());
             responseVS = HttpHelper.sendObjectMap(mapToSend, currencyServer.getCurrencyRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
@@ -285,9 +284,9 @@ public class PaymentService extends IntentService {
         ResponseVS responseVS = null;
         try {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
-            SMIMEMessage smimeMessage = appVS.signMessage(transactionDto.getToUserIBAN().iterator().next(),
+            CMSSignedMessage cmsMessage = appVS.signMessage(transactionDto.getToUserIBAN().iterator().next(),
                     JSON.writeValueAsString(transactionDto), getString(R.string.FROM_USERVS_msg_subject));
-            responseVS = HttpHelper.sendData(smimeMessage.getBytes(),
+            responseVS = HttpHelper.sendData(cmsMessage.toPEM(),
                     ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionVSServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -308,8 +307,8 @@ public class PaymentService extends IntentService {
             if(TypeVS.CURRENCY_CHANGE == transactionDto.getOperation()) {
                 transactionDto.setToUserIBAN(null);
                 requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
-                SMIMEMessage smimeMessage = transactionDto.getSmimeMessage();
-                requestDto.setCurrencyChangeCSR(smimeMessage.getSignedContent());
+                CMSSignedMessage cmsMessage = transactionDto.getCMSMessage();
+                requestDto.setCurrencyChangeCSR(cmsMessage.getSignedContentStr());
             } else requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
             OperationVS operationVS = new OperationVS(transactionDto.getOperation(), requestDto,
                     OperationVS.State.PENDING);
@@ -322,9 +321,9 @@ public class PaymentService extends IntentService {
                         responseVS.getMessage(CurrencyBatchResponseDto.class);
                 if(transactionDto.getQrMessageDto() != null) transactionDto.getQrMessageDto().
                         setCurrencyChangeCert(responseDto.getCurrencyChangeCert());
-                SMIMEMessage smimeMessage = requestDto.validateResponse(responseDto,
+                CMSSignedMessage cmsMessage = requestDto.validateResponse(responseDto,
                         currencyServer.getTrustAnchors());
-                responseVS.setSMIME(smimeMessage);
+                responseVS.setCMS(cmsMessage);
                 Wallet.updateWallet(requestDto);
                 operationVS.setState(OperationVS.State.FINISHED);
                 getContentResolver().delete(operationUri, null, null);

@@ -1,15 +1,13 @@
 package org.votingsystem.util;
 
-import android.util.Base64;
-
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
@@ -185,12 +183,12 @@ public class CurrencyBundle {
         }
 
         for (Currency currency : currencySet) {
-            SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(
-                    currency.getHashCertVS(), toUserIBAN, JSON.writeValueAsString(dto), subject);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage);
+            CMSSignedMessage cmsMessage = currency.getCertificationRequest().signData(
+                    JSON.writeValueAsString(dto));
+            MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage);
             timeStamper.call();
-            currency.setSMIME(timeStamper.getSMIME());
-            currencySetSignatures.add(Base64.encodeToString(currency.getSMIME().getBytes(), Base64.NO_WRAP));
+            currency.setCMS(timeStamper.getCMS());
+            currencySetSignatures.add(currency.getCMS().toPEMStr());
         }
         dto.setCurrencySet(currencySetSignatures);
         dto.setCurrencyCollection(currencySet);

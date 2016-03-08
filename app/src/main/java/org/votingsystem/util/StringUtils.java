@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
@@ -113,6 +114,10 @@ public class StringUtils {
             is.close();
         }
         return writer.toString();
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
     public static String getHashBase64 (String originStr, String digestAlgorithm)

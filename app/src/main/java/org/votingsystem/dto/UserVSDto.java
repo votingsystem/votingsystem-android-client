@@ -10,9 +10,9 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.jce.X509Principal;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
+import org.votingsystem.util.crypto.CertUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

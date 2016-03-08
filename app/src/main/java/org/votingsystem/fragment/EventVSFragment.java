@@ -33,6 +33,7 @@ import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
@@ -40,8 +41,6 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.service.VoteService;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -51,6 +50,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,15 +120,15 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         setProgressDialogVisible(false, null);
     }
 
-    private void launchVoteService(TypeVS operation, SMIMEMessage smimeMessage) {
+    private void launchVoteService(TypeVS operation, CMSSignedMessage cmsMessage) {
         LOGD(TAG + ".launchVoteService", "operation: " + operation.toString());
         try {
             Intent startIntent = new Intent(getActivity(), VoteService.class);
             startIntent.putExtra(ContextVS.TYPEVS_KEY, operation);
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            if(smimeMessage != null) {
+            if(cmsMessage != null) {
                 try {
-                    startIntent.putExtra(ContextVS.SMIME_MSG_KEY, smimeMessage.getBytes());
+                    startIntent.putExtra(ContextVS.CMS_MSG_KEY, cmsMessage.toPEM());
                 } catch (Exception e) { e.printStackTrace(); }
             }
             voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));
@@ -278,7 +278,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 case RC_SIGN_ACCESS_REQUEST:
                     if(Activity.RESULT_OK == resultCode) {
                         ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                        launchVoteService(TypeVS.SEND_VOTE, responseVS.getSMIME());
+                        launchVoteService(TypeVS.SEND_VOTE, responseVS.getCMS());
                     }
                     break;
             }

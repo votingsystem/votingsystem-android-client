@@ -2,9 +2,9 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -168,7 +168,7 @@ public class ActorDto implements java.io.Serializable {
 
     public X509Certificate getCertificate() throws Exception {
         if(certificate == null & certChainPEM != null) {
-            certificate = CertUtils.fromPEMToX509CertCollection(
+            certificate = PEMUtils.fromPEMToX509CertCollection(
                     certChainPEM.getBytes()).iterator().next();
         }
         return certificate;
@@ -180,7 +180,7 @@ public class ActorDto implements java.io.Serializable {
 
     public Collection<X509Certificate> getCertChain() throws Exception {
         if(certChain == null & certChainPEM != null) {
-            certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+            certChain = PEMUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         }
 		return certChain;
 	}
@@ -207,7 +207,7 @@ public class ActorDto implements java.io.Serializable {
 
     public X509Certificate getTimeStampCert() throws Exception {
         if(timeStampCert == null && timeStampCertPEM != null) {
-            timeStampCert = CertUtils.fromPEMToX509CertCollection(timeStampCertPEM.getBytes()).iterator().next();
+            timeStampCert = PEMUtils.fromPEMToX509CertCollection(timeStampCertPEM.getBytes()).iterator().next();
         }
     	return timeStampCert;
     }
@@ -224,7 +224,7 @@ public class ActorDto implements java.io.Serializable {
     public Set<TrustAnchor> getTrustAnchors() throws Exception {
         if(trustAnchors != null) return trustAnchors;
         if(certChainPEM == null) return null;
-        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        certChain = PEMUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         trustAnchors = new HashSet<>();
         for (X509Certificate cert:certChain) {
             trustAnchors.add(new TrustAnchor(cert, null));

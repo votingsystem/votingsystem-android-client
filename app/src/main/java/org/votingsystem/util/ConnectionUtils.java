@@ -7,12 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.signature.smime.SMIMEMessage;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -46,9 +46,9 @@ public class ConnectionUtils {
         ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch (requestCode) {
             case RC_INIT_CONNECTION_REQUEST:
-                if(responseVS != null && responseVS.getSMIME() != null) {
+                if(responseVS != null && responseVS.getCMS() != null) {
                     try {
-                        initSessionMessageDto.setSMIME(responseVS.getSMIME());
+                        initSessionMessageDto.setCMS(responseVS.getCMS());
                         Intent startIntent = new Intent(activity, WebSocketService.class);
                         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
                         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));
@@ -101,11 +101,11 @@ public class ConnectionUtils {
         @Override protected Void doInBackground(String... urls) {
             try {
                 SocketMessageDto initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
-                SMIMEMessage smimeMessage = AppVS.getInstance().signMessage(
+                CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(
                         AppVS.getInstance().getCurrencyServer().getName(),
                         JSON.writeValueAsString(initSessionMessageDto),
                         activity.getString(R.string.init_authenticated_session_msg_subject));
-                initSessionMessageDto.setSMIME(smimeMessage);
+                initSessionMessageDto.setCMS(cmsMessage);
                 Intent startIntent = new Intent(activity, WebSocketService.class);
                 startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
                 startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));

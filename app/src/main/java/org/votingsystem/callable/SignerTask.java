@@ -2,18 +2,18 @@ package org.votingsystem.callable;
 
 import android.os.AsyncTask;
 
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  *
  * To avoid NetworkOnMainThreadException exception timestamping the signature
  */
-public class SignerTask  extends AsyncTask<String, String, SMIMEMessage> {
+public class SignerTask  extends AsyncTask<String, String, CMSSignedMessage> {
 
     public static interface Listener {
-        public SMIMEMessage sign();
-        public void processResult(SMIMEMessage smimeMessage);
+        public CMSSignedMessage sign();
+        public void processResult(CMSSignedMessage cmsMessage);
     }
 
     Listener listener;
@@ -23,11 +23,11 @@ public class SignerTask  extends AsyncTask<String, String, SMIMEMessage> {
     }
 
 
-    @Override protected SMIMEMessage doInBackground(String... urls) {
+    @Override protected CMSSignedMessage doInBackground(String... urls) {
         return listener.sign();
     }
 
-    @Override protected void onPostExecute(SMIMEMessage smimeMessage) {
-        listener.processResult(smimeMessage);
+    @Override protected void onPostExecute(CMSSignedMessage cmsMessage) {
+        listener.processResult(cmsMessage);
     }
 }

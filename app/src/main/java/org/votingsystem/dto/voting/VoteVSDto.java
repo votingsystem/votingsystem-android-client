@@ -40,8 +40,8 @@ public class VoteVSDto implements Serializable {
     private String originHashCertVote;
     private String hashCertVSBase64;
     private String hashCertVoteHex;
-    private String messageSMIMEURL;
-    private String cancelationMessageSMIMEURL;
+    private String messageCMSURL;
+    private String cancelationMessageCMSURL;
     private String eventURL;
     private String UUID;
     private EventVSDto eventVS;
@@ -129,20 +129,20 @@ public class VoteVSDto implements Serializable {
         this.hashCertVoteHex = hashCertVoteHex;
     }
 
-    public String getMessageSMIMEURL() {
-        return messageSMIMEURL;
+    public String getMessageCMSURL() {
+        return messageCMSURL;
     }
 
-    public void setMessageSMIMEURL(String messageSMIMEURL) {
-        this.messageSMIMEURL = messageSMIMEURL;
+    public void setMessageCMSURL(String messageCMSURL) {
+        this.messageCMSURL = messageCMSURL;
     }
 
-    public String getCancelationMessageSMIMEURL() {
-        return cancelationMessageSMIMEURL;
+    public String getCancelationMessageCMSURL() {
+        return cancelationMessageCMSURL;
     }
 
-    public void setCancelationMessageSMIMEURL(String cancelationMessageSMIMEURL) {
-        this.cancelationMessageSMIMEURL = cancelationMessageSMIMEURL;
+    public void setCancelationMessageCMSURL(String cancelationMessageCMSURL) {
+        this.cancelationMessageCMSURL = cancelationMessageCMSURL;
     }
 
     public String getEventURL() {

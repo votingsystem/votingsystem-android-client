@@ -27,12 +27,12 @@ import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.SignerTask;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContentTypeVS;
@@ -142,7 +142,7 @@ public class QRActionsFragment extends Fragment {
                         final SocketMessageDto initSessionMessageDto = SocketMessageDto.
                                 INIT_REMOTE_SESSION_REQUEST_BY_TARGET_SESSION_ID(remoteSessionId);
                         new SignerTask(new SignerTask.Listener() {
-                            @Override public SMIMEMessage sign() {
+                            @Override public CMSSignedMessage sign() {
                                 try {
                                     return AppVS.getInstance().signMessage(
                                             AppVS.getInstance().getCurrencyServer().getName(),
@@ -151,9 +151,9 @@ public class QRActionsFragment extends Fragment {
                                 } catch (Exception ex) { ex.printStackTrace();}
                                 return null;
                             }
-                            @Override public void processResult(SMIMEMessage smimeMessage) {
+                            @Override public void processResult(CMSSignedMessage cmsMessage) {
                                 try {
-                                    initSessionMessageDto.setSMIME(smimeMessage);
+                                    initSessionMessageDto.setCMS(cmsMessage);
                                     Intent startIntent = new Intent(getActivity(), WebSocketService.class);
                                     startIntent.putExtra(ContextVS.MESSAGE_KEY,
                                             JSON.writeValueAsString(initSessionMessageDto));

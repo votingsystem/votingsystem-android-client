@@ -17,12 +17,12 @@ import android.widget.EditText;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.ReceiptFragment;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -168,7 +168,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
             case RC_SIGN_ANONYMOUS_CERT_REQUEST:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    new AnonymousDelegationTask(responseVS.getSMIME()).execute();
+                    new AnonymousDelegationTask(responseVS.getCMS()).execute();
                 }
                 break;
         }
@@ -181,10 +181,10 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
 
     public class AnonymousDelegationTask extends AsyncTask<String, String, ResponseVS> {
 
-        private SMIMEMessage smimeMessage;
+        private CMSSignedMessage cmsMessage;
 
-        public AnonymousDelegationTask(SMIMEMessage smimeMessage) {
-            this.smimeMessage = smimeMessage;
+        public AnonymousDelegationTask(CMSSignedMessage cmsMessage) {
+            this.cmsMessage = cmsMessage;
         }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true,
@@ -194,28 +194,25 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
             ResponseVS responseVS = null;
             try {
                 RepresentativeDelegationDto anonymousDelegationRequest = delegationDto.getDelegation();
-                delegationDto.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
+                delegationDto.setAnonymousDelegationRequestBase64ContentDigest(cmsMessage.getContentDigestStr());
                 Map<String, Object> mapToSend = new HashMap<>();
                 mapToSend.put(ContextVS.CSR_FILE_NAME, delegationDto.getCertificationRequest().getCsrPEM());
-                mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
+                mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
                 responseVS = HttpHelper.sendObjectMap(mapToSend,
                         AppVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     delegationDto.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                     //this is the delegation request signed with anonymous cert
-                    smimeMessage = delegationDto.getCertificationRequest().getSMIME(
-                            delegationDto.getHashCertVSBase64(),
-                            AppVS.getInstance().getAccessControl().getName(),
-                            JSON.getMapper().writeValueAsString(anonymousDelegationRequest),
-                            getString(R.string.representative_delegation_lbl));
-                    smimeMessage = new MessageTimeStamper(smimeMessage,
+                    cmsMessage = delegationDto.getCertificationRequest().signData(
+                            JSON.getMapper().writeValueAsString(anonymousDelegationRequest));
+                    cmsMessage = new MessageTimeStamper(cmsMessage,
                             AppVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-                    responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                    responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                             AppVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        delegationDto.setDelegationReceipt(responseVS.getSMIME(),
+                        delegationDto.setDelegationReceipt(responseVS.getCMS(),
                                 AppVS.getInstance().getAccessControl().getCertificate());
-                        SMIMEMessage delegationReceipt = new SMIMEMessage(responseVS.getMessageBytes());
+                        CMSSignedMessage delegationReceipt = new CMSSignedMessage(responseVS.getMessageBytes());
                         Collection matches = delegationReceipt.checkSignerCert(
                                 AppVS.getInstance().getAccessControl().getCertificate());
                         if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");

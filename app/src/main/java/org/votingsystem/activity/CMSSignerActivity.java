@@ -17,11 +17,11 @@ import android.widget.TextView;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -39,17 +39,17 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SMIMESignerActivity extends AppCompatActivity {
+public class CMSSignerActivity extends AppCompatActivity {
 	
-	public static final String TAG = SMIMESignerActivity.class.getSimpleName();
+	public static final String TAG = CMSSignerActivity.class.getSimpleName();
 
     public static final int RC_PASSWORD_REQUEST   = 0;
     public static final int RC_SIGN_REQUEST       = 1;
 
-    private String broadCastId = SMIMESignerActivity.class.getSimpleName();
+    private String broadCastId = CMSSignerActivity.class.getSimpleName();
     private WebView webView;
     private Menu menu;
-    private SMIMEMessage smime;
+    private CMSSignedMessage cms;
     private TextView signature_state;
     private SocketMessageDto socketMessage;
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -64,8 +64,8 @@ public class SMIMESignerActivity extends AppCompatActivity {
             if(TypeVS.MESSAGEVS_SIGN_RESPONSE == socketMessageResponse.getOperation()) {
                 if(ResponseVS.SC_WS_MESSAGE_SEND_OK == socketMessageResponse.getStatusCode()) {
                     UIUtils.launchMessageActivity(socketMessageResponse.getNotificationResponse(
-                            SMIMESignerActivity.this));
-                    SMIMESignerActivity.this.finish();
+                            CMSSignerActivity.this));
+                    CMSSignerActivity.this.finish();
                 } else showMessage(socketMessageResponse.getStatusCode(),
                         getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
             } else LOGD(TAG + ".broadcastReceiver", "socketMessageResponse:" +
@@ -87,9 +87,9 @@ public class SMIMESignerActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.smime_signer);
+        setContentView(R.layout.cms_signer);
         UIUtils.setSupportActionBar(this);
-        webView = (WebView) findViewById(R.id.smime_signed_content);
+        webView = (WebView) findViewById(R.id.cms_signed_content);
         signature_state = (TextView) findViewById(R.id.signature_state);
         socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
@@ -98,10 +98,10 @@ public class SMIMESignerActivity extends AppCompatActivity {
             webView.loadData(signatureContent, "application/json", "UTF-8");
         } catch (IOException ex) { ex.printStackTrace(); }
         if(savedInstanceState != null) {
-            byte[] smimeBytes = savedInstanceState.getByteArray(ContextVS.SMIME_MSG_KEY);
-            if(smimeBytes != null) {
+            byte[] cmsBytes = savedInstanceState.getByteArray(ContextVS.CMS_MSG_KEY);
+            if(cmsBytes != null) {
                 try {
-                    smime = new SMIMEMessage(smimeBytes);
+                    cms = new CMSSignedMessage(cmsBytes);
                 } catch (Exception e) { e.printStackTrace(); }
             }
         }
@@ -115,13 +115,13 @@ public class SMIMESignerActivity extends AppCompatActivity {
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.smime_signer, menu);
-        if(smime != null) setMenu();
+        inflater.inflate(R.menu.cms_signer, menu);
+        if(cms != null) setMenu();
         return true;
     }
 
     private void setMenu() {
-        if(smime != null) {
+        if(cms != null) {
             if(menu != null) {
                 menu.setGroupVisible(R.id.signature_items, true);
                 menu.removeItem(R.id.sign_document);
@@ -138,13 +138,13 @@ public class SMIMESignerActivity extends AppCompatActivity {
         final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         switch(requestCode) {
             case RC_SIGN_REQUEST:
-                if(responseVS != null && responseVS.getSMIME() != null) {
-                    smime = responseVS.getSMIME();
+                if(responseVS != null && responseVS.getCMS() != null) {
+                    cms = responseVS.getCMS();
                     executorService.submit(new Runnable() {
                         @Override public void run() {
                             try {
                                 sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_OK, null,
-                                        responseVS.getSMIME(), TypeVS.MESSAGEVS_SIGN_RESPONSE));
+                                        responseVS.getCMS(), TypeVS.MESSAGEVS_SIGN_RESPONSE));
                             } catch (Exception e) { e.printStackTrace(); }
                         }});
                     setMenu();
@@ -188,7 +188,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
                 sendIntent.setAction(Intent.ACTION_SEND);
                 sendIntent.setType(ContentTypeVS.TEXT.getName());
                 try {
-                    sendIntent.putExtra(Intent.EXTRA_STREAM, Utils.createTempFile(smime.getBytes(), this));
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, Utils.createTempFile(cms.toPEM(), this));
                 } catch (Exception e) { e.printStackTrace(); }
                 startActivity(sendIntent);
                 return true;
@@ -228,7 +228,7 @@ public class SMIMESignerActivity extends AppCompatActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         try {
-            if(smime != null) outState.putByteArray(ContextVS.SMIME_MSG_KEY, smime.getBytes());
+            if(cms != null) outState.putByteArray(ContextVS.CMS_MSG_KEY, cms.getEncoded());
         }catch (Exception e) { e.printStackTrace(); }
         super.onSaveInstanceState(outState);
     }

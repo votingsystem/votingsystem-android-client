@@ -1,4 +1,4 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
 import org.bouncycastle2.openssl.PasswordFinder;
 

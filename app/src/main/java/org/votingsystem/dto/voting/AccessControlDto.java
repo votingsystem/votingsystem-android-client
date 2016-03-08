@@ -154,4 +154,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
         return getServerURL() + "/representative/cancelAnonymousDelegation";
     }
 
+    public String getCMSVoteURL(String hashHex) {
+        return getServerURL() + "/rest/messageCMS/vote/hash/" + hashHex;
+    }
 }

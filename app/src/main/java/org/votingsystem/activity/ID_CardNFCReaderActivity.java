@@ -16,24 +16,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.bouncycastle2.cert.jcajce.JcaCertStore;
+import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.cms.DNIeContentSigner;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.signature.smime.DNIeContentSigner;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.ui.DNIePasswordDialog;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.crypto.CertificationRequestVS;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -223,11 +224,11 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
 				Store cerStore = new JcaCertStore(Arrays.asList(chain));
 
-				SMIMEMessage smimeMessage = DNIeContentSigner.getSMIME(privateKey, userCert, cerStore,
-						toUser, textToSign, msgSubject);
-				smimeMessage = new MessageTimeStamper(smimeMessage,
+				CMSSignedData cmsSignedData = DNIeContentSigner.signData(privateKey, userCert, cerStore, textToSign);
+				CMSSignedMessage cmsMessage = new CMSSignedMessage(cmsSignedData.getEncoded());
+				cmsMessage = new MessageTimeStamper(cmsMessage,
 						AppVS.getInstance().getTimeStampServiceURL()).call();
-				responseVS = new ResponseVS(ResponseVS.SC_OK, smimeMessage);
+				responseVS = new ResponseVS(ResponseVS.SC_OK, cmsMessage);
 				if(MODE_UPDATE_USER_DATA == activityMode) {
 					PrefUtils.putAppUser(appUser);
 					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());

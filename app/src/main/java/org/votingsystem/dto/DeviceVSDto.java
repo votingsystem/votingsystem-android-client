@@ -3,7 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.Serializable;
 import java.security.PublicKey;
@@ -149,7 +149,7 @@ public class DeviceVSDto implements Serializable {
 
     @JsonIgnore public X509Certificate getX509Cert() throws Exception {
         if(x509Certificate == null && certPEM != null) x509Certificate =
-                CertUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
+                PEMUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
         return x509Certificate;
     }
 

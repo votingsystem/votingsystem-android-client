@@ -7,12 +7,12 @@ import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.CertificationRequestVS;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.contentprovider.TransactionVSContentProvider;
 import org.votingsystem.dto.currency.CurrencyDto;
@@ -35,8 +36,6 @@ import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.service.VoteService;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -49,6 +48,7 @@ import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
 import java.util.Date;
 
@@ -68,7 +68,7 @@ public class ReceiptFragment extends Fragment {
     private TransactionVSDto transactionDto;
     private TextView receiptSubject;
     private WebView receipt_content;
-    private SMIMEMessage receiptWrapperSMIME;
+    private CMSSignedMessage receiptWrapperCMS;
     private String broadCastId;
     private String receiptURL;
     private Menu menu;
@@ -198,13 +198,12 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void initReceiptScreen (ReceiptWrapper receiptWrapper) {
-        LOGD(TAG + ".initReceiptScreen", "type: " + receiptWrapper.getTypeVS() +
-                " - messageId: " + receiptWrapper.getMessageId());
+        LOGD(TAG + ".initReceiptScreen", "type: " + receiptWrapper.getTypeVS());
         try {
             String contentFormatted = "";
             String dateStr = null;
-            receiptWrapperSMIME = receiptWrapper.getReceipt();
-            String receiptSubjectStr = receiptWrapperSMIME == null? null : receiptWrapperSMIME.getSubject();
+            receiptWrapperCMS = receiptWrapper.getReceipt();
+            String receiptSubjectStr = null;
             switch(receiptWrapper.getTypeVS()) {
                 case ANONYMOUS_SELECTION_CERT_REQUEST:
                     RepresentativeDelegationDto delegationDto = receiptWrapper.getReceipt()
@@ -225,7 +224,7 @@ public class ReceiptFragment extends Fragment {
                 case SEND_VOTE:
                     VoteVSHelper voteVSHelper = (VoteVSHelper) receiptWrapper;
                     receiptSubjectStr = voteVSHelper.getEventVS().getSubject();
-                    dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
+                    dateStr = DateUtils.getDayWeekDateStr(receiptWrapperCMS.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime(), "HH:mm");
                     contentFormatted = getString(R.string.votevs_info_formatted,
                             voteVSHelper.getVote().getOptionSelected().getContent(),
@@ -242,19 +241,19 @@ public class ReceiptFragment extends Fragment {
                 case ACCESS_REQUEST:
                     AccessRequestDto requestDto =  receiptWrapper.getReceipt()
                             .getSignedContent(AccessRequestDto.class);
-                    dateStr = DateUtils.getDayWeekDateStr(receiptWrapperSMIME.getSigner().
+                    dateStr = DateUtils.getDayWeekDateStr(receiptWrapperCMS.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime(), "HH:mm");
                     contentFormatted = getString(R.string.access_request_info_formatted, dateStr,
                             requestDto.getEventURL());
                     receiptSubjectStr = getString(R.string.access_request_lbl);
                     break;
                 case FROM_GROUP_TO_ALL_MEMBERS:
-                    TransactionVSDto transactionVSDto = receiptWrapperSMIME.getSignedContent(
+                    TransactionVSDto transactionVSDto = receiptWrapperCMS.getSignedContent(
                             TransactionVSDto.class);
                     contentFormatted = transactionVSDto.getFormatted(getActivity());
                     break;
                 default:
-                    contentFormatted = receiptWrapper.getReceipt().getSignedContent();
+                    contentFormatted = receiptWrapper.getReceipt().getSignedContentStr();
 
             }
             receiptSubject.setText(receiptSubjectStr);
@@ -341,11 +340,11 @@ public class ReceiptFragment extends Fragment {
                 case android.R.id.home:
                     break;
                 case R.id.show_signers_info:
-                    UIUtils.showSignersInfoDialog(receiptWrapperSMIME.getSigners(),
+                    UIUtils.showSignersInfoDialog(receiptWrapperCMS.getSigners(),
                             getFragmentManager(), getActivity());
                     break;
                 case R.id.show_timestamp_info:
-                    UIUtils.showTimeStampInfoDialog(receiptWrapperSMIME.getSigner().getTimeStampToken(),
+                    UIUtils.showTimeStampInfoDialog(receiptWrapperCMS.getSigner().getTimeStampToken(),
                             appVS.getTimeStampCert(), getFragmentManager(), getActivity());
                     break;
                 case R.id.share_receipt:
@@ -353,7 +352,7 @@ public class ReceiptFragment extends Fragment {
                     sendIntent.setAction(Intent.ACTION_SEND);
                     sendIntent.setType(ContentTypeVS.TEXT.getName());
                     sendIntent.putExtra(Intent.EXTRA_STREAM, Utils.createTempFile(
-                            receiptWrapperSMIME.getBytes(), getActivity()));
+                            receiptWrapperCMS.toPEM(), getActivity()));
                     startActivity(sendIntent);
                     return true;
                 case R.id.save_receipt:
@@ -361,14 +360,14 @@ public class ReceiptFragment extends Fragment {
                     values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
                             ObjectUtils.serializeObject(receiptWrapper));
                     values.put(ReceiptContentProvider.TYPE_COL, receiptWrapper.getTypeVS().toString());
-                    values.put(ReceiptContentProvider.URL_COL, receiptWrapper.getMessageId());
+                    values.put(ReceiptContentProvider.URL_COL, receiptWrapper.getURL());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptWrapper.State.ACTIVE.toString());
                     menu.removeItem(R.id.save_receipt);
                     break;
                 case R.id.signature_content:
                     try {
                         MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(
-                                        R.string.signature_content), receiptWrapperSMIME.getSignedContent(),
+                                        R.string.signature_content), receiptWrapperCMS.getSignedContentStr(),
                                 getFragmentManager());
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
@@ -487,7 +486,7 @@ public class ReceiptFragment extends Fragment {
                 try {
                     receiptWrapper.setReceiptBytes(responseVS.getMessageBytes());
                     if(transactionDto != null) {
-                        transactionDto.setSmimeMessage(responseVS.getSMIME());
+                        transactionDto.setCMSMessage(responseVS.getCMS());
                         TransactionVSContentProvider.updateTransaction(appVS, transactionDto);
                     }
                     initReceiptScreen(receiptWrapper);

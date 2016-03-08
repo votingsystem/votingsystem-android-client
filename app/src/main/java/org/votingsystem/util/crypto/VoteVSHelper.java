@@ -1,13 +1,12 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
@@ -43,8 +42,8 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     private EventVSDto eventVS;
     private VoteVSCancelerDto cancelerDto;
     private AccessRequestDto accessRequestDto;
-    private transient SMIMEMessage voteReceipt;
-    private transient SMIMEMessage cancelVoteReceipt;
+    private transient CMSSignedMessage voteReceipt;
+    private transient CMSSignedMessage cancelVoteReceipt;
     private CertificationRequestVS certificationRequest;
 
     public static VoteVSHelper load(VoteVSDto voteVSDto) throws Exception {
@@ -81,11 +80,8 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         return (FieldEventVSDto) options.toArray()[item];
     }
 
-    public SMIMEMessage getSMIMEVote() throws Exception {
-        return certificationRequest.getSMIME(
-                hashAccessRequestBase64, eventVS.getControlCenter().getName(),
-                JSON.writeValueAsString(voteVSDto),
-                AppVS.getInstance().getString(R.string.vote_msg_subject));
+    public CMSSignedMessage getCMSVote() throws Exception {
+        return certificationRequest.signData(JSON.writeValueAsString(voteVSDto));
     }
 
     private void genVote(FieldEventVSDto optionSelected) {
@@ -157,19 +153,19 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         this.NIF = NIF;
     }
 
-    public SMIMEMessage getVoteReceipt() {
+    public CMSSignedMessage getVoteReceipt() {
         return voteReceipt;
     }
 
-    public void setVoteReceipt(SMIMEMessage voteReceipt) {
+    public void setVoteReceipt(CMSSignedMessage voteReceipt) {
         this.voteReceipt = voteReceipt;
     }
 
-    public SMIMEMessage getCancelVoteReceipt() {
+    public CMSSignedMessage getCancelVoteReceipt() {
         return cancelVoteReceipt;
     }
 
-    public void setCancelVoteReceipt(SMIMEMessage cancelVoteReceipt) {
+    public void setCancelVoteReceipt(CMSSignedMessage cancelVoteReceipt) {
         this.cancelVoteReceipt = cancelVoteReceipt;
     }
 
@@ -181,29 +177,13 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         this.certificationRequest = certificationRequest;
     }
 
-    @Override public String getMessageId() {
-        String result = null;
-        if(voteReceipt != null) {
-            try {
-                String[] headers = voteReceipt.getHeader("Message-ID");
-                if(headers != null && headers.length >0) return headers[0];
-            } catch(Exception ex) { ex.printStackTrace(); }
-        } else if(cancelVoteReceipt != null) {
-            try {
-                String[] headers = cancelVoteReceipt.getHeader("Message-ID");
-                if(headers != null && headers.length >0) return headers[0];
-            } catch(Exception ex) { ex.printStackTrace(); }
-        }
-        return result;
-    }
-
     @Override public String getSubject() {
         if(eventVS != null) return eventVS.getSubject();
         else return null;
     }
 
     @Override
-    public SMIMEMessage getReceipt() throws Exception {
+    public CMSSignedMessage getReceipt() throws Exception {
         if(cancelVoteReceipt != null) return cancelVoteReceipt;
         else return voteReceipt;
     }
@@ -211,9 +191,9 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(voteReceipt != null) s.writeObject(voteReceipt.getBytes());
+            if(voteReceipt != null) s.writeObject(voteReceipt.getEncoded());
             else s.writeObject(null);
-            if(cancelVoteReceipt != null) s.writeObject(cancelVoteReceipt.getBytes());
+            if(cancelVoteReceipt != null) s.writeObject(cancelVoteReceipt.getEncoded());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -223,9 +203,17 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
         byte[] voteReceiptBytes = (byte[]) s.readObject();
-        if(voteReceiptBytes != null) voteReceipt = new SMIMEMessage(voteReceiptBytes);
+        if(voteReceiptBytes != null) voteReceipt = new CMSSignedMessage(voteReceiptBytes);
         byte[] cancelVoteReceiptBytes = (byte[]) s.readObject();
-        if(cancelVoteReceiptBytes != null) cancelVoteReceipt = new SMIMEMessage(cancelVoteReceiptBytes);
+        if(cancelVoteReceiptBytes != null) cancelVoteReceipt = new CMSSignedMessage(cancelVoteReceiptBytes);
     }
 
+    public String getCMSVoteURL() {
+        String result = null;
+        try {
+            String hashHex = StringUtils.toHex(hashCertVSBase64);
+            result = AppVS.getInstance().getAccessControl().getCMSVoteURL(hashHex);
+        } catch (Exception ex) { ex.printStackTrace();}
+        return result;
+    }
 }

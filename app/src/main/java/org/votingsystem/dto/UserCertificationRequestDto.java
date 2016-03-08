@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.crypto.Encryptor;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
 import android.util.Base64;
 

@@ -1,10 +1,8 @@
 package org.votingsystem.dto.currency;
 
-import android.util.Base64;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -19,8 +17,8 @@ public class CurrencyBatchResponseDto {
 
     public CurrencyBatchResponseDto() {};
 
-    public CurrencyBatchResponseDto(SMIMEMessage receipt, String leftOverCert) throws Exception {
-        this.receipt = Base64.encodeToString(receipt.getBytes(), Base64.NO_WRAP);
+    public CurrencyBatchResponseDto(CMSSignedMessage receipt, String leftOverCert) throws Exception {
+        this.receipt = receipt.toPEMStr();
         this.leftOverCert = leftOverCert;
     }
 

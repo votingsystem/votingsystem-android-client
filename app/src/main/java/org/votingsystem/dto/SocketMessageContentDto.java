@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.AppVS;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
 
@@ -36,7 +36,7 @@ public class SocketMessageContentDto implements Serializable {
     private String toUser;
     private String deviceToName;
     private String hashCertVS;
-    private String smimeMessage;
+    private String cmsMessage;
     private Set<CurrencyDto> currencyList;
     private String URL;
 
@@ -187,18 +187,18 @@ public class SocketMessageContentDto implements Serializable {
         this.from = from;
     }
 
-    public String getSmimeMessage() {
-        return smimeMessage;
+    public String getCMSMessage() {
+        return cmsMessage;
     }
 
-    public void setSmimeMessage(String smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public void setCMSMessage(String cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 
     @JsonIgnore
-    SMIMEMessage getSMIME () throws Exception {
-        byte[] smimeMessageBytes = Base64.decode(smimeMessage.getBytes(), Base64.NO_WRAP);
-        return new SMIMEMessage(smimeMessageBytes);
+    CMSSignedMessage getCMS () throws Exception {
+        byte[] cmsMessageBytes = Base64.decode(cmsMessage.getBytes(), Base64.NO_WRAP);
+        return new CMSSignedMessage(cmsMessageBytes);
     }
 
     public String getDeviceToName() {

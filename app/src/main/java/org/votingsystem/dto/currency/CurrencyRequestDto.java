@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
@@ -87,7 +88,7 @@ public class CurrencyRequestDto {
     }
 
     public Currency loadCurrencyCert(String pemCert) throws Exception {
-        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes());
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes());
         if(certificates.isEmpty()) throw new ExceptionVS("Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,

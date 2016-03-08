@@ -1,7 +1,6 @@
 package org.votingsystem.dto;
 
 import android.content.Context;
-import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,16 +8,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
+import org.votingsystem.util.crypto.AESParams;
+import org.votingsystem.util.crypto.Encryptor;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -62,7 +61,7 @@ public class SocketMessageDto implements Serializable {
     private String UUID;
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
     private String remoteAddress;
-    private String smimeMessage;
+    private String cmsMessagePEM;
     private String aesParams;
     private String from;
     private String caption;
@@ -84,7 +83,7 @@ public class SocketMessageDto implements Serializable {
     @JsonIgnore private transient AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
-    @JsonIgnore private transient SMIMEMessage smime;
+    @JsonIgnore private transient CMSSignedMessage cms;
 
     public SocketMessageDto () {}
 
@@ -95,7 +94,7 @@ public class SocketMessageDto implements Serializable {
     }
 
     public SocketMessageDto getResponse(Integer statusCode, String message,
-            SMIMEMessage smimeMessage, TypeVS operation) throws Exception {
+                                        CMSSignedMessage cmsMessage, TypeVS operation) throws Exception {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
@@ -107,8 +106,7 @@ public class SocketMessageDto implements Serializable {
         messageContentDto.setOperation(operation);
         messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setMessage(message);
-        if(smimeMessage != null) messageContentDto.setSmimeMessage(
-                Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP));
+        if(cmsMessage != null) messageContentDto.setCMSMessage(cmsMessage.toPEMStr());
         messageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
         messageDto.setUUID(UUID);
@@ -286,23 +284,23 @@ public class SocketMessageDto implements Serializable {
         this.locale = locale;
     }
 
-    public String getSmimeMessage() {
-        return smimeMessage;
+    public String getCMSMessage() {
+        return cmsMessagePEM;
     }
 
-    public void setSmimeMessage(String smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public void setCMSMessage(String cmsMessage) {
+        this.cmsMessagePEM = cmsMessage;
     }
 
     @JsonIgnore
-    public SMIMEMessage getSMIME() throws Exception {
-        if(smime == null) smime = new SMIMEMessage(Base64.decode(smimeMessage, Base64.NO_WRAP));
-        return smime;
+    public CMSSignedMessage getCMS() throws Exception {
+        if(cms == null) cms = CMSSignedMessage.FROM_PEM(cmsMessagePEM);
+        return cms;
     }
 
-    public SocketMessageDto setSMIME(SMIMEMessage smimeMessage) throws Exception {
-        this.smime = smimeMessage;
-        this.smimeMessage = Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP);
+    public SocketMessageDto setCMS(CMSSignedMessage cmsMessage) throws Exception {
+        this.cms = cmsMessage;
+        this.cmsMessagePEM = cmsMessage.toPEMStr();
         return this;
     }
 
@@ -568,7 +566,7 @@ public class SocketMessageDto implements Serializable {
         if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
         if(content.getFrom() != null) from = content.getFrom();
         if(content.getDeviceFromId() != null) deviceFromId = content.getDeviceFromId();
-        if(content.getSmimeMessage() != null) smime = content.getSMIME();
+        if(content.getCMSMessage() != null) cms = content.getCMS();
         if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
                 content.getCurrencyList());
         if(content.getSubject() != null) subject = content.getSubject();
@@ -613,7 +611,7 @@ public class SocketMessageDto implements Serializable {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(smime != null) s.writeObject(smime.getBytes());
+            if(cms != null) s.writeObject(cms.getEncoded());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -623,7 +621,7 @@ public class SocketMessageDto implements Serializable {
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
         byte[] receiptBytes = (byte[]) s.readObject();
-        if(receiptBytes != null) smime = new SMIMEMessage(receiptBytes);
+        if(receiptBytes != null) cms = new CMSSignedMessage(receiptBytes);
     }
 
     @Override public String toString() {

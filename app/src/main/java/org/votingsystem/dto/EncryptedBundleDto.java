@@ -4,7 +4,7 @@ import android.util.Base64;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.signature.smime.EncryptedBundle;
+import org.votingsystem.util.crypto.EncryptedBundle;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

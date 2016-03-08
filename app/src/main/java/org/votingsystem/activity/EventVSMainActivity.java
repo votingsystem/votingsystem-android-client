@@ -40,7 +40,7 @@ public class EventVSMainActivity extends ActivityBase {
                 " - intent extras: " + getIntent().getExtras());
         super.onCreate(savedInstanceState);
         Bundle args = getIntent().getExtras();
-        EventVSGridFragment fragment = new EventVSGridFragment();
+        EventVSGridFragment fragment = new  EventVSGridFragment();
         eventVSGridRef = new WeakReference<>(fragment);
         if(args == null) args = new Bundle();
         args.putSerializable(ContextVS.EVENT_STATE_KEY, EventVSDto.State.ACTIVE);

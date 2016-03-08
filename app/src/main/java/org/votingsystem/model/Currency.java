@@ -3,19 +3,19 @@ package org.votingsystem.model;
 import android.content.Context;
 
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -48,19 +48,16 @@ public class Currency extends ReceiptWrapper {
     private Long id;
     private TypeVS operation;
     private BigDecimal batchAmount;
-    private transient SMIMEMessage receipt;
-    private transient SMIMEMessage cancellationReceipt;
-    private transient SMIMEMessage smimeMessage;
+    private transient CMSSignedMessage receipt;
+    private transient CMSSignedMessage cmsMessage;
     private transient X509Certificate x509AnonymousCert;
     private CertificationRequestVS certificationRequest;
     private byte[] receiptBytes;
-    private byte[] cancellationReceiptBytes;
     private String originHashCertVS;
     private String hashCertVS;
     private BigDecimal amount;
     private String subject;
     private State state;
-    private Date cancellationDate;
     private String currencyCode;
     private String url;
     private String tag;
@@ -175,24 +172,24 @@ public class Currency extends ReceiptWrapper {
         this.batchUUID = batchUUID;
     }
 
-    public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor)
+    public void validateReceipt(CMSSignedMessage cmsReceipt, Set<TrustAnchor> trustAnchor)
             throws Exception {
-        if(!smimeMessage.getSigner().getSignedContentDigestBase64().equals(
-                smimeReceipt.getSigner().getSignedContentDigestBase64())){
+        if(!cmsMessage.getSigner().getSignedContentDigestBase64().equals(
+                cmsReceipt.getSigner().getSignedContentDigestBase64())){
             throw new ExceptionVS("Signer content digest mismatch");
         }
-        for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
+        for(X509Certificate cert : cmsReceipt.getSignersCerts()) {
             CertUtils.verifyCertificate(trustAnchor, false, Arrays.asList(cert));
             LOGD(TAG, "validateReceipt - Cert validated: " + cert.getSubjectDN().toString());
         }
-        this.smimeMessage = smimeReceipt;
+        this.cmsMessage = cmsReceipt;
     }
 
-    public Currency(SMIMEMessage smimeMessage) throws Exception {
-        smimeMessage.isValidSignature();
-        this.smimeMessage = smimeMessage;
-        initCertData(smimeMessage.getCurrencyCert());
-        CurrencyDto batchItemDto = JSON.readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
+    public Currency(CMSSignedMessage cmsMessage) throws Exception {
+        cmsMessage.isValidSignature();
+        this.cmsMessage = cmsMessage;
+        initCertData(cmsMessage.getCurrencyCert());
+        CurrencyDto batchItemDto = cmsMessage.getSignedContent(CurrencyDto.class);
         this.batchUUID = batchItemDto.getBatchUUID();
         this.batchAmount = batchItemDto.getBatchAmount();
         if(TypeVS.CURRENCY_SEND != batchItemDto.getOperation())
@@ -206,7 +203,7 @@ public class Currency extends ReceiptWrapper {
             throw new ExceptionVS("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
                     batchItemDto.getTag());
 
-        Date signatureTime = smimeMessage.getTimeStampToken(smimeMessage.getCurrencyCert())
+        Date signatureTime = cmsMessage.getTimeStampToken(cmsMessage.getCurrencyCert())
                 .getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
@@ -216,12 +213,12 @@ public class Currency extends ReceiptWrapper {
         this.timeLimited = batchItemDto.isTimeLimited();
     }
 
-    public SMIMEMessage getSMIME() {
-        return smimeMessage;
+    public CMSSignedMessage getCMS() {
+        return cmsMessage;
     }
 
-    public void setSMIME(SMIMEMessage smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public void setCMS(CMSSignedMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 
     public void initSigner (byte[] signedCsr) throws Exception {
@@ -239,7 +236,7 @@ public class Currency extends ReceiptWrapper {
     }
 
     public byte[] getIssuedCertPEM() throws IOException {
-        return CertUtils.getPEMEncoded(x509AnonymousCert);
+        return PEMUtils.getPEMEncoded(x509AnonymousCert);
     }
 
     public Date getValidFrom() {
@@ -354,15 +351,9 @@ public class Currency extends ReceiptWrapper {
         this.localId = localId;
     }
 
-    @Override public SMIMEMessage getReceipt() throws Exception {
-        if(receipt == null && receiptBytes != null) receipt = new SMIMEMessage(receiptBytes);
+    @Override public CMSSignedMessage getReceipt() throws Exception {
+        if(receipt == null && receiptBytes != null) receipt = new CMSSignedMessage(receiptBytes);
         return receipt;
-    }
-
-    public SMIMEMessage getCancellationReceipt() throws Exception {
-        if(cancellationReceipt == null && cancellationReceiptBytes != null) cancellationReceipt =
-                new SMIMEMessage(cancellationReceiptBytes);
-        return cancellationReceipt;
     }
 
     public State getState() {
@@ -377,43 +368,6 @@ public class Currency extends ReceiptWrapper {
     public void setReceiptBytes(byte[] receiptBytes) {
         this.state = State.EXPENDED;
         this.receiptBytes = receiptBytes;
-    }
-
-    public void setCancellationReceiptBytes(byte[] receiptBytes) {
-        this.cancellationReceiptBytes = receiptBytes;
-    }
-
-    public void setCancellationReceipt(SMIMEMessage receipt) {
-        try {
-            this.cancellationReceiptBytes = receipt.getBytes();
-            this.cancellationReceipt = receipt;
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public Date getCancellationDate() {
-        try {
-            if(cancellationDate == null && getCancellationReceipt() != null)
-                cancellationDate = getCancellationReceipt().getSigner().getTimeStampToken().
-                        getTimeStampInfo().getGenTime();
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return cancellationDate;
-    }
-
-    @Override public String getMessageId() {
-        String result = null;
-        try {
-            SMIMEMessage receipt = getReceipt();
-            if(receipt == null) return null;
-            String[] headers = receipt.getHeader("Message-ID");
-            if(headers != null && headers.length >0) return headers[0];
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return result;
     }
 
     public String getOriginHashCertVS() {
@@ -471,7 +425,7 @@ public class Currency extends ReceiptWrapper {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(smimeMessage != null) s.writeObject(smimeMessage.getBytes());
+            if(cmsMessage != null) s.writeObject(cmsMessage.getEncoded());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -480,8 +434,8 @@ public class Currency extends ReceiptWrapper {
 
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
-        byte[] smimeMessageBytes = (byte[]) s.readObject();
-        if(smimeMessageBytes != null) smimeMessage = new SMIMEMessage(smimeMessageBytes);
+        byte[] cmsMessageBytes = (byte[]) s.readObject();
+        if(cmsMessageBytes != null) cmsMessage = new CMSSignedMessage(cmsMessageBytes);
         if(certificationRequest != null) fromCertificationRequestVS(certificationRequest);
     }
 

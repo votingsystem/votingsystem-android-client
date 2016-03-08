@@ -9,12 +9,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -31,8 +31,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.mail.MessagingException;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -62,10 +60,10 @@ public class TransactionVSDto implements Serializable {
     private String fromUserIBAN;
     private String receipt;
     private String bankIBAN;
-    private String messageSMIME;
-    private String cancelationMessageSMIME;
-    private String messageSMIMEURL;
-    private String messageSMIMEParentURL;
+    private String cmsMessagePEM;
+    private String cmsCancelationMessagePEM;
+    private String cmsMessageURL;
+    private String cmsMessageParentURL;
     private String UUID;
     private BigDecimal amount;
     private Boolean timeLimited = Boolean.FALSE;
@@ -81,8 +79,8 @@ public class TransactionVSDto implements Serializable {
     private UserVSDto.Type userToType;
 
     @JsonIgnore private TagVSDto tagVS;
-    @JsonIgnore private SMIMEMessage smimeMessage;
-    @JsonIgnore private SMIMEMessage cancelationSmimeMessage;
+    @JsonIgnore private CMSSignedMessage cmsMessage;
+    @JsonIgnore private CMSSignedMessage cancelationMessageCMS;
     @JsonIgnore private List<UserVSDto> toUserVSList;
     @JsonIgnore private SocketMessageDto socketMessageDto;
     @JsonIgnore private UserVSDto signer;
@@ -178,39 +176,37 @@ public class TransactionVSDto implements Serializable {
         this.localId = localId;
     }
 
-    public SMIMEMessage getSmimeMessage() throws Exception {
-        if(smimeMessage == null && messageSMIME != null) {
-            byte[] smimeMessageBytes = Base64.decode(messageSMIME.getBytes(), Base64.NO_WRAP);
-            smimeMessage = new SMIMEMessage(smimeMessageBytes);
+    public CMSSignedMessage getCMSMessage() throws Exception {
+        if(cmsMessage == null && cmsMessagePEM != null) {
+            byte[] cmsMessageBytes = Base64.decode(cmsMessagePEM.getBytes(), Base64.NO_WRAP);
+            cmsMessage = new CMSSignedMessage(cmsMessageBytes);
         }
-        return smimeMessage;
+        return cmsMessage;
     }
 
-    public void setSmimeMessage(SMIMEMessage smimeMessage) throws IOException, MessagingException {
-        this.smimeMessage = smimeMessage;
-        this.messageSMIME = Base64.encodeToString(smimeMessage.getBytes(), Base64.NO_WRAP);
+    public void setCMSMessage(CMSSignedMessage cmsMessage) throws IOException {
+        this.cmsMessage = cmsMessage;
+        this.cmsMessagePEM = cmsMessage.toPEMStr();
     }
 
-    public SMIMEMessage getCancelationSmimeMessage() throws Exception {
-        if(cancelationSmimeMessage == null && cancelationSmimeMessage != null) {
-            byte[] smimeMessageBytes = Base64.decode(cancelationSmimeMessage.getBytes(), Base64.NO_WRAP);
-            cancelationSmimeMessage = new SMIMEMessage(smimeMessageBytes);
+    public CMSSignedMessage getCancelationMessageCMS() throws Exception {
+        if(cancelationMessageCMS == null && cmsCancelationMessagePEM != null) {
+            cancelationMessageCMS = CMSSignedMessage.FROM_PEM(cmsCancelationMessagePEM);
         }
-        return cancelationSmimeMessage;
+        return cancelationMessageCMS;
     }
 
-    public void setCancelationSmimeMessage(SMIMEMessage cancelationSmimeMessage)
-            throws IOException, MessagingException {
-        this.cancelationSmimeMessage = cancelationSmimeMessage;
-        this.cancelationMessageSMIME = Base64.encodeToString(cancelationSmimeMessage.getBytes(), Base64.NO_WRAP);
+    public void setCancelationMessageCMS(CMSSignedMessage cancelationMessageCMS) throws IOException {
+        this.cancelationMessageCMS = cancelationMessageCMS;
+        this.cmsCancelationMessagePEM = cancelationMessageCMS.toPEMStr();
     }
 
-    public String getCancelationMessageSMIME() {
-        return cancelationMessageSMIME;
+    public String getCmsCancelationMessagePEM() {
+        return cmsCancelationMessagePEM;
     }
 
-    public void setCancelationMessageSMIME(String cancelationMessageSMIME) {
-        this.cancelationMessageSMIME = cancelationMessageSMIME;
+    public void setCmsCancelationMessagePEM(String cmsCancelationMessagePEM) {
+        this.cmsCancelationMessagePEM = cmsCancelationMessagePEM;
     }
 
     @JsonIgnore public String getTagName() {
@@ -268,12 +264,12 @@ public class TransactionVSDto implements Serializable {
     }
 
 
-    public String getMessageSMIMEURL() {
-        return messageSMIMEURL;
+    public String getCmsMessageURL() {
+        return cmsMessageURL;
     }
 
-    public void setMessageSMIMEURL(String messageSMIMEURL) {
-        this.messageSMIMEURL = messageSMIMEURL;
+    public void setCmsMessageURL(String cmsMessageURL) {
+        this.cmsMessageURL = cmsMessageURL;
     }
 
     public BigDecimal getAmount() {
@@ -309,12 +305,12 @@ public class TransactionVSDto implements Serializable {
         this.numChildTransactions = numChildTransactions;
     }
 
-    public String getMessageSMIME() {
-        return messageSMIME;
+    public String getCmsMessagePEM() {
+        return cmsMessagePEM;
     }
 
-    public void setMessageSMIME(String messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
     }
 
     public String getReceipt() {
@@ -440,12 +436,12 @@ public class TransactionVSDto implements Serializable {
         this.toUser = toUser;
     }
 
-    public String getMessageSMIMEParentURL() {
-        return messageSMIMEParentURL;
+    public String getCmsMessageParentURL() {
+        return cmsMessageParentURL;
     }
 
-    public void setMessageSMIMEParentURL(String messageSMIMEParentURL) {
-        this.messageSMIMEParentURL = messageSMIMEParentURL;
+    public void setCmsMessageParentURL(String cmsMessageParentURL) {
+        this.cmsMessageParentURL = cmsMessageParentURL;
     }
 
     public UserVSDto.Type getUserToType() {
@@ -508,21 +504,21 @@ public class TransactionVSDto implements Serializable {
         return null;
     }
 
-    public String validateReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
-        switch(typeVS) {
+    public String validateReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+        switch(dto.getOperation()) {
             case FROM_USERVS:
-                return validateFromUserVSReceipt(smimeMessage, isIncome);
+                return validateFromUserVSReceipt(cmsMessage, isIncome);
             case CURRENCY_SEND:
-                return validateCurrencySendReceipt(smimeMessage, isIncome);
+                return validateCurrencySendReceipt(cmsMessage, isIncome);
             case CURRENCY_CHANGE:
-                return validateCurrencyChangeReceipt(smimeMessage, isIncome);
-            default: throw new ValidationExceptionVS("unknown receipt type: " + typeVS);
+                return validateCurrencyChangeReceipt(cmsMessage, isIncome);
+            default: throw new ValidationExceptionVS("unknown receipt type: " + dto.getOperation());
         }
     }
 
-    private String validateCurrencyChangeReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+    private String validateCurrencyChangeReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
         if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
@@ -546,8 +542,8 @@ public class TransactionVSDto implements Serializable {
         return result;
     }
 
-    private String validateCurrencySendReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+    private String validateCurrencySendReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
         if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
@@ -574,8 +570,8 @@ public class TransactionVSDto implements Serializable {
         return result;
     }
 
-    private String validateFromUserVSReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        TransactionVSDto receiptDto = smimeMessage.getSignedContent(TransactionVSDto.class);
+    private String validateFromUserVSReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        TransactionVSDto receiptDto = cmsMessage.getSignedContent(TransactionVSDto.class);
         if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
                     receiptDto.getType());
@@ -656,7 +652,7 @@ public class TransactionVSDto implements Serializable {
         switch(operation) {
             case FROM_GROUP_TO_ALL_MEMBERS:
                 result = timeLimited ? context.getString(R.string.time_limited_lbl) + "</br>":"";
-                result = result + context.getString(R.string.from_group_to_all_member_smime_content,
+                result = result + context.getString(R.string.from_group_to_all_member_cms_content,
                         fromUser, subject, amount, currencyCode, getTagVS().getName());
                 break;
             default:

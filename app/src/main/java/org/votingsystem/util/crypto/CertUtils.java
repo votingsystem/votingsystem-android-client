@@ -1,4 +1,4 @@
-package org.votingsystem.signature.util;
+package org.votingsystem.util.crypto;
 
 import android.util.Log;
 
@@ -22,8 +22,6 @@ import org.bouncycastle2.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.jce.X509Principal;
-import org.bouncycastle2.openssl.PEMReader;
-import org.bouncycastle2.openssl.PEMWriter;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle2.x509.X509V1CertificateGenerator;
@@ -36,15 +34,9 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -68,8 +60,6 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -77,7 +67,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
-import javax.mail.MessagingException;
 import javax.security.auth.x500.X500Principal;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -235,22 +224,17 @@ public class CertUtils {
         return certGen.generate(caKey, "BC");
     }
 
-   public static CertPath verifyCertificate(X509Certificate cert, CertStore store, KeyStore trustedStore) 
-        throws InvalidAlgorithmParameterException, KeyStoreException, MessagingException, CertPathBuilderException {
-         
+   public static CertPath verifyCertificate(X509Certificate cert, CertStore store, KeyStore trustedStore)
+           throws InvalidAlgorithmParameterException, KeyStoreException, CertPathBuilderException,
+           NoSuchProviderException, NoSuchAlgorithmException {
+
         if (cert == null || store == null || trustedStore == null) 
             throw new IllegalArgumentException("cert == "+cert+", store == "+store+", trustedStore == "+trustedStore);
-
         CertPathBuilder pathBuilder;
-
         // I create the CertPathBuilder object. It will be used to find a
         // certification path that starts from the signer's certificate and
         // leads to a trusted root certificate.
-        try {
-            pathBuilder = CertPathBuilder.getInstance("PKIX", "BC");
-        } catch (Exception e) {
-            throw new MessagingException("Error during the creation of the certpathbuilder.", e);
-        }
+       pathBuilder = CertPathBuilder.getInstance("PKIX", "BC");
 
         X509CertSelector xcs = new X509CertSelector();
         xcs.setCertificate(cert);
@@ -265,27 +249,19 @@ public class CertUtils {
         } catch (CertPathBuilderException e) {
             // A certification path is not found, so null is returned.
             return null;
-        } catch (InvalidAlgorithmParameterException e) {
-            // If this exception is thrown an error has occured during
-            // certification path search. 
-            throw new MessagingException("Error during the certification path search.", e);
         }
-        
     }
 
-
-    public static CertValidatorResultVS verifyCertificate(Set<TrustAnchor> anchors,
+    public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,
                   boolean checkCRL, List<X509Certificate> certs) throws ExceptionVS {
         return verifyCertificate(anchors, checkCRL, certs, Calendar.getInstance().getTime());
     }
 
-    public static CertValidatorResultVS verifyCertificate(Set<TrustAnchor> anchors,
+    public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,
           boolean checkCRL, List<X509Certificate> certs, Date signingDate) throws ExceptionVS {
         try {
             PKIXParameters pkixParameters = new PKIXParameters(anchors);
             pkixParameters.setDate(signingDate);
-            CertExtensionCheckerVS checker = new CertExtensionCheckerVS();
-            pkixParameters.addCertPathChecker(checker);
             pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
             CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
             CertificateFactory certFact = CertificateFactory.getInstance("X.509");
@@ -297,71 +273,13 @@ public class CertUtils {
             //X509Certificate certCaResult = ta.getTrustedCert();
             //log.debug("certCaResult: " + certCaResult.getSubjectDN().toString()+
             //        "- serialNumber: " + certCaResult.getSerialNumber().longValue());
-            return new CertValidatorResultVS(checker, (PKIXCertPathValidatorResult)result);
+            return (PKIXCertPathValidatorResult)result;
         } catch(Exception ex) {
             String msg = "Empty cert list";
             if(certs != null && !certs.isEmpty()) msg = ex.getMessage() + " - cert: " +
                     certs.iterator().next().getSubjectDN();
             throw new ExceptionVS(msg, ex);
         }
-    }
-
-    public static byte[] getPEMEncoded (Object objectToEncode) throws IOException {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
-        if(objectToEncode instanceof Collection) {
-            Collection objectToEncodeColection = ((Collection)objectToEncode);
-            for(Object object : objectToEncodeColection) {
-                pemWrt.writeObject(object);
-            }
-        } else pemWrt.writeObject(objectToEncode);
-        pemWrt.close();
-        bOut.close();
-        return bOut.toByteArray();
-    }
-
-    public static byte[] getPEMEncoded (X509Certificate certificate) throws IOException {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
-        pemWrt.writeObject(certificate);
-        pemWrt.close();
-        bOut.close();
-        return bOut.toByteArray();
-    }
-
-    public static X509Certificate fromPEMToX509Cert (byte[] pemFileBytes) throws Exception {
-        InputStream in = new ByteArrayInputStream(pemFileBytes);
-        CertificateFactory fact = CertificateFactory.getInstance("X.509","BC");
-        X509Certificate x509Cert = (X509Certificate)fact.generateCertificate(in);
-        return x509Cert;
-    }
-	
-    public static Collection<X509Certificate> fromPEMToX509CertCollection (
-    		byte[] pemChainFileBytes) throws Exception {
-        InputStream in = new ByteArrayInputStream(pemChainFileBytes);
-        CertificateFactory fact = CertificateFactory.getInstance("X.509","BC");
-        Collection<X509Certificate> x509Certs = 
-                (Collection<X509Certificate>)fact.generateCertificates(in);
-        return x509Certs;
-    }
-
-    public static X509Certificate loadCertificate (byte[] certBytes) throws Exception {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(certBytes);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        Collection<X509Certificate> certificateChain =
-                (Collection<X509Certificate>) certificateFactory.generateCertificates(inputStream);
-        X509Certificate x509Cert = certificateChain.iterator().next();
-        inputStream.close();
-        return x509Cert;
-    }
-
-    public static PublicKey fromPEMToRSAPublicKey(byte[] pemBytes) throws Exception {
-        KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
-        PEMReader pemReader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(pemBytes)));
-        RSAPublicKey jcerSAPublicKey = (RSAPublicKey) pemReader.readObject();
-        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(jcerSAPublicKey.getEncoded());
-        PublicKey publicKey = factory.generatePublic(pubKeySpec);
-        return publicKey;
     }
 
     public static <T> T getCertExtensionData(Class<T> type, X509Certificate x509Certificate,
@@ -387,6 +305,16 @@ public class CertUtils {
         return certExtensionDto;
     }
 
+    public static X509Certificate loadCertificate (byte[] certBytes) throws Exception {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(certBytes);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        Collection<X509Certificate> certificateChain =
+                (Collection<X509Certificate>) certificateFactory.generateCertificates(inputStream);
+        X509Certificate x509Cert = certificateChain.iterator().next();
+        inputStream.close();
+        return x509Cert;
+    }
+
     /**
      * Checks whether given X.509 certificate is self-signed.
      *
@@ -408,23 +336,4 @@ public class CertUtils {
         }
     }
 
-    public static PKCS10CertificationRequest fromPEMToPKCS10CertificationRequest (byte[] csrBytes) throws Exception {
-        PEMReader pemReader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(csrBytes)));
-        PKCS10CertificationRequest result = (PKCS10CertificationRequest)pemReader.readObject();
-        pemReader.close();
-        return result;
-    }
-
-    public static class CertValidatorResultVS {
-        CertExtensionCheckerVS checker;
-        PKIXCertPathValidatorResult result;
-
-        public CertValidatorResultVS(CertExtensionCheckerVS checker, PKIXCertPathValidatorResult result) {
-            this.checker = checker;
-            this.result = result;
-        }
-
-        public CertExtensionCheckerVS getChecker() {return checker;}
-        public PKIXCertPathValidatorResult getResult() {return result;}
-    }
 }

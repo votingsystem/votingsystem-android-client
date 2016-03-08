@@ -281,7 +281,7 @@ public class TransactionVSContentProvider extends ContentProvider {
     public static ContentValues getContentValues(TransactionVSDto transactionVS) {
         ContentValues values = new ContentValues();
         values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
-        values.put(TransactionVSContentProvider.URL_COL, transactionVS.getMessageSMIMEURL());
+        values.put(TransactionVSContentProvider.URL_COL, transactionVS.getCmsMessageURL());
         if(transactionVS.getFromUserVS() != null) values.put(
                 TransactionVSContentProvider.FROM_USER_COL, transactionVS.getFromUserVS().getNIF());
         if(transactionVS.getToUserVS() != null) values.put(

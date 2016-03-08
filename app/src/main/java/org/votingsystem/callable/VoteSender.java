@@ -2,15 +2,15 @@ package org.votingsystem.callable;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,13 +26,13 @@ public class VoteSender implements Callable<ResponseVS> {
     public static final String TAG = VoteSender.class.getSimpleName();
 
     private VoteVSHelper voteVSHelper;
-    private SMIMEMessage accessRequest;
+    private CMSSignedMessage accessRequest;
 
     public VoteSender(VoteVSHelper voteVSHelper) {
         this.voteVSHelper = voteVSHelper;
     }
 
-    public VoteSender(VoteVSHelper voteVSHelper, SMIMEMessage accessRequest) {
+    public VoteSender(VoteVSHelper voteVSHelper, CMSSignedMessage accessRequest) {
         this.voteVSHelper = voteVSHelper;
         this.accessRequest = accessRequest;
     }
@@ -52,19 +52,19 @@ public class VoteSender implements Callable<ResponseVS> {
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME,
                     voteVSHelper.getCertificationRequest().getCsrPEM());
-            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, accessRequest.getBytes());
+            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, accessRequest.toPEM());
             responseVS = HttpHelper.sendObjectMap(mapToSend,
                     AppVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             voteVSHelper.getCertificationRequest().initSigner(responseVS.getMessageBytes());
-            SMIMEMessage signedVote = new MessageTimeStamper(voteVSHelper.getSMIMEVote()).call();
-            responseVS = HttpHelper.sendData(signedVote.getBytes(), ContentTypeVS.VOTE,
+            CMSSignedMessage signedVote = new MessageTimeStamper(voteVSHelper.getCMSVote()).call();
+            responseVS = HttpHelper.sendData(signedVote.toPEM(), ContentTypeVS.VOTE,
                     AppVS.getInstance().getControlCenter().getVoteServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 cancelAccessRequest(); //AccesRequest OK and Vote error -> Cancel access request
                 return responseVS;
             } else {
-                voteVSHelper.setVoteReceipt(responseVS.getSMIME());
+                voteVSHelper.setVoteReceipt(responseVS.getCMS());
                 responseVS.setData(voteVSHelper);
             }
         } catch(ExceptionVS ex) {
@@ -82,10 +82,10 @@ public class VoteSender implements Callable<ResponseVS> {
         try {
             String subject = AppVS.getInstance().getString(R.string.cancel_vote_msg_subject);
             String serviceURL = AppVS.getInstance().getAccessControl().getCancelVoteServiceURL();
-            SMIMEMessage smimeMessage = AppVS.getInstance().signMessage(AppVS.getInstance().getAccessControl().getName(),
+            CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(AppVS.getInstance().getAccessControl().getName(),
                     JSON.writeValueAsString(voteVSHelper.getVoteCanceler()), subject,
                     AppVS.getInstance().getTimeStampServiceURL());
-            return HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED, serviceURL);
+            return HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serviceURL);
         } catch(Exception ex) {
             ex.printStackTrace();
             return ResponseVS.EXCEPTION(ex.getMessage(),

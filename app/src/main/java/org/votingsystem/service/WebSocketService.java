@@ -8,7 +8,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -16,9 +15,10 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.CMSSignerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
-import org.votingsystem.activity.SMIMESignerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.AESParamsDto;
@@ -29,8 +29,6 @@ import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -42,6 +40,7 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
+import org.votingsystem.util.crypto.AESParams;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -300,7 +299,7 @@ public class WebSocketService extends Service {
                     Utils.showNewMessageNotification();
                     break;
                 case MESSAGEVS_SIGN:
-                    intent = new Intent(this, SMIMESignerActivity.class);
+                    intent = new Intent(this, CMSSignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
                     startActivity(intent);
@@ -362,12 +361,11 @@ public class WebSocketService extends Service {
                                     transactionDto.isTimeLimited(),  qrDto.getHashCertVS(),
                                     transactionDto.getTagName());
                             qrDto.setCurrency(currency);
-                            SMIMEMessage simeMessage = AppVS.getInstance().signMessage(
+                            CMSSignedMessage simeMessage = AppVS.getInstance().signMessage(
                                     qrDto.getHashCertVS(),
                                     new String(currency.getCertificationRequest().getCsrPEM()),
                                     getString(R.string.currency_change_subject));
-                            transactionDto.setMessageSMIME(
-                                    new String(Base64.encode(simeMessage.getBytes(), Base64.NO_WRAP)));
+                            transactionDto.setCmsMessagePEM(simeMessage.toPEMStr());
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
                                     JSON.getMapper().writeValueAsString(transactionDto),
                                     simeMessage, TypeVS.TRANSACTIONVS_INFO);
@@ -390,8 +388,9 @@ public class WebSocketService extends Service {
                         try {
                             QRMessageDto<TransactionVSDto> qrDto =
                                     (QRMessageDto<TransactionVSDto>) socketSession.getData();
-                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
-                            TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
+                            CMSSignedMessage cmsMessage = socketMsg.getCMS();
+                            TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+                            TypeVS typeVS = dto.getOperation();
                             if(TypeVS.CURRENCY_CHANGE == typeVS) {
                                 Currency currency = qrDto.getCurrency();
                                 currency.initSigner(socketMsg.getMessage().getBytes());
@@ -409,7 +408,7 @@ public class WebSocketService extends Service {
                                 Wallet.updateWallet(Arrays.asList(currency));
                             }
                             TransactionVSDto transactionDto = qrDto.getData();
-                            String result = transactionDto.validateReceipt(smimeMessage, true);
+                            String result = transactionDto.validateReceipt(cmsMessage, true);
                             intent.putExtra(ContextVS.MESSAGE_KEY, result);
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                             AppVS.getInstance().removeQRMessage(qrDto.getUUID());

@@ -2,15 +2,16 @@ package org.votingsystem.model;
 
 import android.util.Base64;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
@@ -52,7 +53,7 @@ public class CurrencyBatch {
     private String currencyCode;
     private String toUserIBAN;
     private String tag;
-    private SMIMEMessage smimeMessage;
+    private CMSSignedMessage cmsMessage;
     private Map<String, Currency> currencyMap;
 
     public CurrencyBatch() {}
@@ -77,7 +78,7 @@ public class CurrencyBatch {
     }
 
     public void validateTransactionVSResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
-        SMIMEMessage receipt = new SMIMEMessage(Base64.decode(((String) dataMap.get("receipt")).getBytes(), Base64.NO_WRAP));
+        CMSSignedMessage receipt = new CMSSignedMessage(Base64.decode(((String) dataMap.get("receipt")).getBytes(), Base64.NO_WRAP));
         if(dataMap.containsKey("leftOverCoin")) {
 
         }
@@ -90,12 +91,12 @@ public class CurrencyBatch {
             Map receiptData = (Map) dataMap.get(i);
             //TODO
             String hashCertVS = (String) receiptData.keySet().iterator().next();
-            SMIMEMessage smimeReceipt = new SMIMEMessage(
+            CMSSignedMessage cmsReceipt = new CMSSignedMessage(
                     Base64.decode(((String) receiptData.get(hashCertVS)).getBytes(), Base64.NO_WRAP));
             CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    smimeReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
+                    cmsReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
             Currency currency = currencyMap.remove(certExtensionDto.getHashCertVS());
-            currency.validateReceipt(smimeReceipt, trustAnchor);
+            currency.validateReceipt(cmsReceipt, trustAnchor);
         }
         if(currencyMap.size() != 0) throw new ExceptionVS(currencyMap.size() + " Currency transactions without receipt");
     }
@@ -143,7 +144,7 @@ public class CurrencyBatch {
     }
 
     public Currency initCurrency(String signedCsr) throws Exception {
-        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(
                 signedCsr.getBytes());
         if(certificates.isEmpty()) throw new ExceptionVS(
                 "Unable to init Currency. Certs not found on signed CSR");
@@ -285,12 +286,12 @@ public class CurrencyBatch {
         this.tag = tag;
     }
 
-    public SMIMEMessage getSmimeMessage() {
-        return smimeMessage;
+    public CMSSignedMessage getCMSMessage() {
+        return cmsMessage;
     }
 
-    public void setSmimeMessage(SMIMEMessage smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public void setCMSMessage(CMSSignedMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 
     public List<Currency> getCurrencyList() {

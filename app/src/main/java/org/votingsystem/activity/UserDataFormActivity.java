@@ -22,15 +22,13 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.AddressVS;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
@@ -38,16 +36,16 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Set;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -248,10 +246,7 @@ public class UserDataFormActivity extends AppCompatActivity {
             province.setError(getString(R.string.enter_province_error_lbl));
             return false;
         }
-        try {
-            InternetAddress emailAddr = new InternetAddress(mailText.getText().toString());
-            emailAddr.validate();
-        } catch (AddressException ex) {
+        if(!StringUtils.isValidEmail(mailText.getText())) {
             mailText.setError(getString(R.string.mail_missing_msg));
             return false;
         }
@@ -287,7 +282,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
                     if(!PrefUtils.isDNIeEnabled()) isConnectionRequired = false;
-                    new DataSender(responseVS.getSMIME(),
+                    new DataSender(responseVS.getCMS(),
                             new String(responseVS.getMessageBytes()).toCharArray()).execute();
                 }
                 break;
@@ -297,11 +292,11 @@ public class UserDataFormActivity extends AppCompatActivity {
 
     public class DataSender extends AsyncTask<String, String, ResponseVS> {
 
-        private SMIMEMessage smimeMessage;
+        private CMSSignedMessage cmsMessage;
         private char[] protectedPassword;
 
-        public DataSender(SMIMEMessage smimeMessage, char[] idCardPassw) {
-            this.smimeMessage = smimeMessage;
+        public DataSender(CMSSignedMessage cmsMessage, char[] idCardPassw) {
+            this.cmsMessage = cmsMessage;
             this.protectedPassword = idCardPassw;
         }
 
@@ -313,7 +308,7 @@ public class UserDataFormActivity extends AppCompatActivity {
         @Override protected ResponseVS doInBackground(String... urls) {
             ResponseVS responseVS = null;
             try {
-                responseVS = HttpHelper.sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                         AppVS.getInstance().getCurrencyServer().getCSRSignedWithIDCardServiceURL());
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -321,7 +316,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                 CertificationRequestVS certificationRequest = (CertificationRequestVS)
                         ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest().getBytes());
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
-                Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
+                Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(
                         responseVS.getMessageBytes());
                 X509Certificate x509Cert = certificates.iterator().next();
                 UserVSDto user = UserVSDto.getUserVS(x509Cert);

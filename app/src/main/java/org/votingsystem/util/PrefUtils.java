@@ -14,8 +14,8 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.Encryptor;
 
 import java.io.IOException;
 import java.util.Calendar;

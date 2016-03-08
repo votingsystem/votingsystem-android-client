@@ -223,13 +223,16 @@ public class Utils {
         }
     }
 
+    //http://www.pocketmagic.net/android-unique-device-id/
+    //requires adding a permission in AndroidManifest.xml -> android.permission.READ_PHONE_STATE
     public static String getDeviceId() {
         TelephonyManager telephonyManager = (TelephonyManager)AppVS.getInstance().getSystemService(
                 Context.TELEPHONY_SERVICE);
         // phone = telephonyManager.getLine1Number(); -> operator dependent
         //IMSI
         //phone = telephonyManager.getSubscriberId();
-        //the IMEI for GSM and the MEID or ESN for CDMA phones. Null if device ID is not available.
+        //the IMEI for GSM and the MEID or ESN for CDMA phones. Null if device ID is not available,
+        //only for Android devices with Phone use.
         String deviceId = telephonyManager.getDeviceId();
         if(deviceId == null || deviceId.trim().isEmpty()) {
             deviceId = android.os.Build.SERIAL;
