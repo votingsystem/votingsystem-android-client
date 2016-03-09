@@ -27,7 +27,7 @@ import java.util.Date;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class ClienteOCSP {
+public class OCSPClient {
 
     public static CertificateVSDto.State validateCert(X509Certificate certificate, BigInteger serialNumber,
                  Date checkDate) throws Exception {

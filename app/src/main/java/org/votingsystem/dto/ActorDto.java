@@ -2,7 +2,6 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -28,7 +27,6 @@ public class ActorDto implements java.io.Serializable {
     public enum State { SUSPENDED, OK, PAUSED;}
 
     private Long id;
-    private EnvironmentVS environmentMode;
     private String serverURL;
     private String name;
     private String timeStampServerURL;
@@ -82,14 +80,6 @@ public class ActorDto implements java.io.Serializable {
 
     public void setServerType(Type serverType) {
         this.serverType = serverType;
-    }
-
-    public EnvironmentVS getEnvironmentMode() {
-        return environmentMode;
-    }
-
-    public void setEnvironmentMode(EnvironmentVS environmentMode) {
-        this.environmentMode = environmentMode;
     }
 
     public void setServerURL(String serverURL) {

@@ -79,7 +79,7 @@ public class CMSUtils {
     }
 
     public static DERObject getSingleValuedSignedAttribute(AttributeTable signedAttrTable,
-                                                           DERObjectIdentifier attrOID, String printableName) throws CMSException {
+                           DERObjectIdentifier attrOID, String printableName) throws CMSException {
         if (signedAttrTable == null) return null;
         ASN1EncodableVector vector = signedAttrTable.getAll(attrOID);
         switch (vector.size()) {

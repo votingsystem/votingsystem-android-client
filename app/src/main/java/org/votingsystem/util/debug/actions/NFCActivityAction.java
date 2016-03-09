@@ -27,7 +27,7 @@ public class NFCActivityAction implements DebugAction {
                 Intent intent = new Intent(appContext, ID_CardNFCReaderActivity.class);
                 //intent.putExtra(ContextVS.OPERATIONVS_KEY, TypeVS.CURRENCY_REQUEST);
                 intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, "message content");
-                intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, "smime message subject");
+                intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, "cms message subject");
                 intent.putExtra(ContextVS.MESSAGE_KEY, "Do you want to sign the message?");
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 appContext.startActivity(intent);

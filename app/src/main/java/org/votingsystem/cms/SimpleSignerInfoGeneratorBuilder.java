@@ -17,6 +17,9 @@ import java.security.Provider;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class SimpleSignerInfoGeneratorBuilder {
   private Helper helper;
 

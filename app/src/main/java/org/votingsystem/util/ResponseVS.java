@@ -52,7 +52,7 @@ public class ResponseVS<T> implements Parcelable {
     private T data;
     private TypeVS typeVS;
     private CMSSignedMessage cmsMessage;
-    private byte[] cmsMessageBytes;
+    private byte[] cmsPEMMessageBytes;
     private ContentTypeVS contentType = ContentTypeVS.TEXT;
     private byte[] messageBytes;
     private Uri uri;
@@ -78,8 +78,8 @@ public class ResponseVS<T> implements Parcelable {
         contentType = (ContentTypeVS) source.readSerializable();
         messageBytes = new byte[source.readInt()];
         source.readByteArray(messageBytes);
-        cmsMessageBytes = new byte[source.readInt()];
-        source.readByteArray(cmsMessageBytes);
+        cmsPEMMessageBytes = new byte[source.readInt()];
+        source.readByteArray(cmsPEMMessageBytes);
         uri = source.readParcelable(Uri.class.getClassLoader());
     }
 
@@ -244,10 +244,10 @@ public class ResponseVS<T> implements Parcelable {
 	}
 
     public CMSSignedMessage getCMS() {
-        if(cmsMessage == null && (cmsMessageBytes != null || messageBytes != null)) {
+        if(cmsMessage == null && (cmsPEMMessageBytes != null || messageBytes != null)) {
             try {
-                byte[] cmsBytes = (cmsMessageBytes != null)? cmsMessageBytes:messageBytes;
-                cmsMessage = new CMSSignedMessage(cmsBytes);
+                byte[] cmsBytes = (cmsPEMMessageBytes != null)? cmsPEMMessageBytes :messageBytes;
+                cmsMessage = CMSSignedMessage.FROM_PEM(cmsBytes);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
@@ -339,7 +339,7 @@ public class ResponseVS<T> implements Parcelable {
         }
         if(cmsMessage != null) {
             try {
-                byte[] cmsMessageBytes = cmsMessage.getEncoded();
+                byte[] cmsMessageBytes = cmsMessage.toPEM();
                 parcel.writeInt(cmsMessageBytes.length);
                 parcel.writeByteArray(cmsMessageBytes);
             } catch(Exception ex) {

@@ -31,8 +31,8 @@ public class ContextVS {
     public static final String WALLET_FILE_NAME                = "wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
     public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentTypeVS.TEXT.getName();
-    public static final String CMS_FILE_NAME                 = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String CMS_ANONYMOUS_FILE_NAME       = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CMS_FILE_NAME                   = "cms" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CMS_ANONYMOUS_FILE_NAME         = "cmsAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String DEFAULT_SIGNED_FILE_NAME        = "cmsMessage.p7m";

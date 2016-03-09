@@ -49,7 +49,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class CMSSignedMessage extends CMSSignedData {
 
     private static Logger log = Logger.getLogger(CMSSignedMessage.class.getName());

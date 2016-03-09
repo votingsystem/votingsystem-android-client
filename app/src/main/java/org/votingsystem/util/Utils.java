@@ -102,7 +102,7 @@ public class Utils {
 
     public static Uri createTempFile(byte[] fileBytes, Context context) throws IOException {
         Uri result = null;
-        File tempFile = File.createTempFile("smime", ".p7s", context.getExternalCacheDir());
+        File tempFile = File.createTempFile("cms", ".p7s", context.getExternalCacheDir());
         try {
             tempFile.createNewFile();
             FileOutputStream fo = new FileOutputStream(tempFile);

@@ -20,9 +20,7 @@ import org.bouncycastle2.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
 import org.bouncycastle2.operator.OperatorCreationException;
-import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,11 +38,9 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -64,25 +60,6 @@ public class Encryptor {
 	public static final String TAG = Encryptor.class.getSimpleName();
 
 	private  Encryptor() { }
-
-    public static EncryptedBundleVS decryptEncryptedBundle(EncryptedBundleVS encryptedBundleVS,
-               PrivateKey privateKey) throws Exception {
-        byte[] decriptedMsgBytes = decryptCMS(encryptedBundleVS.getEncryptedMessageBytes(),
-                privateKey);
-        CMSSignedMessage cmsMessage = new CMSSignedMessage(decriptedMsgBytes);
-        encryptedBundleVS.setStatusCode(ResponseVS.SC_OK);
-        encryptedBundleVS.setDecryptedCMSMessage(cmsMessage);
-        return encryptedBundleVS;
-    }
-
-    public static List<EncryptedBundleVS> decryptEncryptedBundleList(
-            List<EncryptedBundleVS> encryptedBundleVSList, PrivateKey privateKey) throws Exception {
-        List<EncryptedBundleVS> result = new ArrayList<EncryptedBundleVS>();
-        for(EncryptedBundleVS encryptedBundleVS : encryptedBundleVSList) {
-            result.add(decryptEncryptedBundle(encryptedBundleVS, privateKey));
-        }
-        return result;
-    }
 
     public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert)
             throws CertificateEncodingException, OperatorCreationException, CMSException, IOException {
@@ -115,7 +92,7 @@ public class Encryptor {
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
             InputStream           dataStream = recData.getContentStream();
             ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
-            byte[]                buf = new byte[4096];
+            byte[] buf = new byte[4096];
             int len = 0;
             while ((len = dataStream.read(buf)) >= 0) {
                 dataOut.write(buf, 0, len);
@@ -155,26 +132,6 @@ public class Encryptor {
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(bundle.getIV()));
         return cipher.doFinal(bundle.getCipherText());
     }
-
-    /*public static String encryptAES(String messageToEncrypt, AESParams params) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, params.getKey(), params.getIV());
-        byte[] encryptedMessage = cipher.doFinal(messageToEncrypt.getBytes("UTF-8"));
-        return new String(org.bouncycastle2.util.encoders.Base64.encode(encryptedMessage));
-    }*/
-
-    /*public static String decryptAES(String messageToDecrypt, AESParams params) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, params.getKey(), params.getIV());
-        byte[] encryptedMessageBytes = org.bouncycastle2.util.encoders.Base64.decode(
-                messageToDecrypt.getBytes("UTF-8"));
-        byte[] decryptedBytes = cipher.doFinal(encryptedMessageBytes);
-        return new String(decryptedBytes, "UTF8");
-    }*/
 
     //BC provider to avoid key length restrictions on normal jvm
     public static String encryptAES(String messageToEncrypt, AESParams aesParams) throws
