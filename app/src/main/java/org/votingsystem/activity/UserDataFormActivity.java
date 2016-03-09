@@ -70,7 +70,6 @@ public class UserDataFormActivity extends AppCompatActivity {
     private UserVSDto userVSDto;
     private char[] password;
     private CryptoDeviceAccessMode.Mode accessMode;
-    private boolean isConnectionRequired = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -281,7 +280,6 @@ public class UserDataFormActivity extends AppCompatActivity {
             case RC_SIGN_USER_DATA:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    if(!PrefUtils.isDNIeEnabled()) isConnectionRequired = false;
                     new DataSender(responseVS.getCMS(),
                             new String(responseVS.getMessageBytes()).toCharArray()).execute();
                 }
@@ -337,6 +335,8 @@ public class UserDataFormActivity extends AppCompatActivity {
                     if(passwordAccessMode == null) {
                         passwordAccessMode = new CryptoDeviceAccessMode(accessMode, password);
                         PrefUtils.putCryptoDeviceAccessMode(passwordAccessMode);
+                        PrefUtils.putProtectedPassword(passwordAccessMode.getMode(),
+                                password, protectedPassword);
                     }
                     AppVS.getInstance().setToken(newToken);
                 } catch (Exception ex) { ex.printStackTrace();}
