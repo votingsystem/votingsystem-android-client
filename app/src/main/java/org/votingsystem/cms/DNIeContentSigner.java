@@ -18,7 +18,7 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
-import static org.votingsystem.util.ContextVS.DNIe_SIGN_MECHANISM;
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.ContextVS.PROVIDER;
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -51,7 +51,7 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     @Override public AlgorithmIdentifier getAlgorithmIdentifier() {
-        return new DefaultSignatureAlgorithmIdentifierFinder().find(DNIe_SIGN_MECHANISM);
+        return new DefaultSignatureAlgorithmIdentifierFinder().find(SIGNATURE_ALGORITHM);
     }
 
     @Override public OutputStream getOutputStream() {
@@ -83,7 +83,7 @@ public class DNIeContentSigner implements ContentSigner {
         byte[] getSignature() {
             byte[] sigBytes = null;
             try {
-                Signature signature = Signature.getInstance(DNIe_SIGN_MECHANISM, "DNIeJCAProvider");
+                Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM, "DNIeJCAProvider");
                 signature.initSign(privateKey);
                 signature.update(bOut.toByteArray());
                 sigBytes = signature.sign();

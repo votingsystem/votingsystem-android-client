@@ -10,6 +10,7 @@ import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -234,24 +235,16 @@ public class VoteVSDto implements Serializable {
     }
 
     public VoteVSDto loadSignatureData(X509Certificate x509Certificate,
-                                       TimeStampToken timeStampToken) throws IOException {
+                                       TimeStampToken timeStampToken) throws Exception {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
-        byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
-        if(voteExtensionValue != null) {
-            DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
-            VoteCertExtensionDto certExtensionDto = JSON.readValue(((DERUTF8String) voteCertDataDER.getObject()).toString(),
-                    VoteCertExtensionDto.class);
-            this.accessControlEventVSId = certExtensionDto.getEventId();
-            this.accessControlURL = certExtensionDto.getAccessControlURL();
-            this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
-        }
-        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
-        if(representativeURLExtensionValue != null) {
-            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    representativeURLExtensionValue);
-            setRepresentativeURL(((DERUTF8String) representativeURL_DER.getObject()).toString());
-        }
+        VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class,
+                x509Certificate, ContextVS.VOTE_OID);
+        this.accessControlEventVSId = certExtensionDto.getEventId();
+        this.accessControlURL = certExtensionDto.getAccessControlURL();
+        this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
+        this.representativeURL = CertUtils.getCertExtensionData(x509Certificate,
+                ContextVS.REPRESENTATIVE_VOTE_OID);
         return this;
     }
 

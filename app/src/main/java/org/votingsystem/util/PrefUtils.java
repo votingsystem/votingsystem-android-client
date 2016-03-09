@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import static org.votingsystem.util.ContextVS.APPLICATION_ID_KEY;
-import static org.votingsystem.util.ContextVS.VOTING_SYSTEM_PRIVATE_PREFS;
+import static org.votingsystem.util.ContextVS.PRIVATE_PREFS;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 
@@ -46,7 +46,7 @@ public class PrefUtils {
 
     public static void init() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         //initialize listened keys
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, false).commit();
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
@@ -58,25 +58,25 @@ public class PrefUtils {
 
     public static void markDataBootstrapDone() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, true).commit();
     }
 
     public static void markAccessControlLoaded(String accessControlURL) {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL).commit();
     }
 
     public static boolean isDataBootstrapDone() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getBoolean(ContextVS.BOOTSTRAP_DONE, false);
     }
 
     public static String getDeviceId()  {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         String applicationId = settings.getString(ContextVS.APPLICATION_ID_KEY, null);
         if(applicationId == null) {
             applicationId = Utils.getDeviceId();
@@ -91,7 +91,7 @@ public class PrefUtils {
     public static void putDNIeEnabled(boolean enabled) {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
             editor.putBoolean(ContextVS.DNIE_KEY, enabled);
             editor.commit();
@@ -99,7 +99,7 @@ public class PrefUtils {
     }
 
     public static boolean isDNIeEnabled() {
-        SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+        SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         return pref.getBoolean(ContextVS.DNIE_KEY, false);
     }
@@ -107,7 +107,7 @@ public class PrefUtils {
     public static void putDNIeCAN(String CAN) {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(ContextVS.CAN_KEY, CAN.trim());
             editor.commit();
@@ -116,13 +116,13 @@ public class PrefUtils {
 
     public static String getDNIeCAN() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         return sp.getString(ContextVS.CAN_KEY, null);
     }
 
     public static Calendar getLastPendingOperationCheckedTime() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         Calendar lastCheckedTime = Calendar.getInstance();
         lastCheckedTime.setTimeInMillis(sp.getLong(ContextVS.PENDING_OPERATIONS_LAST_CHECKED_KEY, 0L));
         return lastCheckedTime;
@@ -131,19 +131,19 @@ public class PrefUtils {
     public static void registerPreferenceChangeListener(
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.registerOnSharedPreferenceChangeListener(listener);
     }
 
     public static void unregisterPreferenceChangeListener(
             SharedPreferences.OnSharedPreferenceChangeListener listener) {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
     public static Date getCurrencyAccountsLastCheckDate() {
-        SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.VOTING_SYSTEM_PRIVATE_PREFS,
+        SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         GregorianCalendar lastCheckedTime = new GregorianCalendar();
         lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY, 0));
@@ -157,7 +157,7 @@ public class PrefUtils {
         Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = AppVS.getInstance().getSharedPreferences(
-                ContextVS.VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                ContextVS.PRIVATE_PREFS, Context.MODE_PRIVATE);
         String balancesStr = pref.getString(editorKey, null);
         try {
             return JSON.readValue(balancesStr, BalancesDto.class);
@@ -167,7 +167,7 @@ public class PrefUtils {
 
     public static void putBalances(BalancesDto balancesDto, TimePeriod timePeriod) throws Exception {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());
@@ -180,7 +180,7 @@ public class PrefUtils {
 
     public static void resetPasswordRetries() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(ContextVS.RETRIES_KEY, 0);
         editor.commit();
@@ -188,7 +188,7 @@ public class PrefUtils {
 
     public static int incrementPasswordRetries() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         int numRetries = settings.getInt(ContextVS.RETRIES_KEY, 0) + 1;
         if(numRetries >= ContextVS.NUM_MAX_PASSW_RETRIES) {
             LOGD(TAG, "NUM. MAX RETRIES EXCEEDED (3). Resseting CryptoDeviceAccessMode");
@@ -208,7 +208,7 @@ public class PrefUtils {
             EncryptedBundleDto ebDto = Encryptor.pbeAES_Encrypt(
                     new String(passw) , new String(passwordToEncrypt).getBytes()).toDto();
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(ContextVS.PROTECTED_PASSWORD_KEY, JSON.writeValueAsString(ebDto));
             editor.commit();
@@ -223,7 +223,7 @@ public class PrefUtils {
         char[] password = null;
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    PRIVATE_PREFS, Context.MODE_PRIVATE);
             String dtoStr = settings.getString(ContextVS.PROTECTED_PASSWORD_KEY, null);
             if(dtoStr != null) {
                 EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
@@ -242,7 +242,7 @@ public class PrefUtils {
                                  char[] token) throws Exception {
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    PRIVATE_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
             String encryptedWallet = null;
             if(currencyCollection != null) {
@@ -262,7 +262,7 @@ public class PrefUtils {
         Set<Currency> result = null;
         try {
             SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                    VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                    PRIVATE_PREFS, Context.MODE_PRIVATE);
             String dtoStr = settings.getString(ContextVS.WALLET_FILE_NAME, null);
             if(dtoStr != null) {
                 EncryptedBundleDto ebDto = JSON.readValue(dtoStr, EncryptedBundleDto.class);
@@ -279,13 +279,13 @@ public class PrefUtils {
 
     public static String getCsrRequest() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         return settings.getString(ContextVS.CSR_KEY, null);
     }
 
     public static void putCsrRequest(CertificationRequestVS certificationRequest) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
         try {
@@ -296,7 +296,7 @@ public class PrefUtils {
 
     public static void putAppUser(UserVSDto userVS) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
         try {
@@ -307,7 +307,7 @@ public class PrefUtils {
 
     public static UserVSDto getAppUser() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedUserVS = settings.getString(ContextVS.USER_KEY, null);
         if(serializedUserVS != null) {
             UserVSDto userVS = (UserVSDto) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
@@ -318,7 +318,7 @@ public class PrefUtils {
 
     public static void putRepresentationState(RepresentationStateDto stateDto) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         try {
             editor.putString(RepresentationStateDto.class.getSimpleName(),
@@ -331,7 +331,7 @@ public class PrefUtils {
     public static RepresentationStateDto getRepresentationState() {
         if(representation != null) return representation;
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         String stateJSON = settings.getString(
                 RepresentationStateDto.class.getSimpleName(), null);
         if(stateJSON != null) {
@@ -344,7 +344,7 @@ public class PrefUtils {
 
     public static void putAnonymousDelegation(RepresentativeDelegationDto delegation) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         RepresentationStateDto representation = null;
         String serializedDelegation = null;
@@ -368,7 +368,7 @@ public class PrefUtils {
     public static RepresentativeDelegationDto getAnonymousDelegation() {
         if(representativeDelegationDto != null) return representativeDelegationDto;
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serializedObject = settings.getString(
                 ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, null);
         if(serializedObject != null) {
@@ -380,7 +380,7 @@ public class PrefUtils {
 
     public static void putCryptoDeviceAccessMode(CryptoDeviceAccessMode passwAccessMode) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         if(passwAccessMode == null) {
             editor.putString(CRYPTO_DEVICE_ACCESS_MODE_KEY, null);
@@ -395,7 +395,7 @@ public class PrefUtils {
 
     public static CryptoDeviceAccessMode getCryptoDeviceAccessMode() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
-                VOTING_SYSTEM_PRIVATE_PREFS, Context.MODE_PRIVATE);
+                PRIVATE_PREFS, Context.MODE_PRIVATE);
         String serialized = settings.getString(CRYPTO_DEVICE_ACCESS_MODE_KEY, null);
         CryptoDeviceAccessMode result = null;
         if(serialized != null) {

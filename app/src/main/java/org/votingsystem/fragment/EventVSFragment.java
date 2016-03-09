@@ -128,7 +128,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
             if(cmsMessage != null) {
                 try {
-                    startIntent.putExtra(ContextVS.CMS_MSG_KEY, cmsMessage.toPEM());
+                    startIntent.putExtra(ContextVS.CMS_MSG_KEY, cmsMessage.getEncoded());
                 } catch (Exception e) { e.printStackTrace(); }
             }
             voteVSHelper = VoteVSHelper.load(new VoteVSDto(eventVS, optionSelected));

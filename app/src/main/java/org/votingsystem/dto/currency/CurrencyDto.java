@@ -70,7 +70,7 @@ public class CurrencyDto implements Serializable {
         CertificationRequestInfo info = csrPKCS10.getCertificationRequestInfo();
         String subjectDN = info.getSubject().toString();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                csrPKCS10, ContextVS.CURRENCY_TAG);
+                csrPKCS10, ContextVS.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
         hashCertVS = certExtensionDto.getHashCertVS();

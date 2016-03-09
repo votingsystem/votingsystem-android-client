@@ -28,7 +28,7 @@ public class CryptoDeviceAccessMode implements Serializable {
     public CryptoDeviceAccessMode(Mode mode, char[] passw) {
         try {
             this.mode = mode;
-            this.hashBase64 = StringUtils.getHashBase64(new String(passw), ContextVS.VOTING_DATA_DIGEST);
+            this.hashBase64 = StringUtils.getHashBase64(new String(passw), ContextVS.DATA_DIGEST_ALGORITHM);
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
@@ -51,7 +51,7 @@ public class CryptoDeviceAccessMode implements Serializable {
     public boolean validateHash(String passw, AppCompatActivity activity) {
         int numRetries = -1;
         try {
-            String passwHash = StringUtils.getHashBase64(passw, ContextVS.VOTING_DATA_DIGEST);
+            String passwHash = StringUtils.getHashBase64(passw, ContextVS.DATA_DIGEST_ALGORITHM);
             if(!hashBase64.equals(passwHash)) {
                 numRetries = PrefUtils.incrementPasswordRetries();
                 throw new ExceptionVS(activity.getString(R.string.password_error_msg) + ", " +

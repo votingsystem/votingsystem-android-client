@@ -127,7 +127,7 @@ public class QRMessageDto<T> implements Serializable {
 
     public void createRequest() throws NoSuchAlgorithmException {
         this.origingHashCertVS = java.util.UUID.randomUUID().toString();
-        this.hashCertVS = StringUtils.getHashBase64(origingHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        this.hashCertVS = StringUtils.getHashBase64(origingHashCertVS, ContextVS.DATA_DIGEST_ALGORITHM);
     }
 
     public String getUUID() {

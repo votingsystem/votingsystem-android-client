@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.votingsystem.util.ContextVS.PROVIDER;
-import static org.votingsystem.util.ContextVS.VOTE_SIGN_MECHANISM;
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -50,16 +50,16 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         VoteVSHelper voteVSHelper = new VoteVSHelper();
         voteVSHelper.originHashAccessRequest = UUID.randomUUID().toString();
         voteVSHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
+                voteVSHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
         voteVSHelper.originHashCertVote = UUID.randomUUID().toString();
         voteVSHelper.hashCertVSBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
+                voteVSHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
         voteVSHelper.eventVSId = voteVSDto.getEventVS().getId();
         voteVSHelper.eventVSURL = voteVSDto.getEventVS().getURL();
         voteVSHelper.eventVS = voteVSDto.getEventVS();
         voteVSHelper.genVote(voteVSDto.getOptionSelected());
         voteVSHelper.certificationRequest = CertificationRequestVS.getVoteRequest(
-                VOTE_SIGN_MECHANISM, PROVIDER,
+                SIGNATURE_ALGORITHM, PROVIDER,
                 voteVSDto.getEventVS().getAccessControl().getServerURL(),
                 voteVSDto.getEventVS().getId(),
                 voteVSHelper.hashCertVSBase64);

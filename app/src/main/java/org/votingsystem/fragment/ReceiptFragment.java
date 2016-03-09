@@ -226,9 +226,9 @@ public class ReceiptFragment extends Fragment {
                     receiptSubjectStr = voteVSHelper.getEventVS().getSubject();
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperCMS.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime(), "HH:mm");
+                    VoteVSDto vsDto = receiptWrapper.getReceipt().getSignedContent(VoteVSDto.class);
                     contentFormatted = getString(R.string.votevs_info_formatted,
-                            voteVSHelper.getVote().getOptionSelected().getContent(),
-                            receiptWrapper.getReceipt().getSignedContent());
+                            dateStr, vsDto.getOptionSelected().getContent());
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
                     RepresentativeDelegationDto delegation =  receiptWrapper.getReceipt()

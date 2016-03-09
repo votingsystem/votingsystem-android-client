@@ -212,7 +212,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         delegationDto.setDelegationReceipt(responseVS.getCMS(),
                                 AppVS.getInstance().getAccessControl().getCertificate());
-                        CMSSignedMessage delegationReceipt = new CMSSignedMessage(responseVS.getMessageBytes());
+                        CMSSignedMessage delegationReceipt = CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes());
                         Collection matches = delegationReceipt.checkSignerCert(
                                 AppVS.getInstance().getAccessControl().getCertificate());
                         if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");

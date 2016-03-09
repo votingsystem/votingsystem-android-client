@@ -2,9 +2,11 @@ package org.votingsystem.util.crypto;
 
 import android.util.Log;
 
+import org.bouncycastle2.asn1.ASN1Object;
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.ASN1Set;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.asn1.cms.Attribute;
@@ -69,6 +71,8 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+import custom.org.apache.harmony.security.asn1.ASN1Primitive;
+
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -107,7 +111,7 @@ public class CertUtils {
         certGen.setNotAfter(dateFinish);
         certGen.setSubjectDN(x509Principal);
         certGen.setPublicKey(requestPublicKey);
-        certGen.setSignatureAlgorithm(ContextVS.VOTE_SIGN_MECHANISM);
+        certGen.setSignatureAlgorithm(ContextVS.SIGNATURE_ALGORITHM);
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
                 new SubjectKeyIdentifierStructure(requestPublicKey));
         certGen.addExtension(X509Extensions.BasicConstraints, true,
@@ -286,23 +290,38 @@ public class CertUtils {
                                              String extensionOID) throws Exception {
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
         if(extensionValue == null) return null;
-        DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
-        String extensionData = ((DERUTF8String) derTaggedObject.getObject()).getString();
+        DERSet derSet = (DERSet) X509ExtensionUtil.fromExtensionValue(extensionValue);
+        String extensionData = ((DERUTF8String) derSet.getObjectAt(0)).getString();
         return JSON.readValue(extensionData, type);
     }
 
-    public static <T> T getCertExtensionData(Class<T> type, PKCS10CertificationRequest csr, int tagNo) throws Exception {
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        Enumeration csrAttributes = info.getAttributes().getObjects();
-        T certExtensionDto = null;
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            if(attribute.getTagNo() == tagNo) {
-                String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
-                certExtensionDto = JSON.readValue(certAttributeJSONStr, type);
+    public static String getCertExtensionData(X509Certificate x509Certificate, String extensionOID) throws Exception {
+        byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
+        if(extensionValue == null) return null;
+        ASN1Object asn1Object = X509ExtensionUtil.fromExtensionValue(extensionValue);
+        if(asn1Object instanceof ASN1Set) {
+            return ((ASN1Set) asn1Object).getObjectAt(0).toString();
+        }
+        return null;
+    }
+
+    public static <T> T getCertExtensionData(Class<T> type, PKCS10CertificationRequest csr, String oid) throws Exception {
+        ASN1Set asn1Set = csr.getCertificationRequestInfo().getAttributes();
+        if(asn1Set.getObjects() != null) {
+            Enumeration ASN1SetEnum = asn1Set.getObjects();
+            while(ASN1SetEnum.hasMoreElements()) {
+                Object object = ASN1SetEnum.nextElement();
+                if(object instanceof org.bouncycastle2.asn1.pkcs.Attribute) {
+                    Attribute attribute = (Attribute) object;
+                    if(attribute.getAttrType().getId().equals(oid)) {
+                        String certAttributeJSONStr = ((DERUTF8String)attribute.getAttrValues().getObjectAt(0)).getString();
+                        return JSON.getMapper().readValue(certAttributeJSONStr, type);
+                    }
+                }
             }
         }
-        return certExtensionDto;
+        LOGD(TAG, "missing attribute with oid: " + oid);
+        return null;
     }
 
     public static X509Certificate loadCertificate (byte[] certBytes) throws Exception {
