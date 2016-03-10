@@ -80,7 +80,7 @@ public class TransactionVSDto implements Serializable {
 
     @JsonIgnore private TagVSDto tagVS;
     @JsonIgnore private CMSSignedMessage cmsMessage;
-    @JsonIgnore private CMSSignedMessage cancelationMessageCMS;
+    @JsonIgnore private CMSSignedMessage cancelationCmsMessage;
     @JsonIgnore private List<UserVSDto> toUserVSList;
     @JsonIgnore private SocketMessageDto socketMessageDto;
     @JsonIgnore private UserVSDto signer;
@@ -189,16 +189,16 @@ public class TransactionVSDto implements Serializable {
         this.cmsMessagePEM = cmsMessage.toPEMStr();
     }
 
-    public CMSSignedMessage getCancelationMessageCMS() throws Exception {
-        if(cancelationMessageCMS == null && cmsCancelationMessagePEM != null) {
-            cancelationMessageCMS = CMSSignedMessage.FROM_PEM(cmsCancelationMessagePEM);
+    public CMSSignedMessage getCancelationCmsMessage() throws Exception {
+        if(cancelationCmsMessage == null && cmsCancelationMessagePEM != null) {
+            cancelationCmsMessage = CMSSignedMessage.FROM_PEM(cmsCancelationMessagePEM);
         }
-        return cancelationMessageCMS;
+        return cancelationCmsMessage;
     }
 
-    public void setCancelationMessageCMS(CMSSignedMessage cancelationMessageCMS) throws IOException {
-        this.cancelationMessageCMS = cancelationMessageCMS;
-        this.cmsCancelationMessagePEM = cancelationMessageCMS.toPEMStr();
+    public void setCancelationCmsMessage(CMSSignedMessage cancelationCmsMessage) throws IOException {
+        this.cancelationCmsMessage = cancelationCmsMessage;
+        this.cmsCancelationMessagePEM = cancelationCmsMessage.toPEMStr();
     }
 
     public String getCmsCancelationMessagePEM() {

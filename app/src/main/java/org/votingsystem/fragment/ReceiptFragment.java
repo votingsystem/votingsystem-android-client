@@ -34,7 +34,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.service.VoteService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -48,7 +48,7 @@ import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import java.util.Date;
 
@@ -113,11 +113,11 @@ public class ReceiptFragment extends Fragment {
         }
     };
 
-    private void launchVoteCancelation(VoteVSHelper voteVSHelper) {
+    private void launchVoteCancelation(VoteHelper voteHelper) {
         Intent startIntent = new Intent(getActivity(), VoteService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+        startIntent.putExtra(ContextVS.VOTE_KEY, voteHelper);
         setProgressDialogVisible(getString(R.string.loading_data_msg),
                 getString(R.string.loading_info_msg), true);
         getActivity().startService(startIntent);
@@ -222,12 +222,12 @@ public class ReceiptFragment extends Fragment {
                             currencyDto.getCurrencyServerURL());
                     break;
                 case SEND_VOTE:
-                    VoteVSHelper voteVSHelper = (VoteVSHelper) receiptWrapper;
-                    receiptSubjectStr = voteVSHelper.getEventVS().getSubject();
+                    VoteHelper voteHelper = (VoteHelper) receiptWrapper;
+                    receiptSubjectStr = voteHelper.getEventVS().getSubject();
                     dateStr = DateUtils.getDayWeekDateStr(receiptWrapperCMS.getSigner().
                             getTimeStampToken().getTimeStampInfo().getGenTime(), "HH:mm");
-                    VoteVSDto vsDto = receiptWrapper.getReceipt().getSignedContent(VoteVSDto.class);
-                    contentFormatted = getString(R.string.votevs_info_formatted,
+                    VoteDto vsDto = receiptWrapper.getReceipt().getSignedContent(VoteDto.class);
+                    contentFormatted = getString(R.string.vote_info_formatted,
                             dateStr, vsDto.getOptionSelected().getContent());
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
@@ -284,7 +284,7 @@ public class ReceiptFragment extends Fragment {
         }
         switch(receiptWrapper.getTypeVS()) {
             case SEND_VOTE:
-                if(((VoteVSHelper)receiptWrapper).getEventVS().getDateFinish().before(
+                if(((VoteHelper)receiptWrapper).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
                     menu.removeItem(R.id.cancel_vote);
                 }
@@ -372,8 +372,8 @@ public class ReceiptFragment extends Fragment {
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
                 case R.id.check_receipt:
-                    if(receiptWrapper instanceof VoteVSHelper) {
-                        new VoteVSChecker().execute(((VoteVSHelper)receiptWrapper).getHashCertVSBase64());
+                    if(receiptWrapper instanceof VoteHelper) {
+                        new VoteChecker().execute(((VoteHelper)receiptWrapper).getHashCertVSBase64());
                     }
                     return true;
                 case R.id.delete_item:
@@ -398,7 +398,7 @@ public class ReceiptFragment extends Fragment {
                 case R.id.cancel_vote:
                     dialog = new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.cancel_vote_lbl)).
                             setMessage(Html.fromHtml(getString(R.string.cancel_vote_from_receipt_msg,
-                                    ((VoteVSHelper) receiptWrapper).getEventVS().getSubject())))
+                                    ((VoteHelper) receiptWrapper).getEventVS().getSubject())))
                                     .setPositiveButton(getString(R.string.ok_lbl),
                                             new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int whichButton) {
@@ -426,13 +426,13 @@ public class ReceiptFragment extends Fragment {
             case RC_CANCEL_VOTE:
                 if(Activity.RESULT_OK == resultCode) {
                     ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    launchVoteCancelation((VoteVSHelper) receiptWrapper);
+                    launchVoteCancelation((VoteHelper) receiptWrapper);
                 }
                 break;
         }
     }
 
-    private class VoteVSChecker extends AsyncTask<String, Void, ResponseVS> {
+    private class VoteChecker extends AsyncTask<String, Void, ResponseVS> {
 
         @Override protected void onPostExecute(ResponseVS responseVS) {
             super.onPostExecute(responseVS);
@@ -441,10 +441,10 @@ public class ReceiptFragment extends Fragment {
                     responseVS, getFragmentManager());
             else {
                 try {
-                    VoteVSDto voteVSDtoDto = (VoteVSDto) responseVS.getMessage(org.votingsystem.dto.voting.VoteVSDto.class);
+                    VoteDto voteDtoDto = (VoteDto) responseVS.getMessage(VoteDto.class);
                     MessageDialogFragment.showDialog(ResponseVS.SC_OK,
-                            MsgUtils.getVoteVSStateMsg(voteVSDtoDto.getState(), getActivity()),
-                            getString(R.string.votvs_value_msg, voteVSDtoDto.getOptionSelected().getContent()),
+                            MsgUtils.getVoteStateMsg(voteDtoDto.getState(), getActivity()),
+                            getString(R.string.votvs_value_msg, voteDtoDto.getOptionSelected().getContent()),
                             getFragmentManager());
                 } catch (Exception ex) {ex.printStackTrace();}
             }
@@ -461,7 +461,7 @@ public class ReceiptFragment extends Fragment {
             try {
                 String hashHex = StringUtils.toHex(params[0]);
                 responseVS = HttpHelper.getData(appVS.getAccessControl().
-                        getVoteVSCheckServiceURL(hashHex), ContentTypeVS.JSON);
+                        getVoteCheckServiceURL(hashHex), ContentTypeVS.JSON);
             } catch(Exception ex) {
                 responseVS = ResponseVS.EXCEPTION(ex, getActivity());
             } finally {return responseVS;}
@@ -484,7 +484,7 @@ public class ReceiptFragment extends Fragment {
         @Override  protected void onPostExecute(ResponseVS responseVS) {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    receiptWrapper.setReceiptBytes(responseVS.getMessageBytes());
+                    receiptWrapper.setReceipt(CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes()));
                     if(transactionDto != null) {
                         transactionDto.setCMSMessage(responseVS.getCMS());
                         TransactionVSContentProvider.updateTransaction(appVS, transactionDto);

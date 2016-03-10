@@ -10,7 +10,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,25 +25,25 @@ public class VoteSender implements Callable<ResponseVS> {
 
     public static final String TAG = VoteSender.class.getSimpleName();
 
-    private VoteVSHelper voteVSHelper;
+    private VoteHelper voteHelper;
     private CMSSignedMessage accessRequest;
 
-    public VoteSender(VoteVSHelper voteVSHelper) {
-        this.voteVSHelper = voteVSHelper;
+    public VoteSender(VoteHelper voteHelper) {
+        this.voteHelper = voteHelper;
     }
 
-    public VoteSender(VoteVSHelper voteVSHelper, CMSSignedMessage accessRequest) {
-        this.voteVSHelper = voteVSHelper;
+    public VoteSender(VoteHelper voteHelper, CMSSignedMessage accessRequest) {
+        this.voteHelper = voteHelper;
         this.accessRequest = accessRequest;
     }
 
     @Override public ResponseVS call() {
-        LOGD(TAG + ".call", "eventvs subject: " + voteVSHelper.getEventVS().getSubject());
+        LOGD(TAG + ".call", "eventvs subject: " + voteHelper.getEventVS().getSubject());
         ResponseVS responseVS = null;
         try {
             String subject = AppVS.getInstance().getString(R.string.request_msg_subject,
-                    voteVSHelper.getEventVS().getId());
-            AccessRequestDto requestDto = voteVSHelper.getAccessRequest();
+                    voteHelper.getEventVS().getId());
+            AccessRequestDto requestDto = voteHelper.getAccessRequest();
             if(accessRequest == null) accessRequest = AppVS.getInstance().signMessage(
                     AppVS.getInstance().getAccessControl().getName(),
                     JSON.writeValueAsString(requestDto), subject,
@@ -51,21 +51,21 @@ public class VoteSender implements Callable<ResponseVS> {
             //send access request to fetch the anonymous certificate that signs the vote
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME,
-                    voteVSHelper.getCertificationRequest().getCsrPEM());
+                    voteHelper.getCertificationRequest().getCsrPEM());
             mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, accessRequest.toPEM());
             responseVS = HttpHelper.sendObjectMap(mapToSend,
                     AppVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            voteVSHelper.getCertificationRequest().initSigner(responseVS.getMessageBytes());
-            CMSSignedMessage signedVote = new MessageTimeStamper(voteVSHelper.getCMSVote()).call();
+            voteHelper.getCertificationRequest().initSigner(responseVS.getMessageBytes());
+            CMSSignedMessage signedVote = new MessageTimeStamper(voteHelper.getCMSVote()).call();
             responseVS = HttpHelper.sendData(signedVote.toPEM(), ContentTypeVS.VOTE,
                     AppVS.getInstance().getControlCenter().getVoteServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 cancelAccessRequest(); //AccesRequest OK and Vote error -> Cancel access request
                 return responseVS;
             } else {
-                voteVSHelper.setVoteReceipt(responseVS.getCMS());
-                responseVS.setData(voteVSHelper);
+                voteHelper.setVoteReceipt(responseVS.getCMS());
+                responseVS.setData(voteHelper);
             }
         } catch(ExceptionVS ex) {
             ex.printStackTrace();
@@ -83,7 +83,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String subject = AppVS.getInstance().getString(R.string.cancel_vote_msg_subject);
             String serviceURL = AppVS.getInstance().getAccessControl().getCancelVoteServiceURL();
             CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(AppVS.getInstance().getAccessControl().getName(),
-                    JSON.writeValueAsString(voteVSHelper.getVoteCanceler()), subject,
+                    JSON.writeValueAsString(voteHelper.getVoteCanceler()), subject,
                     AppVS.getInstance().getTimeStampServiceURL());
             return HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serviceURL);
         } catch(Exception ex) {

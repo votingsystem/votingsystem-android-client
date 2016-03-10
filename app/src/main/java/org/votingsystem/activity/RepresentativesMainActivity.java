@@ -156,10 +156,10 @@ public class RepresentativesMainActivity extends ActivityBase {
 
     public class AnonymousDelegationCancellationTask extends AsyncTask<String, String, ResponseVS> {
 
-        private CMSSignedMessage cmsMessage;
+        private CMSSignedMessage cmsSignedMessage;
         
         public AnonymousDelegationCancellationTask(CMSSignedMessage cmsMessage) {
-            this.cmsMessage = cmsMessage;
+            this.cmsSignedMessage = cmsMessage;
         }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true,
@@ -177,7 +177,7 @@ public class RepresentativesMainActivity extends ActivityBase {
                         AppVS.getInstance().getAccessControl().getTimeStampServiceURL());
                 anonymousCMSMessage = timeStamper.call();
                 Map<String, Object> mapToSend = new HashMap<>();
-                mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
+                mapToSend.put(ContextVS.CMS_FILE_NAME, cmsSignedMessage.toPEM());
                 mapToSend.put(ContextVS.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());
                 responseVS =  HttpHelper.sendObjectMap(mapToSend,
                         AppVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());

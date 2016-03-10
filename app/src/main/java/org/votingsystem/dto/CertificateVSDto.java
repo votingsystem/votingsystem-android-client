@@ -19,7 +19,8 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CertificateVSDto {
 
-    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
+    public enum Type {
+        VOTE_ROOT, VOTE, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
         ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
 
     public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}

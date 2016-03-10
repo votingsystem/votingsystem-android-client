@@ -51,7 +51,7 @@ public class EventVSDto implements Serializable {
     private Date lastUpdated;
     private String[] tags;
     private State state;
-    private VoteVSDto vote;
+    private VoteDto vote;
     private String UUID;
 
     public EventVSDto() {}
@@ -220,16 +220,16 @@ public class EventVSDto implements Serializable {
     }
 
 
-    public void setVote(VoteVSDto vote) {
+    public void setVote(VoteDto vote) {
         this.vote = vote;
     }
 
-    public VoteVSDto getVote() {
+    public VoteDto getVote() {
         return vote;
     }
 
     public String getStatsServiceURL() {
-        return accessControl.getServerURL() + "/rest/eventVSElection/id/" + id + "/stats";
+        return accessControl.getServerURL() + "/rest/eventElection/id/" + id + "/stats";
     }
 
     public boolean isActive() {

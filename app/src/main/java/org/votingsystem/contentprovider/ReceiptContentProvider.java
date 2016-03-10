@@ -15,7 +15,7 @@ import android.text.TextUtils;
 
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.ReceiptWrapper;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -199,13 +199,13 @@ public class ReceiptContentProvider extends ContentProvider {
         }
     }
 
-    public static ContentValues getContentValues(VoteVSHelper voteVSHelper, ReceiptWrapper.State state) {
+    public static ContentValues getContentValues(VoteHelper voteHelper, ReceiptWrapper.State state) {
         ContentValues values = new ContentValues();
-        values.put(SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(voteVSHelper));
-        values.put(URL_COL, voteVSHelper.getCMSVoteURL());
-        values.put(TYPE_COL, voteVSHelper.getTypeVS().toString());
+        values.put(SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(voteHelper));
+        values.put(URL_COL, voteHelper.getCMSVoteURL());
+        values.put(TYPE_COL, voteHelper.getTypeVS().toString());
         values.put(STATE_COL, state.toString());
-        if(voteVSHelper.getLocalId() == null) values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+        if(voteHelper.getLocalId() == null) values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
         values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         return values;
     }

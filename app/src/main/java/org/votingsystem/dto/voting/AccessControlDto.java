@@ -56,7 +56,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getCancelVoteServiceURL() {
-        return getServerURL() + "/rest/voteVS/cancel";
+        return getServerURL() + "/rest/vote/cancel";
     }
 
     public String getSearchServiceURL (int offset, int max) {
@@ -106,12 +106,12 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getEventVSURL (EventVSDto.State eventState, int max, Long offset) {
-        return getServerURL() + "/rest/eventVSElection?max="+ max + "&offset=" + offset  +
+        return getServerURL() + "/rest/eventElection?max="+ max + "&offset=" + offset  +
                 "&eventVSState=" + eventState.toString();
     }
 
     public String getPublishServiceURL() {
-        return getServerURL() + "/rest/eventVSElection";
+        return getServerURL() + "/rest/eventElection";
     }
 
     public String getUserCSRServiceURL (Long csrRequestId) {
@@ -127,7 +127,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getAccessServiceURL () {
-        return getServerURL() +  "/accessRequestVS";
+        return getServerURL() +  "/accessRequest";
     }
 
     public String getCheckDatesServiceURL (Long id) {
@@ -146,8 +146,8 @@ public class AccessControlDto extends ActorDto implements Serializable {
         return getServerURL() + "/rest/representative/revoke";
     }
 
-    public String getVoteVSCheckServiceURL(String hashHex) {
-        return getServerURL() + "/rest/voteVS/hash/" + hashHex;
+    public String getVoteCheckServiceURL(String hashHex) {
+        return getServerURL() + "/rest/vote/hash/" + hashHex;
     }
 
     public String getAnonymousDelegationCancelerServiceURL() {
@@ -155,6 +155,6 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getCMSVoteURL(String hashHex) {
-        return getServerURL() + "/rest/messageCMS/vote/hash/" + hashHex;
+        return getServerURL() + "/rest/cmsMessage/vote/hash/" + hashHex;
     }
 }

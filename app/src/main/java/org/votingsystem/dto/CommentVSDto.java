@@ -13,7 +13,7 @@ public class CommentVSDto implements Comparable, Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private Long messageCMSId;
+    private Long cmsMessageId;
     private String content;
     private UserVSDto userVS;
     private EventVSDto eventVS;
@@ -69,12 +69,12 @@ public class CommentVSDto implements Comparable, Serializable {
 		return eventVS;
 	}
 
-    public Long getMessageCMSId() {
-        return messageCMSId;
+    public Long getCmsMessageId() {
+        return cmsMessageId;
     }
 
-    public void setMessageCMSId(Long messageCMSId) {
-        this.messageCMSId = messageCMSId;
+    public void setCmsMessageId(Long cmsMessageId) {
+        this.cmsMessageId = cmsMessageId;
     }
 
     @Override public int compareTo(Object comment) {

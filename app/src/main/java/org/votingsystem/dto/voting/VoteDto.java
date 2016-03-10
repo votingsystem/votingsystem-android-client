@@ -4,15 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle2.asn1.DERTaggedObject;
-import org.bouncycastle2.asn1.DERUTF8String;
-import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
@@ -22,11 +17,11 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VoteVSDto implements Serializable {
+public class VoteDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = VoteVSDto.class.getSimpleName();
+    public static final String TAG = VoteDto.class.getSimpleName();
 
     public enum State {OK, CANCELLED, ERROR}
 
@@ -41,8 +36,8 @@ public class VoteVSDto implements Serializable {
     private String originHashCertVote;
     private String hashCertVSBase64;
     private String hashCertVoteHex;
-    private String messageCMSURL;
-    private String cancelationMessageCMSURL;
+    private String cmsMessageURL;
+    private String cancelationCmsMessageURL;
     private String eventURL;
     private String UUID;
     private EventVSDto eventVS;
@@ -58,10 +53,10 @@ public class VoteVSDto implements Serializable {
     @JsonIgnore private X509Certificate x509Certificate;
 
 
-    public VoteVSDto() {}
+    public VoteDto() {}
 
 
-    public VoteVSDto(EventVSDto eventVS, FieldEventVSDto optionSelected) {
+    public VoteDto(EventVSDto eventVS, FieldEventVSDto optionSelected) {
         this.eventVS = eventVS;
         this.optionSelected = optionSelected;
     }
@@ -130,20 +125,20 @@ public class VoteVSDto implements Serializable {
         this.hashCertVoteHex = hashCertVoteHex;
     }
 
-    public String getMessageCMSURL() {
-        return messageCMSURL;
+    public String getCmsMessageURL() {
+        return cmsMessageURL;
     }
 
-    public void setMessageCMSURL(String messageCMSURL) {
-        this.messageCMSURL = messageCMSURL;
+    public void setCmsMessageURL(String cmsMessageURL) {
+        this.cmsMessageURL = cmsMessageURL;
     }
 
-    public String getCancelationMessageCMSURL() {
-        return cancelationMessageCMSURL;
+    public String getCancelationCmsMessageURL() {
+        return cancelationCmsMessageURL;
     }
 
-    public void setCancelationMessageCMSURL(String cancelationMessageCMSURL) {
-        this.cancelationMessageCMSURL = cancelationMessageCMSURL;
+    public void setCancelationCmsMessageURL(String cancelationCmsMessageURL) {
+        this.cancelationCmsMessageURL = cancelationCmsMessageURL;
     }
 
     public String getEventURL() {
@@ -234,8 +229,8 @@ public class VoteVSDto implements Serializable {
         this.serverCerts = serverCerts;
     }
 
-    public VoteVSDto loadSignatureData(X509Certificate x509Certificate,
-                                       TimeStampToken timeStampToken) throws Exception {
+    public VoteDto loadSignatureData(X509Certificate x509Certificate,
+                                     TimeStampToken timeStampToken) throws Exception {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
         VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class,

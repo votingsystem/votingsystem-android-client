@@ -96,18 +96,16 @@ public class ReceiptWrapper implements Serializable {
         return url;
     }
 
-    public void setReceiptBytes(byte[] receiptBytes) throws Exception {
-        if(receiptBytes != null) {
-            receipt = new CMSSignedMessage(receiptBytes);
-            Map dataMap = receipt.getSignedContent(new TypeReference<Map<String, Object>>() { });
-            if(dataMap.containsKey("operation"))
-                this.typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
-            if(dataMap.containsKey("subject")) subject = (String) dataMap.get("subject");
-        }
-    }
-
     public CMSSignedMessage getReceipt() throws Exception {
         return receipt;
+    }
+
+    public void setReceipt(CMSSignedMessage cmsSignedMessage) throws Exception {
+        this.receipt = cmsSignedMessage;
+        Map dataMap = receipt.getSignedContent(new TypeReference<Map<String, Object>>() { });
+        if(dataMap.containsKey("operation"))
+            this.typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
+        if(dataMap.containsKey("subject")) subject = (String) dataMap.get("subject");
     }
 
     public boolean hashReceipt() {

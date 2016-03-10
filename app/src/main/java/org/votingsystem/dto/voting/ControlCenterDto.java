@@ -29,7 +29,7 @@ public class ControlCenterDto extends ActorDto implements Serializable {
     }
 
     public String getVoteServiceURL () {
-        return getServerURL() + "/rest/voteVS";
+        return getServerURL() + "/rest/vote";
     }
 
 }

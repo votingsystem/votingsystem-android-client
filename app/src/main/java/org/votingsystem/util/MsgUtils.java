@@ -11,7 +11,7 @@ import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.Currency;
 
 import java.math.BigDecimal;
@@ -116,11 +116,11 @@ public class MsgUtils {
     }
 
 
-    public static String getVoteVSStateMsg(VoteVSDto.State voteState, Context context) {
+    public static String getVoteStateMsg(VoteDto.State voteState, Context context) {
         switch (voteState) {
-            case OK: return context.getString(R.string.votevs_ok_msg);
-            case CANCELLED: return context.getString(R.string.votevs_cancelled_msg);
-            case ERROR: return context.getString(R.string.votevs_error_msg);
+            case OK: return context.getString(R.string.vote_ok_lbl);
+            case CANCELLED: return context.getString(R.string.vote_cancelled_msg);
+            case ERROR: return context.getString(R.string.vote_error_msg);
             default: return voteState.toString();
         }
     }

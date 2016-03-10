@@ -15,7 +15,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -36,9 +36,9 @@ public class VoteService extends IntentService {
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         byte[] cmsMessageBytes = arguments.getByteArray(ContextVS.CMS_MSG_KEY);
         TypeVS operation = (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY);
-        VoteVSHelper voteVSHelper = (VoteVSHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
+        VoteHelper voteHelper = (VoteHelper) intent.getSerializableExtra(ContextVS.VOTE_KEY);
         ResponseVS responseVS = null;
-        String eventSubject = StringUtils.truncate(voteVSHelper.getSubject(), 50);
+        String eventSubject = StringUtils.truncate(voteHelper.getSubject(), 50);
         Intent resultIntent = new Intent(serviceCaller);
         try {
             LOGD(TAG + ".onHandleIntent", "operation: " + operation);
@@ -46,19 +46,19 @@ public class VoteService extends IntentService {
                 case SEND_VOTE:
                     if(appVS.getControlCenter() == null) {
                         ControlCenterDto controlCenter = appVS.getActorVS(ControlCenterDto.class,
-                                voteVSHelper.getEventVS().getControlCenter().getServerURL());
+                                voteHelper.getEventVS().getControlCenter().getServerURL());
                         appVS.setControlCenter(controlCenter);
                     }
                     if(cmsMessageBytes != null) {
                         CMSSignedMessage accessRequest = new CMSSignedMessage(cmsMessageBytes);
-                        responseVS = new VoteSender(voteVSHelper, accessRequest).call();
-                    } else responseVS = new VoteSender(voteVSHelper).call();
+                        responseVS = new VoteSender(voteHelper, accessRequest).call();
+                    } else responseVS = new VoteSender(voteHelper).call();
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        voteVSHelper = (VoteVSHelper)responseVS.getData();
+                        voteHelper = (VoteHelper)responseVS.getData();
                         responseVS.setCaption(getString(R.string.vote_ok_caption)).
                                 setNotificationMessage(getString(
                                         R.string.vote_ok_msg, eventSubject,
-                                        voteVSHelper.getVote().getOptionSelected().getContent()));
+                                        voteHelper.getVote().getOptionSelected().getContent()));
                     } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
                         responseVS.setCaption(getString(R.string.access_request_repeated_caption)).
                                 setNotificationMessage(getString( R.string.access_request_repeated_msg,
@@ -70,7 +70,7 @@ public class VoteService extends IntentService {
                     }
                     break;
             }
-            resultIntent.putExtra(ContextVS.VOTE_KEY, voteVSHelper);
+            resultIntent.putExtra(ContextVS.VOTE_KEY, voteHelper);
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);

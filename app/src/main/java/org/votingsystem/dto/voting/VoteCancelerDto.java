@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VoteVSCancelerDto implements Serializable {
+public class VoteCancelerDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +26,7 @@ public class VoteVSCancelerDto implements Serializable {
     private String UUID;
 
 
-    public VoteVSCancelerDto() {}
+    public VoteCancelerDto() {}
 
     public void validate() throws ValidationExceptionVS, NoSuchAlgorithmException {
         if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(

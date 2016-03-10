@@ -27,7 +27,7 @@ import android.widget.TextView;
 import org.votingsystem.activity.ReceiptPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -45,7 +45,7 @@ public class ReceiptGridFragment extends Fragment implements
 
     private View rootView;
     private ReceiptGridAdapter adapter = null;
-    private VoteVSDto vote = null;
+    private VoteDto vote = null;
     private int menuItemSelected;
     private GridView gridView;
     private static final int loaderId = 0;

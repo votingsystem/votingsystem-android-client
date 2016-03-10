@@ -5,8 +5,8 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventVSDto;
-import org.votingsystem.dto.voting.VoteVSCancelerDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteCancelerDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
@@ -27,7 +27,7 @@ import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VoteVSHelper extends ReceiptWrapper implements Serializable {
+public class VoteHelper extends ReceiptWrapper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,41 +38,41 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     private String hashAccessRequestBase64;
     private String originHashCertVote;
     private String hashCertVSBase64;
-    private VoteVSDto voteVSDto;
+    private VoteDto voteDto;
     private EventVSDto eventVS;
-    private VoteVSCancelerDto cancelerDto;
+    private VoteCancelerDto cancelerDto;
     private AccessRequestDto accessRequestDto;
     private transient CMSSignedMessage voteReceipt;
     private transient CMSSignedMessage cancelVoteReceipt;
     private CertificationRequestVS certificationRequest;
 
-    public static VoteVSHelper load(VoteVSDto voteVSDto) throws Exception {
-        VoteVSHelper voteVSHelper = new VoteVSHelper();
-        voteVSHelper.originHashAccessRequest = UUID.randomUUID().toString();
-        voteVSHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
-        voteVSHelper.originHashCertVote = UUID.randomUUID().toString();
-        voteVSHelper.hashCertVSBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
-        voteVSHelper.eventVSId = voteVSDto.getEventVS().getId();
-        voteVSHelper.eventVSURL = voteVSDto.getEventVS().getURL();
-        voteVSHelper.eventVS = voteVSDto.getEventVS();
-        voteVSHelper.genVote(voteVSDto.getOptionSelected());
-        voteVSHelper.certificationRequest = CertificationRequestVS.getVoteRequest(
+    public static VoteHelper load(VoteDto voteDto) throws Exception {
+        VoteHelper voteHelper = new VoteHelper();
+        voteHelper.originHashAccessRequest = UUID.randomUUID().toString();
+        voteHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
+                voteHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
+        voteHelper.originHashCertVote = UUID.randomUUID().toString();
+        voteHelper.hashCertVSBase64 = StringUtils.getHashBase64(
+                voteHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
+        voteHelper.eventVSId = voteDto.getEventVS().getId();
+        voteHelper.eventVSURL = voteDto.getEventVS().getURL();
+        voteHelper.eventVS = voteDto.getEventVS();
+        voteHelper.genVote(voteDto.getOptionSelected());
+        voteHelper.certificationRequest = CertificationRequestVS.getVoteRequest(
                 SIGNATURE_ALGORITHM, PROVIDER,
-                voteVSDto.getEventVS().getAccessControl().getServerURL(),
-                voteVSDto.getEventVS().getId(),
-                voteVSHelper.hashCertVSBase64);
-        return voteVSHelper;
+                voteDto.getEventVS().getAccessControl().getServerURL(),
+                voteDto.getEventVS().getId(),
+                voteHelper.hashCertVSBase64);
+        return voteHelper;
     }
 
-    public static VoteVSHelper genRandomVote(Long eventVSId, String eventVSURL,
-             Set<FieldEventVSDto> options) throws Exception {
-        VoteVSDto voteVSDto =  new VoteVSDto();
-        voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventURL(eventVSURL);
-        voteVSDto.setOptionSelected(getRandomOption(options));
-        return VoteVSHelper.load(voteVSDto);
+    public static VoteHelper genRandomVote(Long eventVSId, String eventVSURL,
+                                           Set<FieldEventVSDto> options) throws Exception {
+        VoteDto voteDto =  new VoteDto();
+        voteDto.setEventVSId(eventVSId);
+        voteDto.setEventURL(eventVSURL);
+        voteDto.setOptionSelected(getRandomOption(options));
+        return VoteHelper.load(voteDto);
     }
 
     public static FieldEventVSDto getRandomOption (Set<FieldEventVSDto> options) {
@@ -81,18 +81,18 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
     }
 
     public CMSSignedMessage getCMSVote() throws Exception {
-        return certificationRequest.signData(JSON.writeValueAsString(voteVSDto));
+        return certificationRequest.signData(JSON.writeValueAsString(voteDto));
     }
 
     private void genVote(FieldEventVSDto optionSelected) {
         genAccessRequest();
-        voteVSDto = new VoteVSDto();
-        voteVSDto.setOperation(TypeVS.SEND_VOTE);
-        voteVSDto.setHashCertVSBase64(hashCertVSBase64);
-        voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventURL(eventVSURL);
-        voteVSDto.setOptionSelected(optionSelected);
-        voteVSDto.setUUID(UUID.randomUUID().toString());
+        voteDto = new VoteDto();
+        voteDto.setOperation(TypeVS.SEND_VOTE);
+        voteDto.setHashCertVSBase64(hashCertVSBase64);
+        voteDto.setEventVSId(eventVSId);
+        voteDto.setEventURL(eventVSURL);
+        voteDto.setOptionSelected(optionSelected);
+        voteDto.setUUID(UUID.randomUUID().toString());
     }
 
 
@@ -108,13 +108,13 @@ public class VoteVSHelper extends ReceiptWrapper implements Serializable {
         return eventVS;
     }
 
-    public VoteVSDto getVote() {
-        return voteVSDto;
+    public VoteDto getVote() {
+        return voteDto;
     }
 
-    public VoteVSCancelerDto getVoteCanceler() {
+    public VoteCancelerDto getVoteCanceler() {
         if(cancelerDto == null) {
-            cancelerDto = new VoteVSCancelerDto();
+            cancelerDto = new VoteCancelerDto();
             cancelerDto.setOperation(TypeVS.CANCEL_VOTE);
             cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
             cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);

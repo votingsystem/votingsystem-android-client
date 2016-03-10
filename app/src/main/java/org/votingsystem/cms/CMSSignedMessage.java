@@ -27,7 +27,7 @@ import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.openssl.PEMReader;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CMSUtils;
@@ -127,7 +127,7 @@ public class CMSSignedMessage extends CMSSignedData {
         return new CMSSignedMessage(timeStampedSignedData.getEncoded());
     }
     /**
-     * Digest for storing unique MessageCMS in database
+     * Digest for storing unique CmsMessage in database
      */
     public String getContentDigestStr() throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
@@ -203,8 +203,8 @@ public class CMSSignedMessage extends CMSSignedData {
         return getMessageData().getSigners();
     }
 
-    public VoteVSDto getVoteVS() throws Exception {
-        return getMessageData().getVoteVS();
+    public VoteDto getVote() throws Exception {
+        return getMessageData().getVote();
     }
 
     public Set<X509Certificate> getSignersCerts() throws Exception {
@@ -223,7 +223,7 @@ public class CMSSignedMessage extends CMSSignedData {
 
         private Set<UserVSDto> signers = null;
         private UserVSDto signerVS;
-        private VoteVSDto voteVS;
+        private VoteDto vote;
         private X509Certificate currencyCert;
         private TimeStampToken timeStampToken;
 
@@ -276,13 +276,13 @@ public class CMSSignedMessage extends CMSSignedData {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                    voteVS = getSignedContent(VoteVSDto.class);
-                    voteVS.loadSignatureData(cert, timeStampToken);
+                    vote = getSignedContent(VoteDto.class);
+                    vote.loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}
             }
-            if(voteVS != null) voteVS.setServerCerts(signerCerts);
+            if(vote != null) vote.setServerCerts(signerCerts);
             return true;
         }
 
@@ -298,8 +298,8 @@ public class CMSSignedMessage extends CMSSignedData {
             return timeStampToken;
         }
 
-        public VoteVSDto getVoteVS() {
-            return voteVS;
+        public VoteDto getVote() {
+            return vote;
         }
 
         public X509Certificate getCurrencyCert() {

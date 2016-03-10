@@ -49,7 +49,7 @@ public class TransactionVSFragment extends Fragment {
     private TextView to_user;
     private TextView from_user;
     private Button receipt;
-    private CMSSignedMessage messageCMS;
+    private CMSSignedMessage cmsMessage;
     private String broadCastId = null;
     private AppVS appVS;
 
@@ -146,7 +146,7 @@ public class TransactionVSFragment extends Fragment {
                 DateUtils.getDayWeekDateStr(transactionvs.getDateCreated(), "HH:mm"),
                 transactionvs.getAmount().toPlainString(), transactionvs.getCurrencyCode());
         try {
-            messageCMS = transactionvs.getCMSMessage();
+            cmsMessage = transactionvs.getCMSMessage();
         } catch (Exception e) { e.printStackTrace(); }
         transactionvsSubject.setText(selectedTransaction.getSubject());
         transactionvs_content.setText(Html.fromHtml(transactionHtml));
