@@ -42,7 +42,7 @@ public class EventVSDto implements Serializable {
     private Integer numComments = 0;
 
     private Set<FieldEventVSDto> fieldEventVSSet = new HashSet<FieldEventVSDto>();
-    private Set<EventTagVS> eventTagVSSet = new HashSet<EventTagVS>();
+    private Set<EventVSTagVS> eventVSTagVSSet = new HashSet<EventVSTagVS>();
     private Set<CommentVSDto> commentVSDtoSet = new HashSet<CommentVSDto>();
 
     private Date dateBegin;
@@ -110,12 +110,12 @@ public class EventVSDto implements Serializable {
         this.fieldEventVSSet = fieldsEventVS;
     }
 
-    public void setEventTagVSes(Set<EventTagVS> eventTagVSSet) {
-        this.eventTagVSSet = eventTagVSSet;
+    public void setEventTagVSes(Set<EventVSTagVS> eventVSTagVSSet) {
+        this.eventVSTagVSSet = eventVSTagVSSet;
     }
 
-    public Set<EventTagVS> getEventTagVSes() {
-        return eventTagVSSet;
+    public Set<EventVSTagVS> getEventTagVSes() {
+        return eventVSTagVSSet;
     }
 
     public void setId(Long id) {

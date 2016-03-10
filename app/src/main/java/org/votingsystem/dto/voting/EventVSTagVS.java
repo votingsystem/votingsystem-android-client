@@ -8,7 +8,7 @@ import org.votingsystem.dto.TagVSDto;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventTagVS implements java.io.Serializable {
+public class EventVSTagVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -16,7 +16,7 @@ public class EventTagVS implements java.io.Serializable {
     private EventVSDto eventVS;
     private TagVSDto tagVS;
 
-    public EventTagVS() { }
+    public EventVSTagVS() { }
 
     public Long getId() {
         return this.id;
