@@ -1,5 +1,6 @@
 package org.votingsystem.util.crypto;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.AppVS;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
@@ -81,7 +82,10 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     }
 
     public CMSSignedMessage getCMSVote() throws Exception {
-        return certificationRequest.signData(JSON.writeValueAsString(voteDto));
+        byte[] contentToSign = JSON.writeValueAsBytes(voteDto);
+        TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(
+                certificationRequest.getSignatureMechanism(), contentToSign);
+        return certificationRequest.signData(contentToSign, timeStampToken);
     }
 
     private void genVote(FieldEventVSDto optionSelected) {

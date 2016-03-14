@@ -1,5 +1,6 @@
 package org.votingsystem.util.crypto;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle2.asn1.DERBoolean;
@@ -145,13 +146,17 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
+    public String getSignatureMechanism() {
+        return signatureMechanism;
+    }
+
     public CertificationRequestVS initSigner (byte[] signedCsr) {
         this.signedCsr = signedCsr;
         return this;
     }
 
-    public CMSSignedMessage signData(String textToSign) throws Exception {
-        return getSignedMailGenerator().signData(textToSign);
+    public CMSSignedMessage signData(byte[] contentToSign, TimeStampToken timeStampToken) throws Exception {
+        return getSignedMailGenerator().signData(contentToSign, timeStampToken);
     }
 
     private CMSGenerator getSignedMailGenerator() throws Exception {

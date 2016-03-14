@@ -85,7 +85,6 @@ public class SettingsActivity extends PreferenceActivity {
                                            Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.settings_activity, container, false);
             Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_vs);
-            toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     getActivity().onBackPressed();

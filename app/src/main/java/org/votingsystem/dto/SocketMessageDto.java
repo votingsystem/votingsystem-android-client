@@ -443,7 +443,7 @@ public class SocketMessageDto implements Serializable {
                 toUser, textToSign, subject);
         String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Cert());
+                aesParams.getBytes(), deviceVS.getX509Cert().getPublicKey());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));

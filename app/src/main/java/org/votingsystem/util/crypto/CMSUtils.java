@@ -1,5 +1,8 @@
 package org.votingsystem.util.crypto;
 
+import org.bouncycastle.tsp.TSPException;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.ASN1EncodableVector;
 import org.bouncycastle2.asn1.ASN1InputStream;
@@ -12,19 +15,32 @@ import org.bouncycastle2.asn1.cms.Attribute;
 import org.bouncycastle2.asn1.cms.AttributeTable;
 import org.bouncycastle2.asn1.cms.CMSAttributes;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSException;
 import org.bouncycastle2.cms.CMSSignedData;
+import org.bouncycastle2.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.cms.SignerInformationStore;
+import org.bouncycastle2.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.votingsystem.AppVS;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.ResponseVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -40,7 +56,8 @@ public class CMSUtils {
         return asnInputStream.readObject();
     }
 
-    public static CMSSignedData addTimeStamp(CMSSignedData cmsdata, TimeStampToken timeStampToken) throws Exception {
+    public static CMSSignedData addTimeStampToUnsignedAttributes(CMSSignedData cmsdata,
+                                                 TimeStampToken timeStampToken) throws Exception {
         DERObject derObject = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
         DERSet derset = new DERSet(derObject);
         Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, derset);
@@ -96,4 +113,39 @@ public class CMSUtils {
                             + printableName + " attribute");
         }
     }
+
+    //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
+    public static TimeStampToken getTimeStampToken(String signatureAlgorithm, byte[] contentToSign)
+            throws NoSuchAlgorithmException, IOException, CMSException, TSPException, ExceptionVS {
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
+                .find(SIGNATURE_ALGORITHM);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+        MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
+        byte[]  digestBytes = digest.digest(contentToSign);
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        TimeStampRequest timeStampRequest = reqgen.generate(
+                digAlgId.getAlgorithm().getId(), digestBytes);
+        ResponseVS responseVS = HttpHelper.sendData(
+                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+                AppVS.getInstance().getTimeStampServiceURL());
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            byte[] bytesToken = responseVS.getMessageBytes();
+            return new TimeStampToken(new CMSSignedData(bytesToken));
+        } else throw new ExceptionVS(responseVS.getMessage());
+    }
+
+    public static CMSAttributeTableGenerator getSignedAttributeTableGenerator(
+            TimeStampToken timeStampToken) throws IOException {
+        DERObject derObject = new ASN1InputStream(timeStampToken.getEncoded()).readObject();
+        DERSet derset = new DERSet(derObject);
+        Attribute timeStampAsAttribute = new Attribute(
+                PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, derset);
+        Hashtable hashTable = new Hashtable();
+        hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
+        AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
+        DefaultSignedAttributeTableGenerator signedAttributeGenerator =
+                new DefaultSignedAttributeTableGenerator(timeStampAsAttributeTable);
+        return signedAttributeGenerator;
+    }
+
 }

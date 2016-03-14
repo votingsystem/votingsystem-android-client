@@ -145,9 +145,7 @@ public class QRActionsFragment extends Fragment {
                             @Override public CMSSignedMessage sign() {
                                 try {
                                     return AppVS.getInstance().signMessage(
-                                            AppVS.getInstance().getCurrencyServer().getName(),
-                                            JSON.writeValueAsString(initSessionMessageDto),
-                                            getString(R.string.init_authenticated_session_msg_subject));
+                                            JSON.writeValueAsBytes(initSessionMessageDto));
                                 } catch (Exception ex) { ex.printStackTrace();}
                                 return null;
                             }

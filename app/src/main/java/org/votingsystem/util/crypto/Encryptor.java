@@ -2,13 +2,17 @@ package org.votingsystem.util.crypto;
 
 import android.util.Base64;
 
+import org.bouncycastle2.asn1.cms.ContentInfo;
+import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.CMSAlgorithm;
+import org.bouncycastle2.cms.CMSEnvelopedData;
+import org.bouncycastle2.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle2.cms.CMSEnvelopedDataParser;
-import org.bouncycastle2.cms.CMSEnvelopedDataStreamGenerator;
-import org.bouncycastle2.cms.CMSException;
+import org.bouncycastle2.cms.CMSProcessableByteArray;
 import org.bouncycastle2.cms.CMSTypedStream;
 import org.bouncycastle2.cms.RecipientInformation;
 import org.bouncycastle2.cms.RecipientInformationStore;
+import org.bouncycastle2.cms.bc.BcRSAKeyTransRecipientInfoGenerator;
 import org.bouncycastle2.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
@@ -19,13 +23,14 @@ import org.bouncycastle2.crypto.modes.CBCBlockCipher;
 import org.bouncycastle2.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle2.crypto.params.KeyParameter;
 import org.bouncycastle2.crypto.params.ParametersWithIV;
-import org.bouncycastle2.operator.OperatorCreationException;
+import org.bouncycastle2.openssl.PEMReader;
+import org.bouncycastle2.operator.OutputEncryptor;
 import org.votingsystem.util.ContextVS;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,7 +38,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
@@ -61,33 +65,39 @@ public class Encryptor {
 
 	private  Encryptor() { }
 
-    public static byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert)
-            throws CertificateEncodingException, OperatorCreationException, CMSException, IOException {
-        CMSEnvelopedDataStreamGenerator dataStreamGen = new CMSEnvelopedDataStreamGenerator();
-        dataStreamGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).
-                setProvider(ContextVS.PROVIDER));
-        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        OutputStream out = dataStreamGen.open(bOut, new JceCMSContentEncryptorBuilder(
-                CMSAlgorithm.AES256_CBC).setProvider(ContextVS.PROVIDER).build());
-        out.write(dataToEncrypt);
-        out.close();
-        return android.util.Base64.encode(bOut.toByteArray(), android.util.Base64.NO_WRAP);
+    public static byte[] encryptToCMS(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator("".getBytes(), publicKey));
+        OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(
+                ContextVS.PROVIDER).build();
+        CMSEnvelopedData ed = edGen.generate( new CMSProcessableByteArray(bytesToEncrypt), encryptor);
+        return PEMUtils.getPEMEncoded(ed.getContentInfo());
+    }
+
+    public static byte[] encryptToCMS(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+        edGen.addRecipientInfoGenerator(new BcRSAKeyTransRecipientInfoGenerator(
+                new JcaX509CertificateHolder(receiverCert)));
+        OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(
+                ContextVS.PROVIDER).build();
+        CMSEnvelopedData ed = edGen.generate( new CMSProcessableByteArray(bytesToEncrypt), encryptor);
+        return PEMUtils.getPEMEncoded(ed.getContentInfo());
     }
 
     /**
      * Method to decrypt CMS signed messages
      */
-    public static byte[] decryptCMS( byte[] base64EncryptedData, PrivateKey privateKey)
+    public static byte[] decryptCMS(byte[] pemEncrypted, PrivateKey privateKey)
             throws Exception {
-        byte[] cmsEncryptedData = Base64.decode(base64EncryptedData, Base64.NO_WRAP);
-        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+        PEMReader PEMParser = new PEMReader(new InputStreamReader(new ByteArrayInputStream(pemEncrypted)));
+        ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
+        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(contentInfo.getEncoded());
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Collection c = recipients.getRecipients();
         Iterator it = c.iterator();
         byte[] result = null;
         if (it.hasNext()) {
             RecipientInformation   recipient = (RecipientInformation)it.next();
-            //assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
             CMSTypedStream recData = recipient.getContentStream(
                     new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
             InputStream           dataStream = recData.getContentStream();
@@ -99,7 +109,6 @@ public class Encryptor {
             }
             dataOut.close();
             result = dataOut.toByteArray();
-            //assertEquals(true, Arrays.equals(data, dataOut.toByteArray()));
         }
         return result;
     }

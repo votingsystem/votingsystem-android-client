@@ -11,6 +11,7 @@ import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.CMSProcessableByteArray;
 import org.bouncycastle2.cms.CMSSignedData;
@@ -23,7 +24,6 @@ import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
@@ -50,6 +50,7 @@ import org.votingsystem.util.RootUtil;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.WebSocketSession;
 import org.votingsystem.util.crypto.AESParams;
+import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.Encryptor;
 import org.votingsystem.util.crypto.KeyGeneratorVS;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -316,20 +317,15 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
-    public CMSSignedMessage signMessage(String toUser, String textToSign, String subject,
-                                        String timeStampServiceURL) throws Exception {
-        String userNIF = getUserVS().getNIF();
-        LOGD(TAG + ".signMessage", "subject: " + subject);
+    public CMSSignedMessage signMessage(byte[] contentToSign) throws Exception {
+        LOGD(TAG + ".signMessage", "signMessage - user NIF: " +  getUserVS().getNIF());
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
         CMSGenerator cmsGenerator = new CMSGenerator(keyEntry.getPrivateKey(),
                 Arrays.asList(keyEntry.getCertificateChain()[0]),
                 SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-        CMSSignedMessage cmsMessage = cmsGenerator.signData(textToSign);
-        return new MessageTimeStamper(cmsMessage, timeStampServiceURL).call();
-    }
-
-    public CMSSignedMessage signMessage(String toUser, String textToSign, String subject) throws Exception {
-        return signMessage(toUser, textToSign, subject, getTimeStampServiceURL());
+        TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(
+                SIGNATURE_ALGORITHM, contentToSign);
+        return cmsGenerator.signData(contentToSign, timeStampToken);
     }
 
     public void setControlCenter(ControlCenterDto controlCenter) {

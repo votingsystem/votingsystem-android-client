@@ -10,7 +10,6 @@ import org.bouncycastle2.asn1.DERSet;
 import org.bouncycastle2.asn1.DERTaggedObject;
 import org.bouncycastle2.asn1.DERUTF8String;
 import org.bouncycastle2.asn1.cms.Attribute;
-import org.bouncycastle2.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle2.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle2.asn1.x500.X500Name;
 import org.bouncycastle2.asn1.x509.BasicConstraints;
@@ -70,8 +69,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
-
-import custom.org.apache.harmony.security.asn1.ASN1Primitive;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 

@@ -10,9 +10,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
@@ -29,6 +29,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.crypto.CMSUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -171,11 +172,11 @@ public class RepresentativesMainActivity extends ActivityBase {
             RepresentativeDelegationDto cancelationRequest =
                     delegation.getAnonymousRepresentationDocumentCancelationRequest();
             try {
+                byte[] contentToSign = JSON.getMapper().writeValueAsBytes(cancelationRequest);
+                TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(
+                        delegation.getCertificationRequest().getSignatureMechanism(), contentToSign);
                 CMSSignedMessage anonymousCMSMessage = delegation.getCertificationRequest().signData(
-                        JSON.getMapper().writeValueAsString(cancelationRequest));
-                MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousCMSMessage,
-                        AppVS.getInstance().getAccessControl().getTimeStampServiceURL());
-                anonymousCMSMessage = timeStamper.call();
+                        contentToSign, timeStampToken);
                 Map<String, Object> mapToSend = new HashMap<>();
                 mapToSend.put(ContextVS.CMS_FILE_NAME, cmsSignedMessage.toPEM());
                 mapToSend.put(ContextVS.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());

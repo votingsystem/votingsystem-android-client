@@ -15,13 +15,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.cert.jcajce.JcaCertStore;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.jce.PrincipalUtil;
 import org.bouncycastle2.util.Store;
-import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.cms.DNIeContentSigner;
 import org.votingsystem.dto.DeviceVSDto;
@@ -34,6 +33,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.CertificationRequestVS;
 
 import java.io.IOException;
@@ -224,11 +224,12 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				Certificate[] chain = ksUserDNIe.getCertificateChain(CERT_SIGN);
 				Store cerStore = new JcaCertStore(Arrays.asList(chain));
 
-				CMSSignedData cmsSignedData = DNIeContentSigner.signData(privateKey, userCert, cerStore, textToSign);
-				CMSSignedMessage cmsMessage = new CMSSignedMessage(cmsSignedData.getEncoded());
-				cmsMessage = new MessageTimeStamper(cmsMessage,
-						AppVS.getInstance().getTimeStampServiceURL()).call();
-				responseVS = new ResponseVS(ResponseVS.SC_OK, cmsMessage);
+				byte[] contentToSign = textToSign.getBytes();
+				TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(SIGNATURE_ALGORITHM,
+						contentToSign);
+				CMSSignedData cmsSignedData = DNIeContentSigner.signData(privateKey, userCert,
+						cerStore, contentToSign, timeStampToken);
+				responseVS = new ResponseVS(ResponseVS.SC_OK, new CMSSignedMessage(cmsSignedData));
 				if(MODE_UPDATE_USER_DATA == activityMode) {
 					PrefUtils.putAppUser(appUser);
 					responseVS.setMessageBytes(new String(myFragment.getPassword()).getBytes());

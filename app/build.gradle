@@ -13,7 +13,7 @@ android {
     dexOptions {
         incremental true
         javaMaxHeapSize "4g"
-        dexInProcess = true
+        //dexInProcess = true
     }
 
     signingConfigs {
@@ -81,7 +81,7 @@ android {
 }
 
 ext {
-    supportLibVersion = '23.1.1'
+    supportLibVersion = '23.2.0'
 }
 
 dependencies {

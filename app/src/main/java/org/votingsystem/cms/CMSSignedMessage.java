@@ -123,7 +123,7 @@ public class CMSSignedMessage extends CMSSignedData {
     }
 
     public static CMSSignedMessage addTimeStamp(CMSSignedMessage signedMessage, TimeStampToken timeStampToken) throws Exception {
-        CMSSignedData timeStampedSignedData = CMSUtils.addTimeStamp(signedMessage, timeStampToken);
+        CMSSignedData timeStampedSignedData = CMSUtils.addTimeStampToUnsignedAttributes(signedMessage, timeStampToken);
         return new CMSSignedMessage(timeStampedSignedData.getEncoded());
     }
     /**

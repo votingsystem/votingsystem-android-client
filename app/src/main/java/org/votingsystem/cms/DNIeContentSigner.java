@@ -1,7 +1,9 @@
 package org.votingsystem.cms;
 
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle2.cms.CMSAttributeTableGenerator;
 import org.bouncycastle2.cms.CMSProcessableByteArray;
 import org.bouncycastle2.cms.CMSSignedData;
 import org.bouncycastle2.cms.CMSSignedDataGenerator;
@@ -10,6 +12,7 @@ import org.bouncycastle2.cms.SignerInfoGenerator;
 import org.bouncycastle2.operator.ContentSigner;
 import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle2.util.Store;
+import org.votingsystem.util.crypto.CMSUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,8 +21,8 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
-import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.ContextVS.PROVIDER;
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -96,18 +99,21 @@ public class DNIeContentSigner implements ContentSigner {
     }
 
     public static CMSSignedData signData(PrivateKey privateKey, X509Certificate userCert,
-                 Store cerStore, String textToSign) throws Exception {
-        CMSTypedData msg = new CMSProcessableByteArray(textToSign.getBytes());
+                 Store cerStore, byte[] contentToSign, TimeStampToken timeStampToken) throws Exception {
+        CMSAttributeTableGenerator signedAttributeGenerator =
+                CMSUtils.getSignedAttributeTableGenerator(timeStampToken);
+        CMSTypedData msg = new CMSProcessableByteArray(contentToSign);
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
         DNIeContentSigner dnieContentSigner = new DNIeContentSigner(privateKey, userCert, cerStore);
         SimpleSignerInfoGeneratorBuilder dnieSignerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
         dnieSignerInfoGeneratorBuilder = dnieSignerInfoGeneratorBuilder.setProvider(PROVIDER);
-        //dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
+        dnieSignerInfoGeneratorBuilder.setSignedAttributeGenerator(signedAttributeGenerator);
         SignerInfoGenerator signerInfoGenerator = dnieSignerInfoGeneratorBuilder.build(dnieContentSigner);
         gen.addSignerInfoGenerator(signerInfoGenerator);
         gen.addCertificates(cerStore);
         return gen.generate(msg, true);
     }
+
 
 }
 

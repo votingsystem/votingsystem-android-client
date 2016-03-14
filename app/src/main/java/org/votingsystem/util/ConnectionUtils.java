@@ -102,9 +102,7 @@ public class ConnectionUtils {
             try {
                 SocketMessageDto initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
                 CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(
-                        AppVS.getInstance().getCurrencyServer().getName(),
-                        JSON.writeValueAsString(initSessionMessageDto),
-                        activity.getString(R.string.init_authenticated_session_msg_subject));
+                        JSON.writeValueAsBytes(initSessionMessageDto));
                 initSessionMessageDto.setCMS(cmsMessage);
                 Intent startIntent = new Intent(activity, WebSocketService.class);
                 startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);

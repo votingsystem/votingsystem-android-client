@@ -362,9 +362,7 @@ public class WebSocketService extends Service {
                                     transactionDto.getTagName());
                             qrDto.setCurrency(currency);
                             CMSSignedMessage simeMessage = AppVS.getInstance().signMessage(
-                                    qrDto.getHashCertVS(),
-                                    new String(currency.getCertificationRequest().getCsrPEM()),
-                                    getString(R.string.currency_change_subject));
+                                    currency.getCertificationRequest().getCsrPEM());
                             transactionDto.setCmsMessagePEM(simeMessage.toPEMStr());
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
                                     JSON.getMapper().writeValueAsString(transactionDto),

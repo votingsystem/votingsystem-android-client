@@ -14,9 +14,9 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.EditText;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
@@ -35,6 +35,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.crypto.CMSUtils;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -203,10 +204,13 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     delegationDto.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                     //this is the delegation request signed with anonymous cert
+                    byte[] contentToSign = JSON.getMapper().writeValueAsBytes(anonymousDelegationRequest);
+                    String signatureMechanism =
+                            delegationDto.getCertificationRequest().getSignatureMechanism();
+                    TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(
+                            signatureMechanism, contentToSign);
                     cmsMessage = delegationDto.getCertificationRequest().signData(
-                            JSON.getMapper().writeValueAsString(anonymousDelegationRequest));
-                    cmsMessage = new MessageTimeStamper(cmsMessage,
-                            AppVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+                            contentToSign, timeStampToken);
                     responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                             AppVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

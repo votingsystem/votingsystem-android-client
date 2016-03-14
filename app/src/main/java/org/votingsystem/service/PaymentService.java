@@ -250,9 +250,8 @@ public class PaymentService extends IntentService {
             String messageSubject = getString(R.string.currency_request_msg_subject);
             CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto,
                     transactionDto.getAmount(), currencyServer.getServerURL());
-            String signatureContent =  JSON.writeValueAsString(requestDto);
-            CMSSignedMessage cmsMessage = appVS.signMessage(currencyServer.getName(),
-                    signatureContent, messageSubject);
+            byte[] contentToSign =  JSON.writeValueAsBytes(requestDto);
+            CMSSignedMessage cmsMessage = appVS.signMessage(contentToSign);
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, JSON.writeValueAsBytes(requestDto.getRequestCSRSet()));
             mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, cmsMessage.toPEM());
@@ -284,8 +283,7 @@ public class PaymentService extends IntentService {
         ResponseVS responseVS = null;
         try {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
-            CMSSignedMessage cmsMessage = appVS.signMessage(transactionDto.getToUserIBAN().iterator().next(),
-                    JSON.writeValueAsString(transactionDto), getString(R.string.FROM_USERVS_msg_subject));
+            CMSSignedMessage cmsMessage = appVS.signMessage(JSON.writeValueAsBytes(transactionDto));
             responseVS = HttpHelper.sendData(cmsMessage.toPEM(),
                     ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionVSServiceURL());
         } catch(Exception ex) {

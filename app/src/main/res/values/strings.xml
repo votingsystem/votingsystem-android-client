@@ -61,8 +61,6 @@
     <string name="cert_state_msg">comprobando el estado de la solicitud de certificado</string>
     <string name="cert_downloaded_msg">el certificado de usuario está disponible</string>
     <string name="request_msg_subject">[solicitud acceso - %1$s]</string>
-    <string name="vote_msg_subject">[voto]</string>
-    <string name="cancel_vote_msg_subject">[anulación de voto]</string>
     <string name="canceled_lbl">anulado</string>
     <string name="saved_cancel_vote_recepit_msg">puede encontrar el recibo de la cancelación de este voto en la lista de recibos</string>
     <string name="open_cancel_vote_receipt_lbl">abrir recibo de cancelación</string>
@@ -301,7 +299,6 @@
     <string name="connecting_to_service_msg">conectando a servicio</string>
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
     <string name="anonymous_transactionvs_msg">deseo que el pago sea anónimo</string>
-    <string name="FROM_USERVS_msg_subject">ingreso de usuario</string>
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
         <b>votingsystem, 2015. </b>version %s<br><br>
@@ -526,7 +523,6 @@
     <string name="from_uservs_receipt_ok_msg">ha \'%1$s\' un ingreso de \'%2$s\' para \'%3$s\'</string>
     <string name="income_lbl">recibido</string>
     <string name="expense_lbl">realizado</string>
-    <string name="currency_change_subject">intercambio de moneda anónimo</string>
     <string name="check_operationvs">comprobar operación</string>
     <string name="currency_send_description"><![CDATA[<html><b>ingreso anónimo</b><br/>asunto: \'%1$s\'
         <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>

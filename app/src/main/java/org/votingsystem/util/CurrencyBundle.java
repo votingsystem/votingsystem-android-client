@@ -1,8 +1,8 @@
 package org.votingsystem.util;
 
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
@@ -10,6 +10,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.crypto.CMSUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -183,11 +184,12 @@ public class CurrencyBundle {
         }
 
         for (Currency currency : currencySet) {
+            byte[] contentToSign = JSON.writeValueAsBytes(dto);
+            TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(
+                    currency.getCertificationRequest().getSignatureMechanism(), contentToSign);
             CMSSignedMessage cmsMessage = currency.getCertificationRequest().signData(
-                    JSON.writeValueAsString(dto));
-            MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage);
-            timeStamper.call();
-            currency.setCMS(timeStamper.getCMS());
+                    contentToSign, timeStampToken);
+            currency.setCMS(cmsMessage);
             currencySetSignatures.add(currency.getCMS().toPEMStr());
         }
         dto.setCurrencySet(currencySetSignatures);
