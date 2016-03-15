@@ -29,7 +29,7 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
 import org.votingsystem.util.HttpHelper;
@@ -306,7 +306,7 @@ public class UserDataFormActivity extends AppCompatActivity {
         @Override protected ResponseVS doInBackground(String... urls) {
             ResponseVS responseVS = null;
             try {
-                responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+                responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                         AppVS.getInstance().getCurrencyServer().getCSRSignedWithIDCardServiceURL());
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");

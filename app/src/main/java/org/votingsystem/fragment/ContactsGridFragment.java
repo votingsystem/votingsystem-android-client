@@ -43,7 +43,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -378,7 +378,7 @@ public class ContactsGridFragment extends Fragment
             } else {
                 contactsURL = appVS.getCurrencyServer().getSearchServiceURL(params[0]);
             }
-            return HttpHelper.getData(contactsURL, ContentTypeVS.JSON);
+            return HttpHelper.getData(contactsURL, ContentType.JSON);
         }
 
         @Override protected void onProgressUpdate(String... progress) { }

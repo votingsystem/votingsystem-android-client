@@ -25,7 +25,7 @@ public class NFCActivityAction implements DebugAction {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
                 Intent intent = new Intent(appContext, ID_CardNFCReaderActivity.class);
-                //intent.putExtra(ContextVS.OPERATIONVS_KEY, TypeVS.CURRENCY_REQUEST);
+                //intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.CURRENCY_REQUEST);
                 intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, "message content");
                 intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, "cms message subject");
                 intent.putExtra(ContextVS.MESSAGE_KEY, "Do you want to sign the message?");

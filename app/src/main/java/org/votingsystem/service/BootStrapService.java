@@ -10,7 +10,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.PrefUtils;
@@ -48,7 +48,7 @@ public class BootStrapService extends IntentService {
         if(!PrefUtils.isDataBootstrapDone()) { }
         if(appVS.getCurrencyServer() == null) {
             responseVS = HttpHelper.getData(ActorDto.getServerInfoURL(currencyServerURL),
-                    ContentTypeVS.JSON);
+                    ContentType.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     CurrencyServerDto currencyServer = (CurrencyServerDto) responseVS.getMessage(

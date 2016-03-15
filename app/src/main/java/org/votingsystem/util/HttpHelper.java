@@ -92,11 +92,11 @@ public class HttpHelper {
         } catch (Exception ex) { ex.printStackTrace(); }
     }
     
-    public static ResponseVS getData (String serverURL, ContentTypeVS contentType) {
+    public static ResponseVS getData (String serverURL, ContentType contentType) {
         LOGD(TAG + ".getData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
-        ContentTypeVS responseContentType = null;
+        ContentType responseContentType = null;
         try {
             HttpGet httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
@@ -105,7 +105,7 @@ public class HttpHelper {
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             LOGD(TAG + ".getData", "Connections in pool: " + cm.getConnectionsInPool());
             LOGD(TAG + ".getData" ,response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
@@ -150,7 +150,7 @@ public class HttpHelper {
         } else {
             MessageDto messageDto = null;
             String responseStr = null;
-            if(responseContentType != null && responseContentType.contains(MediaTypeVS.JSON)) messageDto =
+            if(responseContentType != null && responseContentType.contains(MediaType.JSON)) messageDto =
                     JSON.readValue(responseBytes, MessageDto.class);
             else responseStr = new String(responseBytes, "UTF-8");
             switch (response.getStatusLine().getStatusCode()) {
@@ -204,7 +204,7 @@ public class HttpHelper {
         } else {
             MessageDto messageDto = null;
             String responseStr = null;
-            if(responseContentType != null && responseContentType.contains(MediaTypeVS.JSON)) messageDto =
+            if(responseContentType != null && responseContentType.contains(MediaType.JSON)) messageDto =
                     JSON.readValue(responseBytes, MessageDto.class);
             else responseStr = new String(responseBytes, "UTF-8");
             switch (response.getStatusLine().getStatusCode()) {
@@ -217,13 +217,13 @@ public class HttpHelper {
         }
     }
 
-    public static ResponseVS sendData(byte[] data, ContentTypeVS contentType,
+    public static ResponseVS sendData(byte[] data, ContentType contentType,
               String serverURL, String... headerNames) {
         LOGD(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpPost httpPost = new HttpPost(serverURL);
         HttpResponse response = null;
         ResponseVS responseVS = null;
-        ContentTypeVS responseContentType = null;
+        ContentType responseContentType = null;
         try {
             ByteArrayEntity reqEntity = new ByteArrayEntity(data);
             if(contentType != null) reqEntity.setContentType(contentType.getName());
@@ -231,7 +231,7 @@ public class HttpHelper {
             httpPost.setEntity(reqEntity);
             response = httpclient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             LOGD(TAG + ".sendData" ,"----------------------------------------");
             LOGD(TAG + ".sendData" , response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
@@ -257,7 +257,7 @@ public class HttpHelper {
 
     public static ResponseVS sendFile (File file, String serverURL) {
         ResponseVS responseVS = null;
-        ContentTypeVS responseContentType = null;
+        ContentType responseContentType = null;
         try {
             HttpPost httpPost = new HttpPost(serverURL);
             LOGD(TAG + ".sendFile" , "serverURL: " + httpPost.getURI()
@@ -268,7 +268,7 @@ public class HttpHelper {
             httpPost.setEntity(reqEntity);
             HttpResponse response = httpclient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             LOGD(TAG + ".sendFile" , "----------------------------------------");
             LOGD(TAG + ".sendFile" , response.getStatusLine().toString() + " - " +
                     response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);
@@ -294,7 +294,7 @@ public class HttpHelper {
              Map<String, Object> fileMap, String serverURL) throws Exception {
     	 LOGD(TAG + ".sendObjectMap" , "serverURL: " + serverURL);
          ResponseVS responseVS = null;
-         ContentTypeVS responseContentType = null;
+         ContentType responseContentType = null;
          if(fileMap == null || fileMap.isEmpty()) throw new Exception("Empty Map");
          HttpPost httpPost = new HttpPost(serverURL);
          HttpResponse response = null;
@@ -318,7 +318,7 @@ public class HttpHelper {
              httpPost.setEntity(reqEntity);
              response = httpclient.execute(httpPost);
              Header header = response.getFirstHeader("Content-Type");
-             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+             if(header != null) responseContentType = ContentType.getByName(header.getValue());
              LOGD(TAG + ".sendObjectMap" ,"----------------------------------------");
              LOGD(TAG + ".sendObjectMap" ,response.getStatusLine().toString() + " - " +
                      response.getFirstHeader("Content-Type") + " - contentTypeVS: " + responseContentType);

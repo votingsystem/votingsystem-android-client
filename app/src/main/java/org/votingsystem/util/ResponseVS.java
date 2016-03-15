@@ -53,7 +53,7 @@ public class ResponseVS<T> implements Parcelable {
     private TypeVS typeVS;
     private CMSSignedMessage cmsMessage;
     private byte[] cmsPEMMessageBytes;
-    private ContentTypeVS contentType = ContentTypeVS.TEXT;
+    private ContentType contentType = ContentType.TEXT;
     private byte[] messageBytes;
     private Uri uri;
 
@@ -75,7 +75,7 @@ public class ResponseVS<T> implements Parcelable {
             } catch (Exception ex) { ex.printStackTrace();}
         }
         typeVS = (TypeVS) source.readSerializable();
-        contentType = (ContentTypeVS) source.readSerializable();
+        contentType = (ContentType) source.readSerializable();
         messageBytes = new byte[source.readInt()];
         source.readByteArray(messageBytes);
         cmsPEMMessageBytes = new byte[source.readInt()];
@@ -124,7 +124,7 @@ public class ResponseVS<T> implements Parcelable {
         this.message = message;
     }
 
-    public ResponseVS(int statusCode, String message, ContentTypeVS contentType) {
+    public ResponseVS(int statusCode, String message, ContentType contentType) {
         this.statusCode = statusCode;
         this.message = message;
         this.contentType = contentType;
@@ -135,7 +135,7 @@ public class ResponseVS<T> implements Parcelable {
         this.messageBytes = messageBytes;
     }
 
-    public ResponseVS(int statusCode, byte[] messageBytes, ContentTypeVS contentType) {
+    public ResponseVS(int statusCode, byte[] messageBytes, ContentType contentType) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
         this.contentType = contentType;
@@ -259,11 +259,11 @@ public class ResponseVS<T> implements Parcelable {
 		this.cmsMessage = cmsMessage;
 	}
 
-    public ContentTypeVS getContentType() {
+    public ContentType getContentType() {
         return contentType;
     }
 
-    public void setContentType(ContentTypeVS contentType) {
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
     }
 

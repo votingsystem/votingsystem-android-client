@@ -32,7 +32,7 @@ import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.service.EventVSService;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -299,7 +299,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
         @Override protected ResponseVS doInBackground(String... urls) {
             return HttpHelper.getData(AccessControlDto.getServerInfoURL(
-                    AppVS.getInstance().getAccessControlURL()), ContentTypeVS.JSON);
+                    AppVS.getInstance().getAccessControlURL()), ContentType.JSON);
         }
 
         @Override protected void onProgressUpdate(String... progress) { }

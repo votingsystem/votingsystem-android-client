@@ -35,7 +35,7 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -280,7 +280,7 @@ public class QRActionsFragment extends Fragment {
                     getString(R.string.loading_info_msg));
             try {
                 return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
-                        .getDeviceByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
+                        .getDeviceByIdServiceURL(qrMessageDto.getDeviceId()), ContentType.JSON);
             } catch (Exception ex) {
                 return ResponseVS.ERROR(getString(R.string.connection_error_msg), ex.getMessage());
             }

@@ -37,11 +37,11 @@ public class ContextVS {
 
     public static final String WALLET_FILE_NAME                = "wallet.wvs";
     public static final String SIGNED_FILE_NAME                = "signedFile";
-    public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentTypeVS.TEXT.getName();
-    public static final String CMS_FILE_NAME                   = "cms" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String CMS_ANONYMOUS_FILE_NAME         = "cmsAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CSR_FILE_NAME                   = "csr" + ":" + ContentType.TEXT.getName();
+    public static final String CMS_FILE_NAME                   = "cms" + ":" + MediaType.JSON_SIGNED;
+    public static final String CMS_ANONYMOUS_FILE_NAME         = "cmsAnonymous" + ":" + MediaType.JSON_SIGNED;
+    public static final String ACCESS_REQUEST_FILE_NAME        = "accessRequest" + ":" + MediaType.JSON_SIGNED;
+    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaType.JSON_SIGNED;
     public static final String ANDROID_PROVIDER                = "AndroidOpenSSL";
     public static final String WEB_SOCKET_BROADCAST_ID         = "WEB_SOCKET_BROADCAST_ID";
 
@@ -82,7 +82,7 @@ public class ContextVS {
     public static final String OFFSET_KEY = "OFFSET";
     public static final String CAPTION_KEY = "CAPTION";
     public static final String IMAGE_KEY = "IMAGE_KEY";
-    public static final String OPERATIONVS_KEY = "OPERATIONVS_KEY";
+    public static final String OPERATION_KEY = "OPERATION_KEY";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
     public static final String USER_ACCOUNT_LAST_CHECKED_KEY = "USER_ACCOUNT_LAST_CHECKED_KEY";

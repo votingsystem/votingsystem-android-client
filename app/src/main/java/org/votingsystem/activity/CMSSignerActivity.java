@@ -22,7 +22,7 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
@@ -186,7 +186,7 @@ public class CMSSignerActivity extends AppCompatActivity {
             case R.id.share_receipt:
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.setType(ContentTypeVS.TEXT.getName());
+                sendIntent.setType(ContentType.TEXT.getName());
                 try {
                     sendIntent.putExtra(Intent.EXTRA_STREAM, Utils.createTempFile(cms.toPEM(), this));
                 } catch (Exception e) { e.printStackTrace(); }

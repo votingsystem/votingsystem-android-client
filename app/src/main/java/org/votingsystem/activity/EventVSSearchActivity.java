@@ -29,7 +29,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.fragment.EventVSFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -183,7 +183,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
             }
             String serviceURL = AppVS.getInstance().getAccessControl().getSearchServiceURL(null, null, queryStr,
                     EventVSDto.Type.ELECTION, eventState);
-            responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+            responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
             try {
                 ResultListDto<EventVSDto> resultListDto = (ResultListDto<EventVSDto>)
                         responseVS.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});

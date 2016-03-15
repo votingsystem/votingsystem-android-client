@@ -29,7 +29,7 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.UIUtils;
@@ -194,7 +194,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
         @Override protected ResponseVS doInBackground(String... urls) {
             try {
                 CurrencyStateDto currencyStateDto = HttpHelper.getData(CurrencyStateDto.class,
-                        urls[0], MediaTypeVS.JSON);
+                        urls[0], MediaType.JSON);
                 currency.setState(currencyStateDto.getState());
                 getContentResolver().update(CurrencyContentProvider.getURI(currency.getLocalId()),
                         CurrencyContentProvider.getContentValues(currency), null, null);

@@ -28,7 +28,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.BrowserVSActivity;
+import org.votingsystem.activity.BrowserActivity;
 import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
@@ -238,7 +238,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.eventInfo:
-                Intent intent = new Intent(AppVS.getInstance(), BrowserVSActivity.class);
+                Intent intent = new Intent(AppVS.getInstance(), BrowserActivity.class);
                 intent.putExtra(ContextVS.URL_KEY, eventVS.getStatsServiceURL());
                 intent.putExtra(ContextVS.DOUBLE_BACK_KEY, false);
                 startActivity(intent);

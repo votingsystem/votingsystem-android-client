@@ -15,7 +15,7 @@ import android.text.TextUtils;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.OperationVS;
+import org.votingsystem.util.Operation;
 
 import java.util.Date;
 
@@ -24,14 +24,14 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class OperationVSContentProvider extends ContentProvider {
+public class OperationContentProvider extends ContentProvider {
 
-    public static final String TAG = OperationVSContentProvider.class.getSimpleName();
+    public static final String TAG = OperationContentProvider.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DB_NAME = "voting_system_operationvs.db";
-    private static final String TABLE_NAME = "operationvs";
-    public static final String AUTHORITY = "votingsystem.org.operationvs";
+    private static final String DB_NAME = "voting_system_operation.db";
+    private static final String TABLE_NAME = "operation";
+    public static final String AUTHORITY = "votingsystem.org.operation";
 
     public static final String ID_COL                = "_id";
     public static final String TYPE_COL              = "type";
@@ -47,7 +47,7 @@ public class OperationVSContentProvider extends ContentProvider {
     private static final int ALL_ITEMS = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "operationvs";
+    private static final String BASE_PATH = "operation";
 
     private static final UriMatcher URI_MATCHER;
     static{
@@ -81,9 +81,9 @@ public class OperationVSContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/operationvsList"; // List of items.
+                return "vnd.android.cursor.dir/operationList"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/operationvs"; // Specific item.
+                return "vnd.android.cursor.item/operation"; // Specific item.
             default:
                 return null;
         }
@@ -109,7 +109,7 @@ public class OperationVSContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        values.put(OperationVSContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        values.put(OperationContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         int updateCount = 0;
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
@@ -135,8 +135,8 @@ public class OperationVSContentProvider extends ContentProvider {
         Uri newUri = null;
         if(values != null) {
             long rowId = -1;
-            values.put(OperationVSContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-            values.put(OperationVSContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+            values.put(OperationContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(OperationContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
             rowId = database.insert(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
         }
@@ -153,7 +153,7 @@ public class OperationVSContentProvider extends ContentProvider {
             rowCount = database.delete(TABLE_NAME, ID_COL + " = ?", new String[]{idColStr});
         } else  rowCount = database.delete(TABLE_NAME, selection, selectionArgs);
         // Notify any listeners and return the deleted row count.
-        LOGD(TAG + ".delete", "operationvs id: " + idColStr);
+        LOGD(TAG + ".delete", "operation id: " + idColStr);
         getContext().getContentResolver().notifyChange(uri, null);
         return rowCount;
     }
@@ -193,28 +193,28 @@ public class OperationVSContentProvider extends ContentProvider {
         }
     }
 
-    public static ContentValues getContentValues(OperationVS operation) {
+    public static ContentValues getContentValues(Operation operation) {
         ContentValues values = new ContentValues();
-        values.put(OperationVSContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(operation));
-        values.put(OperationVSContentProvider.URL_COL, AppVS.getInstance().getCurrencyServerURL());
-        values.put(OperationVSContentProvider.TYPE_COL, operation.getTypeVS().toString());
-        values.put(OperationVSContentProvider.STATE_COL, operation.getState().toString());
+        values.put(OperationContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(operation));
+        values.put(OperationContentProvider.URL_COL, AppVS.getInstance().getCurrencyServerURL());
+        values.put(OperationContentProvider.TYPE_COL, operation.getTypeVS().toString());
+        values.put(OperationContentProvider.STATE_COL, operation.getState().toString());
         if(operation.getLocalId() == null) {
-            values.put(OperationVSContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(OperationContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
         }
-        values.put(OperationVSContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        values.put(OperationContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         return values;
     }
 
-    public static OperationVS getOperation(Cursor cursor) {
+    public static Operation getOperation(Cursor cursor) {
         byte[] objectBytes = cursor.getBlob(cursor.getColumnIndex(
-                OperationVSContentProvider.SERIALIZED_OBJECT_COL));
-        OperationVS operation = (OperationVS) ObjectUtils.deSerializeObject(objectBytes);
-        operation.setLocalId(cursor.getLong(cursor.getColumnIndex(OperationVSContentProvider.ID_COL)));
+                OperationContentProvider.SERIALIZED_OBJECT_COL));
+        Operation operation = (Operation) ObjectUtils.deSerializeObject(objectBytes);
+        operation.setLocalId(cursor.getLong(cursor.getColumnIndex(OperationContentProvider.ID_COL)));
         operation.setDateCreated(new Date(cursor.getLong(cursor.getColumnIndex(
-                OperationVSContentProvider.TIMESTAMP_CREATED_COL))));
+                OperationContentProvider.TIMESTAMP_CREATED_COL))));
         operation.setLastUpdated(new Date(cursor.getLong(cursor.getColumnIndex(
-                OperationVSContentProvider.TIMESTAMP_UPDATED_COL))));
+                OperationContentProvider.TIMESTAMP_UPDATED_COL))));
         return operation;
     }
 

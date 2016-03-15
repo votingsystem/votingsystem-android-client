@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.BrowserVSActivity;
+import org.votingsystem.activity.BrowserActivity;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.debug.DebugAction;
 
@@ -25,7 +25,7 @@ public class BrowserVSAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
-                Intent intent = new Intent(AppVS.getInstance(), BrowserVSActivity.class);
+                Intent intent = new Intent(AppVS.getInstance(), BrowserActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 //intent.putExtra(ContextVS.URL_KEY, appContext.getCurrencyServer().getServerURL());
                 //intent.putExtra(ContextVS.URL_KEY,"http://currency:8086/Currency/testing/testSocket");

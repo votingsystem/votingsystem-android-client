@@ -26,7 +26,7 @@ import org.bouncycastle2.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle2.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.votingsystem.AppVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ResponseVS;
 
@@ -125,7 +125,7 @@ public class CMSUtils {
         TimeStampRequest timeStampRequest = reqgen.generate(
                 digAlgId.getAlgorithm().getId(), digestBytes);
         ResponseVS responseVS = HttpHelper.sendData(
-                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+                timeStampRequest.getEncoded(), ContentType.TIMESTAMP_QUERY,
                 AppVS.getInstance().getTimeStampServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();

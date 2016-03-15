@@ -24,7 +24,7 @@ import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.ReceiptFragment;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -211,7 +211,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                             signatureMechanism, contentToSign);
                     cmsMessage = delegationDto.getCertificationRequest().signData(
                             contentToSign, timeStampToken);
-                    responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+                    responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                             AppVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         delegationDto.setDelegationReceipt(responseVS.getCMS(),
@@ -229,7 +229,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                     }
                 } else {
                     responseVS.setCaption(getString(R.string.error_lbl));
-                    if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                    if(ContentType.JSON == responseVS.getContentType()) {
                         MessageDto messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
                         responseVS.setNotificationMessage(messageDto.getMessage());
                         responseVS.setData(messageDto.getURL());

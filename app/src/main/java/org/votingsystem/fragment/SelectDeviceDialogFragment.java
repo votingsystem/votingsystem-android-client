@@ -25,7 +25,7 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
@@ -149,7 +149,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         @Override protected List<String> doInBackground(String... params) {
             connectedDeviceList.clear();
             try {
-                UserDto userDto = HttpHelper.getData(UserDto.class, params[0], MediaTypeVS.JSON);
+                UserDto userDto = HttpHelper.getData(UserDto.class, params[0], MediaType.JSON);
                 for(DeviceDto deviceDto : userDto.getConnectedDevices()) {
                     if(!Utils.getDeviceName().toLowerCase().equals(
                             deviceDto.getDeviceName().toLowerCase()))

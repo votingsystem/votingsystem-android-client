@@ -19,7 +19,7 @@
             android:label="@string/app_name" android:theme="@style/ThemeVS">
         </activity>
 
-        <activity android:name="org.votingsystem.activity.BrowserVSActivity"
+        <activity android:name="org.votingsystem.activity.BrowserActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
@@ -144,8 +144,8 @@
         <provider android:name="org.votingsystem.contentprovider.CurrencyContentProvider"
             android:exported="false" android:authorities="votingsystem.org.currency"/>
 
-        <provider android:name="org.votingsystem.contentprovider.OperationVSContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.operationvs"/>
+        <provider android:name="org.votingsystem.contentprovider.OperationContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.operation"/>
 
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service are only available to this app. -->

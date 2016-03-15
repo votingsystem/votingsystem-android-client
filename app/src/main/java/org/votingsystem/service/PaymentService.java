@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.contentprovider.OperationVSContentProvider;
+import org.votingsystem.contentprovider.OperationContentProvider;
 import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -26,15 +26,15 @@ import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.CurrencyBundle;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.OperationVS;
+import org.votingsystem.util.Operation;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -113,11 +113,11 @@ public class PaymentService extends IntentService {
             try {
                 switch (transactionDto.getType()) {
                     case FROM_USER:
-                        OperationVS operationVS = new OperationVS(TypeVS.FROM_USER, transactionDto,
-                                OperationVS.State.PENDING);
+                        Operation operation = new Operation(TypeVS.FROM_USER, transactionDto,
+                                Operation.State.PENDING);
                         Uri operationUri = getContentResolver().insert(
-                                OperationVSContentProvider.CONTENT_URI,
-                                OperationVSContentProvider.getContentValues(operationVS));
+                                OperationContentProvider.CONTENT_URI,
+                                OperationContentProvider.getContentValues(operation));
                         responseVS = sendTransaction(transactionDto.getTransactionFromUser());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
                                 transactionDto.getPaymentConfirmURL() != null) {
@@ -146,14 +146,14 @@ public class PaymentService extends IntentService {
                                 responseDto.setOperation(TypeVS.FROM_USER);
                                 responseDto.setCMSMessage(base64Receipt);
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
-                                        ContentTypeVS.JSON, transactionDto.getPaymentConfirmURL());
+                                        ContentType.JSON, transactionDto.getPaymentConfirmURL());
                             }
-                            operationVS.setState(OperationVS.State.FINISHED);
+                            operation.setState(Operation.State.FINISHED);
                             getContentResolver().delete(operationUri, null, null);
                         } else {
-                            operationVS.setState(OperationVS.State.ERROR);
-                            getContentResolver().update(operationUri, OperationVSContentProvider
-                                    .getContentValues(operationVS), null, null);
+                            operation.setState(Operation.State.ERROR);
+                            getContentResolver().update(operationUri, OperationContentProvider
+                                    .getContentValues(operation), null, null);
                         }
                         break;
                     case CURRENCY_SEND:
@@ -171,7 +171,7 @@ public class PaymentService extends IntentService {
                                 TransactionResponseDto responseDto = new TransactionResponseDto(
                                         TypeVS.CURRENCY_SEND, null, responseVS.getCMS());
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
-                                        ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                                        ContentType.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
                             responseVS.setMessage(message);
                         }
@@ -212,7 +212,7 @@ public class PaymentService extends IntentService {
                                         transactionDto.getQrMessageDto().getCurrencyChangeCert(),
                                         responseVS.getCMS());
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
-                                        ContentTypeVS.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
+                                        ContentType.JSON_SIGNED, transactionDto.getPaymentConfirmURL());
                             }
                             responseVS.setMessage(message);
                         }
@@ -285,7 +285,7 @@ public class PaymentService extends IntentService {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
             CMSSignedMessage cmsMessage = appVS.signMessage(JSON.writeValueAsBytes(transactionDto));
             responseVS = HttpHelper.sendData(cmsMessage.toPEM(),
-                    ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionServiceURL());
+                    ContentType.JSON_SIGNED, currencyServer.getTransactionServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);
@@ -308,12 +308,12 @@ public class PaymentService extends IntentService {
                 CMSSignedMessage cmsMessage = transactionDto.getCMSMessage();
                 requestDto.setCurrencyChangeCSR(cmsMessage.getSignedContentStr());
             } else requestDto = currencyBundle.getCurrencyBatchDto(transactionDto);
-            OperationVS operationVS = new OperationVS(transactionDto.getOperation(), requestDto,
-                    OperationVS.State.PENDING);
-            Uri operationUri = getContentResolver().insert(OperationVSContentProvider.CONTENT_URI,
-                    OperationVSContentProvider.getContentValues(operationVS));
+            Operation operation = new Operation(transactionDto.getOperation(), requestDto,
+                    Operation.State.PENDING);
+            Uri operationUri = getContentResolver().insert(OperationContentProvider.CONTENT_URI,
+                    OperationContentProvider.getContentValues(operation));
             responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(requestDto),
-                    ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
+                    ContentType.JSON, currencyServer.getCurrencyTransactionServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CurrencyBatchResponseDto responseDto = (CurrencyBatchResponseDto)
                         responseVS.getMessage(CurrencyBatchResponseDto.class);
@@ -323,13 +323,13 @@ public class PaymentService extends IntentService {
                         currencyServer.getTrustAnchors());
                 responseVS.setCMS(cmsMessage);
                 Wallet.updateWallet(requestDto);
-                operationVS.setState(OperationVS.State.FINISHED);
+                operation.setState(Operation.State.FINISHED);
                 getContentResolver().delete(operationUri, null, null);
             } else {
-                operationVS.setState(OperationVS.State.ERROR).setStatusCode(responseVS.getStatusCode())
+                operation.setState(Operation.State.ERROR).setStatusCode(responseVS.getStatusCode())
                         .setMessage(responseVS.getMessage());
-                getContentResolver().update(operationUri, OperationVSContentProvider
-                        .getContentValues(operationVS), null, null);
+                getContentResolver().update(operationUri, OperationContentProvider
+                        .getContentValues(operation), null, null);
             }
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -353,7 +353,7 @@ public class PaymentService extends IntentService {
         try {
             String targetService = appVS.getCurrencyServer().getUserInfoServiceURL(
                     appVS.getUser().getNIF());
-            responseVS = HttpHelper.getData(targetService, ContentTypeVS.JSON);
+            responseVS = HttpHelper.getData(targetService, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 BalancesDto accountsInfo = (BalancesDto) responseVS.getMessage(BalancesDto.class);
                 PrefUtils.putBalances(accountsInfo, DateUtils.getCurrentWeekPeriod());
@@ -385,7 +385,7 @@ public class PaymentService extends IntentService {
                     new TypeReference<Set<CurrencyStateDto>>() {},
                     JSON.writeValueAsBytes(hashCertVSSet),
                     appVS.getCurrencyServer().getCurrencyBundleStateServiceURL(),
-                    MediaTypeVS.JSON);
+                    MediaType.JSON);
             Set<CurrencyStateDto> currencyWithErrors = new HashSet<>();
             Set<String> currencyOKSet = new HashSet<>();
             for(CurrencyStateDto currencyDto: responseDto) {

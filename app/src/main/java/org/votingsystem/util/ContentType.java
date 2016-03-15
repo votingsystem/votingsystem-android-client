@@ -3,27 +3,27 @@ package org.votingsystem.util;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public enum ContentTypeVS {
+public enum ContentType {
 
 
-    BACKUP(MediaTypeVS.BACKUP, "zip"),
+    BACKUP(MediaType.BACKUP, "zip"),
     JAVASCRIPT("application/javascript", "js"),
 
-    JSON(MediaTypeVS.JSON, "json"),
-    JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7s"),
-    JSON_ENCRYPTED(MediaTypeVS.JSON_ENCRYPTED,"p7s"),//.p7c
+    JSON(MediaType.JSON, "json"),
+    JSON_SIGNED(MediaType.JSON_SIGNED,"p7s"),
+    JSON_ENCRYPTED(MediaType.JSON_ENCRYPTED,"p7s"),//.p7c
     JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-encrypted", "p7s"),
 
-    MESSAGEVS(MediaTypeVS.MESSAGEVS, "vs"),
+    MESSAGEVS(MediaType.MESSAGEVS, "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
-    MULTIPART_ENCRYPTED(MediaTypeVS.MULTIPART_ENCRYPTED, null),
+    MULTIPART_ENCRYPTED(MediaType.MULTIPART_ENCRYPTED, null),
     TEXT("text/plain", "txt"),
     HTML("text/html", "html"),
     TEXT_STREAM("text/plain", "txt"),
     TIMESTAMP_QUERY("application/timestamp-query", null),
     TIMESTAMP_RESPONSE("application/timestamp-response", null),
 
-    ZIP(MediaTypeVS.ZIP, "zip"),
+    ZIP(MediaType.ZIP, "zip"),
     IMAGE("application/image", null),
 
     OCSP_REQUEST("application/ocsp-request", null),
@@ -31,7 +31,7 @@ public enum ContentTypeVS {
 
     CMS_SIGNED("signed-data", null),
     SIGNED("application/pkcs7-signature","p7s"),
-    ENCRYPTED(MediaTypeVS.ENCRYPTED, "p7s"),//.p7c
+    ENCRYPTED(MediaType.ENCRYPTED, "p7s"),//.p7c
     SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-encrypted", "p7s"),
 
     PKCS7_CERT("application/pkcs7-certificates","p7b"),//.spc
@@ -41,11 +41,11 @@ public enum ContentTypeVS {
     PKIX_CRL("application/pkix-crl", "crl"),
     PKIX_CERT("application/pkix-cert", "cer"),
     PKCS10("application/pkcs10", "p10"),//.csr
-    PEM(MediaTypeVS.PEM, "pem"),
+    PEM(MediaType.PEM, "pem"),
 
-    VOTE(MediaTypeVS.VOTE, "vote"),
+    VOTE(MediaType.VOTE, "vote"),
 
-    CURRENCY(MediaTypeVS.CURRENCY, "servs"),
+    CURRENCY(MediaType.CURRENCY, "servs"),
 
     X509_CA("application/x509-ca-cert", "crt"),
     X509_USER("application/x509-user-cert", "crt");
@@ -54,12 +54,12 @@ public enum ContentTypeVS {
     private String extension;
     private TypeVS typeVS;
 
-    private ContentTypeVS(String name, String extension) {
+    private ContentType(String name, String extension) {
         this.name = name;
         this.extension = "." + extension;
     }
 
-    private ContentTypeVS(String name, String extension, TypeVS typeVS) {
+    private ContentType(String name, String extension, TypeVS typeVS) {
         this.name = name;
         this.extension = "." + extension;
     }
@@ -94,14 +94,14 @@ public enum ContentTypeVS {
     }
 
     public boolean isEncrypted() {
-        return name.contains(MediaTypeVS.ENCRYPTED);
+        return name.contains(MediaType.ENCRYPTED);
     }
 
     public boolean isSignedAndEncrypted() {
-        return (name.contains("application/pkcs7-signature") && name.contains(MediaTypeVS.ENCRYPTED));
+        return (name.contains("application/pkcs7-signature") && name.contains(MediaType.ENCRYPTED));
     }
 
-    public static ContentTypeVS getByName(String contentTypeStr) {
+    public static ContentType getByName(String contentTypeStr) {
         if(contentTypeStr == null) return null;
 
         if(contentTypeStr.contains(VOTE.getName())) return VOTE;
@@ -134,7 +134,7 @@ public enum ContentTypeVS {
         return null;
     }
 
-    public static ContentTypeVS getByExtension(String extensionStr) {
+    public static ContentType getByExtension(String extensionStr) {
         if(extensionStr == null) return null;
         if(extensionStr.contains(ZIP.getExtension())) return ZIP;
         if(extensionStr.contains(TEXT.getExtension())) return TEXT;

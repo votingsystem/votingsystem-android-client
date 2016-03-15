@@ -5,7 +5,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -58,7 +58,7 @@ public class VoteSender implements Callable<ResponseVS> {
 
 
             CMSSignedMessage signedVote = voteHelper.getCMSVote();
-            responseVS = HttpHelper.sendData(signedVote.toPEM(), ContentTypeVS.VOTE,
+            responseVS = HttpHelper.sendData(signedVote.toPEM(), ContentType.VOTE,
                     AppVS.getInstance().getControlCenter().getVoteServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 cancelAccessRequest(); //AccesRequest OK and Vote error -> Cancel access request
@@ -83,7 +83,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String serviceURL = AppVS.getInstance().getAccessControl().getCancelVoteServiceURL();
             CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(
                     JSON.writeValueAsBytes(voteHelper.getVoteCanceler()));
-            return HttpHelper.sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serviceURL);
+            return HttpHelper.sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED, serviceURL);
         } catch(Exception ex) {
             ex.printStackTrace();
             return ResponseVS.EXCEPTION(ex.getMessage(),

@@ -32,7 +32,7 @@ import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -213,7 +213,7 @@ public class MessageFormFragment extends Fragment {
         @Override protected UserDto doInBackground(String... params) {
             UserDto result = null;
             try {
-                result = HttpHelper.getData(UserDto.class, serviceURL, MediaTypeVS.JSON);
+                result = HttpHelper.getData(UserDto.class, serviceURL, MediaType.JSON);
             } catch (Exception ex) { ex.printStackTrace();}
             return result;
         }

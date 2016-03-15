@@ -33,7 +33,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.RootUtil;
@@ -260,7 +260,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private <T> T getActorDtoFromURL(Class<T> type, String serverURL) {
         T targetServer = null;
         try {
-            targetServer = HttpHelper.getData(type, ActorDto.getServerInfoURL(serverURL), MediaTypeVS.JSON);
+            targetServer = HttpHelper.getData(type, ActorDto.getServerInfoURL(serverURL), MediaType.JSON);
             setServer((ActorDto) targetServer);
         } catch(Exception ex) {
             LOGE(TAG + ".getActorDtoFromURL", "ERROR fetching: " + serverURL);

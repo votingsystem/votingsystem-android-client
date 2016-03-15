@@ -65,7 +65,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             /*case R.id.admin_currency_menu_item:
-                Intent intent = new Intent(this, BrowserVSActivity.class);
+                Intent intent = new Intent(this, BrowserActivity.class);
                 intent.putExtra(ContextVS.URL_KEY, appVS.getCurrencyServer().getMenuAdminURL());
                 startActivity(intent);
                 return true;*/

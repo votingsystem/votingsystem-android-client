@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 
-public class OperationVS<T> implements Serializable {
+public class Operation<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,9 +19,9 @@ public class OperationVS<T> implements Serializable {
     private Date dateCreated;
     private Date lastUpdated;
 
-    public OperationVS() {}
+    public Operation() {}
 
-    public OperationVS(TypeVS typeVS, T data, State state) {
+    public Operation(TypeVS typeVS, T data, State state) {
         this.typeVS = typeVS;
         this.data = data;
         this.state = state;
@@ -55,7 +55,7 @@ public class OperationVS<T> implements Serializable {
         return state;
     }
 
-    public OperationVS setState(State state) {
+    public Operation setState(State state) {
         this.state = state;
         return this;
     }
@@ -80,7 +80,7 @@ public class OperationVS<T> implements Serializable {
         return statusCode;
     }
 
-    public OperationVS setStatusCode(int statusCode) {
+    public Operation setStatusCode(int statusCode) {
         this.statusCode = statusCode;
         return this;
     }
@@ -89,7 +89,7 @@ public class OperationVS<T> implements Serializable {
         return message;
     }
 
-    public OperationVS setMessage(String message) {
+    public Operation setMessage(String message) {
         this.message = message;
         return this;
     }

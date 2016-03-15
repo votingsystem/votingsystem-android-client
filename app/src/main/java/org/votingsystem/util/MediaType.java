@@ -1,7 +1,7 @@
 package org.votingsystem.util;
 
 
-public class MediaTypeVS {
+public class MediaType {
 
     public static final String CURRENCY = "application/currency;application/pkcs7-signature;";
     public static final String JSON_SIGNED = "application/json;application/pkcs7-signature";

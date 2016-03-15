@@ -36,7 +36,7 @@ import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.service.VoteService;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
@@ -350,7 +350,7 @@ public class ReceiptFragment extends Fragment {
                 case R.id.share_receipt:
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.setType(ContentTypeVS.TEXT.getName());
+                    sendIntent.setType(ContentType.TEXT.getName());
                     sendIntent.putExtra(Intent.EXTRA_STREAM, Utils.createTempFile(
                             receiptWrapperCMS.toPEM(), getActivity()));
                     startActivity(sendIntent);
@@ -461,7 +461,7 @@ public class ReceiptFragment extends Fragment {
             try {
                 String hashHex = StringUtils.toHex(params[0]);
                 responseVS = HttpHelper.getData(appVS.getAccessControl().
-                        getVoteCheckServiceURL(hashHex), ContentTypeVS.JSON);
+                        getVoteCheckServiceURL(hashHex), ContentType.JSON);
             } catch(Exception ex) {
                 responseVS = ResponseVS.EXCEPTION(ex, getActivity());
             } finally {return responseVS;}
@@ -478,7 +478,7 @@ public class ReceiptFragment extends Fragment {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            return HttpHelper.getData(urls[0], ContentTypeVS.TEXT);
+            return HttpHelper.getData(urls[0], ContentType.TEXT);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {

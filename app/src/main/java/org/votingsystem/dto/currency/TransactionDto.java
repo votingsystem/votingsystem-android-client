@@ -677,7 +677,7 @@ public class TransactionDto implements Serializable {
         return transaction;
     }
 
-    public static TransactionDto fromOperationVS(Operation operation) throws Exception {
+    public static TransactionDto fromOperation(Operation operation) throws Exception {
         TransactionDto transactionDto = operation.getSignedContent(TransactionDto.class);
         if(transactionDto.getTagVS() == null) {
             transactionDto.setTagVS(new TagVSDto(TagVSDto.WILDTAG));

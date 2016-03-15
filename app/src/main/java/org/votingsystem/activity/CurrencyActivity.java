@@ -27,7 +27,7 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -176,7 +176,7 @@ public class CurrencyActivity extends AppCompatActivity {
                         String receiptStr = currency.getReceipt().toPEMStr();
                         sendIntent.setAction(Intent.ACTION_SEND);
                         sendIntent.putExtra(Intent.EXTRA_TEXT, receiptStr);
-                        sendIntent.setType(ContentTypeVS.TEXT.getName());
+                        sendIntent.setType(ContentType.TEXT.getName());
                         startActivity(sendIntent);
                     } catch(Exception ex) {
                         ex.printStackTrace();

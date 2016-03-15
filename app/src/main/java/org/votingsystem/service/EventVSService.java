@@ -12,7 +12,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -75,7 +75,7 @@ public class EventVSService extends IntentService {
             }
             String serviceURL = appVS.getAccessControl().getEventVSURL(eventState,
                     ContextVS.EVENTS_PAGE_SIZE, offset);
-            responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+            responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     ResultListDto<EventVSDto> resultListDto = JSON.readValue(

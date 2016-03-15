@@ -32,7 +32,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -390,7 +390,7 @@ public class WebSocketService extends Service {
                                 CurrencyStateDto currencyStateDto = HttpHelper.getData(CurrencyStateDto.class,
                                         AppVS.getInstance().getCurrencyServer()
                                         .getCurrencyStateServiceURL(currency.getHashCertVS()),
-                                        MediaTypeVS.JSON);
+                                        MediaType.JSON);
                                 currency.setState(currencyStateDto.getState());
                                 getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
                                         CurrencyContentProvider.getContentValues(currency));

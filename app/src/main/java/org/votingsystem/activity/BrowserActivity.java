@@ -30,7 +30,7 @@ import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
@@ -47,14 +47,14 @@ import static org.votingsystem.util.LogUtils.LOGD;
  *
  * http://www.devahead.com/blog/2012/01/preserving-the-state-of-an-android-webview-on-screen-orientation-change/
  */
-public class BrowserVSActivity extends AppCompatActivity {
+public class BrowserActivity extends AppCompatActivity {
 	
-	public static final String TAG = BrowserVSActivity.class.getSimpleName();
+	public static final String TAG = BrowserActivity.class.getSimpleName();
 
     private String viewerURL;
     private String jsCommand;
     private AppVS appVS = null;
-    private String broadCastId = BrowserVSActivity.class.getSimpleName();
+    private String broadCastId = BrowserActivity.class.getSimpleName();
     private WebView webView;
     private FrameLayout webViewPlaceholder;
     private Operation operation;
@@ -69,7 +69,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
         if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
         if(responseVS.getOperation() != null) {
-            if(ContentTypeVS.JSON == responseVS.getContentType()) {
+            if(ContentType.JSON == responseVS.getContentType()) {
                 invokeOperationCallback(responseVS.getMessage(),
                         responseVS.getOperation().getCallerCallback());
             } else {
@@ -90,7 +90,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
         doubleBackEnabled = getIntent().getBooleanExtra(ContextVS.DOUBLE_BACK_KEY, true);
         if(savedInstanceState != null) {
-            operation = (Operation) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
+            operation = (Operation) savedInstanceState.getSerializable(ContextVS.OPERATION_KEY);
         }
         /*if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -167,7 +167,7 @@ public class BrowserVSActivity extends AppCompatActivity {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
-        outState.putSerializable(ContextVS.OPERATIONVS_KEY, operation);
+        outState.putSerializable(ContextVS.OPERATION_KEY, operation);
     }
 
     @Override

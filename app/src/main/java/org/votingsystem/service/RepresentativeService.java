@@ -15,10 +15,10 @@ import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -79,7 +79,7 @@ public class RepresentativeService extends IntentService {
         ResponseVS responseVS = null;
         try {
             RepresentationStateDto stateDto = HttpHelper.getData(
-                    RepresentationStateDto.class, serviceURL, MediaTypeVS.JSON);
+                    RepresentationStateDto.class, serviceURL, MediaType.JSON);
             switch (stateDto.getState()) {
                 case REPRESENTATIVE:
                     ResponseVS representativeImageReponse = HttpHelper.getData(
@@ -107,7 +107,7 @@ public class RepresentativeService extends IntentService {
 
 
     private void requestRepresentatives(String serviceURL, String serviceCaller) {
-        ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+        ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             try {
                 ResultListDto<UserDto> resultListDto = (ResultListDto<UserDto>)
@@ -146,7 +146,7 @@ public class RepresentativeService extends IntentService {
             responseVS = HttpHelper.getData(imageServiceURL, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 representativeImageBytes = responseVS.getMessageBytes();
-            responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
+            responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 representative = (UserDto) responseVS.getMessage(UserDto.class);
                 representative.setImageBytes(representativeImageBytes);

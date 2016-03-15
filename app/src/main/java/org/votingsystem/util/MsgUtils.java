@@ -125,8 +125,8 @@ public class MsgUtils {
         }
     }
 
-    public static String getOperationVSDescription(OperationVS operationVS) {
-        Object data = operationVS.getData();
+    public static String getOperationDescription(Operation operation) {
+        Object data = operation.getData();
         String result = null;
         if(data instanceof CurrencyBatchDto) {
             CurrencyBatchDto batchDto = (CurrencyBatchDto) data;
