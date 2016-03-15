@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.CurrencyFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -92,7 +92,7 @@ public class CurrencyActivity extends AppCompatActivity {
                     case DEVICE_SELECT:
                         try {
                             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                                DeviceVSDto targetDevice = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
+                                DeviceDto targetDevice = (DeviceDto) responseVS.getMessage(DeviceDto.class);
                                 SocketMessageDto socketMessage = SocketMessageDto.getCurrencyWalletChangeRequest(
                                         targetDevice, Arrays.asList(currency));
                                 Intent startIntent = new Intent(CurrencyActivity.this, WebSocketService.class);

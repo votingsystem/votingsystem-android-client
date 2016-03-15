@@ -16,15 +16,15 @@ public class UserCertificationRequestDto implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private AddressVS addressVS;
+    private Address address;
     private byte[] csrRequest;
     private byte[] token;
     @JsonIgnore private byte[] plainToken;
 
     public UserCertificationRequestDto(){}
 
-    public UserCertificationRequestDto(AddressVS addressVS, byte[] csrRequest) throws Exception {
-        this.addressVS = addressVS;
+    public UserCertificationRequestDto(Address address, byte[] csrRequest) throws Exception {
+        this.address = address;
         this.csrRequest = csrRequest;
         this.plainToken = UUID.randomUUID().toString().getBytes();
         this.token = Encryptor.encryptToCMS(this.plainToken,
@@ -39,12 +39,12 @@ public class UserCertificationRequestDto implements java.io.Serializable {
         this.csrRequest = csrRequest;
     }
 
-    public AddressVS getAddressVS() {
-        return addressVS;
+    public Address getAddress() {
+        return address;
     }
 
-    public void setAddressVS(AddressVS addressVS) {
-        this.addressVS = addressVS;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public byte[] getToken() {

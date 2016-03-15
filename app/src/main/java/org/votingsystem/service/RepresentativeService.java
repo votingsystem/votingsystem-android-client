@@ -13,7 +13,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -75,7 +75,7 @@ public class RepresentativeService extends IntentService {
             return;
         }
         String serviceURL = appVS.getAccessControl().getRepresentationStateServiceURL(
-                appVS.getUserVS().getNIF());
+                appVS.getUser().getNIF());
         ResponseVS responseVS = null;
         try {
             RepresentationStateDto stateDto = HttpHelper.getData(
@@ -110,11 +110,11 @@ public class RepresentativeService extends IntentService {
         ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             try {
-                ResultListDto<UserVSDto> resultListDto = (ResultListDto<UserVSDto>)
-                        responseVS.getMessage(new TypeReference<ResultListDto<UserVSDto>>() {});
+                ResultListDto<UserDto> resultListDto = (ResultListDto<UserDto>)
+                        responseVS.getMessage(new TypeReference<ResultListDto<UserDto>>() {});
                 UserContentProvider.setNumTotalRepresentatives(resultListDto.getTotalCount());
                 List<ContentValues> contentValuesList = new ArrayList<>();
-                for(UserVSDto representative : resultListDto.getResultList()) {
+                for(UserDto representative : resultListDto.getResultList()) {
                     contentValuesList.add(UserContentProvider.getContentValues(representative));
                 }
                 if(!contentValuesList.isEmpty()) {
@@ -141,16 +141,16 @@ public class RepresentativeService extends IntentService {
                 getRepresentativeImageURL(representativeId);
         byte[] representativeImageBytes = null;
         ResponseVS responseVS = null;
-        org.votingsystem.dto.UserVSDto representative = null;
+        UserDto representative = null;
         try {
             responseVS = HttpHelper.getData(imageServiceURL, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 representativeImageBytes = responseVS.getMessageBytes();
             responseVS = HttpHelper.getData(serviceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                representative = (org.votingsystem.dto.UserVSDto) responseVS.getMessage(org.votingsystem.dto.UserVSDto.class);
+                representative = (UserDto) responseVS.getMessage(UserDto.class);
                 representative.setImageBytes(representativeImageBytes);
-                Uri representativeURI = UserContentProvider.getUserVSURI(
+                Uri representativeURI = UserContentProvider.getUserURI(
                         representative.getId());
                 getContentResolver().insert(UserContentProvider.CONTENT_URI,
                         UserContentProvider.getContentValues(representative));

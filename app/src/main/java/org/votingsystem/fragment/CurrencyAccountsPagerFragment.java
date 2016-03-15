@@ -78,7 +78,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
 
         final String TAG = CurrencyPagerAdapter.class.getSimpleName();
 
-        private static final int USERVS_MONETARY_INFO = 0;
+        private static final int USER_MONETARY_INFO = 0;
         private static final int CURRENCY_LIST = 1;
 
         private String searchQuery = null;
@@ -92,7 +92,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
         @Override public Fragment getItem(int position) {
             Fragment selectedFragment = null;
             switch(position) {
-                case USERVS_MONETARY_INFO:
+                case USER_MONETARY_INFO:
                     selectedFragment = new CurrencyAccountsFragment();
                     break;
                 case CURRENCY_LIST:

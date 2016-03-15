@@ -90,7 +90,7 @@ public class AccessControlDto extends ActorDto implements Serializable {
     }
 
     public String getRepresentationStateServiceURL (String nif) {
-        return getServerURL() + "/rest/userVS/nif/" + nif + "/representationState";
+        return getServerURL() + "/rest/user/nif/" + nif + "/representationState";
     }
 
     public String getRepresentativeImageURL (Long representativeId) {

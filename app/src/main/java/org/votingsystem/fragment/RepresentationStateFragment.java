@@ -74,7 +74,7 @@ public class RepresentationStateFragment extends Fragment implements
     private void setRepresentationView(RepresentationStateDto representation) {
         this.representation = representation;
         if(representation == null) {
-            if(AppVS.getInstance().getUserVS() != null) launchRepresentativeService(TypeVS.STATE);
+            if(AppVS.getInstance().getUser() != null) launchRepresentativeService(TypeVS.STATE);
             rootView.setVisibility(View.GONE);
             return;
         } else {

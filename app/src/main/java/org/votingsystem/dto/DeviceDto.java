@@ -13,7 +13,7 @@ import java.security.cert.X509Certificate;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DeviceVSDto implements Serializable {
+public class DeviceDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,18 +34,18 @@ public class DeviceVSDto implements Serializable {
     @JsonIgnore private X509Certificate x509Certificate;
     @JsonIgnore private PublicKey publicKey;
 
-    public DeviceVSDto() {}
+    public DeviceDto() {}
 
-    public DeviceVSDto(Long id) {
+    public DeviceDto(Long id) {
         this.setId(id);
     }
 
-    public DeviceVSDto(Long id, String name) {
+    public DeviceDto(Long id, String name) {
         this.setId(id);
         this.setDeviceName(name);
     }
 
-    public DeviceVSDto(String deviceId, String sessionId) {
+    public DeviceDto(String deviceId, String sessionId) {
         this.setDeviceId(deviceId);
         this.setSessionId(sessionId);
     }
@@ -102,7 +102,7 @@ public class DeviceVSDto implements Serializable {
         return sessionId;
     }
 
-    public DeviceVSDto setSessionId(String sessionId) {
+    public DeviceDto setSessionId(String sessionId) {
         this.sessionId = sessionId;
         return this;
     }
@@ -147,7 +147,7 @@ public class DeviceVSDto implements Serializable {
         this.IBAN = IBAN;
     }
 
-    @JsonIgnore public X509Certificate getX509Cert() throws Exception {
+    @JsonIgnore public X509Certificate getX509Certificate() throws Exception {
         if(x509Certificate == null && certPEM != null) x509Certificate =
                 PEMUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
         return x509Certificate;

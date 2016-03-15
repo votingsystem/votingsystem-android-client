@@ -28,7 +28,7 @@ import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.SignerTask;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -172,11 +172,11 @@ public class QRActionsFragment extends Fragment {
                         qrMessageDto = JSON.readValue(qrMessage, QRMessageDto.class);
                         if(qrMessageDto.getDeviceId() != null) {
                             if(AppVS.getInstance().getWSSession(qrMessageDto.getDeviceId()) == null) {
-                                new GetDeviceVSDataTask(qrMessageDto).execute();
+                                new GetDeviceDataTask(qrMessageDto).execute();
                             } else {
                                 SocketMessageDto socketMessage = SocketMessageDto.
                                         getQRInfoRequestByTargetDeviceId(AppVS.getInstance().getWSSession(
-                                                qrMessageDto.getDeviceId()).getDeviceVS(), qrMessageDto);
+                                                qrMessageDto.getDeviceId()).getDevice(), qrMessageDto);
                                 sendQRRequestInfo(socketMessage);
                             }
                         } else if(qrMessageDto.getSessionId() != null) {
@@ -207,7 +207,7 @@ public class QRActionsFragment extends Fragment {
                                 case QR_MESSAGE_INFO:
                                     SocketMessageDto socketMessage = SocketMessageDto.
                                             getQRInfoRequestByTargetDeviceId(
-                                            qrMessageDto.getDeviceVS(), qrMessageDto);
+                                            qrMessageDto.getDevice(), qrMessageDto);
                                     sendQRRequestInfo(socketMessage);
                                     break;
                             }
@@ -260,13 +260,13 @@ public class QRActionsFragment extends Fragment {
                 broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
-    public class GetDeviceVSDataTask extends AsyncTask<String, Void, ResponseVS> {
+    public class GetDeviceDataTask extends AsyncTask<String, Void, ResponseVS> {
 
-        public final String TAG = GetDeviceVSDataTask.class.getSimpleName();
+        public final String TAG = GetDeviceDataTask.class.getSimpleName();
 
         private QRMessageDto qrMessageDto;
 
-        public GetDeviceVSDataTask(QRMessageDto qrMessageDto) {
+        public GetDeviceDataTask(QRMessageDto qrMessageDto) {
             this.qrMessageDto = qrMessageDto;
         }
 
@@ -280,7 +280,7 @@ public class QRActionsFragment extends Fragment {
                     getString(R.string.loading_info_msg));
             try {
                 return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
-                        .getDeviceVSByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
+                        .getDeviceByIdServiceURL(qrMessageDto.getDeviceId()), ContentTypeVS.JSON);
             } catch (Exception ex) {
                 return ResponseVS.ERROR(getString(R.string.connection_error_msg), ex.getMessage());
             }
@@ -293,9 +293,9 @@ public class QRActionsFragment extends Fragment {
             setProgressDialogVisible(false, null, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    DeviceVSDto deviceVSDto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
+                    DeviceDto deviceDto = (DeviceDto) responseVS.getMessage(DeviceDto.class);
                     SocketMessageDto socketMessage = SocketMessageDto.
-                            getQRInfoRequestByTargetDeviceId(deviceVSDto, qrMessageDto);
+                            getQRInfoRequestByTargetDeviceId(deviceDto, qrMessageDto);
                     sendQRRequestInfo(socketMessage);
                 } catch (Exception e) { e.printStackTrace();}
             } else {

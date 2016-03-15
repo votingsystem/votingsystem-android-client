@@ -16,7 +16,7 @@ import android.widget.TextView;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 
@@ -33,7 +33,7 @@ public class ContactFragment extends Fragment {
 
     private String broadCastId = null;
     private Button toggle_contact_button;
-    private UserVSDto userVS;
+    private UserDto user;
     private Menu menu;
     
 
@@ -45,10 +45,10 @@ public class ContactFragment extends Fragment {
         return fragment;
     }
 
-    public static Fragment newInstance(UserVSDto userVS) {
+    public static Fragment newInstance(UserDto user) {
         ContactFragment fragment = new ContactFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ContextVS.USER_KEY, userVS);
+        args.putSerializable(ContextVS.USER_KEY, user);
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,13 +63,13 @@ public class ContactFragment extends Fragment {
         TextView user_name_text = (TextView) rootView.findViewById(R.id.user_name_text);
         Long contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY, -1);
         if(contactId > 0) {
-            userVS = UserContentProvider.loadUser(contactId, getActivity());
+            user = UserContentProvider.loadUser(contactId, getActivity());
         } else {
-            userVS =  (UserVSDto) getArguments().getSerializable(ContextVS.USER_KEY);
-            UserVSDto contactDB = UserContentProvider.loadUser(userVS, getActivity());
-            if(contactDB != null) userVS = contactDB;
+            user =  (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
+            UserDto contactDB = UserContentProvider.loadUser(user, getActivity());
+            if(contactDB != null) user = contactDB;
         }
-        user_name_text.setText(userVS.getFullName());
+        user_name_text.setText(user.getFullName());
         setContactButtonState();
         setHasOptionsMenu(true);
         broadCastId = ContactFragment.class.getSimpleName() + "_" + (contactId != null? contactId:
@@ -78,18 +78,18 @@ public class ContactFragment extends Fragment {
     }
 
     private void deleteContact() {
-        UserContentProvider.deleteById(userVS.getId(), getActivity());
+        UserContentProvider.deleteById(user.getId(), getActivity());
         getActivity().onBackPressed();
     }
 
     private void addContact() {
         getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
-                UserContentProvider.getContentValues(userVS.setType(UserVSDto.Type.CONTACT)));
+                UserContentProvider.getContentValues(user.setType(UserDto.Type.CONTACT)));
         setContactButtonState();
     }
 
     private void setContactButtonState() {
-        if(UserVSDto.Type.CONTACT == userVS.getType()) toggle_contact_button.setVisibility(View.GONE);
+        if(UserDto.Type.CONTACT == user.getType()) toggle_contact_button.setVisibility(View.GONE);
         else {
             toggle_contact_button.setVisibility(View.VISIBLE);
             toggle_contact_button.setText(getString(R.string.add_contact_lbl));
@@ -102,7 +102,7 @@ public class ContactFragment extends Fragment {
             menu.removeItem(R.id.delete_item);
             menu.add(R.id.general_items, R.id.send_message, 1,
                         getString(R.string.send_msg_lbl));
-            if(UserVSDto.Type.CONTACT == userVS.getType()) menu.add(R.id.general_items, R.id.delete_item, 3,
+            if(UserDto.Type.CONTACT == user.getType()) menu.add(R.id.general_items, R.id.delete_item, 3,
                     getString(R.string.remove_contact_lbl));
         }
     }
@@ -130,7 +130,7 @@ public class ContactFragment extends Fragment {
             case R.id.send_message:
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
                 resultIntent.putExtra(ContextVS.FRAGMENT_KEY, MessageFormFragment.class.getName());
-                resultIntent.putExtra(ContextVS.USER_KEY, userVS);
+                resultIntent.putExtra(ContextVS.USER_KEY, user);
                 resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(resultIntent);
                 return true;
@@ -138,7 +138,7 @@ public class ContactFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
                 intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionVSFormFragment.class.getName());
                 intent.putExtra(ContextVS.TYPEVS_KEY, TransactionVSFormFragment.Type.TRANSACTIONVS_FORM);
-                intent.putExtra(ContextVS.USER_KEY, userVS);
+                intent.putExtra(ContextVS.USER_KEY, user);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 return true;

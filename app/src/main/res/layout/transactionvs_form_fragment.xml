@@ -71,7 +71,7 @@
                 android:text="@string/payment_options_lbl"
                 android:gravity="center"
                 android:textSize="17sp" />
-            <CheckBox android:id="@+id/from_uservs_checkbox"
+            <CheckBox android:id="@+id/from_user_checkbox"
                 android:textSize="16sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -39,7 +39,7 @@ public class ResultListDto<T> {
         this(resultList, offset, max, Long.valueOf(totalCount));
     }
 
-    public static <T> ResultListDto GROUPVS(List<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
+    public static <T> ResultListDto GROUP(List<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
         ResultListDto<T> result = new ResultListDto<T>();
         result.setResultList(groupList);
         result.setState(state);

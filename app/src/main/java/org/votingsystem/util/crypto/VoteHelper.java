@@ -5,7 +5,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.dto.voting.FieldEventVSDto;
+import org.votingsystem.dto.voting.FieldEventDto;
 import org.votingsystem.dto.voting.VoteCancelerDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.util.ContextVS;
@@ -68,7 +68,7 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     }
 
     public static VoteHelper genRandomVote(Long eventVSId, String eventVSURL,
-                                           Set<FieldEventVSDto> options) throws Exception {
+                                           Set<FieldEventDto> options) throws Exception {
         VoteDto voteDto =  new VoteDto();
         voteDto.setEventVSId(eventVSId);
         voteDto.setEventURL(eventVSURL);
@@ -76,9 +76,9 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
         return VoteHelper.load(voteDto);
     }
 
-    public static FieldEventVSDto getRandomOption (Set<FieldEventVSDto> options) {
+    public static FieldEventDto getRandomOption (Set<FieldEventDto> options) {
         int item = new Random().nextInt(options.size()); // In real life, the Random object should be rather more shared than this
-        return (FieldEventVSDto) options.toArray()[item];
+        return (FieldEventDto) options.toArray()[item];
     }
 
     public CMSSignedMessage getCMSVote() throws Exception {
@@ -88,7 +88,7 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
         return certificationRequest.signData(contentToSign, timeStampToken);
     }
 
-    private void genVote(FieldEventVSDto optionSelected) {
+    private void genVote(FieldEventDto optionSelected) {
         genAccessRequest();
         voteDto = new VoteDto();
         voteDto.setOperation(TypeVS.SEND_VOTE);

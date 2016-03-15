@@ -11,7 +11,7 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.ContactFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.UIUtils;
@@ -40,11 +40,11 @@ public class ContactPagerActivity extends AppCompatActivity {
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
-        UserVSDto userVS = (UserVSDto) getIntent().getExtras().getSerializable(ContextVS.USER_KEY);
-        if(userVS != null) {
-            updateActionBarTitle(userVS.getName());
+        UserDto user = (UserDto) getIntent().getExtras().getSerializable(ContextVS.USER_KEY);
+        if(user != null) {
+            updateActionBarTitle(user.getName());
             ContactPagerAdapter pagerAdapter = new ContactPagerAdapter(
-                    getSupportFragmentManager(), Arrays.asList(userVS));
+                    getSupportFragmentManager(), Arrays.asList(user));
             mViewPager.setAdapter(pagerAdapter);
         }  else {
             ContactDBPagerAdapter pagerAdapter = new ContactDBPagerAdapter(
@@ -52,7 +52,7 @@ public class ContactPagerActivity extends AppCompatActivity {
             mViewPager.setAdapter(pagerAdapter);
             String selection = UserContentProvider.TYPE_COL + " =? ";
             cursor = getContentResolver().query(UserContentProvider.CONTENT_URI, null, selection,
-                    new String[]{UserVSDto.Type.CONTACT.toString()}, null);
+                    new String[]{UserDto.Type.CONTACT.toString()}, null);
             cursor.moveToFirst();
             mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override public void onPageSelected(int position) {
@@ -106,8 +106,8 @@ public class ContactPagerActivity extends AppCompatActivity {
 
     class ContactPagerAdapter extends FragmentStatePagerAdapter {
 
-        private List<UserVSDto> itemList;
-        public ContactPagerAdapter(FragmentManager fm, List<UserVSDto> itemList) {
+        private List<UserDto> itemList;
+        public ContactPagerAdapter(FragmentManager fm, List<UserDto> itemList) {
             super(fm);
             this.itemList = itemList;
         }

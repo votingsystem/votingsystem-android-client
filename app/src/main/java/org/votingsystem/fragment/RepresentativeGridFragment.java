@@ -34,7 +34,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.RepresentativePagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.service.RepresentativeService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
@@ -213,7 +213,7 @@ public class RepresentativeGridFragment extends Fragment
         String selection = UserContentProvider.TYPE_COL + " =? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 UserContentProvider.CONTENT_URI, null, selection,
-                new String[]{UserVSDto.Type.REPRESENTATIVE.toString()}, null);
+                new String[]{UserDto.Type.REPRESENTATIVE.toString()}, null);
         return loader;
     }
 

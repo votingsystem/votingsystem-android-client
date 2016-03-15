@@ -12,25 +12,15 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle2.cert.jcajce.JcaCertStore;
-import org.bouncycastle2.cms.CMSProcessableByteArray;
-import org.bouncycastle2.cms.CMSSignedData;
-import org.bouncycastle2.cms.CMSSignedDataGenerator;
-import org.bouncycastle2.cms.CMSTypedData;
-import org.bouncycastle2.cms.jcajce.JcaSignerInfoGeneratorBuilder;
-import org.bouncycastle2.operator.ContentSigner;
-import org.bouncycastle2.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle2.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle2.util.Store;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.dto.ActorDto;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.ControlCenterDto;
@@ -49,7 +39,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.RootUtil;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.WebSocketSession;
-import org.votingsystem.util.crypto.AESParams;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.Encryptor;
 import org.votingsystem.util.crypto.KeyGeneratorVS;
@@ -63,13 +52,11 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -102,8 +89,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private ControlCenterDto controlCenter;
     private CurrencyServerDto currencyServer;
     private String currencyServerURL;
-    private UserVSDto userVS;
-    private DeviceVSDto connectedDevice;
+    private UserDto user;
+    private DeviceDto connectedDevice;
     private X509Certificate sslServerCert;
     private Map<String, X509Certificate> certsMap = new HashMap<>();
     private Set<EventVSDto.State> eventsStateLoaded = new HashSet<>();
@@ -140,7 +127,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
                 startService(startIntent);
             }
             PrefUtils.registerPreferenceChangeListener(this);
-            userVS = PrefUtils.getAppUser();
+            user = PrefUtils.getAppUser();
             byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
                     "VotingSystemSSLCert.pem"));
             Collection<X509Certificate> votingSystemSSLCerts =
@@ -203,13 +190,13 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return null;
     }
 
-    public UserVSDto getUserVS() {
-        return userVS;
+    public UserDto getUser() {
+        return user;
     }
 
     public AccessControlDto getAccessControl() {
         if(accessControl == null) {
-            accessControl = getActorVS(AccessControlDto.class, accessControlURL);
+            accessControl = getActor(AccessControlDto.class, accessControlURL);
         }
         return accessControl;
     }
@@ -220,8 +207,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return null;
     }
 
-    public void setAccessControlVS(AccessControlDto accessControl) {
-        LOGD(TAG + ".setAccessControlVS", "serverURL: " + accessControl.getServerURL());
+    public void setAccessControl(AccessControlDto accessControl) {
+        LOGD(TAG + ".setAccessControl", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
         serverMap.put(accessControl.getServerURL(), accessControl);
         PrefUtils.markAccessControlLoaded(accessControl.getServerURL());
@@ -247,21 +234,21 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return (X509Certificate) keyEntry.getCertificateChain()[0];
     }
 
-    public byte[] decryptMessage(byte[] base64EncryptedData) throws Exception {
+    public byte[] decryptMessage(byte[] encryptedPEM) throws Exception {
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
         //X509Certificate cryptoTokenCert = (X509Certificate) keyEntry.getCertificateChain()[0];
         PrivateKey privateKey = keyEntry.getPrivateKey();
-        return Encryptor.decryptCMS(base64EncryptedData, privateKey);
+        return Encryptor.decryptCMS(encryptedPEM, privateKey);
     }
 
-    public <T> T getActorVS(final Class<T> type, final String serverURL) {
+    public <T> T getActor(final Class<T> type, final String serverURL) {
         T targetServer = (T) getServer(serverURL);
         if(targetServer == null) {
             if(Looper.getMainLooper().getThread() != Thread.currentThread()) { //not in main thread,
                 //if invoked from main thread -> android.os.NetworkOnMainThreadException
                 targetServer = getActorDtoFromURL(type, serverURL);
             } else {
-                LOGD(TAG + ".getActorVS", "FROM MAIN THREAD - CREATING NEW THREAD - " + serverURL);
+                LOGD(TAG + ".getActor", "FROM MAIN THREAD - CREATING NEW THREAD - " + serverURL);
                 new Thread(new Runnable() {
                     @Override public void run() {  getActorDtoFromURL(type, serverURL);  }
                 }).start();
@@ -304,7 +291,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         WebSocketSession socketSession = null;
         for(String sessionUUID : sessionsMap.keySet()) {
             socketSession = sessionsMap.get(sessionUUID);
-            if(socketSession != null && socketSession.getDeviceVS() != null && socketSession.getDeviceVS().
+            if(socketSession != null && socketSession.getDevice() != null && socketSession.getDevice().
                     getId() == deviceID) {
                 return socketSession;
             }
@@ -312,13 +299,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return null;
     }
 
-    public AESParams getSessionKey(String UUID) {
-        return sessionsMap.get(UUID).getAESParams();
-    }
-
     //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
     public CMSSignedMessage signMessage(byte[] contentToSign) throws Exception {
-        LOGD(TAG + ".signMessage", "signMessage - user NIF: " +  getUserVS().getNIF());
+        LOGD(TAG + ".signMessage", "signMessage - user NIF: " +  getUser().getNIF());
         KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
         CMSGenerator cmsGenerator = new CMSGenerator(keyEntry.getPrivateKey(),
                 Arrays.asList(keyEntry.getCertificateChain()[0]),
@@ -342,7 +325,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     public CurrencyServerDto getCurrencyServer() {
-        if(currencyServer == null) currencyServer = getActorVS(
+        if(currencyServer == null) currencyServer = getActor(
                 CurrencyServerDto.class, currencyServerURL);
         return currencyServer;
     }
@@ -384,15 +367,15 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if(USER_KEY.equals(key)) {
-            userVS = PrefUtils.getAppUser();
+            user = PrefUtils.getAppUser();
         }
     }
 
-    public DeviceVSDto getConnectedDevice() {
+    public DeviceDto getConnectedDevice() {
         return connectedDevice;
     }
 
-    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+    public void setConnectedDevice(DeviceDto connectedDevice) {
         this.connectedDevice = connectedDevice;
     }
 
@@ -424,32 +407,4 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return isRootedPhone;
     }
 
-
-    public CMSSignedMessage signCMSData(String signatureContent) throws Exception {
-        List certList = new ArrayList();
-        CMSTypedData msg = new CMSProcessableByteArray(signatureContent.getBytes());
-
-        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
-
-        certList.add((X509Certificate) keyEntry.getCertificateChain()[0]);
-        Store certs = new JcaCertStore(certList);
-        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-
-
-        /*SimpleSignerInfoGeneratorBuilder signerInfoGeneratorBuilder =  new SimpleSignerInfoGeneratorBuilder();
-
-        signerInfoGeneratorBuilder.setProvider(ANDROID_PROVIDER);
-        signerInfoGeneratorBuilder.setSignedAttributeGenerator(new AttributeTable(signedAttrs));
-        SignerInfoGenerator signerInfoGenerator = signerInfoGeneratorBuilder.build(
-                SIGNATURE_ALGORITHM, key, x509Cert);*/
-
-
-        ContentSigner signer = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(ANDROID_PROVIDER).build(keyEntry.getPrivateKey());
-        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder()
-                .setProvider("BC").build()).build(signer, (X509Certificate) keyEntry.getCertificateChain()[0]));
-        gen.addCertificates(certs);
-        CMSSignedData signedData = gen.generate(msg, true);
-        //validatePKCS7SignedData(pemEncoded);
-        return  new CMSSignedMessage(signedData);
-    }
 }

@@ -299,8 +299,8 @@ public class EventVSSearchActivity extends AppCompatActivity {
                             getElapsedTimeStr(eventVS.getDateBegin()));
                     break;
             }
-            if(eventVS.getUserVS() != null) {
-                ((TextView)itemView.findViewById(R.id.publisher)).setText(eventVS.getUserVS());
+            if(eventVS.getUser() != null) {
+                ((TextView)itemView.findViewById(R.id.publisher)).setText(eventVS.getUser());
             }
             ((TextView)itemView.findViewById(R.id.subject)).setText(eventVS.getSubject());
             ((TextView)itemView.findViewById(R.id.subject)).setTextColor(getResources().getColor(state_color));

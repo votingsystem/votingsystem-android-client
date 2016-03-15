@@ -19,7 +19,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.ReceiptFragment;
@@ -58,13 +58,13 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
     public static final int RC_SIGN_ANONYMOUS_CERT_REQUEST = 1;
     
     private EditText weeks_delegation;
-    private UserVSDto representative = null;
+    private UserDto representative = null;
     private RepresentativeDelegationDto delegationDto = null;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        representative = (UserVSDto) getIntent().getSerializableExtra(ContextVS.USER_KEY);
+        representative = (UserDto) getIntent().getSerializableExtra(ContextVS.USER_KEY);
         setContentView(R.layout.representative_delegation);
         UIUtils.setSupportActionBar(this, getString(R.string.representative_delegation_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

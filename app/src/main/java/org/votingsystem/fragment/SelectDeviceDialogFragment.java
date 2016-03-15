@@ -20,8 +20,8 @@ import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -48,7 +48,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
     private AppVS appVS;
     private SimpleAdapter simpleAdapter;
     private String dialogCaller;
-    private Set<DeviceVSDto> deviceSetDto;
+    private Set<DeviceDto> deviceSetDto;
     private TextView msg_text;
     private List<String> connectedDeviceList = new ArrayList<>();
     private DeviceLoader deviceLoader;
@@ -76,13 +76,13 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position,long id) {
                 Intent intent = new Intent(dialogCaller);
                 ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, TypeVS.DEVICE_SELECT);
-                DeviceVSDto selectedDeviceVSDto = null;
-                for(DeviceVSDto deviceVSDto : deviceSetDto) {
-                    if(connectedDeviceList.get(position).equals(deviceVSDto.getDeviceName()))
-                        selectedDeviceVSDto = deviceVSDto;
+                DeviceDto selectedDeviceDto = null;
+                for(DeviceDto deviceDto : deviceSetDto) {
+                    if(connectedDeviceList.get(position).equals(deviceDto.getDeviceName()))
+                        selectedDeviceDto = deviceDto;
                 }
                 try {
-                    responseVS.setMessage(JSON.writeValueAsString(selectedDeviceVSDto));
+                    responseVS.setMessage(JSON.writeValueAsString(selectedDeviceDto));
                 } catch (IOException e) { e.printStackTrace(); }
                 intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
@@ -110,7 +110,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null && savedInstanceState.containsKey(ContextVS.FORM_DATA_KEY)) {
             dialogCaller = savedInstanceState.getString(ContextVS.CALLER_KEY);
-            deviceSetDto = (Set<DeviceVSDto>) savedInstanceState.getSerializable(ContextVS.DTO_KEY);
+            deviceSetDto = (Set<DeviceDto>) savedInstanceState.getSerializable(ContextVS.DTO_KEY);
             connectedDeviceList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
             if(connectedDeviceList.size() > 0) {
                 msg_text.setText(getString(R.string.select_connected_device_msg));
@@ -120,7 +120,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         } else {
             deviceLoader = new DeviceLoader();
             String targetURL = ((AppVS)getActivity().getApplicationContext()).getCurrencyServer().
-                    getDeviceVSConnectedServiceURL(appVS.getUserVS().getNIF());
+                    getDeviceConnectedServiceURL(appVS.getUser().getNIF());
             deviceLoader.execute(targetURL);
         }
     }
@@ -149,11 +149,11 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         @Override protected List<String> doInBackground(String... params) {
             connectedDeviceList.clear();
             try {
-                UserVSDto userDto = HttpHelper.getData(UserVSDto.class, params[0], MediaTypeVS.JSON);
-                for(DeviceVSDto deviceVSDto : userDto.getConnectedDevices()) {
+                UserDto userDto = HttpHelper.getData(UserDto.class, params[0], MediaTypeVS.JSON);
+                for(DeviceDto deviceDto : userDto.getConnectedDevices()) {
                     if(!Utils.getDeviceName().toLowerCase().equals(
-                            deviceVSDto.getDeviceName().toLowerCase()))
-                        connectedDeviceList.add(deviceVSDto.getDeviceName());
+                            deviceDto.getDeviceName().toLowerCase()))
+                        connectedDeviceList.add(deviceDto.getDeviceName());
                 }
             } catch (Exception ex) { ex.printStackTrace();}
             return connectedDeviceList;

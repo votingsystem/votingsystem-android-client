@@ -40,7 +40,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -118,7 +117,7 @@ public class CMSUtils {
     public static TimeStampToken getTimeStampToken(String signatureAlgorithm, byte[] contentToSign)
             throws NoSuchAlgorithmException, IOException, CMSException, TSPException, ExceptionVS {
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
-                .find(SIGNATURE_ALGORITHM);
+                .find(signatureAlgorithm);
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
         MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
         byte[]  digestBytes = digest.digest(contentToSign);

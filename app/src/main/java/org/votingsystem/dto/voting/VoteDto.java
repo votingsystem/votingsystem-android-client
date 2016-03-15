@@ -42,7 +42,7 @@ public class VoteDto implements Serializable {
     private String UUID;
     private EventVSDto eventVS;
     private State state;
-    private FieldEventVSDto optionSelected;
+    private FieldEventDto optionSelected;
 
     private String accessControlURL;
     private String representativeURL;
@@ -56,7 +56,7 @@ public class VoteDto implements Serializable {
     public VoteDto() {}
 
 
-    public VoteDto(EventVSDto eventVS, FieldEventVSDto optionSelected) {
+    public VoteDto(EventVSDto eventVS, FieldEventDto optionSelected) {
         this.eventVS = eventVS;
         this.optionSelected = optionSelected;
     }
@@ -157,11 +157,11 @@ public class VoteDto implements Serializable {
         this.state = state;
     }
 
-    public FieldEventVSDto getOptionSelected() {
+    public FieldEventDto getOptionSelected() {
         return optionSelected;
     }
 
-    public void setOptionSelected(FieldEventVSDto optionSelected) {
+    public void setOptionSelected(FieldEventDto optionSelected) {
         this.optionSelected = optionSelected;
     }
 

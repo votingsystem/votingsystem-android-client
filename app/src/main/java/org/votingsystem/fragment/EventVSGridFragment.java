@@ -274,8 +274,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                                 getElapsedTimeStr(eventVS.getDateBegin()));
                         break;
                 }
-                if(eventVS.getUserVS() != null) {
-                    ((TextView)view.findViewById(R.id.publisher)).setText(eventVS.getUserVS());
+                if(eventVS.getUser() != null) {
+                    ((TextView)view.findViewById(R.id.publisher)).setText(eventVS.getUser());
                 }
                 ((TextView)view.findViewById(R.id.subject)).setTextColor(
                         getResources().getColor(state_color));
@@ -308,7 +308,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             setProgressDialogVisible(false);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    appVS.setAccessControlVS((AccessControlDto)
+                    appVS.setAccessControl((AccessControlDto)
                             responseVS.getMessage(AccessControlDto.class));
                     fetchItems(0L);
                 } catch(Exception ex) {ex.printStackTrace();}

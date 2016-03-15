@@ -4,7 +4,7 @@ import android.util.Base64;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.throwable.ExceptionVS;
@@ -34,7 +34,7 @@ public class CurrencyBatch {
 
     private CurrencyServerDto currencyServer;
 
-    private UserVSDto toUserVS;
+    private UserDto toUser;
     private BigDecimal batchAmount = null;
     private BigDecimal wildTagAmount;
     private BigDecimal currencyAmount = null;
@@ -174,12 +174,12 @@ public class CurrencyBatch {
         }
     };
 
-    public UserVSDto getToUserVS() {
-        return toUserVS;
+    public UserDto getToUser() {
+        return toUser;
     }
 
-    public void setToUserVS(UserVSDto toUserVS) {
-        this.toUserVS = toUserVS;
+    public void setToUser(UserDto toUser) {
+        this.toUser = toUser;
     }
 
     public BigDecimal getBatchAmount() {

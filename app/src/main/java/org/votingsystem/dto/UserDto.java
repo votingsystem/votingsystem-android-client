@@ -29,13 +29,13 @@ import static org.votingsystem.util.LogUtils.LOGD;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserVSDto implements Serializable {
+public class UserDto implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public static final String TAG = UserVSDto.class.getSimpleName();
+    public static final String TAG = UserDto.class.getSimpleName();
 
-    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS, CONTACT}
+    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANK, CONTACT}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
 
@@ -46,8 +46,8 @@ public class UserVSDto implements Serializable {
     private String name;
     private String reason;
     private String description;
-    private Set<DeviceVSDto> connectedDevices;
-    private org.votingsystem.dto.DeviceVSDto deviceVS;
+    private Set<DeviceDto> connectedDevices;
+    private DeviceDto device;
     private Set<CertificateVSDto> certCollection = new HashSet<>();
     private String firstName;
     private String lastName;
@@ -60,10 +60,10 @@ public class UserVSDto implements Serializable {
     private String URL;
     private String cn;
     private String deviceId;
-    private UserVSDto representative;//this is for groups
+    private UserDto representative;//this is for groups
     private String representativeMessageURL;
     private String imageURL;
-    private AddressVS address;
+    private Address address;
     @JsonIgnore private X509Certificate certificate;
     @JsonIgnore private byte[] imageBytes;
     private transient Uri contactURI;
@@ -73,9 +73,9 @@ public class UserVSDto implements Serializable {
     @JsonIgnore private TimeStampToken timeStampToken;
     @JsonIgnore private SignerInformation signerInformation;
 
-    public UserVSDto() {}
+    public UserDto() {}
 
-    public UserVSDto(String name, String phone, String email) {
+    public UserDto(String name, String phone, String email) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -83,43 +83,43 @@ public class UserVSDto implements Serializable {
 
 
     @JsonIgnore
-    public static UserVSDto getUserVS (X509Certificate x509Cert) {
-        UserVSDto userVS = new UserVSDto();
-        userVS.setCertificate(x509Cert);
+    public static UserDto getUser(X509Certificate x509Cert) {
+        UserDto user = new UserDto();
+        user.setCertificate(x509Cert);
         String subjectDN = x509Cert.getSubjectDN().getName();
         if (subjectDN.contains("C="))
-            userVS.setCountry(subjectDN.split("C=")[1].split(",")[0]);
+            user.setCountry(subjectDN.split("C=")[1].split(",")[0]);
         if (subjectDN.contains("SERIALNUMBER="))
-            userVS.setNIF(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
+            user.setNIF(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
         if (subjectDN.contains("SURNAME="))
-            userVS.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
+            user.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
         if (subjectDN.contains("GIVENNAME="))
-            userVS.setFirstName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
+            user.setFirstName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
         if (subjectDN.contains("CN="))
-            userVS.setCn(subjectDN.split("CN=")[1]);
+            user.setCn(subjectDN.split("CN=")[1]);
         try {
             CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                    x509Cert, ContextVS.DEVICEVS_OID);
+                    x509Cert, ContextVS.DEVICE_OID);
             if(certExtensionDto != null) {
-                userVS.setEmail(certExtensionDto.getEmail());
-                userVS.setPhone(certExtensionDto.getMobilePhone());
-                userVS.setDeviceId(certExtensionDto.getDeviceId());
+                user.setEmail(certExtensionDto.getEmail());
+                user.setPhone(certExtensionDto.getMobilePhone());
+                user.setDeviceId(certExtensionDto.getDeviceId());
             }
         } catch(Exception ex) {ex.printStackTrace();}
-        return userVS;
+        return user;
     }
 
-    public static UserVSDto getUserVS (X509Principal principal) {
-        UserVSDto userVS = new UserVSDto();
-        userVS.setNIF((String) principal.getValues(new DERObjectIdentifier("2.5.4.5")).get(0));
-        userVS.setLastName((String) principal.getValues(new DERObjectIdentifier("2.5.4.4")).get(0));
-        userVS.setFirstName((String) principal.getValues(new DERObjectIdentifier("2.5.4.42")).get(0));
-        userVS.setCountry((String) principal.getValues(new DERObjectIdentifier("2.5.4.6")).get(0));
-        return userVS;
+    public static UserDto getUser(X509Principal principal) {
+        UserDto user = new UserDto();
+        user.setNIF((String) principal.getValues(new DERObjectIdentifier("2.5.4.5")).get(0));
+        user.setLastName((String) principal.getValues(new DERObjectIdentifier("2.5.4.4")).get(0));
+        user.setFirstName((String) principal.getValues(new DERObjectIdentifier("2.5.4.42")).get(0));
+        user.setCountry((String) principal.getValues(new DERObjectIdentifier("2.5.4.6")).get(0));
+        return user;
     }
 
     @JsonIgnore
-    public Set<DeviceVSDto> getDevices() throws Exception {
+    public Set<DeviceDto> getDevices() throws Exception {
         return connectedDevices;
     }
 
@@ -201,7 +201,7 @@ public class UserVSDto implements Serializable {
         return NIF;
     }
 
-    public UserVSDto setNIF(String NIF) {
+    public UserDto setNIF(String NIF) {
         this.NIF = NIF;
         return this;
     }
@@ -226,7 +226,7 @@ public class UserVSDto implements Serializable {
         return type;
     }
 
-    public UserVSDto setType(Type type) {
+    public UserDto setType(Type type) {
         this.type = type;
         return this;
     }
@@ -247,11 +247,11 @@ public class UserVSDto implements Serializable {
         this.description = description;
     }
 
-    public Set<org.votingsystem.dto.DeviceVSDto> getConnectedDevices() {
+    public Set<DeviceDto> getConnectedDevices() {
         return connectedDevices;
     }
 
-    public void setConnectedDevices(Set<org.votingsystem.dto.DeviceVSDto> connectedDevices) {
+    public void setConnectedDevices(Set<DeviceDto> connectedDevices) {
         this.connectedDevices = connectedDevices;
     }
 
@@ -280,19 +280,19 @@ public class UserVSDto implements Serializable {
         else this.certCollection = new HashSet<>(certCollection);
     }
 
-    public org.votingsystem.dto.DeviceVSDto getDeviceVS() {
-        return deviceVS;
+    public DeviceDto getDevice() {
+        return device;
     }
 
-    public void setDeviceVS(org.votingsystem.dto.DeviceVSDto deviceVS) {
-        this.deviceVS = deviceVS;
+    public void setDevice(DeviceDto device) {
+        this.device = device;
     }
 
-    public UserVSDto getRepresentative() {
+    public UserDto getRepresentative() {
         return representative;
     }
 
-    public void setRepresentative(UserVSDto representative) {
+    public void setRepresentative(UserDto representative) {
         this.representative = representative;
     }
 
@@ -375,11 +375,11 @@ public class UserVSDto implements Serializable {
         this.imageURL = imageURL;
     }
 
-    public AddressVS getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(AddressVS address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 

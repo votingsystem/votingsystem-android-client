@@ -23,9 +23,9 @@ import android.widget.TextView;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.AddressVS;
+import org.votingsystem.dto.Address;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
@@ -62,12 +62,12 @@ public class UserDataFormActivity extends AppCompatActivity {
     private EditText canText;
     private EditText phoneText;
     private EditText mailText;
-    private EditText address;
+    private EditText addressText;
     private EditText postal_code;
     private EditText city;
     private EditText province;
     private Spinner country_spinner;
-    private UserVSDto userVSDto;
+    private UserDto userDto;
     private char[] password;
     private CryptoDeviceAccessMode.Mode accessMode;
 
@@ -85,7 +85,7 @@ public class UserDataFormActivity extends AppCompatActivity {
         mailText = (EditText)findViewById(R.id.mail_edit);
         phoneText = (EditText)findViewById(R.id.phone_edit);
         canText = (EditText)findViewById(R.id.can);
-        address = (EditText)findViewById(R.id.address);
+        addressText = (EditText)findViewById(R.id.address);
         postal_code = (EditText)findViewById(R.id.postal_code);
         city = (EditText)findViewById(R.id.location);
         province = (EditText)findViewById(R.id.province);
@@ -106,21 +106,21 @@ public class UserDataFormActivity extends AppCompatActivity {
         try {
             String can = PrefUtils.getDNIeCAN();
             if(can != null) canText.setText(can);
-            userVSDto = PrefUtils.getAppUser();
-            if(userVSDto == null) {//first run
+            userDto = PrefUtils.getAppUser();
+            if(userDto == null) {//first run
                 if(savedInstanceState == null) MessageDialogFragment.showDialog(ResponseVS.SC_OK,
                         getString(R.string.msg_lbl), getString(R.string.first_run_msg), getSupportFragmentManager());
 
             } else {
-                phoneText.setText(userVSDto.getPhone());
-                mailText.setText(userVSDto.getEmail());
-                AddressVS addressVS = userVSDto.getAddress();
-                if(addressVS != null) {
-                    address.setText(addressVS.getName());
-                    postal_code.setText(addressVS.getPostalCode());
-                    city.setText(addressVS.getCity());
-                    province.setText(addressVS.getProvince());
-                    country_spinner.setSelection(addressVS.getCountry().getPosition());
+                phoneText.setText(userDto.getPhone());
+                mailText.setText(userDto.getEmail());
+                Address address = userDto.getAddress();
+                if(address != null) {
+                    this.addressText.setText(address.getName());
+                    postal_code.setText(address.getPostalCode());
+                    city.setText(address.getCity());
+                    province.setText(address.getProvince());
+                    country_spinner.setSelection(address.getCountry().getPosition());
                 }
             }
         } catch (Exception e) {
@@ -148,33 +148,33 @@ public class UserDataFormActivity extends AppCompatActivity {
       	if (validateForm ()) {
             String deviceId = PrefUtils.getDeviceId();
             LOGD(TAG + ".validateForm() ", "deviceId: " + deviceId);
-            if(userVSDto == null) userVSDto = new UserVSDto();
-            userVSDto.setPhone(phoneText.getText().toString());
-            userVSDto.setEmail(mailText.getText().toString());
-            AddressVS addressVS = new AddressVS();
-            if(!TextUtils.isEmpty(address.getText().toString()))
-                addressVS.setName(address.getText().toString());
+            if(userDto == null) userDto = new UserDto();
+            userDto.setPhone(phoneText.getText().toString());
+            userDto.setEmail(mailText.getText().toString());
+            Address address = new Address();
+            if(!TextUtils.isEmpty(addressText.getText().toString()))
+                address.setName(addressText.getText().toString());
             if(!TextUtils.isEmpty(postal_code.getText().toString()))
-                addressVS.setPostalCode(postal_code.getText().toString());
+                address.setPostalCode(postal_code.getText().toString());
             if(!TextUtils.isEmpty(city.getText().toString()))
-                addressVS.setCity(city.getText().toString());
+                address.setCity(city.getText().toString());
             if(!TextUtils.isEmpty(province.getText().toString()))
-                addressVS.setProvince(province.getText().toString());
-            addressVS.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
+                address.setProvince(province.getText().toString());
+            address.setCountry(Country.getByPosition(country_spinner.getSelectedItemPosition()));
 
-            userVSDto.setAddress(addressVS);
-            PrefUtils.putAppUser(userVSDto);
+            userDto.setAddress(address);
+            PrefUtils.putAppUser(userDto);
 
-            String address = addressVS.getName() == null ? "":addressVS.getName();
-            String postalCode = addressVS.getPostalCode() == null ? "":addressVS.getPostalCode();
-            String city = addressVS.getCity() == null ? "":addressVS.getCity();
-            String province = addressVS.getProvince() == null ? "":addressVS.getProvince();
+            String addressStr = address.getName() == null ? "":address.getName();
+            String postalCode = address.getPostalCode() == null ? "":address.getPostalCode();
+            String city = address.getCity() == null ? "":address.getCity();
+            String province = address.getProvince() == null ? "":address.getProvince();
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.user_data_form_lbl),
                     getString(R.string.user_data_confirm_msg, canText.getText().toString(),
-                            userVSDto.getPhone(),
-                            userVSDto.getEmail(), address, postalCode, city, province,
-                            addressVS.getCountry().getName()), this);
+                            userDto.getPhone(),
+                            userDto.getEmail(), address, postalCode, city, province,
+                            address.getCountry().getName()), this);
             builder.setPositiveButton(getString(R.string.continue_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -213,7 +213,7 @@ public class UserDataFormActivity extends AppCompatActivity {
         canText.setError(null);
         phoneText.setError(null);
         mailText.setError(null);
-        address.setError(null);
+        addressText.setError(null);
         postal_code.setError(null);
         city.setError(null);
         province.setError(null);
@@ -229,8 +229,8 @@ public class UserDataFormActivity extends AppCompatActivity {
             mailText.setError(getString(R.string.mail_missing_msg));
             return false;
         }
-        if(TextUtils.isEmpty(address.getText().toString())){
-            address.setError(getString(R.string.enter_address_error_lbl));
+        if(TextUtils.isEmpty(addressText.getText().toString())){
+            addressText.setError(getString(R.string.enter_address_error_lbl));
             return false;
         }
         if(TextUtils.isEmpty(postal_code.getText().toString())){
@@ -317,7 +317,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                 Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(
                         responseVS.getMessageBytes());
                 X509Certificate x509Cert = certificates.iterator().next();
-                UserVSDto user = UserVSDto.getUserVS(x509Cert);
+                UserDto user = UserDto.getUser(x509Cert);
                 LOGD(TAG, "updateKeyStore - user: " + user.getNIF() +
                         " - certificates.size(): " + certificates.size());
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];

@@ -115,7 +115,7 @@ public class PaymentFragment extends Fragment {
                     TransactionVSDto.getPaymentMethods(transactionDto.getPaymentOptions()));
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             payment_method_spinner.setAdapter(dataAdapter);
-            receptor.setText(transactionDto.getToUser());
+            receptor.setText(transactionDto.getToUserName());
             subject.setText(transactionDto.getSubject());
             amount.setText(transactionDto.getAmount().toString() + " " + transactionDto.getCurrencyCode());
             String tagvsInfo = getString(R.string.selected_tag_lbl,
@@ -172,7 +172,7 @@ public class PaymentFragment extends Fragment {
             final BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
                     transactionDto.getCurrencyCode(), transactionDto.getTagVS().getName());
             switch (transactionDto.getType()) {
-                case FROM_USERVS:
+                case FROM_USER:
                     try {
                         if(availableForTagVS.compareTo(transactionDto.getAmount()) < 0) {
                             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(

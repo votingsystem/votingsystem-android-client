@@ -51,7 +51,7 @@ public class CurrencyBatchDto implements Serializable {
 
     public CurrencyBatchDto(CurrencyBatch currencyBatch) {
         this.subject = currencyBatch.getSubject();
-        this.toUserIBAN = currencyBatch.getToUserVS().getIBAN();
+        this.toUserIBAN = currencyBatch.getToUser().getIBAN();
         this.batchAmount = currencyBatch.getBatchAmount();
         this.currencyCode = currencyBatch.getCurrencyCode();
         this.tag = currencyBatch.getTag();

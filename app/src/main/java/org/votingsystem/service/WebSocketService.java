@@ -21,8 +21,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.MessageContentProvider;
-import org.votingsystem.dto.AESParamsDto;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
@@ -40,7 +39,6 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
-import org.votingsystem.util.crypto.AESParams;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -106,7 +104,7 @@ public class WebSocketService extends Service {
         }
         Bundle arguments = intent.getExtras();
         final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
-                (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USERVS;
+                (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USER;
         final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
         final String message = arguments.getString(ContextVS.MESSAGE_KEY);
         final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
@@ -125,11 +123,11 @@ public class WebSocketService extends Service {
                                 " - socketMsg: " + message);
                         switch(operationType) {
                             case MESSAGEVS:
-                                List<DeviceVSDto> targetDevicesDto = JSON.readValue(
-                                        dtoStr, new TypeReference<List<DeviceVSDto>>(){});
-                                for (DeviceVSDto deviceVSDto : targetDevicesDto) {
+                                List<DeviceDto> targetDevicesDto = JSON.readValue(
+                                        dtoStr, new TypeReference<List<DeviceDto>>(){});
+                                for (DeviceDto deviceDto : targetDevicesDto) {
                                     SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
-                                            deviceVSDto, null, message, broadCastId);
+                                            deviceDto, null, message, broadCastId);
                                     session.getBasicRemote().sendText(
                                             JSON.writeValueAsString(messageDto));
                                 }
@@ -279,14 +277,11 @@ public class WebSocketService extends Service {
                 return;
             }
             if(socketSession == null) {
-                byte[] decryptedBytes = appVS.decryptMessage(socketMsg.getAesParams().getBytes());
-                AESParamsDto aesDto = JSON.readValue(decryptedBytes, AESParamsDto.class);
-                AESParams aesParams = AESParams.fromDto(aesDto);
-                socketMsg.decryptMessage(aesParams);
+                socketMsg.decryptMessage();
                 socketSession = new WebSocketSession(socketMsg);
                 appVS.putWSSession(socketMsg.getUUID(), socketSession);
             } else {
-                if(socketMsg.isEncrypted()) socketMsg.decryptMessage(socketSession.getAESParams());
+                if(socketMsg.isEncrypted()) socketMsg.decryptMessage();
             }
             LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                     " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
@@ -352,7 +347,7 @@ public class WebSocketService extends Service {
                         try {
                             QRMessageDto<TransactionVSDto> qrDto = AppVS.getInstance().getQRMessage(
                                     socketMsg.getMessage());
-                            qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
+                            //qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
 
                             Currency currency =  new  Currency(

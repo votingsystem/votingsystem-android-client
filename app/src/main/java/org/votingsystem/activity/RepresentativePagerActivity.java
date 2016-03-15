@@ -11,7 +11,7 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.RepresentativeFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.UIUtils;
@@ -42,7 +42,7 @@ public class RepresentativePagerActivity extends AppCompatActivity {
         mViewPager.setAdapter(pagerAdapter);
         String selection = UserContentProvider.TYPE_COL + " =? ";
         cursor = getContentResolver().query(UserContentProvider.CONTENT_URI, null, selection,
-                new String[]{UserVSDto.Type.REPRESENTATIVE.toString()}, null);
+                new String[]{UserDto.Type.REPRESENTATIVE.toString()}, null);
         cursor.moveToFirst();
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override public void onPageSelected(int position) {

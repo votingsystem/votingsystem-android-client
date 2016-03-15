@@ -19,7 +19,7 @@ public class ContextVS {
     public static final String REPRESENTATIVE_VOTE_OID                 = VOTING_SYSTEM_BASE_OID + 1;
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID + 2;
     public static final String CURRENCY_OID                            = VOTING_SYSTEM_BASE_OID + 3;
-    public static final String DEVICEVS_OID                            = VOTING_SYSTEM_BASE_OID + 4;
+    public static final String DEVICE_OID                              = VOTING_SYSTEM_BASE_OID + 4;
     public static final String ANONYMOUS_CERT_OID                      = VOTING_SYSTEM_BASE_OID + 5;
 
 
@@ -85,7 +85,7 @@ public class ContextVS {
     public static final String OPERATIONVS_KEY = "OPERATIONVS_KEY";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
-    public static final String USERVS_ACCOUNT_LAST_CHECKED_KEY = "USERVS_ACCOUNT_LAST_CHECKED_KEY";
+    public static final String USER_ACCOUNT_LAST_CHECKED_KEY = "USER_ACCOUNT_LAST_CHECKED_KEY";
     public static final String CURSOR_POSITION_KEY = "CURSOR_POSITION";
     public static final String EVENT_STATE_KEY = "EVENT_STATE";
     public static final String EVENTVS_KEY  = "EVENTVS";

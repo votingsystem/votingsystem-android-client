@@ -59,8 +59,8 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.voting.FieldEventVSDto;
+import org.votingsystem.dto.UserDto;
+import org.votingsystem.dto.voting.FieldEventDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.ui.DialogButton;
 
@@ -117,11 +117,11 @@ public class UIUtils  {
         AppVS.getInstance().startActivity(intent);
     }
 
-    public static void showSignersInfoDialog(Set<UserVSDto> signers, FragmentManager fragmentManager,
-             Context context) {
+    public static void showSignersInfoDialog(Set<UserDto> signers, FragmentManager fragmentManager,
+                                             Context context) {
         StringBuilder signersInfo = new StringBuilder(context.getString(R.string.num_signers_lbl,
                 signers.size()) + "<br/><br/>");
-        for(UserVSDto signer : signers) {
+        for(UserDto signer : signers) {
             X509Certificate certificate = signer.getCertificate();
             signersInfo.append(context.getString(R.string.cert_info_formated_msg,
                     certificate.getSubjectDN().toString(),
@@ -360,7 +360,7 @@ public class UIUtils  {
         return (int) size;
     }
 
-    public static Map<Integer, EditText> showDynamicFormDialog(final Set<FieldEventVSDto> fields,
+    public static Map<Integer, EditText> showDynamicFormDialog(final Set<FieldEventDto> fields,
                final View.OnClickListener listener, Activity activity) {
         AlertDialog.Builder builder= new AlertDialog.Builder(activity);
         LayoutInflater inflater = activity.getLayoutInflater();
@@ -370,7 +370,7 @@ public class UIUtils  {
         final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
         errorMsgTextView.setVisibility(View.GONE);
         final Map<Integer, EditText> fieldsMap = new HashMap<Integer, EditText>();
-        for (FieldEventVSDto field : fields) {
+        for (FieldEventDto field : fields) {
             fieldsMap.put(field.getId().intValue(), UIUtils.addFormField(field.getContent(),
                     InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
                     mFormView, field.getId().intValue(), activity));
@@ -385,7 +385,7 @@ public class UIUtils  {
         Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View onClick) {
-                for (FieldEventVSDto field : fields) {
+                for (FieldEventDto field : fields) {
                     EditText editText = fieldsMap.get(field.getId().intValue());
                     String fieldValue = editText.getText().toString();
                     if (fieldValue.isEmpty()) {
@@ -519,10 +519,10 @@ public class UIUtils  {
     }
 
     public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
-        UserVSDto userVS = PrefUtils.getAppUser();
-        ((TextView)linearLayout.findViewById(R.id.name)).setText(userVS.getAddress().getName());
-        ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(userVS.getAddress().getPostalCode());
-        ((TextView)linearLayout.findViewById(R.id.city)).setText(userVS.getAddress().getCity());
+        UserDto user = PrefUtils.getAppUser();
+        ((TextView)linearLayout.findViewById(R.id.name)).setText(user.getAddress().getName());
+        ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(user.getAddress().getPostalCode());
+        ((TextView)linearLayout.findViewById(R.id.city)).setText(user.getAddress().getCity());
         linearLayout.setVisibility(View.VISIBLE);
     }
 

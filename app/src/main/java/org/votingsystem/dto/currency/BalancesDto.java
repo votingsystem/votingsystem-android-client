@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.TagVSInfoDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TimePeriod;
@@ -25,7 +25,7 @@ public class BalancesDto {
 
     public static final String TAG = BalancesDto.class.getSimpleName();
 
-    private UserVSDto userVS;
+    private UserDto user;
     private TimePeriod timePeriod;
     private List<TransactionVSDto> transactionFromList;
     private List<TransactionVSDto> transactionToList;
@@ -153,12 +153,12 @@ public class BalancesDto {
         }
     }
 
-    public UserVSDto getUserVS() {
-        return userVS;
+    public UserDto getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVSDto userVS) {
-        this.userVS = userVS;
+    public void setUser(UserDto user) {
+        this.user = user;
     }
 
     public List<TransactionVSDto> getTransactionList() {

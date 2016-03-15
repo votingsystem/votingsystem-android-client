@@ -26,7 +26,7 @@ import org.bouncycastle2.cms.SignerInformationStore;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.openssl.PEMReader;
 import org.bouncycastle2.util.Store;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -195,11 +195,11 @@ public class CMSSignedMessage extends CMSSignedData {
         return null;
     }
 
-    public UserVSDto getSigner() throws Exception {
+    public UserDto getSigner() throws Exception {
         return  getMessageData().getSignerVS();
     }
 
-    public Set<UserVSDto> getSigners() throws Exception {
+    public Set<UserDto> getSigners() throws Exception {
         return getMessageData().getSigners();
     }
 
@@ -209,8 +209,8 @@ public class CMSSignedMessage extends CMSSignedData {
 
     public Set<X509Certificate> getSignersCerts() throws Exception {
         Set<X509Certificate> signerCerts = new HashSet<>();
-        for(UserVSDto userVS : getMessageData().getSigners()) {
-            signerCerts.add(userVS.getCertificate());
+        for(UserDto user : getMessageData().getSigners()) {
+            signerCerts.add(user.getCertificate());
         }
         return signerCerts;
     }
@@ -221,8 +221,8 @@ public class CMSSignedMessage extends CMSSignedData {
 
     private class MessageData {
 
-        private Set<UserVSDto> signers = null;
-        private UserVSDto signerVS;
+        private Set<UserDto> signers = null;
+        private UserDto signerVS;
         private VoteDto vote;
         private X509Certificate currencyCert;
         private TimeStampToken timeStampToken;
@@ -262,19 +262,19 @@ public class CMSSignedMessage extends CMSSignedData {
                 } catch (Exception ex) {
                     throw ex;
                 }
-                UserVSDto userVS = UserVSDto.getUserVS(cert);
-                userVS.setSignerInformation(signer);
+                UserDto user = UserDto.getUser(cert);
+                user.setSignerInformation(signer);
                 TimeStampToken tsToken = checkTimeStampToken(signer);
-                userVS.setTimeStampToken(tsToken);
+                user.setTimeStampToken(tsToken);
                 if(tsToken != null) {
                     Date timeStampDate = tsToken.getTimeStampInfo().getGenTime();
                     if(firstSignature == null || firstSignature.after(timeStampDate)) {
                         firstSignature = timeStampDate;
-                        signerVS = userVS;
+                        signerVS = user;
                     }
                     timeStampToken = tsToken;
                 }
-                signers.add(userVS);
+                signers.add(user);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                     vote = getSignedContent(VoteDto.class);
                     vote.loadSignatureData(cert, timeStampToken);
@@ -286,11 +286,11 @@ public class CMSSignedMessage extends CMSSignedData {
             return true;
         }
 
-        public UserVSDto getSignerVS() {
+        public UserDto getSignerVS() {
             return signerVS;
         }
 
-        public Set<UserVSDto> getSigners() {
+        public Set<UserDto> getSigners() {
             return signers;
         }
 

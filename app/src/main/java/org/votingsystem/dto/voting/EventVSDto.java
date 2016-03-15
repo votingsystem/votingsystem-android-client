@@ -37,11 +37,11 @@ public class EventVSDto implements Serializable {
     private Integer numSignaturesCollected;
     private Integer numVotesCollected;
     private ControlCenterDto controlCenter;
-    private String userVS;
+    private String user;
     private AccessControlDto accessControl;
     private Integer numComments = 0;
 
-    private Set<FieldEventVSDto> fieldEventVSSet = new HashSet<FieldEventVSDto>();
+    private Set<FieldEventDto> fieldEventSet = new HashSet<FieldEventDto>();
     private Set<EventVSTagVS> eventVSTagVSSet = new HashSet<EventVSTagVS>();
     private Set<CommentVSDto> commentVSDtoSet = new HashSet<CommentVSDto>();
 
@@ -102,12 +102,12 @@ public class EventVSDto implements Serializable {
         this.cardinality = cardinality;
     }
 
-    public Set<FieldEventVSDto> getFieldsEventVS() {
-        return fieldEventVSSet;
+    public Set<FieldEventDto> getFieldsEventVS() {
+        return fieldEventSet;
     }
 
-    public void setFieldsEventVS(Set<FieldEventVSDto> fieldsEventVS) {
-        this.fieldEventVSSet = fieldsEventVS;
+    public void setFieldsEventVS(Set<FieldEventDto> fieldsEventVS) {
+        this.fieldEventSet = fieldsEventVS;
     }
 
     public void setEventTagVSes(Set<EventVSTagVS> eventVSTagVSSet) {
@@ -138,12 +138,12 @@ public class EventVSDto implements Serializable {
         return tags;
     }
 
-    public String getUserVS() {
-        return userVS;
+    public String getUser() {
+        return user;
     }
 
-    public void setUserVS(String userVS) {
-        this.userVS = userVS;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public void setTags(String[] tags) {
@@ -215,7 +215,7 @@ public class EventVSDto implements Serializable {
         return accessControl;
     }
 
-    public void setAccessControlVS(AccessControlDto accessControl) {
+    public void setAccessControl(AccessControlDto accessControl) {
         this.accessControl = accessControl;
     }
 

@@ -15,13 +15,13 @@ public class CertExtensionDto {
     private String nif;
     private String givenname;
     private String surname;
-    private DeviceVSDto.Type deviceType;
+    private DeviceDto.Type deviceType;
 
 
 
     public CertExtensionDto() {}
 
-    public CertExtensionDto(String deviceId, String deviceName, String email, String phone, DeviceVSDto.Type deviceType) {
+    public CertExtensionDto(String deviceId, String deviceName, String email, String phone, DeviceDto.Type deviceType) {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.email = email;
@@ -61,11 +61,11 @@ public class CertExtensionDto {
         this.mobilePhone = mobilePhone;
     }
 
-    public DeviceVSDto.Type getDeviceType() {
+    public DeviceDto.Type getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(DeviceVSDto.Type deviceType) {
+    public void setDeviceType(DeviceDto.Type deviceType) {
         this.deviceType = deviceType;
     }
 

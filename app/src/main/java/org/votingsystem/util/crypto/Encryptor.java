@@ -142,41 +142,6 @@ public class Encryptor {
         return cipher.doFinal(bundle.getCipherText());
     }
 
-    //BC provider to avoid key length restrictions on normal jvm
-    public static String encryptAES(String messageToEncrypt, AESParams aesParams) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
-            UnsupportedEncodingException, InvalidCipherTextException {
-        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
-        KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
-        ParametersWithIV params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
-        pbbc.init(true, params); //to decrypt put param to false
-        byte[] input = messageToEncrypt.getBytes("UTF-8");
-        byte[] output = new byte[pbbc.getOutputSize(input.length)];
-        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
-        pbbc.doFinal(output, bytesWrittenOut);
-        return Base64.encodeToString(output, Base64.NO_WRAP);
-    }
-
-    //BC provider to avoid key length restrictions on normal jvm
-    public static String decryptAES(String messageToDecrypt, AESParams aesParams) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
-            UnsupportedEncodingException, InvalidCipherTextException {
-        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
-        KeyParameter keyParam = new KeyParameter(aesParams.getKey().getEncoded());
-        CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIV().getIV());
-        pbbc.init(false, params); //to encrypt put param to true
-        byte[] input = Base64.decode(messageToDecrypt.getBytes("UTF-8"), Base64.NO_WRAP);
-        byte[] output = new byte[pbbc.getOutputSize(input.length)];
-        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
-        pbbc.doFinal(output, bytesWrittenOut);
-        int i = output.length - 1; //remove padding
-        while (i >= 0 && output[i] == 0) { --i; }
-        byte[] result = Arrays.copyOf(output, i + 1);
-        return new String(result);
-    }
-
     public static String encryptRSA(String plainText, PublicKey publicKey) throws Exception {
         Cipher rsaCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
         rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey);

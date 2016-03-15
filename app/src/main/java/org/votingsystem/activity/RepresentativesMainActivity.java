@@ -97,14 +97,14 @@ public class RepresentativesMainActivity extends ActivityBase {
         if(representation != null) {
             switch(representation.getState()) {
                 case REPRESENTATIVE:
-                    menu.removeGroup(R.id.options_for_uservs);
+                    menu.removeGroup(R.id.options_for_user);
                     break;
                 case WITHOUT_REPRESENTATION:
                     menu.removeItem(R.id.cancel_anonymouys_representation);
                     break;
             }
         } else {
-            menu.removeGroup(R.id.options_for_uservs);
+            menu.removeGroup(R.id.options_for_user);
         }
         return super.onCreateOptionsMenu(menu);
     }

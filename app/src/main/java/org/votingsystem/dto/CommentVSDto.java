@@ -15,7 +15,7 @@ public class CommentVSDto implements Comparable, Serializable {
     private Long id;
     private Long cmsMessageId;
     private String content;
-    private UserVSDto userVS;
+    private UserDto user;
     private EventVSDto eventVS;
     private Date dateCreated;
     private Date lastUpdated;
@@ -29,12 +29,12 @@ public class CommentVSDto implements Comparable, Serializable {
         this.content = content;
     }
 
-    public UserVSDto getUserVS() {
-        return userVS;
+    public UserDto getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVSDto userVS) {
-        this.userVS = userVS;
+    public void setUser(UserDto user) {
+        this.user = user;
     }
 
     public Long getId() {

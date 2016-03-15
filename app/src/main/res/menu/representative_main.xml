@@ -14,7 +14,7 @@
     <!--<item android:id="@+id/options_for_representatives" android:orderInCategory="3"
         android:title="@string/options_for_representatives_lbl" > <menu> </menu></item> -->
 
-    <group android:id="@+id/options_for_uservs">
+    <group android:id="@+id/options_for_user">
         <item android:id="@+id/cancel_anonymouys_representation"
             android:orderInCategory="5"
             vs:showAsAction="never"

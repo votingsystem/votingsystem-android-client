@@ -11,6 +11,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,7 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SocketMessageContentDto implements Serializable {
+public class SocketMessageEncryptedDto implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
@@ -37,21 +38,24 @@ public class SocketMessageContentDto implements Serializable {
     private String deviceToName;
     private String hashCertVS;
     private String cmsMessage;
+    private String pemCert;
+    private String pemPublicKey;
+    private boolean timeLimited = false;
     private Set<CurrencyDto> currencyList;
     private String URL;
 
-    public SocketMessageContentDto() { }
+    public SocketMessageEncryptedDto() { }
 
-    public SocketMessageContentDto(TypeVS operation, Integer statusCode, String message, String URL) {
+    public SocketMessageEncryptedDto(TypeVS operation, Integer statusCode, String message, String URL) {
         this.operation = operation;
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
     }
 
-    public static SocketMessageContentDto getSignRequest(String toUser,
-            String textToSign, String subject) throws Exception {
-        SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
+    public static SocketMessageEncryptedDto getSignRequest(String toUser,
+                                                           String textToSign, String subject) throws Exception {
+        SocketMessageEncryptedDto messageContentDto =  new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setToUser(toUser);
@@ -60,18 +64,20 @@ public class SocketMessageContentDto implements Serializable {
         return messageContentDto;
     }
 
-    public static SocketMessageContentDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
-        SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
+    public static SocketMessageEncryptedDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
+        SocketMessageEncryptedDto messageContentDto =  new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.QR_MESSAGE_INFO);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
+        messageContentDto.setPemCert(
+                new String(PEMUtils.getPEMEncoded(AppVS.getInstance().getX509UserCert())));
         messageContentDto.setMessage(qrMessageDto.getUUID());
         return messageContentDto;
     }
 
-    public static SocketMessageContentDto getCurrencyWalletChangeRequest(
+    public static SocketMessageEncryptedDto getCurrencyWalletChangeRequest(
             Collection<Currency> currencyList) throws Exception {
-        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
+        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
@@ -79,11 +85,11 @@ public class SocketMessageContentDto implements Serializable {
         return messageContentDto;
     }
 
-    public static SocketMessageContentDto getMessageVSToDevice(
-            UserVSDto userVS, String toUser, String message) throws Exception {
-        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
+    public static SocketMessageEncryptedDto getMessageVSToDevice(
+            UserDto user, String toUser, String message) throws Exception {
+        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
-        messageContentDto.setFrom(userVS.getFullName());
+        messageContentDto.setFrom(user.getFullName());
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setToUser(toUser);
@@ -231,5 +237,29 @@ public class SocketMessageContentDto implements Serializable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getPemCert() {
+        return pemCert;
+    }
+
+    public void setPemCert(String pemCert) {
+        this.pemCert = pemCert;
+    }
+
+    public boolean isTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(boolean timeLimited) {
+        this.timeLimited = timeLimited;
+    }
+
+    public String getPemPublicKey() {
+        return pemPublicKey;
+    }
+
+    public void setPemPublicKey(String pemPublicKey) {
+        this.pemPublicKey = pemPublicKey;
     }
 }

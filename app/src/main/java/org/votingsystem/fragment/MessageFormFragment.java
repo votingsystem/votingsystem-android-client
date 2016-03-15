@@ -24,9 +24,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.ContextVS;
@@ -52,14 +52,14 @@ public class MessageFormFragment extends Fragment {
     public static final String TAG = MessageFormFragment.class.getSimpleName();
 
     private String broadCastId = MessageFormFragment.class.getSimpleName();
-    private UserVSDto userVS;
+    private UserDto user;
     private TextView caption_text;
     private EditText messageEditText;
     private Button send_msg_button;
     private SocketMessageDto socketMessage;
     private LinearLayout msg_form;
     private boolean messageDeliveredNotified = false;
-    private Set<DeviceVSDto> connectedDevices = new HashSet<>();
+    private Set<DeviceDto> connectedDevices = new HashSet<>();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -101,16 +101,16 @@ public class MessageFormFragment extends Fragment {
         View view = inflater.inflate(R.layout.messagevs_form_fragment, null);
         messageEditText = (EditText) view.findViewById(R.id.message);
         msg_form =  (LinearLayout) view.findViewById(R.id.msg_form);
-        userVS =  (UserVSDto) getArguments().getSerializable(ContextVS.USER_KEY);
+        user =  (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
         socketMessage = (SocketMessageDto) getArguments().getSerializable(ContextVS.WEBSOCKET_MSG_KEY);
         String serviceURL = null;
-        if(userVS != null) {
+        if(user != null) {
             serviceURL = ((AppVS)getActivity().getApplication()).getCurrencyServer()
-                    .getDeviceVSConnectedServiceURL(userVS.getNIF());
+                    .getDeviceConnectedServiceURL(user.getNIF());
         }
         if(socketMessage != null) {
             serviceURL = ((AppVS)getActivity().getApplication()).getCurrencyServer()
-                    .getDeviceVSConnectedServiceURL(socketMessage.getDeviceFromId(), true);
+                    .getDeviceConnectedServiceURL(socketMessage.getDeviceFromId(), true);
         }
         caption_text = (TextView) view.findViewById(R.id.caption_text);
         send_msg_button = (Button) view.findViewById(R.id.send_msg_button);
@@ -137,7 +137,7 @@ public class MessageFormFragment extends Fragment {
             messageDeliveredNotified = savedInstanceState.getBoolean("messageDeliveredNotified");
             try {
                 connectedDevices = JSON.readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
-                        new TypeReference<Set<DeviceVSDto>>() {});
+                        new TypeReference<Set<DeviceDto>>() {});
             } catch (Exception ex) {ex.printStackTrace();}
         }
         checkSocketConnection();
@@ -173,10 +173,10 @@ public class MessageFormFragment extends Fragment {
     private void updateConnectedView() {
         if(!connectedDevices.isEmpty() && AppVS.getInstance().isWithSocketConnection()) {
             msg_form.setVisibility(View.VISIBLE);
-            caption_text.setText(getString(R.string.user_connected_lbl, userVS.getFullName()));
+            caption_text.setText(getString(R.string.user_connected_lbl, user.getFullName()));
         } else {
             msg_form.setVisibility(View.GONE);
-            caption_text.setText(getString(R.string.uservs_disconnected_lbl, userVS.getFullName()));
+            caption_text.setText(getString(R.string.user_disconnected_lbl, user.getFullName()));
         }
     }
 
@@ -201,7 +201,7 @@ public class MessageFormFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    public class UserDeviceLoader extends AsyncTask<String, String, UserVSDto> {
+    public class UserDeviceLoader extends AsyncTask<String, String, UserDto> {
 
         private String serviceURL;
         public UserDeviceLoader(String serviceURL) { this.serviceURL = serviceURL;}
@@ -210,32 +210,32 @@ public class MessageFormFragment extends Fragment {
             setProgressDialogVisible(getString(R.string.connecting_caption),
                     getString(R.string.check_devices_lbl), true); }
 
-        @Override protected UserVSDto doInBackground(String... params) {
-            UserVSDto result = null;
+        @Override protected UserDto doInBackground(String... params) {
+            UserDto result = null;
             try {
-                result = HttpHelper.getData(UserVSDto.class, serviceURL, MediaTypeVS.JSON);
+                result = HttpHelper.getData(UserDto.class, serviceURL, MediaTypeVS.JSON);
             } catch (Exception ex) { ex.printStackTrace();}
             return result;
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(UserVSDto userDto) {
+        @Override protected void onPostExecute(UserDto userDto) {
             connectedDevices =  new HashSet<>();
             try {
                 if(userDto != null) {
                     String deviceId = PrefUtils.getDeviceId();
-                    for(DeviceVSDto deviceDto : userDto.getConnectedDevices()) {
+                    for(DeviceDto deviceDto : userDto.getConnectedDevices()) {
                         if(!deviceId.equals(deviceDto.getDeviceId())) {
                             connectedDevices.add(deviceDto);
                         }
                     }
-                    if(userVS == null) userVS = userDto;
+                    if(user == null) user = userDto;
                     updateConnectedView();
                 } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());
                 setProgressDialogVisible(null, null, false);
-                LOGD(TAG + ".UserVSDataFetcher", "connectedDevices: " + connectedDevices.size());
+                LOGD(TAG + ".UserDataFetcher", "connectedDevices: " + connectedDevices.size());
             } catch (Exception ex) { ex.printStackTrace(); }
         }
     }

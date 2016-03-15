@@ -173,13 +173,13 @@ public class CurrencyAccountsFragment extends Fragment {
     }
 
     private void updateCurrencyAccountsInfo() {
-        Toast.makeText(getActivity(), getString(R.string.fetching_uservs_accounts_info_msg),
+        Toast.makeText(getActivity(), getString(R.string.fetching_user_accounts_info_msg),
                 Toast.LENGTH_SHORT).show();
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
         startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_ACCOUNTS_INFO);
         startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                getString(R.string.fetching_uservs_accounts_info_msg));
+                getString(R.string.fetching_user_accounts_info_msg));
         getActivity().startService(startIntent);
     }
 

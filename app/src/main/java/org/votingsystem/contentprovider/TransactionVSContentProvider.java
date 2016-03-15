@@ -255,7 +255,7 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void updateUserVSTransactionVSList(Context context, BalancesDto userInfo) {
+    public static void updateUserTransactionVSList(Context context, BalancesDto userInfo) {
 
         for(TransactionVSDto transactionVS : userInfo.getTransactionList()) {
             addTransaction(context, transactionVS,
@@ -282,10 +282,10 @@ public class TransactionVSContentProvider extends ContentProvider {
         ContentValues values = new ContentValues();
         values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
         values.put(TransactionVSContentProvider.URL_COL, transactionVS.getCmsMessageURL());
-        if(transactionVS.getFromUserVS() != null) values.put(
-                TransactionVSContentProvider.FROM_USER_COL, transactionVS.getFromUserVS().getNIF());
-        if(transactionVS.getToUserVS() != null) values.put(
-                TransactionVSContentProvider.TO_USER_COL, transactionVS.getToUserVS().getNIF());
+        if(transactionVS.getFromUser() != null) values.put(
+                TransactionVSContentProvider.FROM_USER_COL, transactionVS.getFromUser().getNIF());
+        if(transactionVS.getToUser() != null) values.put(
+                TransactionVSContentProvider.TO_USER_COL, transactionVS.getToUser().getNIF());
         values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
         values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
         values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyCode());

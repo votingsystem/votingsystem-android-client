@@ -23,9 +23,9 @@ import org.bouncycastle2.util.Store;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.cms.DNIeContentSigner;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.UserCertificationRequestDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.ui.DNIePasswordDialog;
@@ -197,9 +197,9 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				if(MODE_PASSWORD_REQUEST == activityMode) {
 					return ResponseVS.OK().setMessageBytes(new String(myFragment.getPassword()).getBytes());
 				}
-				UserVSDto appUser = null;
+				UserDto appUser = null;
 				if(MODE_UPDATE_USER_DATA == activityMode) {
-					UserVSDto userFromCert = UserVSDto.getUserVS(PrincipalUtil.getSubjectX509Principal(userCert));
+					UserDto userFromCert = UserDto.getUser(PrincipalUtil.getSubjectX509Principal(userCert));
 					appUser = PrefUtils.getAppUser();
 					appUser.setNIF(userFromCert.getNIF()).setCertificate(userCert);
 					appUser.setFirstName(userFromCert.getFirstName());
@@ -211,7 +211,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 						CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
 								SIGNATURE_ALGORITHM, PROVIDER, appUser.getNIF(), appUser.getEmail(),
 								appUser.getPhone(), PrefUtils.getDeviceId(), appUser.getFirstName(),
-								appUser.getLastName(), DeviceVSDto.Type.MOBILE);
+								appUser.getLastName(), DeviceDto.Type.MOBILE);
 						byte[] csrBytes = certificationRequest.getCsrPEM();
 						UserCertificationRequestDto userCertificationRequestDto =
 								new UserCertificationRequestDto(appUser.getAddress(), csrBytes);

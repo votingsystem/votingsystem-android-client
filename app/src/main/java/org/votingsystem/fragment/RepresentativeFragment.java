@@ -26,7 +26,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.service.RepresentativeService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -51,7 +51,7 @@ public class RepresentativeFragment extends Fragment {
     private String broadCastId = null;
     private Button selectButton;
     private Long representativeId;
-    private UserVSDto representative;
+    private UserDto representative;
     private ImageView representative_image;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -59,7 +59,7 @@ public class RepresentativeFragment extends Fragment {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
         if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
-            printRepresentativeData((UserVSDto) intent.getSerializableExtra(ContextVS.USER_KEY));
+            printRepresentativeData((UserDto) intent.getSerializableExtra(ContextVS.USER_KEY));
             setProgressDialogVisible(false);
         }
         }
@@ -80,9 +80,9 @@ public class RepresentativeFragment extends Fragment {
                 " - arguments: " + getArguments());
         representativeId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
         Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
-                getUserVSURI(representativeId), null, null, null, null);
+                getUserURI(representativeId), null, null, null, null);
         cursor.moveToFirst();
-        final UserVSDto representative = (UserVSDto) ObjectUtils.deSerializeObject(cursor.getBlob(
+        final UserDto representative = (UserDto) ObjectUtils.deSerializeObject(cursor.getBlob(
                 cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         rootView = inflater.inflate(R.layout.representative, container, false);
         representative_image = (ImageView) rootView.findViewById(R.id.representative_image);
@@ -130,7 +130,7 @@ public class RepresentativeFragment extends Fragment {
         } else ProgressDialogFragment.hide(broadCastId, getFragmentManager());
     }
 
-    private void printRepresentativeData(UserVSDto representative) {
+    private void printRepresentativeData(UserDto representative) {
         if(representative == null) {
             LOGD(TAG + ".printRepresentativeData", "representative null");
             return;

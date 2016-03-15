@@ -127,7 +127,7 @@
         <!-- The attribute "android:exported" must be set to "false" to restrict this content
             provider to its own app. Otherwise, all apps could access it. -->
         <provider android:name="org.votingsystem.contentprovider.UserContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.uservs"/>
+            android:exported="false" android:authorities="votingsystem.org.user"/>
 
         <provider android:name="org.votingsystem.contentprovider.EventVSContentProvider"
             android:exported="false" android:authorities="votingsystem.org.eventvs"/>

@@ -45,7 +45,7 @@ public class VoteService extends IntentService {
             switch(operation) {
                 case SEND_VOTE:
                     if(appVS.getControlCenter() == null) {
-                        ControlCenterDto controlCenter = appVS.getActorVS(ControlCenterDto.class,
+                        ControlCenterDto controlCenter = appVS.getActor(ControlCenterDto.class,
                                 voteHelper.getEventVS().getControlCenter().getServerURL());
                         appVS.setControlCenter(controlCenter);
                     }

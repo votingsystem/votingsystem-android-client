@@ -59,7 +59,7 @@ public class ActorDto implements java.io.Serializable {
     }
 
     public String getMenuUserURL() {
-        return getServerURL() + "/app/userVS?menu=user";
+        return getServerURL() + "/app/user?menu=user";
     }
 
     public String getMenuAdminURL() {
@@ -207,7 +207,7 @@ public class ActorDto implements java.io.Serializable {
     }
 
     public String getCSRSignedWithIDCardServiceURL () {
-        return serverURL + "/rest/userVS/csrSignedWithIDCard";
+        return serverURL + "/rest/user/csrSignedWithIDCard";
     }
 
 

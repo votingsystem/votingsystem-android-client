@@ -2,7 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.dto.AddressVS;
+import org.votingsystem.dto.Address;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
@@ -18,7 +18,7 @@ public class TransactionVSDetailsDto {
     private BigDecimal itemPrice;
     private BigDecimal discount;
     private Date dateDelivery;
-    private AddressVS deliveryAddressVS;
+    private Address deliveryAddress;
 
     public boolean equals(TransactionVSDetailsDto details) {
         if(numItems.intValue() != details.numItems) return false;
@@ -60,16 +60,16 @@ public class TransactionVSDetailsDto {
         this.dateDelivery = dateDelivery;
     }
 
-    public AddressVS getDeliveryAddressVS() {
-        return deliveryAddressVS;
+    public Address getDeliveryAddress() {
+        return deliveryAddress;
     }
 
-    public void setDeliveryAddressVS(AddressVS deliveryAddressVS) {
-        this.deliveryAddressVS = deliveryAddressVS;
+    public void setDeliveryAddress(Address deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 
     @Override public String toString() {
-        return MessageFormat.format("[numItems: {0} - itemPrice: {1} - discount: {2} - dateDelivery: {3} - deliveryAddressVS: {4}]",
-                numItems, itemPrice, discount, dateDelivery, deliveryAddressVS);
+        return MessageFormat.format("[numItems: {0} - itemPrice: {1} - discount: {2} - dateDelivery: {3} - deliveryAddress: {4}]",
+                numItems, itemPrice, discount, dateDelivery, deliveryAddress);
     }
 }

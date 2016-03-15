@@ -63,9 +63,9 @@ public class QRMessageDto<T> implements Serializable {
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }
     
-    public QRMessageDto(DeviceVSDto deviceVSDto, TypeVS typeVS){
+    public QRMessageDto(DeviceDto deviceDto, TypeVS typeVS){
         this.typeVS = typeVS;
-        this.deviceId = deviceVSDto.getId();
+        this.deviceId = deviceDto.getId();
         this.dateCreated = new Date();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }
@@ -103,8 +103,8 @@ public class QRMessageDto<T> implements Serializable {
         return publicKey;
     }
 
-    public DeviceVSDto getDeviceVS() throws Exception {
-        DeviceVSDto dto = new DeviceVSDto(deviceId);
+    public DeviceDto getDevice() throws Exception {
+        DeviceDto dto = new DeviceDto(deviceId);
         dto.setPublicKey(getRSAPublicKey());
         return dto;
     }

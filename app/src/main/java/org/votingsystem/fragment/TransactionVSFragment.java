@@ -130,16 +130,16 @@ public class TransactionVSFragment extends Fragment {
 
     private void initTransactionVSScreen (final TransactionVSDto transactionvs) {
         LOGD(TAG + ".initTransactionVSScreen", "transactionvsId: " + transactionvs.getId());
-        if(transactionvs.getFromUserVS() != null) {
+        if(transactionvs.getFromUser() != null) {
             from_user.setText(Html.fromHtml(getString(R.string.transactionvs_from_user_lbl,
-                    transactionvs.getFromUserVS().getNIF(),
-                    transactionvs.getFromUserVS().getName())));
+                    transactionvs.getFromUser().getNIF(),
+                    transactionvs.getFromUser().getName())));
             from_user.setVisibility(View.VISIBLE);
         }
-        if(transactionvs.getToUserVS() != null) {
+        if(transactionvs.getToUser() != null) {
             to_user.setText(Html.fromHtml(getString(R.string.transactionvs_to_user_lbl,
-                    transactionvs.getToUserVS().getNIF(),
-                    transactionvs.getToUserVS().getName())));
+                    transactionvs.getToUser().getNIF(),
+                    transactionvs.getToUser().getName())));
             to_user.setVisibility(View.VISIBLE);
         }
         String transactionHtml = getString(R.string.transactionvs_formatted,

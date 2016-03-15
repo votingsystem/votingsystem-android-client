@@ -38,7 +38,7 @@ import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.dto.voting.FieldEventVSDto;
+import org.votingsystem.dto.voting.FieldEventDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.service.VoteService;
 import org.votingsystem.util.ActivityResult;
@@ -72,7 +72,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
 
     private EventVSDto eventVS;
     private VoteHelper voteHelper;
-    private FieldEventVSDto optionSelected;
+    private FieldEventDto optionSelected;
     private List<Button> voteOptionsButtonList;
     private Button saveReceiptButton;
     private AppVS appVS;
@@ -163,7 +163,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
                 eventVS = voteHelper.getEventVS();
                 responseVS = getArguments().getParcelable(ContextVS.RESPONSEVS_KEY);
             }
-            eventVS.setAccessControlVS(appVS.getAccessControl());
+            eventVS.setAccessControl(appVS.getAccessControl());
         } catch(Exception ex) {  ex.printStackTrace(); }
         rootView = inflater.inflate(R.layout.eventvs_fragment, container, false);
         saveReceiptButton = (Button) rootView.findViewById(R.id.save_receipt_button);
@@ -198,7 +198,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onActivityCreated(bundle);
         if(bundle != null) {
             voteHelper = (VoteHelper) bundle.getSerializable(ContextVS.VOTE_KEY);
-            optionSelected = (FieldEventVSDto) bundle.getSerializable(ContextVS.DTO_KEY);
+            optionSelected = (FieldEventDto) bundle.getSerializable(ContextVS.DTO_KEY);
         }
         if(voteHelper != null && voteHelper.getVoteReceipt() != null) showReceiptScreen(voteHelper);
         else setEventScreen(eventVS);
@@ -304,14 +304,14 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
             contentTextView.setText(Html.fromHtml(eventContent));
         } catch (Exception ex) { ex.printStackTrace(); }
         contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        Set<FieldEventVSDto> fieldsEventVS = voteHelper.getEventVS().getFieldsEventVS();
+        Set<FieldEventDto> fieldsEventVS = voteHelper.getEventVS().getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(voteOptionsButtonList == null) {
             voteOptionsButtonList = new ArrayList<Button>();
             FrameLayout.LayoutParams paramsButton = new
                     FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
             paramsButton.setMargins(15, 15, 25, 15);
-            for (final FieldEventVSDto option:fieldsEventVS) {
+            for (final FieldEventDto option:fieldsEventVS) {
                 Button optionButton = new Button(getActivity());
                 optionButton.setText(option.getContent());
                 voteOptionsButtonList.add(optionButton);
@@ -336,19 +336,19 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         } catch (Exception ex) { ex.printStackTrace(); }
         contentTextView.setText(Html.fromHtml(eventContent));
         //contentTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        Set<FieldEventVSDto> fieldsEventVS = event.getFieldsEventVS();
+        Set<FieldEventDto> fieldsEventVS = event.getFieldsEventVS();
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.option_button_container);
         if(voteOptionsButtonList != null) linearLayout.removeAllViews();
         voteOptionsButtonList = new ArrayList<Button>();
         FrameLayout.LayoutParams paramsButton = new FrameLayout.LayoutParams(
                 LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
         paramsButton.setMargins(15, 15, 15, 15);
-        for (final FieldEventVSDto option:fieldsEventVS) {
+        for (final FieldEventDto option:fieldsEventVS) {
             Button optionButton = new Button(getActivity());
             optionButton.setText(option.getContent());
             optionButton.setTextAppearance(getActivity(), R.style.electionOptionText);
             optionButton.setOnClickListener(new Button.OnClickListener() {
-                FieldEventVSDto optionSelected = option;
+                FieldEventDto optionSelected = option;
                 public void onClick(View v) {
                     LOGD(TAG, "- optionButton - optionId: " + optionSelected.getId());
                     processSelectedOption(optionSelected);
@@ -360,7 +360,7 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void processSelectedOption(FieldEventVSDto optionSelected) {
+    private void processSelectedOption(FieldEventDto optionSelected) {
         LOGD(TAG + ".processSelectedOption", "processSelectedOption");
         try {
             this.optionSelected = optionSelected;

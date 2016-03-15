@@ -11,7 +11,7 @@ import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CertExtensionDto;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
@@ -131,14 +131,14 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getUserRequest(String signatureMechanism, String provider,
              String nif, String email, String phone, String deviceId,
-             String givenName, String surName, DeviceVSDto.Type deviceType)
+             String givenName, String surName, DeviceDto.Type deviceType)
             throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
         CertExtensionDto dto = new CertExtensionDto(deviceId, Utils.getDeviceName(),
                 email, phone, deviceType).setNif(nif).setGivenname(givenName).setSurname(surName);
-        Attribute attribute = new Attribute(new ASN1ObjectIdentifier(ContextVS.DEVICEVS_OID),
+        Attribute attribute = new Attribute(new ASN1ObjectIdentifier(ContextVS.DEVICE_OID),
                 new DERSet(new DERUTF8String(JSON.writeValueAsString(dto))));
         X500Principal subject = new X500Principal(principal);
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,

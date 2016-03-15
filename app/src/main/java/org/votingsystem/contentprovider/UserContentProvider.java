@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.ObjectUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -29,9 +29,9 @@ public class UserContentProvider extends ContentProvider {
     public static final String SQL_INSERT_OR_REPLACE = "__sql_insert_or_replace__";
 
     private static final int DATABASE_VERSION = 2;
-    private static final String DB_NAME = "voting_system_uservs.db";
-    public static final String TABLE_NAME = "uservs";
-    public static final String AUTHORITY = "votingsystem.org.uservs";
+    private static final String DB_NAME = "voting_system_user.db";
+    public static final String TABLE_NAME = "user";
+    public static final String AUTHORITY = "votingsystem.org.user";
 
     public static final String ID_COL                  = "_id";
     public static final String URL_COL                 = "url";
@@ -50,7 +50,7 @@ public class UserContentProvider extends ContentProvider {
     private static final int ALL_ITEMS     = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "uservs";
+    private static final String BASE_PATH = "user";
 
     private static Long numTotalRepresentatives = null;
 
@@ -65,8 +65,8 @@ public class UserContentProvider extends ContentProvider {
     // Here's the public URI used to query for representative items.
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getUserVSURI(Long userVSId) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + userVSId);
+    public static Uri getUserURI(Long userId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + userId);
     }
 
     @Override public boolean onCreate() {
@@ -87,9 +87,9 @@ public class UserContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/uservs"; // List of items.
+                return "vnd.android.cursor.dir/user"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/uservs"; // Specific item.
+                return "vnd.android.cursor.item/user"; // Specific item.
             default:
                 return null;
         }
@@ -143,19 +143,19 @@ public class UserContentProvider extends ContentProvider {
         return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + id);
     }
 
-    public static ContentValues getContentValues(UserVSDto userVS) {
+    public static ContentValues getContentValues(UserDto user) {
         ContentValues values = new ContentValues();
         values.put(UserContentProvider.SQL_INSERT_OR_REPLACE, true );
-        values.put(UserContentProvider.ID_COL, userVS.getId());
-        values.put(UserContentProvider.URL_COL, userVS.getURL());
-        values.put(UserContentProvider.TYPE_COL, userVS.getType().toString());
-        values.put(UserContentProvider.FULL_NAME_COL, userVS.getName());
+        values.put(UserContentProvider.ID_COL, user.getId());
+        values.put(UserContentProvider.URL_COL, user.getURL());
+        values.put(UserContentProvider.TYPE_COL, user.getType().toString());
+        values.put(UserContentProvider.FULL_NAME_COL, user.getName());
         values.put(UserContentProvider.CONTACT_URI_COL,
-                userVS.getContactURI() != null? userVS.getContactURI().toString():null);
+                user.getContactURI() != null? user.getContactURI().toString():null);
         values.put(UserContentProvider.SERIALIZED_OBJECT_COL,
-                ObjectUtils.serializeObject(userVS));
-        values.put(UserContentProvider.NIF_COL, userVS.getNIF());
-        values.put(UserContentProvider.NUM_REPRESENTATIONS_COL, userVS.getNumRepresentations());
+                ObjectUtils.serializeObject(user));
+        values.put(UserContentProvider.NIF_COL, user.getNIF());
+        values.put(UserContentProvider.NUM_REPRESENTATIONS_COL, user.getNumRepresentations());
         return values;
     }
 
@@ -209,32 +209,32 @@ public class UserContentProvider extends ContentProvider {
         numTotalRepresentatives = numTotal;
     }
 
-    public static UserVSDto loadUser(UserVSDto userVS, Context context) {
+    public static UserDto loadUser(UserDto user, Context context) {
         String selection = null;
         String[] args = null;
-        if(userVS.getContactURI() != null) {
+        if(user.getContactURI() != null) {
             selection =  UserContentProvider.CONTACT_URI_COL + " =? ";
-            args = new String[]{userVS.getContactURI().toString()};
+            args = new String[]{user.getContactURI().toString()};
         } else {
             selection =  UserContentProvider.NIF_COL + " =? ";
-            args = new String[]{userVS.getNIF()};
+            args = new String[]{user.getNIF()};
         }
         Cursor cursor = context.getContentResolver().query(UserContentProvider.CONTENT_URI, null,
                 selection, args, null);
         if(cursor.getCount() > 0) {//contact stored
             cursor.moveToFirst();
-            return (UserVSDto) ObjectUtils.deSerializeObject(cursor.getBlob(
+            return (UserDto) ObjectUtils.deSerializeObject(cursor.getBlob(
                     cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         } else return null;
     }
 
-    public static UserVSDto loadUser(Long id, Context context) {
+    public static UserDto loadUser(Long id, Context context) {
         String selection = UserContentProvider.ID_COL + " =? ";
         Cursor cursor = context.getContentResolver().query(UserContentProvider.CONTENT_URI, null,
                 selection, new String[]{id.toString()}, null);
         if(cursor.getCount() > 0) {//contact stored
             cursor.moveToFirst();
-            return (UserVSDto) ObjectUtils.deSerializeObject(cursor.getBlob(
+            return (UserDto) ObjectUtils.deSerializeObject(cursor.getBlob(
                     cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
         } else return null;
     }

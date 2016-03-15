@@ -91,7 +91,7 @@ public class PaymentService extends IntentService {
                     currencyRequest(serviceCaller, transactionDto, pin);
                     break;
                 case CURRENCY_CHANGE:
-                case FROM_USERVS:
+                case FROM_USER:
                 case CURRENCY_SEND:
                     processTransaction(serviceCaller, transactionDto);
                     break;
@@ -112,13 +112,13 @@ public class PaymentService extends IntentService {
                 Calendar.getInstance().getTime(), FOUR_MINUTES)) {
             try {
                 switch (transactionDto.getType()) {
-                    case FROM_USERVS:
-                        OperationVS operationVS = new OperationVS(TypeVS.FROM_USERVS, transactionDto,
+                    case FROM_USER:
+                        OperationVS operationVS = new OperationVS(TypeVS.FROM_USER, transactionDto,
                                 OperationVS.State.PENDING);
                         Uri operationUri = getContentResolver().insert(
                                 OperationVSContentProvider.CONTENT_URI,
                                 OperationVSContentProvider.getContentValues(operationVS));
-                        responseVS = sendTransactionVS(transactionDto.getTransactionFromUserVS());
+                        responseVS = sendTransactionVS(transactionDto.getTransactionFromUser());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
                                 transactionDto.getPaymentConfirmURL() != null) {
                             ResultListDto<TransactionVSDto> resultList =
@@ -143,7 +143,7 @@ public class PaymentService extends IntentService {
                                 //this is to send the signed receipts to the online service server receptor
                                 //of the transaction
                                 TransactionResponseDto responseDto = new TransactionResponseDto();
-                                responseDto.setOperation(TypeVS.FROM_USERVS);
+                                responseDto.setOperation(TypeVS.FROM_USER);
                                 responseDto.setCMSMessage(base64Receipt);
                                 responseVS = HttpHelper.sendData(JSON.writeValueAsBytes(responseDto),
                                         ContentTypeVS.JSON, transactionDto.getPaymentConfirmURL());
@@ -345,19 +345,19 @@ public class PaymentService extends IntentService {
             LOGD(TAG + ".updateUserInfo", "missing connection to Currency Server");
             return;
         }
-        if(appVS.getUserVS() == null) {
+        if(appVS.getUser() == null) {
             LOGD(TAG + ".updateUserInfo", "missing user data");
             return;
         }
         ResponseVS responseVS = null;
         try {
             String targetService = appVS.getCurrencyServer().getUserInfoServiceURL(
-                    appVS.getUserVS().getNIF());
+                    appVS.getUser().getNIF());
             responseVS = HttpHelper.getData(targetService, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 BalancesDto accountsInfo = (BalancesDto) responseVS.getMessage(BalancesDto.class);
                 PrefUtils.putBalances(accountsInfo, DateUtils.getCurrentWeekPeriod());
-                TransactionVSContentProvider.updateUserVSTransactionVSList(appVS, accountsInfo);
+                TransactionVSContentProvider.updateUserTransactionVSList(appVS, accountsInfo);
             } else responseVS.setCaption(getString(R.string.error_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();

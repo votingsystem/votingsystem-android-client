@@ -24,7 +24,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
@@ -51,10 +51,10 @@ public class TransactionVSFormFragment extends Fragment {
     private EditText amount_text;
     private TextView tag_text, subject;
     private TagVSDto tagVS;
-    private UserVSDto toUserVS;
+    private UserDto toUser;
     private Button add_tag_btn;
     private String broadCastId = TransactionVSFormFragment.class.getSimpleName();
-    private CheckBox from_uservs_checkbox, currency_send_checkbox, currency_change_checkbox;
+    private CheckBox from_user_checkbox, currency_send_checkbox, currency_change_checkbox;
     private Type formType;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -71,7 +71,7 @@ public class TransactionVSFormFragment extends Fragment {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         formType = (Type) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        toUserVS = (UserVSDto) getArguments().getSerializable(ContextVS.USER_KEY);
+        toUser = (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
         View rootView = inflater.inflate(R.layout.transactionvs_form_fragment, container, false);
         rootView.findViewById(R.id.request_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -81,8 +81,8 @@ public class TransactionVSFormFragment extends Fragment {
                 });
         subject = (EditText) rootView.findViewById(R.id.subject);
         amount_text = (EditText) rootView.findViewById(R.id.amount);
-        from_uservs_checkbox = (CheckBox) rootView.findViewById(R.id.from_uservs_checkbox);
-        from_uservs_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        from_user_checkbox = (CheckBox) rootView.findViewById(R.id.from_user_checkbox);
+        from_user_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
                     checkBoxSelected(buttonView, isChecked);
                 }
@@ -116,11 +116,11 @@ public class TransactionVSFormFragment extends Fragment {
                 request_button.setText(getString(R.string.qr_create_lbl));
                 break;
             case TRANSACTIONVS_FORM:
-                if(toUserVS.getConnectedDevices() == null || toUserVS.getConnectedDevices().size() == 0) {
+                if(toUser.getConnectedDevices() == null || toUser.getConnectedDevices().size() == 0) {
                     currency_change_checkbox.setVisibility(View.GONE);
                 }
                 ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.send_money_lbl));
-                ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(toUserVS.getFullName());
+                ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(toUser.getFullName());
                 request_button.setText(getString(R.string.send_money_lbl));
                 break;
         }
@@ -134,7 +134,7 @@ public class TransactionVSFormFragment extends Fragment {
     private void checkBoxSelected(CompoundButton checkbox, boolean isChecked) {
         if(isChecked) {
             if(formType == Type.TRANSACTIONVS_FORM) {
-                from_uservs_checkbox.setChecked(false);
+                from_user_checkbox.setChecked(false);
                 currency_send_checkbox.setChecked(false);
                 currency_change_checkbox.setChecked(false);
             }
@@ -171,7 +171,7 @@ public class TransactionVSFormFragment extends Fragment {
             return;
         }
         List<TransactionVSDto.Type> paymentOptions = new ArrayList<>();
-        if(from_uservs_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.FROM_USERVS);
+        if(from_user_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.FROM_USER);
         if(currency_send_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.CURRENCY_SEND);
         if(currency_change_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.CURRENCY_CHANGE);
         if(paymentOptions.isEmpty()) {
@@ -188,8 +188,8 @@ public class TransactionVSFormFragment extends Fragment {
                 transactionDto.setTagVS(tagVS);
                 transactionDto.setPaymentOptions(paymentOptions);
                 transactionDto.setSubject(subject.getText().toString());
-                transactionDto.setToUser(toUserVS.getFullName());
-                transactionDto.setToUserIBAN(Utils.asSet(toUserVS.getIBAN()));
+                transactionDto.setToUserName(toUser.getFullName());
+                transactionDto.setToUserIBAN(Utils.asSet(toUser.getIBAN()));
                 transactionDto.setDateCreated(new Date());
                 transactionDto.setUUID(UUID.randomUUID().toString());
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
@@ -200,7 +200,7 @@ public class TransactionVSFormFragment extends Fragment {
                 break;
             case QR_FORM:
                 TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
-                        AppVS.getInstance().getUserVS().getFullName(), UserVSDto.Type.USER,
+                        AppVS.getInstance().getUser().getFullName(), UserDto.Type.USER,
                         new BigDecimal(amount_text.getText().toString()),
                         currencySpinner.getSelectedItem().toString(),
                         AppVS.getInstance().getConnectedDevice().getIBAN(), subject.getText().toString(),

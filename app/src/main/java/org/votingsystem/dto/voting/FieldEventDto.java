@@ -9,7 +9,7 @@ import java.util.Map;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FieldEventVSDto implements Serializable {
+public class FieldEventDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -18,7 +18,7 @@ public class FieldEventVSDto implements Serializable {
     private String content;
     private String value;
 
-    public FieldEventVSDto() {}
+    public FieldEventDto() {}
 
     public String getContent() {
         return content;
@@ -52,10 +52,10 @@ public class FieldEventVSDto implements Serializable {
         this.value = value;
     }
 
-    public static FieldEventVSDto parse (Map fieldMap) {
-        FieldEventVSDto fieldEvent = null;
+    public static FieldEventDto parse (Map fieldMap) {
+        FieldEventDto fieldEvent = null;
         try {
-            fieldEvent = new FieldEventVSDto();
+            fieldEvent = new FieldEventDto();
             if(fieldMap.containsKey("id"))
                 fieldEvent.setId(((Integer) fieldMap.get("id")).longValue());
             if(fieldMap.containsKey("content")) {

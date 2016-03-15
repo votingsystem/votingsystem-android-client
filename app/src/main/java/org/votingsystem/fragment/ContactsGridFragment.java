@@ -42,7 +42,7 @@ import org.votingsystem.activity.ContactPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -74,8 +74,8 @@ public class ContactsGridFragment extends Fragment
     private String broadCastId = ContactsGridFragment.class.getSimpleName();
     private static final int loaderId = 0;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
-    private UserVSDto contactUserVS;
-    private List<UserVSDto> userVSList = null;
+    private UserDto contactUser;
+    private List<UserDto> userList = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -131,13 +131,13 @@ public class ContactsGridFragment extends Fragment
             String dtoStr = savedInstanceState.getString(ContextVS.DTO_KEY);
             if(dtoStr != null) {
                 try {
-                    userVSList = JSON.readValue(dtoStr, new TypeReference<List<UserVSDto>>(){});
-                    ContactListAdapter adapter = new ContactListAdapter(userVSList, appVS);
+                    userList = JSON.readValue(dtoStr, new TypeReference<List<UserDto>>(){});
+                    ContactListAdapter adapter = new ContactListAdapter(userList, appVS);
                     gridView.setAdapter(adapter);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                contactUserVS = (UserVSDto) savedInstanceState.getSerializable(ContextVS.USER_KEY);
+                contactUser = (UserDto) savedInstanceState.getSerializable(ContextVS.USER_KEY);
                 Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
                 gridView.onRestoreInstanceState(gridState);
             }
@@ -168,26 +168,26 @@ public class ContactsGridFragment extends Fragment
         if (data == null) return;
         switch (requestCode) {
             case CONTACT_PICKER:
-                final UserVSDto userVS = extractInfoFromContactPickerIntent(data, getActivity());
-                if(userVS != null && userVS.getId() == null) {
+                final UserDto user = extractInfoFromContactPickerIntent(data, getActivity());
+                if(user != null && user.getId() == null) {
                     AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                         getString(R.string.error_lbl),
-                        getString(R.string.contactvs_not_found_msg, userVS.getName()),
+                        getString(R.string.contactvs_not_found_msg, user.getName()),
                         getActivity()).setPositiveButton(getString(R.string.accept_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                fetchUserVS(userVS);
+                                fetchUser(user);
                             }
                         });
                     UIUtils.showMessageDialog(builder);
-                } else launchPager(null, userVS);
+                } else launchPager(null, user);
                 break;
         }
     }
 
-    private void fetchUserVS(UserVSDto userVS) {
-        this.contactUserVS = userVS;
-        new ContactsFetcher(userVS).execute("");
+    private void fetchUser(UserDto user) {
+        this.contactUser = user;
+        new ContactsFetcher(user).execute("");
     }
 
     @Override public void onScrollStateChanged(AbsListView view, int scrollState) { }
@@ -222,10 +222,10 @@ public class ContactsGridFragment extends Fragment
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
         outState.putSerializable(ContextVS.STATE_KEY, mode);
-        outState.putSerializable(ContextVS.USER_KEY, contactUserVS);
-        if(userVSList != null) {
+        outState.putSerializable(ContextVS.USER_KEY, contactUser);
+        if(userList != null) {
             try {
-                outState.putString(ContextVS.DTO_KEY, JSON.writeValueAsString(userVSList));
+                outState.putString(ContextVS.DTO_KEY, JSON.writeValueAsString(userList));
             } catch (Exception ex) { ex.printStackTrace();}
         }
     }
@@ -251,18 +251,18 @@ public class ContactsGridFragment extends Fragment
         if(gridView.getAdapter() instanceof CursorAdapter) {
             launchPager(position, null);
         } else {
-            launchPager(null, userVSList.get(position));
+            launchPager(null, userList.get(position));
         }
     }
 
-    private void launchPager(Integer position, UserVSDto userVS) {
+    private void launchPager(Integer position, UserDto user) {
         Intent intent = new Intent(getActivity(), ContactPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         intent.putExtra(ContextVS.STATE_KEY, mode);
         try {
-            intent.putExtra(ContextVS.DTO_KEY, JSON.writeValueAsString(userVSList));
+            intent.putExtra(ContextVS.DTO_KEY, JSON.writeValueAsString(userList));
         } catch (Exception ex) { ex.printStackTrace();}
-        intent.putExtra(ContextVS.USER_KEY, userVS);
+        intent.putExtra(ContextVS.USER_KEY, user);
         startActivity(intent);
     }
 
@@ -270,7 +270,7 @@ public class ContactsGridFragment extends Fragment
         LOGD(TAG + ".onCreateLoader", "onCreateLoader");
         return new CursorLoader(this.getActivity(),
                 UserContentProvider.CONTENT_URI, null, UserContentProvider.TYPE_COL + " =? ",
-                new String[]{UserVSDto.Type.CONTACT.toString()}, null);
+                new String[]{UserDto.Type.CONTACT.toString()}, null);
     }
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
@@ -314,10 +314,10 @@ public class ContactsGridFragment extends Fragment
 
     public class ContactListAdapter extends BaseAdapter {
 
-        private List<UserVSDto> itemList;
+        private List<UserDto> itemList;
         private Context context;
 
-        public ContactListAdapter(List<UserVSDto> itemList, Context ctx) {
+        public ContactListAdapter(List<UserDto> itemList, Context ctx) {
             this.itemList = itemList;
             this.context = ctx;
         }
@@ -335,14 +335,14 @@ public class ContactsGridFragment extends Fragment
         }
 
         @Override public View getView(int position, View itemView, ViewGroup parent) {
-            UserVSDto userVS = itemList.get(position);
+            UserDto user = itemList.get(position);
             if (itemView == null) {
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
                 itemView = inflater.inflate(R.layout.contact_card, null);
             }
-            ((TextView)itemView.findViewById(R.id.fullname)).setText(userVS.getName());
-            ((TextView) itemView.findViewById(R.id.nif)).setText(userVS.getNIF());
+            ((TextView)itemView.findViewById(R.id.fullname)).setText(user.getName());
+            ((TextView) itemView.findViewById(R.id.nif)).setText(user.getNIF());
             return itemView;
         }
     }
@@ -362,10 +362,10 @@ public class ContactsGridFragment extends Fragment
 
         private String phone, email;
 
-        public ContactsFetcher(UserVSDto userVS) {
-            if(userVS != null) {
-                this.phone = userVS.getPhone();
-                this.email = userVS.getEmail();
+        public ContactsFetcher(UserDto user) {
+            if(user != null) {
+                this.phone = user.getPhone();
+                this.email = user.getEmail();
             }
         }
 
@@ -387,17 +387,17 @@ public class ContactsGridFragment extends Fragment
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     if(phone != null || email != null) {
-                        userVSList = null;
-                        UserVSDto userVS = (UserVSDto) responseVS.getMessage(UserVSDto.class);
-                        if(contactUserVS != null) userVS.setContactURI(contactUserVS.getContactURI());
-                        launchPager(null, userVS);
+                        userList = null;
+                        UserDto user = (UserDto) responseVS.getMessage(UserDto.class);
+                        if(contactUser != null) user.setContactURI(contactUser.getContactURI());
+                        launchPager(null, user);
                     } else {
-                        ResultListDto<UserVSDto> resultList = ((ResultListDto<UserVSDto>) responseVS
-                                .getMessage(new TypeReference<ResultListDto<UserVSDto>>() {}));
-                        userVSList = resultList.getResultList();
-                        if(userVSList.size() > 0)
+                        ResultListDto<UserDto> resultList = ((ResultListDto<UserDto>) responseVS
+                                .getMessage(new TypeReference<ResultListDto<UserDto>>() {}));
+                        userList = resultList.getResultList();
+                        if(userList.size() > 0)
                             rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                        ContactListAdapter adapter = new ContactListAdapter(userVSList, appVS);
+                        ContactListAdapter adapter = new ContactListAdapter(userList, appVS);
                         gridView.setAdapter(adapter);
                     }
                 } catch (Exception ex) {
@@ -413,7 +413,7 @@ public class ContactsGridFragment extends Fragment
         }
     }
 
-    public static UserVSDto extractInfoFromContactPickerIntent(final Intent intent, Context mContext) {
+    public static UserDto extractInfoFromContactPickerIntent(final Intent intent, Context mContext) {
         Cursor cursor = null;
         try {
             Uri contactURI = intent.getData();
@@ -421,7 +421,7 @@ public class ContactsGridFragment extends Fragment
             String phone = null;
             String email = null;
             String name = null;
-            UserVSDto userVS = null;
+            UserDto user = null;
             cursor = mContext.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
                     ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id, null, null);
             if(cursor != null) {
@@ -444,19 +444,19 @@ public class ContactsGridFragment extends Fragment
             if(cursor != null) {
                 cursor.moveToFirst();
                 if(cursor.getCount() > 0) {
-                    userVS = (UserVSDto) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    user = (UserDto) ObjectUtils.deSerializeObject(cursor.getBlob(
                             cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
                 }
             }
-            if(userVS == null) {
-                userVS = new UserVSDto();
-                userVS.setName(name);
-                userVS.setPhone(phone);
-                userVS.setEmail(email);
+            if(user == null) {
+                user = new UserDto();
+                user.setName(name);
+                user.setPhone(phone);
+                user.setEmail(email);
             }
-            userVS.setContactURI(contactURI);
+            user.setContactURI(contactURI);
             LOGD(TAG, "email: " + email + " - phone: " + phone + " - displayName: " + name);
-            return userVS;
+            return user;
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

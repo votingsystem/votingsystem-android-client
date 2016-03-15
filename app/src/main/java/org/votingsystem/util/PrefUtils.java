@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.AppVS;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.EncryptedBundleDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
@@ -50,7 +50,7 @@ public class PrefUtils {
         //initialize listened keys
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, false).commit();
         sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
-        sp.edit().remove(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY).commit();
+        sp.edit().remove(ContextVS.USER_ACCOUNT_LAST_CHECKED_KEY).commit();
         new Thread(new Runnable() {
             @Override public void run() { getRepresentationState(); }
         }).start();
@@ -146,7 +146,7 @@ public class PrefUtils {
         SharedPreferences pref = AppVS.getInstance().getSharedPreferences(ContextVS.PRIVATE_PREFS,
                 Context.MODE_PRIVATE);
         GregorianCalendar lastCheckedTime = new GregorianCalendar();
-        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY, 0));
+        lastCheckedTime.setTimeInMillis(pref.getLong(ContextVS.USER_ACCOUNT_LAST_CHECKED_KEY, 0));
         Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
         if(lastCheckedTime.getTime().after(currentLapseCalendar.getTime())) {
             return lastCheckedTime.getTime();
@@ -169,7 +169,7 @@ public class PrefUtils {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putLong(ContextVS.USERVS_ACCOUNT_LAST_CHECKED_KEY,
+        editor.putLong(ContextVS.USER_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(timePeriod.getDateFrom());
         try {
@@ -294,24 +294,24 @@ public class PrefUtils {
         editor.commit();
     }
 
-    public static void putAppUser(UserVSDto userVS) {
+    public static void putAppUser(UserDto user) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        byte[] serializedUserVS = ObjectUtils.serializeObject(userVS);
+        byte[] serializedUser = ObjectUtils.serializeObject(user);
         try {
-            editor.putString(ContextVS.USER_KEY, new String(serializedUserVS, "UTF-8"));
+            editor.putString(ContextVS.USER_KEY, new String(serializedUser, "UTF-8"));
             editor.commit();
         } catch(Exception ex) {ex.printStackTrace();}
     }
 
-    public static UserVSDto getAppUser() {
+    public static UserDto getAppUser() {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String serializedUserVS = settings.getString(ContextVS.USER_KEY, null);
-        if(serializedUserVS != null) {
-            UserVSDto userVS = (UserVSDto) ObjectUtils.deSerializeObject(serializedUserVS.getBytes());
-            return userVS;
+        String serializedUser = settings.getString(ContextVS.USER_KEY, null);
+        if(serializedUser != null) {
+            UserDto user = (UserDto) ObjectUtils.deSerializeObject(serializedUser.getBytes());
+            return user;
         }
         return null;
     }

@@ -1,6 +1,6 @@
 package org.votingsystem.dto.voting;
 
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -17,7 +17,7 @@ public class StatisticsDto {
     private Long id;
     private EventVSDto.State state;
     private TypeVS typeVS;
-    private UserVSDto userVS;
+    private UserDto user;
     private Integer numSignatures;
     private Integer numAccessRequests;
     private Integer numVotesVSAccounted;
@@ -34,11 +34,11 @@ public class StatisticsDto {
     public EventVSDto.State getState() {
         return state;
     }
-    public void setUserVS(UserVSDto userVS) {
-        this.userVS = userVS;
+    public void setUser(UserDto user) {
+        this.user = user;
     }
-    public UserVSDto getUserVS() {
-        return userVS;
+    public UserDto getUser() {
+        return user;
     }
     public void setNumSignatures(int numSignatures) {
         this.numSignatures = numSignatures;

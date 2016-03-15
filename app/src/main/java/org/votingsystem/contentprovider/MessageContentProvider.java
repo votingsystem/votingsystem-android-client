@@ -148,7 +148,7 @@ public class MessageContentProvider extends ContentProvider {
 
     public static Uri insert(ContentResolver contentResolver, SocketMessageDto socketMsg)
             throws IOException {
-        String decryptedMsg = JSON.writeValueAsString(socketMsg.getContent());
+        String decryptedMsg = JSON.writeValueAsString(socketMsg);
         Uri result = contentResolver.insert(CONTENT_URI, getContentValues(socketMsg.getOperation(),
                 decryptedMsg, State.NOT_READED));
         ResponseVS responseVS = new ResponseVS().setTypeVS(TypeVS.MESSAGEVS)

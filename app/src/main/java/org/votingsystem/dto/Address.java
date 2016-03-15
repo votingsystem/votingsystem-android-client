@@ -12,7 +12,7 @@ import java.util.Date;
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AddressVS implements Serializable {
+public class Address implements Serializable {
 
     public enum Type {CERTIFICATION_OFFICE}
 
@@ -100,7 +100,7 @@ public class AddressVS implements Serializable {
         this.country = country;
     }
 
-    public void checkAddress(AddressVS address) throws ExceptionVS {
+    public void checkAddress(Address address) throws ExceptionVS {
         if(address.getName() != null) if(!address.getName().equals(name)) throw new ExceptionVS(
                 "expected name " + address.getName() + " found " + name);
         if(address.getPostalCode() != null) if(!address.getPostalCode().equals(postalCode))

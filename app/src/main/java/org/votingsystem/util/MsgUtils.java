@@ -112,7 +112,7 @@ public class MsgUtils {
         return context.getString(R.string.transaction_request_confirm_msg,
                 transactionDto.getDescription(context),
                 transactionDto.getAmount().toString() + " " + transactionDto.getCurrencyCode(),
-                transactionDto.getToUser());
+                transactionDto.getToUserName());
     }
 
 

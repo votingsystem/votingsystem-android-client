@@ -16,7 +16,6 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
-import org.votingsystem.util.crypto.AESParams;
 import org.votingsystem.util.crypto.Encryptor;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +42,14 @@ public class SocketMessageDto implements Serializable {
 
     public static final String TAG = SocketMessageDto.class.getSimpleName();
 
+    public String getPemPublicKey() {
+        return pemPublicKey;
+    }
+
+    public void setPemPublicKey(String pemPublicKey) {
+        this.pemPublicKey = pemPublicKey;
+    }
+
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
 
     private TypeVS operation;
@@ -62,25 +68,23 @@ public class SocketMessageDto implements Serializable {
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
     private String remoteAddress;
     private String cmsMessagePEM;
-    private String aesParams;
+    private String pemCert;
+    private String pemPublicKey;
     private String from;
     private String caption;
     private String deviceId;
-    private boolean timeLimited = false;
+    private boolean timeLimited;
     private String deviceFromName;
     private String deviceToName;
     private String toUser;
     private String URL;
-    private DeviceVSDto connectedDevice;
+    private DeviceDto connectedDevice;
     private List<CurrencyDto> currencyList;
     private Date date;
 
-    private SocketMessageContentDto content;
 
-
-    @JsonIgnore private UserVSDto userVS;
+    @JsonIgnore private UserDto user;
     @JsonIgnore private Set<Currency> currencySet;
-    @JsonIgnore private transient AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
     @JsonIgnore private transient CMSSignedMessage cms;
@@ -101,14 +105,13 @@ public class SocketMessageDto implements Serializable {
         messageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         messageDto.setSessionId(sessionId);
-        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
-        messageContentDto.setStatusCode(statusCode);
-        messageContentDto.setOperation(operation);
-        messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
-        messageContentDto.setMessage(message);
-        if(cmsMessage != null) messageContentDto.setCMSMessage(cmsMessage.toPEMStr());
-        messageDto.setEncryptedMessage(Encryptor.encryptAES(
-                JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
+        SocketMessageEncryptedDto encryptedDto = new SocketMessageEncryptedDto();
+        encryptedDto.setStatusCode(statusCode);
+        encryptedDto.setOperation(operation);
+        encryptedDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+        encryptedDto.setMessage(message);
+        if(cmsMessage != null) encryptedDto.setCMSMessage(cmsMessage.toPEMStr());
+        setEncryptedMessage(messageDto, encryptedDto, socketSession.getDevice());
         messageDto.setUUID(UUID);
         return messageDto;
     }
@@ -180,11 +183,11 @@ public class SocketMessageDto implements Serializable {
         this.caption = caption;
     }
 
-    public DeviceVSDto getConnectedDevice() {
+    public DeviceDto getConnectedDevice() {
         return connectedDevice;
     }
 
-    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+    public void setConnectedDevice(DeviceDto connectedDevice) {
         this.connectedDevice = connectedDevice;
     }
 
@@ -312,14 +315,6 @@ public class SocketMessageDto implements Serializable {
         this.state = state;
     }
 
-    public SocketMessageContentDto getContent() {
-        return content;
-    }
-
-    public void setContent(SocketMessageContentDto content) {
-        this.content = content;
-    }
-
     public String getFrom() {
         return from;
     }
@@ -360,12 +355,12 @@ public class SocketMessageDto implements Serializable {
         this.URL = URL;
     }
 
-    public UserVSDto getUserVS() {
-        return userVS;
+    public UserDto getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVSDto userVS) {
-        this.userVS = userVS;
+    public void setUser(UserDto user) {
+        this.user = user;
     }
 
     public Set<Currency> getCurrencySet() throws Exception {
@@ -375,14 +370,6 @@ public class SocketMessageDto implements Serializable {
 
     public void setCurrencySet(Set<Currency> currencySet) {
         this.currencySet = currencySet;
-    }
-
-    public String getAesParams() {
-        return aesParams;
-    }
-
-    public void setAesParams(String aesParams) {
-        this.aesParams = aesParams;
     }
 
     public Date getDate() {
@@ -409,8 +396,16 @@ public class SocketMessageDto implements Serializable {
         return encryptedMessage;
     }
 
-    public void setEncryptedMessage(String encryptedMessage) {
-        this.encryptedMessage = encryptedMessage;
+    public void setEncryptedMessage(String encryptedCMSPEM) {
+        this.encryptedMessage = encryptedCMSPEM;
+    }
+
+    public String getPemCert() {
+        return pemCert;
+    }
+
+    public void setPemCert(String pemCert) {
+        this.pemCert = pemCert;
     }
 
     public String getDeviceToName() {
@@ -421,39 +416,25 @@ public class SocketMessageDto implements Serializable {
         this.deviceToName = deviceToName;
     }
 
-    @JsonIgnore
-    public AESParams getAesEncryptParams() {
-        return aesEncryptParams;
-    }
-
-    public void setAesEncryptParams(AESParams aesEncryptParams) {
-        this.aesEncryptParams = aesEncryptParams;
-    }
-
-    public static SocketMessageDto getSignRequest(DeviceVSDto deviceVS, String toUser,
-                  String textToSign, String subject) throws Exception {
-        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS_SIGN);
+    public static SocketMessageDto getSignRequest(DeviceDto device, String toUser,
+                              String textToSign, String subject) throws Exception {
+        WebSocketSession socketSession = checkWebSocketSession(device, null, TypeVS.MESSAGEVS_SIGN);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setDeviceToId(deviceVS.getId());
-        socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
+        socketMessageDto.setDeviceToId(device.getId());
+        socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(
+        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto.getSignRequest(
                 toUser, textToSign, subject);
-        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                aesParams.getBytes(), deviceVS.getX509Cert().getPublicKey());
-        socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
-                socketSession.getAESParams()));
+        setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
     }
 
     public static SocketMessageDto getQRInfoRequestByTargetDeviceId(
-            DeviceVSDto deviceVS, QRMessageDto qrMessageDto) throws Exception {
+            DeviceDto device, QRMessageDto qrMessageDto) throws Exception {
         qrMessageDto.createRequest();
-        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.QR_MESSAGE_INFO);
+        WebSocketSession socketSession = checkWebSocketSession(device, null, TypeVS.QR_MESSAGE_INFO);
         socketSession.setData(qrMessageDto);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
@@ -461,30 +442,31 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setMessage(qrMessageDto.getOperationId());
         socketMessageDto.setMessageType(qrMessageDto.getOperation());
-        socketMessageDto.setDeviceToId(deviceVS.getId());
-        socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
+        socketMessageDto.setDeviceToId(device.getId());
+        socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getQRInfoRequest(
+        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto.getQRInfoRequest(
                 qrMessageDto);
-        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        if(deviceVS.getX509Cert() != null) {
-            byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                    aesParams.getBytes(), deviceVS.getX509Cert());
-            socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
-            socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
-                    socketSession.getAESParams()));
-        } else if(deviceVS.getPublicKey() != null) {
-            String base64EncryptedAESData = Encryptor.encryptRSA(aesParams, deviceVS.getPublicKey());
-            socketMessageDto.setAesParams(base64EncryptedAESData);
-            socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.writeValueAsString(messageContentDto),
-                    socketSession.getAESParams()));
-        } else LOGD(TAG, "target device without x509 cert");
+        setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
     }
 
+    private static void setEncryptedMessage(SocketMessageDto socketMessageDto,
+                        SocketMessageEncryptedDto encryptedDto, DeviceDto device) throws Exception {
+        if(device.getX509Certificate() != null) {
+            byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(
+                    JSON.writeValueAsBytes(encryptedDto), device.getX509Certificate());
+            socketMessageDto.setEncryptedMessage(new String(encryptedCMS_PEM));
+        } else if(device.getPublicKey() != null) {
+            byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(
+                    JSON.writeValueAsBytes(encryptedDto), device.getPublicKey());
+            socketMessageDto.setEncryptedMessage(new String(encryptedCMS_PEM));
+        } else LOGD(TAG, "target device without public key data");
+    }
+
     public static SocketMessageDto getPlainQRInfoRequestByTargetSessionId(String sessionId) throws Exception {
-        DeviceVSDto deviceVSDto = new DeviceVSDto().setSessionId(sessionId);
-        WebSocketSession socketSession = checkWebSocketSession(deviceVSDto, null, TypeVS.QR_MESSAGE_INFO);
+        DeviceDto deviceDto = new DeviceDto().setSessionId(sessionId);
+        WebSocketSession socketSession = checkWebSocketSession(deviceDto, null, TypeVS.QR_MESSAGE_INFO);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
@@ -493,26 +475,19 @@ public class SocketMessageDto implements Serializable {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getCurrencyWalletChangeRequest(DeviceVSDto deviceVS,
+    public static SocketMessageDto getCurrencyWalletChangeRequest(DeviceDto device,
                               List<Currency> currencyList) throws Exception {
-        WebSocketSession socketSession = checkWebSocketSession(deviceVS, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
+        WebSocketSession socketSession = checkWebSocketSession(device, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
-        socketMessageDto.setDeviceToId(deviceVS.getId());
-        socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto
+        socketMessageDto.setDeviceToId(device.getId());
+        socketMessageDto.setDeviceToName(device.getDeviceName());
+        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto
                 .getCurrencyWalletChangeRequest(currencyList);
-
-        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
-                deviceVS.getX509Cert());
-        socketMessageDto.setAesParams(new String(encryptedAESDataRequestBytes));
-
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON
-                .writeValueAsString(messageContentDto), socketSession.getAESParams()));
+        setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
     }
 
@@ -523,69 +498,58 @@ public class SocketMessageDto implements Serializable {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getMessageVSToDevice(DeviceVSDto deviceVS, String toUser,
-                    String textToEncrypt, String broadCastId) throws Exception {
-        UserVSDto userVS = AppVS.getInstance().getUserVS();
-        WebSocketSession socketSession = checkWebSocketSession(deviceVS, null,
+    public static SocketMessageDto getMessageVSToDevice(DeviceDto device, String toUser,
+                                        String textToEncrypt, String broadCastId) throws Exception {
+        UserDto user = AppVS.getInstance().getUser();
+        WebSocketSession socketSession = checkWebSocketSession(device, null,
                 TypeVS.MESSAGEVS);
         socketSession.setBroadCastId(broadCastId);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setDeviceToId(deviceVS.getId());
-        socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
+        socketMessageDto.setDeviceToId(device.getId());
+        socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(
-                userVS, toUser, textToEncrypt);
-        String aesParams = JSON.writeValueAsString(socketSession.getAESParams().getDto());
-        byte[] encryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(),
-                deviceVS.getX509Cert());
-        socketMessageDto.setAesParams(new String(encryptedAESDataRequestBytes));
-        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
-                JSON.writeValueAsString(messageContentDto), socketSession.getAESParams()));
+        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto.getMessageVSToDevice(
+                user, toUser, textToEncrypt);
+        setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
     }
 
-    public void decryptMessage(PrivateKey privateKey) throws Exception {
-        byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
-        AESParamsDto aesDto = JSON.readValue(new String(decryptedBytes), AESParamsDto.class);
-        this.aesEncryptParams = AESParams.fromDto(aesDto);
-        decryptMessage(this.aesEncryptParams);
-    }
-
-
-    public void decryptMessage(AESParams aesParams) throws Exception {
-        this.aesEncryptParams = aesParams;
-        content = JSON.readValue(Encryptor.decryptAES(encryptedMessage, aesParams),
-                SocketMessageContentDto.class);
-        if(content.getOperation() != null) {
+    public void decryptMessage() throws Exception {
+        byte[] decryptedBytes = AppVS.getInstance().decryptMessage(encryptedMessage.getBytes());
+        SocketMessageEncryptedDto encryptedDto =
+                JSON.readValue(decryptedBytes, SocketMessageEncryptedDto.class);
+        if(encryptedDto.getOperation() != null) {
             this.messageType = operation;
-            operation = content.getOperation();
+            operation = encryptedDto.getOperation();
         }
-        if(content.getStatusCode() != null) statusCode = content.getStatusCode();
-        if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
-        if(content.getFrom() != null) from = content.getFrom();
-        if(content.getDeviceFromId() != null) deviceFromId = content.getDeviceFromId();
-        if(content.getCMSMessage() != null) cms = content.getCMS();
-        if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
-                content.getCurrencyList());
-        if(content.getSubject() != null) subject = content.getSubject();
-        if(content.getMessage() != null) message = content.getMessage();
-        if(content.getToUser() != null) toUser = content.getToUser();
-        if(content.getDeviceToName() != null) deviceToName = content.getDeviceToName();
-        if(content.getURL()!= null) URL = content.getURL();
-        if(content.getTextToSign() != null) textToSign = content.getTextToSign();
-        if(content.getLocale() != null) locale = content.getLocale();
+        if(encryptedDto.getStatusCode() != null) statusCode = encryptedDto.getStatusCode();
+        if(encryptedDto.getDeviceFromName() != null) deviceFromName = encryptedDto.getDeviceFromName();
+        if(encryptedDto.getFrom() != null) from = encryptedDto.getFrom();
+        if(encryptedDto.getDeviceFromId() != null) deviceFromId = encryptedDto.getDeviceFromId();
+        if(encryptedDto.getCMSMessage() != null) cms = encryptedDto.getCMS();
+        if(encryptedDto.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
+                encryptedDto.getCurrencyList());
+        if(encryptedDto.getSubject() != null) subject = encryptedDto.getSubject();
+        if(encryptedDto.getMessage() != null) message = encryptedDto.getMessage();
+        if(encryptedDto.getToUser() != null) toUser = encryptedDto.getToUser();
+        if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
+        if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
+        if(encryptedDto.getTextToSign() != null) textToSign = encryptedDto.getTextToSign();
+        if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
+        if(encryptedDto.getPemCert() != null) pemCert = encryptedDto.getPemCert();
+        if(encryptedDto.getPemPublicKey() != null) pemPublicKey = encryptedDto.getPemPublicKey();
+        timeLimited = encryptedDto.isTimeLimited();
         this.encryptedMessage = null;
     }
 
-    private static <T> WebSocketSession checkWebSocketSession (DeviceVSDto deviceVS, T data, TypeVS typeVS)
+    private static <T> WebSocketSession checkWebSocketSession (DeviceDto device, T data, TypeVS typeVS)
             throws NoSuchAlgorithmException {
         WebSocketSession webSocketSession = null;
-        if(deviceVS != null) webSocketSession = AppVS.getInstance().getWSSession(deviceVS.getId());
-        if(webSocketSession == null && deviceVS != null) {
-            AESParams aesParams = new AESParams();
-            webSocketSession = new WebSocketSession(aesParams, deviceVS).setUUID(
+        if(device != null) webSocketSession = AppVS.getInstance().getWSSession(device.getId());
+        if(webSocketSession == null && device != null) {
+            webSocketSession = new WebSocketSession(device).setUUID(
                     java.util.UUID.randomUUID().toString());
         }
         AppVS.getInstance().putWSSession(webSocketSession.getUUID(), webSocketSession);
