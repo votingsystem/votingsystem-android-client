@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.Operation;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -44,7 +44,7 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_PAUSED                   = 10;
 
     private int statusCode;
-    private OperationVS operation;
+    private Operation operation;
     private String caption;
     private String notificationMessage;
     private String message;
@@ -71,7 +71,7 @@ public class ResponseVS<T> implements Parcelable {
         String operationStr = source.readString();
         if(operationStr != null) {
             try {
-                operation = JSON.readValue(operationStr, OperationVS.class);
+                operation = JSON.readValue(operationStr, Operation.class);
             } catch (Exception ex) { ex.printStackTrace();}
         }
         typeVS = (TypeVS) source.readSerializable();
@@ -362,11 +362,11 @@ public class ResponseVS<T> implements Parcelable {
         return this;
     }
 
-    public OperationVS getOperation() {
+    public Operation getOperation() {
         return operation;
     }
 
-    public void setOperation(OperationVS operation) {
+    public void setOperation(Operation operation) {
         this.operation = operation;
     }
 

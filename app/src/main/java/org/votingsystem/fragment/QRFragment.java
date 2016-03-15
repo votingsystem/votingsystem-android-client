@@ -20,7 +20,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -45,7 +45,7 @@ public class  QRFragment extends Fragment {
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
             if(socketMsg != null) {
                 switch (socketMsg.getOperation()) {
-                    case TRANSACTIONVS_RESPONSE:
+                    case TRANSACTION_RESPONSE:
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
                             DialogButton dialogButton = new DialogButton(getString(R.string.accept_lbl),
                                     new DialogInterface.OnClickListener() {
@@ -69,10 +69,10 @@ public class  QRFragment extends Fragment {
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.qr_fragment, container, false);
         Intent intent = getActivity().getIntent();
-        TransactionVSDto dto = (TransactionVSDto) intent.getSerializableExtra(
+        TransactionDto dto = (TransactionDto) intent.getSerializableExtra(
                 ContextVS.TRANSACTION_KEY);
         QRMessageDto qrDto = new QRMessageDto(AppVS.getInstance().getConnectedDevice(),
-                TypeVS.TRANSACTIONVS_INFO);
+                TypeVS.TRANSACTION_INFO);
         qrDto.setData(dto);
         Bitmap bitmap = null;
         try {
@@ -86,7 +86,7 @@ public class  QRFragment extends Fragment {
         AppVS.getInstance().putQRMessage(qrDto);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_code_lbl));
         ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(
-                getString(R.string.qr_transactionvs_request_msg, dto.getAmount() + " " + dto.getCurrencyCode(),
+                getString(R.string.qr_transaction_request_msg, dto.getAmount() + " " + dto.getCurrencyCode(),
                 MsgUtils.getTagVSMessage(dto.getTagName())));
         if(!AppVS.getInstance().isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(

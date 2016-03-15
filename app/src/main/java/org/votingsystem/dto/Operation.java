@@ -14,9 +14,9 @@ import java.io.Serializable;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class OperationVS implements Serializable {
+public class Operation implements Serializable {
 
-	public static final String TAG = OperationVS.class.getSimpleName();
+	public static final String TAG = Operation.class.getSimpleName();
 
     private static final long serialVersionUID = 1L;
     
@@ -40,28 +40,28 @@ public class OperationVS implements Serializable {
     @JsonProperty("objectId") private String callerCallback;
 
 
-    public OperationVS() {}
+    public Operation() {}
 
-    public OperationVS(int statusCode) {
+    public Operation(int statusCode) {
         this.statusCode = statusCode;
     }
     
-    public OperationVS(TypeVS typeVS) {
+    public Operation(TypeVS typeVS) {
         this.operation = typeVS;
     }
 
-    public OperationVS(TypeVS operation, Uri uriData) {
+    public Operation(TypeVS operation, Uri uriData) {
         this.operation = operation;
         this.uriData = uriData;
     }
 
     
-    public OperationVS(int statusCode, String message) {
+    public Operation(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
     
-    public OperationVS(int statusCode, String message, TypeVS operation) {
+    public Operation(int statusCode, String message, TypeVS operation) {
         this.statusCode = statusCode;
         this.message = message;
         this.operation = operation;
@@ -71,7 +71,7 @@ public class OperationVS implements Serializable {
         return UUID;
     }
 
-    public OperationVS setUUID(String UUID) {
+    public Operation setUUID(String UUID) {
         this.UUID = UUID;
         return this;
     }

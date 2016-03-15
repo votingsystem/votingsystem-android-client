@@ -136,8 +136,8 @@ public class ContactFragment extends Fragment {
                 return true;
             case R.id.send_money:
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionVSFormFragment.class.getName());
-                intent.putExtra(ContextVS.TYPEVS_KEY, TransactionVSFormFragment.Type.TRANSACTIONVS_FORM);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionFormFragment.class.getName());
+                intent.putExtra(ContextVS.TYPEVS_KEY, TransactionFormFragment.Type.TRANSACTION_FORM);
                 intent.putExtra(ContextVS.USER_KEY, user);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);

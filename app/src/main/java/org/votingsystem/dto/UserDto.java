@@ -48,7 +48,7 @@ public class UserDto implements Serializable {
     private String description;
     private Set<DeviceDto> connectedDevices;
     private DeviceDto device;
-    private Set<CertificateVSDto> certCollection = new HashSet<>();
+    private Set<CertificateDto> certCollection = new HashSet<>();
     private String firstName;
     private String lastName;
     private String phone;
@@ -271,11 +271,11 @@ public class UserDto implements Serializable {
         this.lastName = lastName;
     }
 
-    public Set<CertificateVSDto> getCertCollection() {
+    public Set<CertificateDto> getCertCollection() {
         return certCollection;
     }
 
-    public void setCertCollection(Collection<CertificateVSDto> certCollection) {
+    public void setCertCollection(Collection<CertificateDto> certCollection) {
         if(certCollection == null) this.certCollection = null;
         else this.certCollection = new HashSet<>(certCollection);
     }

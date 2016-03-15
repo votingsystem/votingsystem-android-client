@@ -22,8 +22,8 @@ public class IncomesDto {
         if(this.timeLimited == null) this.timeLimited = BigDecimal.ZERO;
     }
 
-    public IncomesDto(TransactionVSDto transactionVS) {
-        add(transactionVS);
+    public IncomesDto(TransactionDto transaction) {
+        add(transaction);
     }
 
     public BigDecimal getTotal() {
@@ -51,9 +51,9 @@ public class IncomesDto {
         else timeLimited = timeLimited.add(sum);
     }
 
-    public IncomesDto add(TransactionVSDto transactionVS) {
-        if(transactionVS.isTimeLimited()) timeLimited = timeLimited.add(transactionVS.getAmount());
-        total = total.add(transactionVS.getAmount());
+    public IncomesDto add(TransactionDto transaction) {
+        if(transaction.isTimeLimited()) timeLimited = timeLimited.add(transaction.getAmount());
+        total = total.add(transaction.getAmount());
         return this;
     }
 

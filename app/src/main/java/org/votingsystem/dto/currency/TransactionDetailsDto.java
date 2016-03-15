@@ -12,7 +12,7 @@ import java.util.Date;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TransactionVSDetailsDto {
+public class TransactionDetailsDto {
 
     private Integer numItems;
     private BigDecimal itemPrice;
@@ -20,7 +20,7 @@ public class TransactionVSDetailsDto {
     private Date dateDelivery;
     private Address deliveryAddress;
 
-    public boolean equals(TransactionVSDetailsDto details) {
+    public boolean equals(TransactionDetailsDto details) {
         if(numItems.intValue() != details.numItems) return false;
         if(itemPrice.compareTo(details.getItemPrice()) != 0) return false;
         if(discount.compareTo(details.getDiscount()) != 0) return false;

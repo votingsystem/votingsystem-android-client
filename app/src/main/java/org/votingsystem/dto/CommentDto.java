@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class CommentVSDto implements Comparable, Serializable {
+public class CommentDto implements Comparable, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class CommentVSDto implements Comparable, Serializable {
     }
 
     @Override public int compareTo(Object comment) {
-        return dateCreated.compareTo(((CommentVSDto)comment).dateCreated);
+        return dateCreated.compareTo(((CommentDto)comment).dateCreated);
     }
 
 }

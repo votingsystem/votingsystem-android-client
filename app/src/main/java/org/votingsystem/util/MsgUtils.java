@@ -9,7 +9,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.Currency;
@@ -102,13 +102,13 @@ public class MsgUtils {
         }
     }
 
-    public static String getCurrencyRequestMessage(TransactionVSDto transactionDto, Context context) {
+    public static String getCurrencyRequestMessage(TransactionDto transactionDto, Context context) {
         String tagMessage = getTagVSMessage(transactionDto.getTagVS().getName());
         return context.getString(R.string.currency_request_msg, transactionDto.getAmount().toPlainString(),
                 transactionDto.getCurrencyCode(), tagMessage);
     }
 
-    public static String getTransactionVSConfirmMessage(TransactionVSDto transactionDto, Context context) {
+    public static String getTransactionConfirmMessage(TransactionDto transactionDto, Context context) {
         return context.getString(R.string.transaction_request_confirm_msg,
                 transactionDto.getDescription(context),
                 transactionDto.getAmount().toString() + " " + transactionDto.getCurrencyCode(),

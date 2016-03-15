@@ -2,7 +2,7 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.dto.CommentVSDto;
+import org.votingsystem.dto.CommentDto;
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
@@ -43,7 +43,7 @@ public class EventVSDto implements Serializable {
 
     private Set<FieldEventDto> fieldEventSet = new HashSet<FieldEventDto>();
     private Set<EventVSTagVS> eventVSTagVSSet = new HashSet<EventVSTagVS>();
-    private Set<CommentVSDto> commentVSDtoSet = new HashSet<CommentVSDto>();
+    private Set<CommentDto> commentDtoSet = new HashSet<CommentDto>();
 
     private Date dateBegin;
     private Date dateFinish;
@@ -155,12 +155,12 @@ public class EventVSDto implements Serializable {
         this.tags = arrayTags.toArray(tags);
     }
 
-    public void setCommentVSes(Set<CommentVSDto> commentVSDtoSet) {
-        this.commentVSDtoSet = commentVSDtoSet;
+    public void setCommentVSes(Set<CommentDto> commentDtoSet) {
+        this.commentDtoSet = commentDtoSet;
     }
 
-    public Set<CommentVSDto> getCommentVSes() {
-        return commentVSDtoSet;
+    public Set<CommentDto> getCommentVSes() {
+        return commentDtoSet;
     }
 
     public void setNumComments(int numComments) {

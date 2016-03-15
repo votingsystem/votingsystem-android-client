@@ -16,7 +16,7 @@ import android.text.TextUtils;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
@@ -30,15 +30,15 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TransactionVSContentProvider extends ContentProvider {
+public class TransactionContentProvider extends ContentProvider {
 
-    public static final String TAG = TransactionVSContentProvider.class.getSimpleName();
+    public static final String TAG = TransactionContentProvider.class.getSimpleName();
 
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DB_NAME       = "voting_system_transactionVS.db";
-    private static final String TABLE_NAME    = "transactionVS";
-    public static final String AUTHORITY      = "votingsystem.org.transactionVS";
+    private static final String DB_NAME       = "voting_system_transaction.db";
+    private static final String TABLE_NAME    = "transactionvs";
+    public static final String AUTHORITY      = "votingsystem.org.transaction";
 
     public static final String ID_COL                    = "_id";
     public static final String URL_COL                   = "url";
@@ -60,7 +60,7 @@ public class TransactionVSContentProvider extends ContentProvider {
     private static final int ALL_ITEMS     = 1;
     private static final int SPECIFIC_ITEM = 2;
 
-    private static final String BASE_PATH = "transactionVS";
+    private static final String BASE_PATH = "transaction";
 
 
     private static final UriMatcher URI_MATCHER;
@@ -70,11 +70,11 @@ public class TransactionVSContentProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, BASE_PATH + "/#", SPECIFIC_ITEM);
     }
 
-    // Here's the public URI used to query for transactionVS items.
+    // Here's the public URI used to query for transaction items.
     public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH);
 
-    public static Uri getTransactionVSURI(Long transactionVSId) {
-        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + transactionVSId);
+    public static Uri getTransactionURI(Long transactionId) {
+        return Uri.parse( "content://" + AUTHORITY + "/" + BASE_PATH + "/" + transactionId);
     }
 
     @Override public boolean onCreate() {
@@ -93,9 +93,9 @@ public class TransactionVSContentProvider extends ContentProvider {
     @Override public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
-                return "vnd.android.cursor.dir/transactionVS"; // List of items.
+                return "vnd.android.cursor.dir/transaction"; // List of items.
             case SPECIFIC_ITEM:
-                return "vnd.android.cursor.item/transactionVS"; // Specific item.
+                return "vnd.android.cursor.item/transaction"; // Specific item.
             default:
                 return null;
         }
@@ -220,21 +220,21 @@ public class TransactionVSContentProvider extends ContentProvider {
     public static List<String> getTransactionWeekList(AppVS appVS) {
         List<String> result = new ArrayList<String>();
         Cursor cursor = appVS.getContentResolver().query(
-                TransactionVSContentProvider.CONTENT_URI, null, null, null, null);
+                TransactionContentProvider.CONTENT_URI, null, null, null, null);
         if(cursor.getCount() == 0) return result;
         cursor.moveToFirst(); //ORDER -> ID_COL DESC
         int lastId =  cursor.getInt(
-                cursor.getColumnIndex(TransactionVSContentProvider.ID_COL));
+                cursor.getColumnIndex(TransactionContentProvider.ID_COL));
         Calendar lastTransactionCalendar = Calendar.getInstance();
         Long lastTransactionMillis = cursor.getLong(
-                cursor.getColumnIndex(TransactionVSContentProvider.TIMESTAMP_CREATED_COL));
+                cursor.getColumnIndex(TransactionContentProvider.TIMESTAMP_CREATED_COL));
         lastTransactionCalendar.setTimeInMillis(lastTransactionMillis);
 
         cursor.moveToLast();
         int firstId =  cursor.getInt(
-                cursor.getColumnIndex(TransactionVSContentProvider.ID_COL));
+                cursor.getColumnIndex(TransactionContentProvider.ID_COL));
         Long firstTransactionMillis = cursor.getLong(
-                cursor.getColumnIndex(TransactionVSContentProvider.TIMESTAMP_CREATED_COL));
+                cursor.getColumnIndex(TransactionContentProvider.TIMESTAMP_CREATED_COL));
         Calendar firstTransactionCalendar = Calendar.getInstance();
         firstTransactionCalendar.setTimeInMillis(firstTransactionMillis);
 
@@ -255,47 +255,47 @@ public class TransactionVSContentProvider extends ContentProvider {
     }
 
 
-    public static void updateUserTransactionVSList(Context context, BalancesDto userInfo) {
+    public static void updateUserTransactionList(Context context, BalancesDto userInfo) {
 
-        for(TransactionVSDto transactionVS : userInfo.getTransactionList()) {
-            addTransaction(context, transactionVS,
+        for(TransactionDto transaction : userInfo.getTransactionList()) {
+            addTransaction(context, transaction,
                     DateUtils.getPath(userInfo.getTimePeriod().getDateFrom()));
         }
     }
 
-    public static Uri addTransaction(Context context, TransactionVSDto transactionVS,
+    public static Uri addTransaction(Context context, TransactionDto transaction,
               String weekLapse) {
-        ContentValues values = getContentValues(transactionVS);
-        values.put(TransactionVSContentProvider.WEEK_LAPSE_COL, weekLapse);
-        Uri uri = context.getContentResolver().insert(TransactionVSContentProvider.CONTENT_URI, values);
+        ContentValues values = getContentValues(transaction);
+        values.put(TransactionContentProvider.WEEK_LAPSE_COL, weekLapse);
+        Uri uri = context.getContentResolver().insert(TransactionContentProvider.CONTENT_URI, values);
         LOGD(TAG + ".addTransaction() ", "added uri: " + uri.toString());
         return uri;
     }
 
-    public static int updateTransaction(Context context, TransactionVSDto transactionVS) {
-        ContentValues values = getContentValues(transactionVS);
-        return context.getContentResolver().update(TransactionVSContentProvider.
-                getTransactionVSURI(transactionVS.getLocalId()), values, null, null);
+    public static int updateTransaction(Context context, TransactionDto transaction) {
+        ContentValues values = getContentValues(transaction);
+        return context.getContentResolver().update(TransactionContentProvider.
+                getTransactionURI(transaction.getLocalId()), values, null, null);
     }
 
-    public static ContentValues getContentValues(TransactionVSDto transactionVS) {
+    public static ContentValues getContentValues(TransactionDto transaction) {
         ContentValues values = new ContentValues();
-        values.put(TransactionVSContentProvider.ID_COL, transactionVS.getId());
-        values.put(TransactionVSContentProvider.URL_COL, transactionVS.getCmsMessageURL());
-        if(transactionVS.getFromUser() != null) values.put(
-                TransactionVSContentProvider.FROM_USER_COL, transactionVS.getFromUser().getNIF());
-        if(transactionVS.getToUser() != null) values.put(
-                TransactionVSContentProvider.TO_USER_COL, transactionVS.getToUser().getNIF());
-        values.put(TransactionVSContentProvider.SUBJECT_COL, transactionVS.getSubject());
-        values.put(TransactionVSContentProvider.AMOUNT_COL, transactionVS.getAmount().toPlainString());
-        values.put(TransactionVSContentProvider.CURRENCY_COL, transactionVS.getCurrencyCode());
-        values.put(TransactionVSContentProvider.TYPE_COL, transactionVS.getType().toString());
+        values.put(TransactionContentProvider.ID_COL, transaction.getId());
+        values.put(TransactionContentProvider.URL_COL, transaction.getCmsMessageURL());
+        if(transaction.getFromUser() != null) values.put(
+                TransactionContentProvider.FROM_USER_COL, transaction.getFromUser().getNIF());
+        if(transaction.getToUser() != null) values.put(
+                TransactionContentProvider.TO_USER_COL, transaction.getToUser().getNIF());
+        values.put(TransactionContentProvider.SUBJECT_COL, transaction.getSubject());
+        values.put(TransactionContentProvider.AMOUNT_COL, transaction.getAmount().toPlainString());
+        values.put(TransactionContentProvider.CURRENCY_COL, transaction.getCurrencyCode());
+        values.put(TransactionContentProvider.TYPE_COL, transaction.getType().toString());
         try {
-            byte[] jsonBytes = JSON.writeValueAsBytes(transactionVS);
-            values.put(TransactionVSContentProvider.JSON_COL, jsonBytes);
+            byte[] jsonBytes = JSON.writeValueAsBytes(transaction);
+            values.put(TransactionContentProvider.JSON_COL, jsonBytes);
         } catch (Exception ex) { ex.printStackTrace(); }
-        values.put(TransactionVSContentProvider.TIMESTAMP_TRANSACTION_COL,
-                transactionVS.getDateCreated().getTime());
+        values.put(TransactionContentProvider.TIMESTAMP_TRANSACTION_COL,
+                transaction.getDateCreated().getTime());
         return values;
     }
 }

@@ -29,9 +29,9 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
-import org.votingsystem.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteDto;
@@ -65,7 +65,7 @@ public class ReceiptFragment extends Fragment {
 
     private AppVS appVS;
     private ReceiptWrapper receiptWrapper;
-    private TransactionVSDto transactionDto;
+    private TransactionDto transactionDto;
     private TextView receiptSubject;
     private WebView receipt_content;
     private CMSSignedMessage receiptWrapperCMS;
@@ -145,7 +145,7 @@ public class ReceiptFragment extends Fragment {
         TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         receiptURL = getArguments().getString(ContextVS.URL_KEY);
         receiptWrapper = (ReceiptWrapper) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
-        transactionDto = (TransactionVSDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+        transactionDto = (TransactionDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
         if(transactionDto != null) receiptWrapper = new ReceiptWrapper(transactionDto);
         if(receiptWrapper != null) {
             if(receiptWrapper.hashReceipt()) initReceiptScreen(receiptWrapper);
@@ -248,9 +248,9 @@ public class ReceiptFragment extends Fragment {
                     receiptSubjectStr = getString(R.string.access_request_lbl);
                     break;
                 case FROM_GROUP_TO_ALL_MEMBERS:
-                    TransactionVSDto transactionVSDto = receiptWrapperCMS.getSignedContent(
-                            TransactionVSDto.class);
-                    contentFormatted = transactionVSDto.getFormatted(getActivity());
+                    TransactionDto transactionDto = receiptWrapperCMS.getSignedContent(
+                            TransactionDto.class);
+                    contentFormatted = transactionDto.getFormatted(getActivity());
                     break;
                 default:
                     contentFormatted = receiptWrapper.getReceipt().getSignedContentStr();
@@ -487,7 +487,7 @@ public class ReceiptFragment extends Fragment {
                     receiptWrapper.setReceipt(CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes()));
                     if(transactionDto != null) {
                         transactionDto.setCMSMessage(responseVS.getCMS());
-                        TransactionVSContentProvider.updateTransaction(appVS, transactionDto);
+                        TransactionContentProvider.updateTransaction(appVS, transactionDto);
                     }
                     initReceiptScreen(receiptWrapper);
                 } catch (Exception ex) {

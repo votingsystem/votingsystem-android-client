@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectTagVSDialogFragment;
@@ -62,7 +62,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
     private BigDecimal maxValue;
     private BigDecimal defaultValue;
     private String currencyCode = null;
-    private TransactionVSDto transactionDto = null;
+    private TransactionDto transactionDto = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -153,7 +153,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         } else {
             if(selectedAmount.compareTo(new BigDecimal(0)) > 0) {
                 if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
-                transactionDto = TransactionVSDto.CURRENCY_REQUEST(selectedAmount,
+                transactionDto = TransactionDto.CURRENCY_REQUEST(selectedAmount,
                         currencyCode, tagVS, time_limited_checkbox.isChecked());
                 Utils.getProtectionPassword(RC_PASSW, MsgUtils.getCurrencyRequestMessage(
                         transactionDto, CurrencyRequesActivity.this), null, this);

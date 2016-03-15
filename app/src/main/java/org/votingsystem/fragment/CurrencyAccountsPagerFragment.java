@@ -96,7 +96,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
                     selectedFragment = new CurrencyAccountsFragment();
                     break;
                 case CURRENCY_LIST:
-                    selectedFragment = new TransactionVSGridFragment();
+                    selectedFragment = new TransactionGridFragment();
                     break;
             }
             args.putString(SearchManager.QUERY, searchQuery);

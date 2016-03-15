@@ -17,7 +17,7 @@ import java.util.Date;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CertificateVSDto {
+public class CertificateDto {
 
     public enum Type {
         VOTE_ROOT, VOTE, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
@@ -42,9 +42,9 @@ public class CertificateVSDto {
     private State state;
     private boolean isRoot;
 
-    public CertificateVSDto() {}
+    public CertificateDto() {}
 
-    public CertificateVSDto(X509Certificate x509Cert) throws CertificateException, NoSuchAlgorithmException,
+    public CertificateDto(X509Certificate x509Cert) throws CertificateException, NoSuchAlgorithmException,
             NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);
@@ -96,11 +96,11 @@ public class CertificateVSDto {
         return notAfter;
     }
 
-    public org.votingsystem.dto.CertificateVSDto.Type getType() {
+    public CertificateDto.Type getType() {
         return type;
     }
 
-    public org.votingsystem.dto.CertificateVSDto.State getState() {
+    public CertificateDto.State getState() {
         return state;
     }
 

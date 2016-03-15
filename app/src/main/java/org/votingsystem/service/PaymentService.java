@@ -12,7 +12,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.OperationVSContentProvider;
-import org.votingsystem.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.BalancesDto;
@@ -23,7 +23,7 @@ import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -77,7 +77,7 @@ public class PaymentService extends IntentService {
         String serviceCaller = arguments.getString(ContextVS.CALLER_KEY);
         char[] pin = arguments.getCharArray(ContextVS.PIN_KEY);
         String hashCertVS = arguments.getString(ContextVS.HASH_CERTVS_KEY);
-        TransactionVSDto transactionDto = (TransactionVSDto) intent.getSerializableExtra(
+        TransactionDto transactionDto = (TransactionDto) intent.getSerializableExtra(
                 ContextVS.TRANSACTION_KEY);
         try {
             switch(operation) {
@@ -105,7 +105,7 @@ public class PaymentService extends IntentService {
         }
     }
 
-    private void processTransaction(String serviceCaller, TransactionVSDto transactionDto) {
+    private void processTransaction(String serviceCaller, TransactionDto transactionDto) {
         LOGD(TAG + ".processTransaction", "operation: " + transactionDto.getOperation());
         ResponseVS responseVS = null;
         if(transactionDto.getDateCreated() != null && DateUtils.inRange(transactionDto.getDateCreated(),
@@ -118,12 +118,12 @@ public class PaymentService extends IntentService {
                         Uri operationUri = getContentResolver().insert(
                                 OperationVSContentProvider.CONTENT_URI,
                                 OperationVSContentProvider.getContentValues(operationVS));
-                        responseVS = sendTransactionVS(transactionDto.getTransactionFromUser());
+                        responseVS = sendTransaction(transactionDto.getTransactionFromUser());
                         if(ResponseVS.SC_OK == responseVS.getStatusCode() &&
                                 transactionDto.getPaymentConfirmURL() != null) {
-                            ResultListDto<TransactionVSDto> resultList =
-                                    (ResultListDto<TransactionVSDto>) responseVS.getMessage(
-                                    new TypeReference<ResultListDto<TransactionVSDto>>() {});
+                            ResultListDto<TransactionDto> resultList =
+                                    (ResultListDto<TransactionDto>) responseVS.getMessage(
+                                    new TypeReference<ResultListDto<TransactionDto>>() {});
                             String base64Receipt = resultList.getResultList().iterator().next().getCmsMessagePEM();
                             CMSSignedMessage receipt = new CMSSignedMessage(Base64.decode(base64Receipt, Base64.NO_WRAP));
                             String message = transactionDto.validateReceipt(receipt, false);
@@ -132,7 +132,7 @@ public class PaymentService extends IntentService {
                                 //this is to send the signed receipts to the user that showed the QR code
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,receipt,
-                                        TypeVS.TRANSACTIONVS_RESPONSE);
+                                        TypeVS.TRANSACTION_RESPONSE);
                                 socketRespDto.setCMSMessage(base64Receipt);
                                 //backup to recover from fails
                                 transactionDto.setSocketMessageDto(socketRespDto);
@@ -164,7 +164,7 @@ public class PaymentService extends IntentService {
 
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null, responseVS.getCMS(),
-                                        TypeVS.TRANSACTIONVS_RESPONSE);
+                                        TypeVS.TRANSACTION_RESPONSE);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
@@ -203,7 +203,7 @@ public class PaymentService extends IntentService {
                                         null: transactionDto.getQrMessageDto().getCurrencyChangeCert();
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, responseMessage,
-                                        responseVS.getCMS(), TypeVS.TRANSACTIONVS_RESPONSE);
+                                        responseVS.getCMS(), TypeVS.TRANSACTION_RESPONSE);
                                 sendSocketMessage(socketRespDto);
                                 responseVS.setMessage(message);
                             } else {
@@ -241,7 +241,7 @@ public class PaymentService extends IntentService {
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
-    private ResponseVS currencyRequest(String serviceCaller, TransactionVSDto transactionDto,
+    private ResponseVS currencyRequest(String serviceCaller, TransactionDto transactionDto,
                            char[] pin){
         CurrencyServerDto currencyServer = appVS.getCurrencyServer();
         ResponseVS responseVS = null;
@@ -278,14 +278,14 @@ public class PaymentService extends IntentService {
         }
     }
 
-    private ResponseVS sendTransactionVS(TransactionVSDto transactionDto) {
-        LOGD(TAG + ".sendTransactionVS", "transactionDto: " + transactionDto.toString());
+    private ResponseVS sendTransaction(TransactionDto transactionDto) {
+        LOGD(TAG + ".sendTransaction", "transactionDto: " + transactionDto.toString());
         ResponseVS responseVS = null;
         try {
             CurrencyServerDto currencyServer = appVS.getCurrencyServer();
             CMSSignedMessage cmsMessage = appVS.signMessage(JSON.writeValueAsBytes(transactionDto));
             responseVS = HttpHelper.sendData(cmsMessage.toPEM(),
-                    ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionVSServiceURL());
+                    ContentTypeVS.JSON_SIGNED, currencyServer.getTransactionServiceURL());
         } catch(Exception ex) {
             ex.printStackTrace();
             responseVS = ResponseVS.EXCEPTION(ex, this);
@@ -294,7 +294,7 @@ public class PaymentService extends IntentService {
         }
     }
 
-    private ResponseVS sendCurrencyBatch(TransactionVSDto transactionDto) {
+    private ResponseVS sendCurrencyBatch(TransactionDto transactionDto) {
         LOGD(TAG + ".sendCurrencyBatch", "sendCurrencyBatch");
         ResponseVS responseVS = null;
         try {
@@ -357,7 +357,7 @@ public class PaymentService extends IntentService {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 BalancesDto accountsInfo = (BalancesDto) responseVS.getMessage(BalancesDto.class);
                 PrefUtils.putBalances(accountsInfo, DateUtils.getCurrentWeekPeriod());
-                TransactionVSContentProvider.updateUserTransactionVSList(appVS, accountsInfo);
+                TransactionContentProvider.updateUserTransactionList(appVS, accountsInfo);
             } else responseVS.setCaption(getString(R.string.error_lbl));
         } catch(Exception ex) {
             ex.printStackTrace();

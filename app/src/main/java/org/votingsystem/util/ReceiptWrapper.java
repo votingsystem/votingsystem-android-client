@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,9 +40,9 @@ public class ReceiptWrapper implements Serializable {
         this.url = url;
     }
 
-    public ReceiptWrapper(TransactionVSDto transactionVS) {
-        this.typeVS = transactionVS.getOperation();
-        this.url = transactionVS.getCmsMessageURL();
+    public ReceiptWrapper(TransactionDto transaction) {
+        this.typeVS = transaction.getOperation();
+        this.url = transaction.getCmsMessageURL();
     }
 
     public String getTypeDescription(Context context) {

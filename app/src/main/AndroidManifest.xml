@@ -96,7 +96,7 @@
 
         <activity android:name="org.votingsystem.activity.CMSSignerActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.TransactionVSPagerActivity" android:theme="@style/ThemeVS"/>
+        <activity android:name="org.votingsystem.activity.TransactionPagerActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
 
@@ -138,8 +138,8 @@
         <provider android:name="org.votingsystem.contentprovider.MessageContentProvider"
             android:exported="false" android:authorities="votingsystem.org.messagevs"/>
 
-        <provider android:name="org.votingsystem.contentprovider.TransactionVSContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.transactionVS"/>
+        <provider android:name="org.votingsystem.contentprovider.TransactionContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.transaction"/>
 
         <provider android:name="org.votingsystem.contentprovider.CurrencyContentProvider"
             android:exported="false" android:authorities="votingsystem.org.currency"/>

@@ -31,7 +31,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ConnectionUtils;
@@ -124,8 +124,8 @@ public class QRActionsFragment extends Fragment {
                     break;
                 case CREATE_QR:
                     Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionVSFormFragment.class.getName());
-                    intent.putExtra(ContextVS.TYPEVS_KEY, TransactionVSFormFragment.Type.QR_FORM);
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionFormFragment.class.getName());
+                    intent.putExtra(ContextVS.TYPEVS_KEY, TransactionFormFragment.Type.QR_FORM);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(intent);
                     break;
@@ -336,10 +336,10 @@ public class QRActionsFragment extends Fragment {
             setProgressDialogVisible(false, null, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    TransactionVSDto dto = (TransactionVSDto) responseVS.getMessage(TransactionVSDto.class);
+                    TransactionDto dto = (TransactionDto) responseVS.getMessage(TransactionDto.class);
                     dto.setQrMessageDto(qrMessageDto);
                     switch (dto.getOperation()) {
-                        case TRANSACTIONVS_INFO:
+                        case TRANSACTION_INFO:
                         case DELIVERY_WITHOUT_PAYMENT:
                         case DELIVERY_WITH_PAYMENT:
                         case REQUEST_FORM:

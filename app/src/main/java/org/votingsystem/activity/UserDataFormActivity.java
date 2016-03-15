@@ -116,7 +116,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                 mailText.setText(userDto.getEmail());
                 Address address = userDto.getAddress();
                 if(address != null) {
-                    this.addressText.setText(address.getName());
+                    addressText.setText(address.getName());
                     postal_code.setText(address.getPostalCode());
                     city.setText(address.getCity());
                     province.setText(address.getProvince());
@@ -173,7 +173,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                     getString(R.string.user_data_form_lbl),
                     getString(R.string.user_data_confirm_msg, canText.getText().toString(),
                             userDto.getPhone(),
-                            userDto.getEmail(), address, postalCode, city, province,
+                            userDto.getEmail(), addressStr, postalCode, city, province,
                             address.getCountry().getName()), this);
             builder.setPositiveButton(getString(R.string.continue_lbl),
                     new DialogInterface.OnClickListener() {

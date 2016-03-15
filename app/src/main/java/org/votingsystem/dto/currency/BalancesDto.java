@@ -27,8 +27,8 @@ public class BalancesDto {
 
     private UserDto user;
     private TimePeriod timePeriod;
-    private List<TransactionVSDto> transactionFromList;
-    private List<TransactionVSDto> transactionToList;
+    private List<TransactionDto> transactionFromList;
+    private List<TransactionDto> transactionToList;
     private Map<String, Map> balances;
     private Map<String, Map<String, BigDecimal>> balancesFrom = new HashMap<>();
     private Map<String, Map<String, IncomesDto>> balancesTo = new HashMap<>();
@@ -38,21 +38,21 @@ public class BalancesDto {
     public BalancesDto() {}
 
 
-    public static BalancesDto TO(List<TransactionVSDto> transactionList, Map<String, Map<String, IncomesDto>> balances) {
+    public static BalancesDto TO(List<TransactionDto> transactionList, Map<String, Map<String, IncomesDto>> balances) {
         BalancesDto dto = new BalancesDto();
         dto.setTransactionToList(transactionList);
         dto.setBalancesTo(balances);
         return dto;
     }
 
-    public static BalancesDto FROM(List<TransactionVSDto> transactionList,Map<String, Map<String, BigDecimal>> balances) {
+    public static BalancesDto FROM(List<TransactionDto> transactionList, Map<String, Map<String, BigDecimal>> balances) {
         BalancesDto dto = new BalancesDto();
         dto.setTransactionFromList(transactionList);
         dto.setBalancesFrom(balances);
         return dto;
     }
 
-    public void setTo(List<TransactionVSDto> transactionList, Map<String, Map<String, IncomesDto>> balances) {
+    public void setTo(List<TransactionDto> transactionList, Map<String, Map<String, IncomesDto>> balances) {
         setTransactionToList(transactionList);
         setBalancesTo(balances);
     }
@@ -63,7 +63,7 @@ public class BalancesDto {
     }
 
 
-    public void setFrom(List<TransactionVSDto> transactionList, Map<String, Map<String, BigDecimal>> balances) {
+    public void setFrom(List<TransactionDto> transactionList, Map<String, Map<String, BigDecimal>> balances) {
         setTransactionFromList(transactionList);
         setBalancesFrom(balances);
     }
@@ -161,8 +161,8 @@ public class BalancesDto {
         this.user = user;
     }
 
-    public List<TransactionVSDto> getTransactionList() {
-        List<TransactionVSDto> result = new ArrayList<>(transactionToList);
+    public List<TransactionDto> getTransactionList() {
+        List<TransactionDto> result = new ArrayList<>(transactionToList);
         result.addAll(transactionFromList);
         return result;
     }
@@ -175,19 +175,19 @@ public class BalancesDto {
         this.balances = balances;
     }
 
-    public List<TransactionVSDto> getTransactionFromList() {
+    public List<TransactionDto> getTransactionFromList() {
         return transactionFromList;
     }
 
-    public void setTransactionFromList(List<TransactionVSDto> transactionFromList) {
+    public void setTransactionFromList(List<TransactionDto> transactionFromList) {
         this.transactionFromList = transactionFromList;
     }
 
-    public List<TransactionVSDto> getTransactionToList() {
+    public List<TransactionDto> getTransactionToList() {
         return transactionToList;
     }
 
-    public void setTransactionToList(List<TransactionVSDto> transactionToList) {
+    public void setTransactionToList(List<TransactionDto> transactionToList) {
         this.transactionToList = transactionToList;
     }
 

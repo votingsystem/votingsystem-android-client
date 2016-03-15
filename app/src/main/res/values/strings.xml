@@ -203,7 +203,7 @@
     <string name="confirm_selection_msg">confirme la selección</string>
     <string name="representative_delegation_lbl">delegar en representante</string>
     <string name="anonymous_delegation_lbl">delegar de forma anónima</string>
-    <string name="anonymous_transactionvs_lbl">pago anónimo</string>
+    <string name="anonymous_transaction_lbl">pago anónimo</string>
     <string name="anonymous_delegation_caption">delegación anónima</string>
     <string name="public_delegation_lbl">delegar de forma pública</string>
     <string name="anonymous_delegation_time_msg">indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
@@ -241,7 +241,7 @@
     <string name="min_payment_option_msg">debe seleccionar al menos una opción de pago</string>
     <string name="currency_request_msg_subject">retirada de efectivo</string>
     <string name="currency_request_passw_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
-    <string name="transactionvs_send_passw_msg"><![CDATA[va a realizar un pago de <b>%1$s %2$s</b>. a
+    <string name="transaction_send_passw_msg"><![CDATA[va a realizar un pago de <b>%1$s %2$s</b>. a
         <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
     <string name="currency_request_ok_caption">retirada de dinero con éxito</string>
     <string name="currency_request_error_caption">error retirando dinero</string>
@@ -263,14 +263,14 @@
     <string name="currency_send_error_msg"><![CDATA[problemas realizando el pago, \'%1$s\']]></string>
     <string name="week_lapse_lbl">%1$s y %2$s</string>
     <string name="week_lbl">semana</string>
-    <string name="transactionvs_lbl">transacción</string>
+    <string name="transaction_lbl">transacción</string>
     <string name="transactionsvs_lbl">transacciones</string>
-    <string name="transactionvs_formatted"><![CDATA[fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$s]]></string>
-    <string name="transactionvs_from_user_lbl"><![CDATA[usuario <b>emisor</b>:<br/><b>nif:</b> %1$s<br/>
+    <string name="transaction_formatted"><![CDATA[fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$s]]></string>
+    <string name="transaction_from_user_lbl"><![CDATA[usuario <b>emisor</b>:<br/><b>nif:</b> %1$s<br/>
     <b>nombre:</b> %2$s]]></string>
-    <string name="transactionvs_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
+    <string name="transaction_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
         <b>nombre:</b> %2$s]]></string>
-    <string name="transactionvs_receipt">recibo</string>
+    <string name="transaction_receipt">recibo</string>
     <string name="wallet_lbl">monedero</string>
     <string name="cert_info_lbl">datos del certificado</string>
     <string name="currency_cert_caption">certificado de la moneda</string>
@@ -298,7 +298,7 @@
     <string name="decrypt_cert_notfound_msg">imposible descifrar desde este dispositivo</string>
     <string name="connecting_to_service_msg">conectando a servicio</string>
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
-    <string name="anonymous_transactionvs_msg">deseo que el pago sea anónimo</string>
+    <string name="anonymous_transaction_msg">deseo que el pago sea anónimo</string>
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
         <b>votingsystem, 2015. </b>version %s<br><br>
@@ -399,17 +399,17 @@
     <string name="app_needed_caption">instalar aplicación</string>
     <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar el lector de código de barras de \'ZXing Team\'</string>
     <string name="qr_code_lbl">código QR</string>
-    <string name="qr_transactionvs_request_msg">solicitando \'%1$s\' para \'%2$s\'</string>
-    <string name="transactionvs_qr_msg">esperando ingreso</string>
+    <string name="qr_transaction_request_msg">solicitando \'%1$s\' para \'%2$s\'</string>
+    <string name="transaction_qr_msg">esperando ingreso</string>
     <string name="qr_connection_required_msg">para poder operar con códigos QR necesita estar conectado</string>
     <string name="qr_create_lbl">crear QR</string>
     <string name="qr_read_lbl">leer QR</string>
     <string name="currency_prompt">moneda</string>
     <string name="operation_prompt">tipo de operación</string>
     <string name="currency_ticket_request_operation">solicitar efectivo</string>
-    <string name="transactionvs_operation">solicitar ingreso en cuenta</string>
+    <string name="transaction_operation">solicitar ingreso en cuenta</string>
     <string name="operation_lbl">operación</string>
-    <string name="delete_transactionvs_lbl">borrar transacción</string>
+    <string name="delete_transaction_lbl">borrar transacción</string>
     <string name="movements_lbl">movimientos</string>
     <string name="movement_lbl">movimiento</string>
     <string name="about_msg">información sobre la aplicación</string>

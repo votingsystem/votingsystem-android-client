@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.Operation;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.TagVSDto;
@@ -36,13 +36,13 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TransactionVSDto implements Serializable {
+public class TransactionDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE, FROM_BANK, FROM_USER,
         FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS,
-        CURRENCY_PERIOD_INIT, TRANSACTIONVS_INFO;}
+        CURRENCY_PERIOD_INIT, TRANSACTION_INFO;}
 
     private TypeVS operation;
     private Long id;
@@ -75,7 +75,7 @@ public class TransactionVSDto implements Serializable {
 
     private String infoURL;
     private List<Type> paymentOptions;
-    private TransactionVSDetailsDto details;
+    private TransactionDetailsDto details;
     private UserDto.Type userToType;
 
     @JsonIgnore private TagVSDto tagVS;
@@ -88,13 +88,13 @@ public class TransactionVSDto implements Serializable {
     @JsonIgnore private QRMessageDto qrMessageDto;
 
 
-    public TransactionVSDto() {}
+    public TransactionDto() {}
 
 
-    public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserDto.Type userToType,
-            BigDecimal amount, String currencyCode, String toUserIBAN, String subject, String tag) {
-        TransactionVSDto dto = new TransactionVSDto();
-        dto.setOperation(TypeVS.TRANSACTIONVS_INFO);
+    public static TransactionDto PAYMENT_REQUEST(String toUser, UserDto.Type userToType,
+                                                 BigDecimal amount, String currencyCode, String toUserIBAN, String subject, String tag) {
+        TransactionDto dto = new TransactionDto();
+        dto.setOperation(TypeVS.TRANSACTION_INFO);
         dto.setUserToType(userToType);
         dto.setToUserName(toUser);
         dto.setAmount(amount);
@@ -107,9 +107,9 @@ public class TransactionVSDto implements Serializable {
         return dto;
     }
 
-    public static TransactionVSDto CURRENCY_REQUEST(BigDecimal amount, String currencyCode,
-            TagVSDto tagVS, boolean timeLimited) {
-        TransactionVSDto dto = new TransactionVSDto();
+    public static TransactionDto CURRENCY_REQUEST(BigDecimal amount, String currencyCode,
+                                                  TagVSDto tagVS, boolean timeLimited) {
+        TransactionDto dto = new TransactionDto();
         dto.setOperation(TypeVS.CURRENCY_REQUEST);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
@@ -505,7 +505,7 @@ public class TransactionVSDto implements Serializable {
     }
 
     public String validateReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
-        TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+        TransactionDto dto = cmsMessage.getSignedContent(TransactionDto.class);
         switch(dto.getOperation()) {
             case FROM_USER:
                 return validateFromUserReceipt(cmsMessage, isIncome);
@@ -521,7 +521,7 @@ public class TransactionVSDto implements Serializable {
         CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
-        if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
+        if(type == TransactionDto.Type.TRANSACTION_INFO) {
             if(!paymentOptions.contains(Type.CURRENCY_CHANGE)) throw new ValidationExceptionVS(
                     "unexpected type: " + receiptDto.getOperation());
         }
@@ -546,8 +546,8 @@ public class TransactionVSDto implements Serializable {
         CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
-        if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
-            if(!paymentOptions.contains(TransactionVSDto.Type.CURRENCY_SEND)) throw new ValidationExceptionVS(
+        if(type == TransactionDto.Type.TRANSACTION_INFO) {
+            if(!paymentOptions.contains(TransactionDto.Type.CURRENCY_SEND)) throw new ValidationExceptionVS(
                     "unexpected type: " + receiptDto.getOperation());
         }
         Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
@@ -571,8 +571,8 @@ public class TransactionVSDto implements Serializable {
     }
 
     private String validateFromUserReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
-        TransactionVSDto receiptDto = cmsMessage.getSignedContent(TransactionVSDto.class);
-        if(type == TransactionVSDto.Type.TRANSACTIONVS_INFO) {
+        TransactionDto receiptDto = cmsMessage.getSignedContent(TransactionDto.class);
+        if(type == TransactionDto.Type.TRANSACTION_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
                     receiptDto.getType());
         } else if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
@@ -603,11 +603,11 @@ public class TransactionVSDto implements Serializable {
         return result;
     }
 
-    public TransactionVSDetailsDto getDetails() {
+    public TransactionDetailsDto getDetails() {
         return details;
     }
 
-    public void setDetails(TransactionVSDetailsDto details) {
+    public void setDetails(TransactionDetailsDto details) {
         this.details = details;
     }
 
@@ -661,30 +661,30 @@ public class TransactionVSDto implements Serializable {
         return result;
     }
 
-    public static TransactionVSDto fromUri(Uri uriData) {
-        TransactionVSDto transactionVS = new TransactionVSDto();
-        transactionVS.setAmount(new BigDecimal(uriData.getQueryParameter("amount")));
+    public static TransactionDto fromUri(Uri uriData) {
+        TransactionDto transaction = new TransactionDto();
+        transaction.setAmount(new BigDecimal(uriData.getQueryParameter("amount")));
         TagVSDto tagVS = null;
         if(uriData.getQueryParameter("tagVS") != null) tagVS = new TagVSDto(uriData.getQueryParameter("tagVS"));
         else tagVS = new TagVSDto(TagVSDto.WILDTAG);
-        transactionVS.setTagVS(tagVS);
-        transactionVS.setCurrencyCode(uriData.getQueryParameter("currencyCode"));
-        transactionVS.setSubject(uriData.getQueryParameter("subject"));
+        transaction.setTagVS(tagVS);
+        transaction.setCurrencyCode(uriData.getQueryParameter("currencyCode"));
+        transaction.setSubject(uriData.getQueryParameter("subject"));
         UserDto toUser = new UserDto();
         toUser.setName(uriData.getQueryParameter("toUserName"));
         toUser.setIBAN(uriData.getQueryParameter("toUserIBAN"));
-        transactionVS.setToUser(toUser);
-        return transactionVS;
+        transaction.setToUser(toUser);
+        return transaction;
     }
 
-    public static TransactionVSDto fromOperationVS(OperationVS operationVS) throws Exception {
-        TransactionVSDto transactionDto = operationVS.getSignedContent(TransactionVSDto.class);
+    public static TransactionDto fromOperationVS(Operation operation) throws Exception {
+        TransactionDto transactionDto = operation.getSignedContent(TransactionDto.class);
         if(transactionDto.getTagVS() == null) {
             transactionDto.setTagVS(new TagVSDto(TagVSDto.WILDTAG));
         }
         UserDto toUser = new UserDto();
         toUser.setName(transactionDto.getFromUserName());
-        if(operationVS.getOperation() == TypeVS.FROM_USER) {
+        if(operation.getOperation() == TypeVS.FROM_USER) {
             if(transactionDto.getToUserIBAN().size() != 1) throw new ExceptionVS("FROM_USER must have " +
                     "'one' receptor and it has '" + transactionDto.getToUserIBAN().size() + "'");
             toUser.setIBAN(transactionDto.getToUserIBAN().iterator().next());
@@ -697,8 +697,8 @@ public class TransactionVSDto implements Serializable {
         return transactionDto;
     }
 
-    @JsonIgnore public TransactionVSDto getTransactionFromUser() {
-        TransactionVSDto dto = new TransactionVSDto();
+    @JsonIgnore public TransactionDto getTransactionFromUser() {
+        TransactionDto dto = new TransactionDto();
         dto.setOperation(TypeVS.FROM_USER);
         dto.setSubject(subject);
         dto.setAmount(amount);

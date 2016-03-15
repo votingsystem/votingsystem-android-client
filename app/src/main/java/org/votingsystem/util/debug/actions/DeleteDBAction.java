@@ -5,7 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import org.votingsystem.contentprovider.TransactionVSContentProvider;
+import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.util.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -20,10 +20,10 @@ public class DeleteDBAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
-                String selection = TransactionVSContentProvider.ID_COL + " > ?";
+                String selection = TransactionContentProvider.ID_COL + " > ?";
                 String[] selectionArgs = { "0" };
                 context.getContentResolver().delete(
-                        TransactionVSContentProvider.CONTENT_URI, selection, selectionArgs);
+                        TransactionContentProvider.CONTENT_URI, selection, selectionArgs);
                 return null;
             }
         }.execute(context);

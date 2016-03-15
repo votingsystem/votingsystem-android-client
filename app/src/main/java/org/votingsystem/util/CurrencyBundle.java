@@ -6,7 +6,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -89,7 +89,7 @@ public class CurrencyBundle {
     }
 
 
-    public CurrencyBatchDto getCurrencyBatchDto(TransactionVSDto transactionDto) throws Exception {
+    public CurrencyBatchDto getCurrencyBatchDto(TransactionDto transactionDto) throws Exception {
         String toUserIBAN = transactionDto.getToUserIBAN() == null ? null:
                 transactionDto.getToUserIBAN().iterator().next();
         return getCurrencyBatchDto(transactionDto.getOperation(),

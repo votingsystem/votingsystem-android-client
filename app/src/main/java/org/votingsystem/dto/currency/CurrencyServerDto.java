@@ -18,12 +18,12 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
     public static final String TAG = CurrencyServerDto.class.getSimpleName();
 
 
-    public String getTransactionVSServiceURL() {
-        return getServerURL() + "/rest/transactionVS";
+    public String getTransactionServiceURL() {
+        return getServerURL() + "/rest/transaction";
     }
 
     public String getCurrencyTransactionServiceURL() {
-        return getServerURL() + "/rest/transactionVS/currency";
+        return getServerURL() + "/rest/transaction/currency";
     }
 
     public String getCurrencyRequestServiceURL() {

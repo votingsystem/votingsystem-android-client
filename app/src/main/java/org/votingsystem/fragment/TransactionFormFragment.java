@@ -25,7 +25,7 @@ import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.Utils;
@@ -41,11 +41,11 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TransactionVSFormFragment extends Fragment {
+public class TransactionFormFragment extends Fragment {
 
-    public static final String TAG = TransactionVSFormFragment.class.getSimpleName();
+    public static final String TAG = TransactionFormFragment.class.getSimpleName();
 
-    public enum Type {QR_FORM, TRANSACTIONVS_FORM}
+    public enum Type {QR_FORM, TRANSACTION_FORM}
 
     private Spinner currencySpinner;
     private EditText amount_text;
@@ -53,7 +53,7 @@ public class TransactionVSFormFragment extends Fragment {
     private TagVSDto tagVS;
     private UserDto toUser;
     private Button add_tag_btn;
-    private String broadCastId = TransactionVSFormFragment.class.getSimpleName();
+    private String broadCastId = TransactionFormFragment.class.getSimpleName();
     private CheckBox from_user_checkbox, currency_send_checkbox, currency_change_checkbox;
     private Type formType;
 
@@ -72,7 +72,7 @@ public class TransactionVSFormFragment extends Fragment {
         super.onCreate(savedInstanceState);
         formType = (Type) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
         toUser = (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
-        View rootView = inflater.inflate(R.layout.transactionvs_form_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.transaction_form_fragment, container, false);
         rootView.findViewById(R.id.request_button).setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
@@ -115,7 +115,7 @@ public class TransactionVSFormFragment extends Fragment {
                 ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_create_lbl));
                 request_button.setText(getString(R.string.qr_create_lbl));
                 break;
-            case TRANSACTIONVS_FORM:
+            case TRANSACTION_FORM:
                 if(toUser.getConnectedDevices() == null || toUser.getConnectedDevices().size() == 0) {
                     currency_change_checkbox.setVisibility(View.GONE);
                 }
@@ -133,7 +133,7 @@ public class TransactionVSFormFragment extends Fragment {
 
     private void checkBoxSelected(CompoundButton checkbox, boolean isChecked) {
         if(isChecked) {
-            if(formType == Type.TRANSACTIONVS_FORM) {
+            if(formType == Type.TRANSACTION_FORM) {
                 from_user_checkbox.setChecked(false);
                 currency_send_checkbox.setChecked(false);
                 currency_change_checkbox.setChecked(false);
@@ -170,10 +170,10 @@ public class TransactionVSFormFragment extends Fragment {
             amount_text.setError(getString(R.string.min_withdrawal_msg));
             return;
         }
-        List<TransactionVSDto.Type> paymentOptions = new ArrayList<>();
-        if(from_user_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.FROM_USER);
-        if(currency_send_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.CURRENCY_SEND);
-        if(currency_change_checkbox.isChecked()) paymentOptions.add(TransactionVSDto.Type.CURRENCY_CHANGE);
+        List<TransactionDto.Type> paymentOptions = new ArrayList<>();
+        if(from_user_checkbox.isChecked()) paymentOptions.add(TransactionDto.Type.FROM_USER);
+        if(currency_send_checkbox.isChecked()) paymentOptions.add(TransactionDto.Type.CURRENCY_SEND);
+        if(currency_change_checkbox.isChecked()) paymentOptions.add(TransactionDto.Type.CURRENCY_CHANGE);
         if(paymentOptions.isEmpty()) {
             MessageDialogFragment.showDialog(getString(R.string.error_lbl),
                     getString(R.string.min_payment_option_msg), getFragmentManager());
@@ -181,8 +181,8 @@ public class TransactionVSFormFragment extends Fragment {
         }
         if(tagVS == null) tagVS = new TagVSDto(TagVSDto.WILDTAG);
         switch (formType) {
-            case TRANSACTIONVS_FORM:
-                TransactionVSDto transactionDto = new TransactionVSDto();
+            case TRANSACTION_FORM:
+                TransactionDto transactionDto = new TransactionDto();
                 transactionDto.setAmount(new BigDecimal(amount_text.getText().toString()));
                 transactionDto.setCurrencyCode(currencySpinner.getSelectedItem().toString());
                 transactionDto.setTagVS(tagVS);
@@ -199,7 +199,7 @@ public class TransactionVSFormFragment extends Fragment {
                 startActivity(resultIntent);
                 break;
             case QR_FORM:
-                TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
+                TransactionDto dto = TransactionDto.PAYMENT_REQUEST(
                         AppVS.getInstance().getUser().getFullName(), UserDto.Type.USER,
                         new BigDecimal(amount_text.getText().toString()),
                         currencySpinner.getSelectedItem().toString(),

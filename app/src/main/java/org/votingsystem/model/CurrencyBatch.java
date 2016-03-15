@@ -77,7 +77,7 @@ public class CurrencyBatch {
         currencyList.add(currency);
     }
 
-    public void validateTransactionVSResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
+    public void validateTransactionResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
         CMSSignedMessage receipt = new CMSSignedMessage(Base64.decode(((String) dataMap.get("receipt")).getBytes(), Base64.NO_WRAP));
         if(dataMap.containsKey("leftOverCoin")) {
 

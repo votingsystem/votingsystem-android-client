@@ -30,10 +30,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.TransactionVSPagerActivity;
+import org.votingsystem.activity.TransactionPagerActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.contentprovider.TransactionContentProvider;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -47,18 +47,18 @@ import java.util.List;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
-public class TransactionVSGridFragment extends Fragment
+public class TransactionGridFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
-    public static final String TAG = TransactionVSGridFragment.class.getSimpleName();
+    public static final String TAG = TransactionGridFragment.class.getSimpleName();
 
     private View rootView;
     private GridView gridView;
-    private TransactionVSListAdapter adapter = null;
+    private TransactionListAdapter adapter = null;
     private AppVS appVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
-    private String broadCastId = TransactionVSGridFragment.class.getName();
+    private String broadCastId = TransactionGridFragment.class.getName();
     private static final int loaderId = 0;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -68,7 +68,7 @@ public class TransactionVSGridFragment extends Fragment
     };
 
     public static Fragment newInstance(Bundle args) {
-        TransactionVSGridFragment fragment = new TransactionVSGridFragment();
+        TransactionGridFragment fragment = new TransactionGridFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -98,7 +98,7 @@ public class TransactionVSGridFragment extends Fragment
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.grid_container, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        adapter = new TransactionVSListAdapter(getActivity(), null,false);
+        adapter = new TransactionListAdapter(getActivity(), null,false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
@@ -153,7 +153,7 @@ public class TransactionVSGridFragment extends Fragment
         menuInflater.inflate(R.menu.currency_accounts, menu);
         menu.setGroupVisible(R.id.general_items, false);
         menu.removeItem(R.id.search_item);
-        List<String> transactionWeekList =TransactionVSContentProvider.getTransactionWeekList (
+        List<String> transactionWeekList = TransactionContentProvider.getTransactionWeekList (
                 (AppVS)getActivity().getApplicationContext());
         for(final String weekLbl: transactionWeekList) {
             MenuItem item = menu.add (weekLbl);
@@ -178,16 +178,16 @@ public class TransactionVSGridFragment extends Fragment
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "position: " + position + " - id: " + id);
         //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity(), TransactionVSPagerActivity.class);
+        Intent intent = new Intent(getActivity(), TransactionPagerActivity.class);
         intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
     @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         LOGD(TAG + ".onCreateLoader", "");
-        String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
+        String selection = TransactionContentProvider.WEEK_LAPSE_COL + " =? ";
         CursorLoader loader = new CursorLoader(getActivity(),
-                TransactionVSContentProvider.CONTENT_URI, null, selection,
+                TransactionContentProvider.CONTENT_URI, null, selection,
                 new String[]{appVS.getCurrentWeekLapseId()}, null);
         return loader;
     }
@@ -222,42 +222,42 @@ public class TransactionVSGridFragment extends Fragment
         }
     }
 
-    public class TransactionVSListAdapter  extends CursorAdapter {
+    public class TransactionListAdapter extends CursorAdapter {
 
         private LayoutInflater inflater = null;
 
-        public TransactionVSListAdapter(Context context, Cursor c, boolean autoRequery) {
+        public TransactionListAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);
             inflater = LayoutInflater.from(context);
         }
 
         @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-            return inflater.inflate(R.layout.transactionvs_card, viewGroup, false);
+            return inflater.inflate(R.layout.transaction_card, viewGroup, false);
         }
 
         @Override public void bindView(View view, Context context, Cursor cursor) {
             if(cursor != null) {
                 byte[] jsonBytes = cursor.getBlob(cursor.getColumnIndex(
-                        TransactionVSContentProvider.JSON_COL));
+                        TransactionContentProvider.JSON_COL));
                 if(jsonBytes != null) {
-                    TransactionVSDto transactionVS = null;
+                    TransactionDto transaction = null;
                     try {
-                        transactionVS = JSON.readValue(jsonBytes, TransactionVSDto.class);
+                        transaction = JSON.readValue(jsonBytes, TransactionDto.class);
                     } catch (IOException e) { e.printStackTrace(); }
                     String weekLapseStr = cursor.getString(cursor.getColumnIndex(
-                            TransactionVSContentProvider.WEEK_LAPSE_COL));
+                            TransactionContentProvider.WEEK_LAPSE_COL));
                     Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
                     TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
-                    transaction_type.setText(transactionVS.getDescription(getActivity(),
-                            transactionVS.getType()));
+                    transaction_type.setText(transaction.getDescription(getActivity(),
+                            transaction.getType()));
                     TextView week_lapse = (TextView) view.findViewById(R.id.week_lapse);
-                    week_lapse.setText(DateUtils.getDayWeekDateStr(transactionVS.getDateCreated(), "HH:mm"));
+                    week_lapse.setText(DateUtils.getDayWeekDateStr(transaction.getDateCreated(), "HH:mm"));
                     TextView amount = (TextView) view.findViewById(R.id.amount);
-                    amount.setText(transactionVS.getAmount().toPlainString());
+                    amount.setText(transaction.getAmount().toPlainString());
                     TextView currency = (TextView) view.findViewById(R.id.currencyCode);
-                    currency.setText(transactionVS.getCurrencyCode());
+                    currency.setText(transaction.getCurrencyCode());
                     ((ImageView)view.findViewById(R.id.transaction_icon)).setImageResource(
-                            transactionVS.getIconId(getActivity()));
+                            transaction.getIconId(getActivity()));
                 }
             }
         }

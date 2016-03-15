@@ -27,7 +27,7 @@ import org.votingsystem.activity.CurrencyRequesActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.voting.TagVSInfoDto;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
@@ -57,7 +57,7 @@ public class CurrencyAccountsFragment extends Fragment {
 
     private static final int CURRENCY_REQUEST   = 1;
 
-    private TransactionVSDto transactionVS;
+    private TransactionDto transaction;
     private View rootView;
     private String broadCastId = CurrencyAccountsFragment.class.getSimpleName();
     private AppVS appVS;
@@ -110,7 +110,7 @@ public class CurrencyAccountsFragment extends Fragment {
         setHasOptionsMenu(true);
         loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
         if(savedInstanceState != null) {
-            transactionVS = (TransactionVSDto)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
+            transaction = (TransactionDto)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
         } else {
             Intent intent = getActivity().getIntent();
             if(intent.getBooleanExtra(ContextVS.REFRESH_KEY, false)) updateCurrencyAccountsInfo();
@@ -196,7 +196,7 @@ public class CurrencyAccountsFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.TRANSACTION_KEY, transactionVS);
+        outState.putSerializable(ContextVS.TRANSACTION_KEY, transaction);
     }
 
     public class AccountVSInfoAdapter extends RecyclerView.Adapter<AccountVSInfoAdapter.ViewHolder>{

@@ -25,7 +25,7 @@ import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -260,7 +260,7 @@ public class WebSocketService extends Service {
                                 appVS.setToken(socketMsg.getMessage().toCharArray());
                             } else appVS.setWithSocketConnection(false);
                             break;
-                        case TRANSACTIONVS_INFO:
+                        case TRANSACTION_INFO:
                             break;
                         case WEB_SOCKET_CLOSE:
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -316,11 +316,11 @@ public class WebSocketService extends Service {
                         Utils.showNewMessageNotification();
                     }
                     break;
-                case TRANSACTIONVS_INFO:
+                case TRANSACTION_INFO:
                     //response received after asking for the details of a QR code
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
-                        TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
+                        TransactionDto dto = socketMsg.getMessage(TransactionDto.class);
                         dto.setSocketMessageDto(socketMsg);
                         dto.setQrMessageDto((QRMessageDto) socketSession.getData());
                         Intent resultIntent = new Intent(this, FragmentContainerActivity.class);
@@ -345,10 +345,10 @@ public class WebSocketService extends Service {
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         SocketMessageDto msgDto = null;
                         try {
-                            QRMessageDto<TransactionVSDto> qrDto = AppVS.getInstance().getQRMessage(
+                            QRMessageDto<TransactionDto> qrDto = AppVS.getInstance().getQRMessage(
                                     socketMsg.getMessage());
                             //qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
-                            TransactionVSDto transactionDto = qrDto.getData();
+                            TransactionDto transactionDto = qrDto.getData();
 
                             Currency currency =  new  Currency(
                                     AppVS.getInstance().getCurrencyServer().getServerURL(),
@@ -361,7 +361,7 @@ public class WebSocketService extends Service {
                             transactionDto.setCmsMessagePEM(simeMessage.toPEMStr());
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
                                     JSON.getMapper().writeValueAsString(transactionDto),
-                                    simeMessage, TypeVS.TRANSACTIONVS_INFO);
+                                    simeMessage, TypeVS.TRANSACTION_INFO);
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -375,14 +375,14 @@ public class WebSocketService extends Service {
                                 getString(R.string.error_lbl));
                     }
                     break;
-                case TRANSACTIONVS_RESPONSE:
+                case TRANSACTION_RESPONSE:
                     //the payer has completed the payment and send the details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         try {
-                            QRMessageDto<TransactionVSDto> qrDto =
-                                    (QRMessageDto<TransactionVSDto>) socketSession.getData();
+                            QRMessageDto<TransactionDto> qrDto =
+                                    (QRMessageDto<TransactionDto>) socketSession.getData();
                             CMSSignedMessage cmsMessage = socketMsg.getCMS();
-                            TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+                            TransactionDto dto = cmsMessage.getSignedContent(TransactionDto.class);
                             TypeVS typeVS = dto.getOperation();
                             if(TypeVS.CURRENCY_CHANGE == typeVS) {
                                 Currency currency = qrDto.getCurrency();
@@ -400,7 +400,7 @@ public class WebSocketService extends Service {
                                 }
                                 Wallet.updateWallet(Arrays.asList(currency));
                             }
-                            TransactionVSDto transactionDto = qrDto.getData();
+                            TransactionDto transactionDto = qrDto.getData();
                             String result = transactionDto.validateReceipt(cmsMessage, true);
                             intent.putExtra(ContextVS.MESSAGE_KEY, result);
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

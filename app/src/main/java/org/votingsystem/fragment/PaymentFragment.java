@@ -26,7 +26,7 @@ import org.votingsystem.activity.CurrencyRequesActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
@@ -61,7 +61,7 @@ public class PaymentFragment extends Fragment {
     private TextView subject;
     private TextView amount;
     private TextView tagvs;
-    private TransactionVSDto transactionDto;
+    private TransactionDto transactionDto;
     private Spinner payment_method_spinner;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -76,8 +76,8 @@ public class PaymentFragment extends Fragment {
         }
     };
 
-    private void launchTransactionVS(TransactionVSDto.Type transactionType) {
-        LOGD(TAG + ".launchTransactionVS() ", "launchTransactionVS");
+    private void launchTransaction(TransactionDto.Type transactionType) {
+        LOGD(TAG + ".launchTransaction() ", "launchTransaction");
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
         try {
             transactionDto.setType(transactionType);
@@ -109,10 +109,10 @@ public class PaymentFragment extends Fragment {
         tagvs= (TextView)rootView.findViewById(R.id.tagvs);
         payment_method_spinner = (Spinner)rootView.findViewById(R.id.payment_method_spinner);
         try {
-            transactionDto = (TransactionVSDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+            transactionDto = (TransactionDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
                     R.layout.payment_spinner_item,
-                    TransactionVSDto.getPaymentMethods(transactionDto.getPaymentOptions()));
+                    TransactionDto.getPaymentMethods(transactionDto.getPaymentOptions()));
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             payment_method_spinner.setAdapter(dataAdapter);
             receptor.setText(transactionDto.getToUserName());
@@ -166,7 +166,7 @@ public class PaymentFragment extends Fragment {
 
     private void submitForm() {
         try {
-            transactionDto.setType(TransactionVSDto.getByDescription(
+            transactionDto.setType(TransactionDto.getByDescription(
                     (String) payment_method_spinner.getSelectedItem()));
             BalancesDto userInfo = PrefUtils.getBalances();
             final BigDecimal availableForTagVS = userInfo.getAvailableForTagVS(
@@ -196,7 +196,7 @@ public class PaymentFragment extends Fragment {
                             return;
                         } else {
                             Utils.getProtectionPassword(RC_SEND_TRANSACTION,
-                                    MsgUtils.getTransactionVSConfirmMessage(transactionDto, getActivity()),
+                                    MsgUtils.getTransactionConfirmMessage(transactionDto, getActivity()),
                                     null, (AppCompatActivity)getActivity());
                         }
                     } catch(Exception ex) { ex.printStackTrace();}
@@ -264,7 +264,7 @@ public class PaymentFragment extends Fragment {
                             UIUtils.showMessageDialog(builder);
                         }
                     } else {
-                        launchTransactionVS(transactionDto.getType());
+                        launchTransaction(transactionDto.getType());
                     }
                     break;
             }
@@ -298,7 +298,7 @@ public class PaymentFragment extends Fragment {
                 break;
             case RC_SEND_TRANSACTION:
                 if(Activity.RESULT_OK == resultCode) {
-                    launchTransactionVS(transactionDto.getType());
+                    launchTransaction(transactionDto.getType());
                 }
                 break;
         }

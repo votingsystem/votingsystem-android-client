@@ -11,8 +11,8 @@ import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.contentprovider.TransactionVSContentProvider;
-import org.votingsystem.fragment.TransactionVSFragment;
+import org.votingsystem.contentprovider.TransactionContentProvider;
+import org.votingsystem.fragment.TransactionFragment;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.UIUtils;
 
@@ -21,9 +21,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TransactionVSPagerActivity extends AppCompatActivity {
+public class TransactionPagerActivity extends AppCompatActivity {
 
-    public static final String TAG = TransactionVSPagerActivity.class.getSimpleName();
+    public static final String TAG = TransactionPagerActivity.class.getSimpleName();
 
     private Cursor cursor = null;
 
@@ -35,10 +35,10 @@ public class TransactionVSPagerActivity extends AppCompatActivity {
         UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
-        String selection = TransactionVSContentProvider.WEEK_LAPSE_COL + " =? ";
-        cursor = getContentResolver().query(TransactionVSContentProvider.CONTENT_URI, null, selection,
+        String selection = TransactionContentProvider.WEEK_LAPSE_COL + " =? ";
+        cursor = getContentResolver().query(TransactionContentProvider.CONTENT_URI, null, selection,
                 new String[]{appVS.getCurrentWeekLapseId()}, null);
-        TransactionVSPagerAdapter pagerAdapter = new TransactionVSPagerAdapter(
+        TransactionPagerAdapter pagerAdapter = new TransactionPagerAdapter(
                 getSupportFragmentManager(), cursor.getCount());
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
@@ -68,17 +68,17 @@ public class TransactionVSPagerActivity extends AppCompatActivity {
         }
     }
 
-    class TransactionVSPagerAdapter extends FragmentStatePagerAdapter {
+    class TransactionPagerAdapter extends FragmentStatePagerAdapter {
 
         private int numPages;
-        public TransactionVSPagerAdapter(FragmentManager fm, int numPages) {
+        public TransactionPagerAdapter(FragmentManager fm, int numPages) {
             super(fm);
             this.numPages = numPages;
         }
 
         @Override public Fragment getItem(int i) {
-            LOGD(TAG + ".TransactionVSPagerAdapter.getItem", "item: " + i);
-            return TransactionVSFragment.newInstance(i);
+            LOGD(TAG + ".TransactionPagerAdapter.getItem", "item: " + i);
+            return TransactionFragment.newInstance(i);
         }
 
         @Override public int getCount() {

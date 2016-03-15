@@ -46,26 +46,26 @@ public class CurrencyRequestDto {
 
     public CurrencyRequestDto() {}
 
-    public static CurrencyRequestDto CREATE_REQUEST(TransactionVSDto transactionVSDto,
+    public static CurrencyRequestDto CREATE_REQUEST(TransactionDto transactionDto,
             BigDecimal currencyValue, String serverURL) throws Exception {
         CurrencyRequestDto currencyRequestDto = new CurrencyRequestDto();
         currencyRequestDto.serverURL = serverURL;
-        currencyRequestDto.subject = transactionVSDto.getSubject();
-        currencyRequestDto.totalAmount = transactionVSDto.getAmount();
-        currencyRequestDto.currencyCode = transactionVSDto.getCurrencyCode();
-        currencyRequestDto.timeLimited = transactionVSDto.isTimeLimited();
-        currencyRequestDto.tagVS = transactionVSDto.getTagVS();
+        currencyRequestDto.subject = transactionDto.getSubject();
+        currencyRequestDto.totalAmount = transactionDto.getAmount();
+        currencyRequestDto.currencyCode = transactionDto.getCurrencyCode();
+        currencyRequestDto.timeLimited = transactionDto.isTimeLimited();
+        currencyRequestDto.tagVS = transactionDto.getTagVS();
         currencyRequestDto.UUID = java.util.UUID.randomUUID().toString();
 
         Map<String, Currency> currencyMap = new HashMap<>();
         Set<String> requestCSRSet = new HashSet<>();
-        BigDecimal divideAndRemainder[] = transactionVSDto.getAmount().divideAndRemainder(currencyValue);
+        BigDecimal divideAndRemainder[] = transactionDto.getAmount().divideAndRemainder(currencyValue);
         if(divideAndRemainder[1].compareTo(BigDecimal.ZERO) != 0) throw new ValidationExceptionVS(MessageFormat.format(
                 "request with remainder - requestAmount ''{0}''  currencyValue ''{{1}}'' remainder ''{{2}}''",
-                transactionVSDto.getAmount(), currencyValue, divideAndRemainder[1]));
+                transactionDto.getAmount(), currencyValue, divideAndRemainder[1]));
         for(int i = 0; i < divideAndRemainder[0].intValue(); i++) {
-            Currency currency = new Currency(serverURL, currencyValue, transactionVSDto.getCurrencyCode(),
-                    transactionVSDto.isTimeLimited(), currencyRequestDto.tagVS.getName());
+            Currency currency = new Currency(serverURL, currencyValue, transactionDto.getCurrencyCode(),
+                    transactionDto.isTimeLimited(), currencyRequestDto.tagVS.getName());
             requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
             currencyMap.put(currency.getHashCertVS(), currency);
         }

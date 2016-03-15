@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.Operation;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
@@ -57,7 +57,7 @@ public class BrowserVSActivity extends AppCompatActivity {
     private String broadCastId = BrowserVSActivity.class.getSimpleName();
     private WebView webView;
     private FrameLayout webViewPlaceholder;
-    private OperationVS operationVS;
+    private Operation operation;
     private boolean doubleBackEnabled = true;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean showBrowserAdvice = true;
@@ -90,7 +90,7 @@ public class BrowserVSActivity extends AppCompatActivity {
         jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
         doubleBackEnabled = getIntent().getBooleanExtra(ContextVS.DOUBLE_BACK_KEY, true);
         if(savedInstanceState != null) {
-            operationVS = (OperationVS) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
+            operation = (Operation) savedInstanceState.getSerializable(ContextVS.OPERATIONVS_KEY);
         }
         /*if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -167,7 +167,7 @@ public class BrowserVSActivity extends AppCompatActivity {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
-        outState.putSerializable(ContextVS.OPERATIONVS_KEY, operationVS);
+        outState.putSerializable(ContextVS.OPERATIONVS_KEY, operation);
     }
 
     @Override
@@ -201,20 +201,20 @@ public class BrowserVSActivity extends AppCompatActivity {
     @JavascriptInterface
     public void unescapedMsg(String jsonStr) {
         try {
-            operationVS = JSON.readValue(jsonStr, OperationVS.class);
-            switch(operationVS.getOperation()) {
+            operation = JSON.readValue(jsonStr, Operation.class);
+            switch(operation.getOperation()) {
                 case BROWSER_URL:
-                    if(operationVS.getEmail() != null) {
-                        launchEmailClient(operationVS.getEmail() , operationVS.getSubject(),
-                                operationVS.getMessage(), null);
+                    if(operation.getEmail() != null) {
+                        launchEmailClient(operation.getEmail() , operation.getSubject(),
+                                operation.getMessage(), null);
                     }
                     break;
                 case REPRESENTATIVE_STATE:
                     RepresentationStateDto representationState = PrefUtils.getRepresentationState();
-                    invokeOperationCallback(representationState, operationVS.getCallerCallback());
+                    invokeOperationCallback(representationState, operation.getCallerCallback());
                     break;
                 default:
-                    LOGD(TAG, "unknown operation: " + operationVS.getOperation());
+                    LOGD(TAG, "unknown operation: " + operation.getOperation());
             }
         } catch (Exception e) { e.printStackTrace(); }
     }
