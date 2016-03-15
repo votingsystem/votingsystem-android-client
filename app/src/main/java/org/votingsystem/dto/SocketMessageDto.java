@@ -105,7 +105,7 @@ public class SocketMessageDto implements Serializable {
         messageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         messageDto.setSessionId(sessionId);
-        SocketMessageEncryptedDto encryptedDto = new SocketMessageEncryptedDto();
+        EncryptedContentDto encryptedDto = new EncryptedContentDto();
         encryptedDto.setStatusCode(statusCode);
         encryptedDto.setOperation(operation);
         encryptedDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
@@ -425,7 +425,7 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto.getSignRequest(
+        EncryptedContentDto encryptedDto = EncryptedContentDto.getSignRequest(
                 toUser, textToSign, subject);
         setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
@@ -445,14 +445,14 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto.getQRInfoRequest(
+        EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(
                 qrMessageDto);
         setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
     }
 
     private static void setEncryptedMessage(SocketMessageDto socketMessageDto,
-                        SocketMessageEncryptedDto encryptedDto, DeviceDto device) throws Exception {
+                                            EncryptedContentDto encryptedDto, DeviceDto device) throws Exception {
         if(device.getX509Certificate() != null) {
             byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(
                     JSON.writeValueAsBytes(encryptedDto), device.getX509Certificate());
@@ -485,7 +485,7 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setUUID(socketSession.getUUID());
         socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setDeviceToName(device.getDeviceName());
-        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto
+        EncryptedContentDto encryptedDto = EncryptedContentDto
                 .getCurrencyWalletChangeRequest(currencyList);
         setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
@@ -510,7 +510,7 @@ public class SocketMessageDto implements Serializable {
         socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageEncryptedDto encryptedDto = SocketMessageEncryptedDto.getMessageVSToDevice(
+        EncryptedContentDto encryptedDto = EncryptedContentDto.getMessageVSToDevice(
                 user, toUser, textToEncrypt);
         setEncryptedMessage(socketMessageDto, encryptedDto, device);
         return socketMessageDto;
@@ -518,8 +518,8 @@ public class SocketMessageDto implements Serializable {
 
     public void decryptMessage() throws Exception {
         byte[] decryptedBytes = AppVS.getInstance().decryptMessage(encryptedMessage.getBytes());
-        SocketMessageEncryptedDto encryptedDto =
-                JSON.readValue(decryptedBytes, SocketMessageEncryptedDto.class);
+        EncryptedContentDto encryptedDto =
+                JSON.readValue(decryptedBytes, EncryptedContentDto.class);
         if(encryptedDto.getOperation() != null) {
             this.messageType = operation;
             operation = encryptedDto.getOperation();

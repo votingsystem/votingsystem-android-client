@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SocketMessageEncryptedDto implements Serializable {
+public class EncryptedContentDto implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
@@ -44,18 +44,18 @@ public class SocketMessageEncryptedDto implements Serializable {
     private Set<CurrencyDto> currencyList;
     private String URL;
 
-    public SocketMessageEncryptedDto() { }
+    public EncryptedContentDto() { }
 
-    public SocketMessageEncryptedDto(TypeVS operation, Integer statusCode, String message, String URL) {
+    public EncryptedContentDto(TypeVS operation, Integer statusCode, String message, String URL) {
         this.operation = operation;
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
     }
 
-    public static SocketMessageEncryptedDto getSignRequest(String toUser,
-                                                           String textToSign, String subject) throws Exception {
-        SocketMessageEncryptedDto messageContentDto =  new SocketMessageEncryptedDto();
+    public static EncryptedContentDto getSignRequest(String toUser,
+                                                     String textToSign, String subject) throws Exception {
+        EncryptedContentDto messageContentDto =  new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setToUser(toUser);
@@ -64,8 +64,8 @@ public class SocketMessageEncryptedDto implements Serializable {
         return messageContentDto;
     }
 
-    public static SocketMessageEncryptedDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
-        SocketMessageEncryptedDto messageContentDto =  new SocketMessageEncryptedDto();
+    public static EncryptedContentDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
+        EncryptedContentDto messageContentDto =  new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.QR_MESSAGE_INFO);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
@@ -75,9 +75,9 @@ public class SocketMessageEncryptedDto implements Serializable {
         return messageContentDto;
     }
 
-    public static SocketMessageEncryptedDto getCurrencyWalletChangeRequest(
+    public static EncryptedContentDto getCurrencyWalletChangeRequest(
             Collection<Currency> currencyList) throws Exception {
-        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
+        EncryptedContentDto messageContentDto = new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
@@ -85,9 +85,9 @@ public class SocketMessageEncryptedDto implements Serializable {
         return messageContentDto;
     }
 
-    public static SocketMessageEncryptedDto getMessageVSToDevice(
+    public static EncryptedContentDto getMessageVSToDevice(
             UserDto user, String toUser, String message) throws Exception {
-        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
+        EncryptedContentDto messageContentDto = new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
         messageContentDto.setFrom(user.getFullName());
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
