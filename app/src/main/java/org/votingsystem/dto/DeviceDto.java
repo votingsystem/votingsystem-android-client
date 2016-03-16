@@ -25,7 +25,8 @@ public class DeviceDto implements Serializable {
     private String deviceName;
     private String email;
     private String phone;
-    private String certPEM;
+    private String publicKeyPEM;
+    private String x509CertificatePEM;
     private String firstName;
     private String lastName;
     private String IBAN;
@@ -90,12 +91,12 @@ public class DeviceDto implements Serializable {
         this.phone = phone;
     }
 
-    public String getCertPEM() {
-        return certPEM;
+    public String getX509CertificatePEM() {
+        return x509CertificatePEM;
     }
 
-    public void setCertPEM(String certPEM) {
-        this.certPEM = certPEM;
+    public void setX509CertificatePEM(String x509CertificatePEM) {
+        this.x509CertificatePEM = x509CertificatePEM;
     }
 
     public String getSessionId() {
@@ -148,8 +149,8 @@ public class DeviceDto implements Serializable {
     }
 
     @JsonIgnore public X509Certificate getX509Certificate() throws Exception {
-        if(x509Certificate == null && certPEM != null) x509Certificate =
-                PEMUtils.fromPEMToX509CertCollection(certPEM.getBytes()).iterator().next();
+        if(x509Certificate == null && x509CertificatePEM != null) x509Certificate =
+                PEMUtils.fromPEMToX509CertCollection(x509CertificatePEM.getBytes()).iterator().next();
         return x509Certificate;
     }
 
@@ -163,6 +164,14 @@ public class DeviceDto implements Serializable {
 
     public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
+    }
+
+    public String getPublicKeyPEM() {
+        return publicKeyPEM;
+    }
+
+    public void setPublicKeyPEM(String publicKeyPEM) {
+        this.publicKeyPEM = publicKeyPEM;
     }
 
 }

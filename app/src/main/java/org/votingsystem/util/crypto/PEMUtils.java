@@ -37,13 +37,8 @@ public class PEMUtils {
         return bOut.toByteArray();
     }
 
-    public static byte[] getPEMEncoded (X509Certificate certificate) throws IOException {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
-        pemWrt.writeObject(certificate);
-        pemWrt.close();
-        bOut.close();
-        return bOut.toByteArray();
+    public static String getPEMEncodedStr (Object objectToEncode) throws IOException {
+        return new String(PEMUtils.getPEMEncoded(objectToEncode));
     }
 
     public static X509Certificate fromPEMToX509Cert (byte[] pemFileBytes) throws Exception {

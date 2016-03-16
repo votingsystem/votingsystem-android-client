@@ -42,12 +42,12 @@ public class SocketMessageDto implements Serializable {
 
     public static final String TAG = SocketMessageDto.class.getSimpleName();
 
-    public String getPemPublicKey() {
-        return pemPublicKey;
+    public String getPublicKeyPEM() {
+        return publicKeyPEM;
     }
 
-    public void setPemPublicKey(String pemPublicKey) {
-        this.pemPublicKey = pemPublicKey;
+    public void setPublicKeyPEM(String publicKeyPEM) {
+        this.publicKeyPEM = publicKeyPEM;
     }
 
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
@@ -62,14 +62,14 @@ public class SocketMessageDto implements Serializable {
     private String sessionId;
     private String subject;
     private String message;
-    private String textToSign;
+    private String contentToSign;
     private String encryptedMessage;
     private String UUID;
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
     private String remoteAddress;
     private String cmsMessagePEM;
-    private String pemCert;
-    private String pemPublicKey;
+    private String x509CertificatePEM;
+    private String publicKeyPEM;
     private String from;
     private String caption;
     private String deviceId;
@@ -159,12 +159,12 @@ public class SocketMessageDto implements Serializable {
         this.toUser = toUser;
     }
 
-    public String getTextToSign() {
-        return textToSign;
+    public String getContentToSign() {
+        return contentToSign;
     }
 
-    public void setTextToSign(String textToSign) {
-        this.textToSign = textToSign;
+    public void setContentToSign(String contentToSign) {
+        this.contentToSign = contentToSign;
     }
 
     public List<CurrencyDto> getCurrencyList() {
@@ -400,12 +400,12 @@ public class SocketMessageDto implements Serializable {
         this.encryptedMessage = encryptedCMSPEM;
     }
 
-    public String getPemCert() {
-        return pemCert;
+    public String getX509CertificatePEM() {
+        return x509CertificatePEM;
     }
 
-    public void setPemCert(String pemCert) {
-        this.pemCert = pemCert;
+    public void setX509CertificatePEM(String x509CertificatePEM) {
+        this.x509CertificatePEM = x509CertificatePEM;
     }
 
     public String getDeviceToName() {
@@ -536,10 +536,10 @@ public class SocketMessageDto implements Serializable {
         if(encryptedDto.getToUser() != null) toUser = encryptedDto.getToUser();
         if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
         if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
-        if(encryptedDto.getTextToSign() != null) textToSign = encryptedDto.getTextToSign();
+        if(encryptedDto.getContentToSign() != null) contentToSign = encryptedDto.getContentToSign();
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
-        if(encryptedDto.getPemCert() != null) pemCert = encryptedDto.getPemCert();
-        if(encryptedDto.getPemPublicKey() != null) pemPublicKey = encryptedDto.getPemPublicKey();
+        if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
+        if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
         timeLimited = encryptedDto.isTimeLimited();
         this.encryptedMessage = null;
     }

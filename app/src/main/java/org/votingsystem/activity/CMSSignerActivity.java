@@ -94,7 +94,7 @@ public class CMSSignerActivity extends AppCompatActivity {
         socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
-                    true).writeValueAsString(socketMessage.getTextToSign());
+                    true).writeValueAsString(socketMessage.getContentToSign());
             webView.loadData(signatureContent, "application/json", "UTF-8");
         } catch (IOException ex) { ex.printStackTrace(); }
         if(savedInstanceState != null) {
@@ -154,7 +154,7 @@ public class CMSSignerActivity extends AppCompatActivity {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     String accessModePassw = new String(responseVS.getMessageBytes());
                     Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getTextToSign());
+                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getContentToSign());
                     intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
                     intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
                     intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.signature_request_from_device,

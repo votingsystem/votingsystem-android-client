@@ -32,14 +32,14 @@ public class EncryptedContentDto implements Serializable {
     private String from;
     private String deviceFromName;
     private Long deviceFromId;
-    private String textToSign;
+    private String contentToSign;
     private String sessionId;
     private String toUser;
     private String deviceToName;
     private String hashCertVS;
     private String cmsMessage;
-    private String pemCert;
-    private String pemPublicKey;
+    private String x509CertificatePEM;
+    private String publicKeyPEM;
     private boolean timeLimited = false;
     private Set<CurrencyDto> currencyList;
     private String URL;
@@ -59,7 +59,7 @@ public class EncryptedContentDto implements Serializable {
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setToUser(toUser);
-        messageContentDto.setTextToSign(textToSign);
+        messageContentDto.setContentToSign(textToSign);
         messageContentDto.setSubject(subject);
         return messageContentDto;
     }
@@ -69,7 +69,7 @@ public class EncryptedContentDto implements Serializable {
         messageContentDto.setOperation(TypeVS.QR_MESSAGE_INFO);
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
         messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
-        messageContentDto.setPemCert(
+        messageContentDto.setX509CertificatePEM(
                 new String(PEMUtils.getPEMEncoded(AppVS.getInstance().getX509UserCert())));
         messageContentDto.setMessage(qrMessageDto.getUUID());
         return messageContentDto;
@@ -153,12 +153,12 @@ public class EncryptedContentDto implements Serializable {
         this.deviceFromName = deviceFromName;
     }
 
-    public String getTextToSign() {
-        return textToSign;
+    public String getContentToSign() {
+        return contentToSign;
     }
 
-    public void setTextToSign(String textToSign) {
-        this.textToSign = textToSign;
+    public void setContentToSign(String contentToSign) {
+        this.contentToSign = contentToSign;
     }
 
     public String getToUser() {
@@ -239,12 +239,12 @@ public class EncryptedContentDto implements Serializable {
         this.sessionId = sessionId;
     }
 
-    public String getPemCert() {
-        return pemCert;
+    public String getX509CertificatePEM() {
+        return x509CertificatePEM;
     }
 
-    public void setPemCert(String pemCert) {
-        this.pemCert = pemCert;
+    public void setX509CertificatePEM(String x509CertificatePEM) {
+        this.x509CertificatePEM = x509CertificatePEM;
     }
 
     public boolean isTimeLimited() {
@@ -255,11 +255,11 @@ public class EncryptedContentDto implements Serializable {
         this.timeLimited = timeLimited;
     }
 
-    public String getPemPublicKey() {
-        return pemPublicKey;
+    public String getPublicKeyPEM() {
+        return publicKeyPEM;
     }
 
-    public void setPemPublicKey(String pemPublicKey) {
-        this.pemPublicKey = pemPublicKey;
+    public void setPublicKeyPEM(String publicKeyPEM) {
+        this.publicKeyPEM = publicKeyPEM;
     }
 }
