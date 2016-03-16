@@ -28,14 +28,12 @@ import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.callable.SignerTask;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -47,7 +45,6 @@ import org.votingsystem.util.Utils;
 import java.security.NoSuchAlgorithmException;
 
 import static org.votingsystem.util.LogUtils.LOGD;
-import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -56,12 +53,10 @@ public class QRActionsFragment extends Fragment {
 
 	public static final String TAG = QRActionsFragment.class.getSimpleName();
 
-    public static final int RC_INIT_REMOTE_SIGNED_SESSION     = 0;
-
     private enum Action {READ_QR, CREATE_QR}
 
     private String broadCastId = QRActionsFragment.class.getSimpleName();
-    private String remoteSessionId;
+    private QRMessageDto qrMessageDto;
     private Action pendingAction;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -98,7 +93,7 @@ public class QRActionsFragment extends Fragment {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_codes_lbl));
         setHasOptionsMenu(true);
         if(savedInstanceState != null) {
-            remoteSessionId = savedInstanceState.getString(ContextVS.SESSION_KEY);
+            qrMessageDto = (QRMessageDto) savedInstanceState.getSerializable(ContextVS.DTO_KEY);
         }
         return rootView;
     }
@@ -135,87 +130,24 @@ public class QRActionsFragment extends Fragment {
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        switch (requestCode) {
-            case RC_INIT_REMOTE_SIGNED_SESSION:
-                if(Activity.RESULT_OK == resultCode) {
-                    try {
-                        final SocketMessageDto initSessionMessageDto = SocketMessageDto.
-                                INIT_REMOTE_SESSION_REQUEST_BY_TARGET_SESSION_ID(remoteSessionId);
-                        new SignerTask(new SignerTask.Listener() {
-                            @Override public CMSSignedMessage sign() {
-                                try {
-                                    return AppVS.getInstance().signMessage(
-                                            JSON.writeValueAsBytes(initSessionMessageDto));
-                                } catch (Exception ex) { ex.printStackTrace();}
-                                return null;
-                            }
-                            @Override public void processResult(CMSSignedMessage cmsMessage) {
-                                try {
-                                    initSessionMessageDto.setCMS(cmsMessage);
-                                    Intent startIntent = new Intent(getActivity(), WebSocketService.class);
-                                    startIntent.putExtra(ContextVS.MESSAGE_KEY,
-                                            JSON.writeValueAsString(initSessionMessageDto));
-                                    getActivity().startService(startIntent);
-                                } catch (Exception ex) { ex.printStackTrace();}
-                            }
-                        }).execute();
-                    } catch ( Exception ex) { ex.printStackTrace();}
-                }
-                break;
-            default:
-                IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-                if (result != null && result.getContents() != null) {
-                    String qrMessage = result.getContents();
-                    QRMessageDto qrMessageDto = null;
-                    LOGD(TAG, "QR reader - onActivityResult - qrMessage: " + qrMessage);
-                    try {
-                        qrMessageDto = JSON.readValue(qrMessage, QRMessageDto.class);
-                        if(qrMessageDto.getDeviceId() != null) {
-                            if(AppVS.getInstance().getWSSession(qrMessageDto.getDeviceId()) == null) {
-                                new GetDeviceDataTask(qrMessageDto).execute();
-                            } else {
-                                SocketMessageDto socketMessage = SocketMessageDto.
-                                        getQRInfoRequestByTargetDeviceId(AppVS.getInstance().getWSSession(
-                                                qrMessageDto.getDeviceId()).getDevice(), qrMessageDto);
-                                sendQRRequestInfo(socketMessage);
-                            }
-                        } else if(qrMessageDto.getSessionId() != null) {
-                            remoteSessionId = qrMessageDto.getSessionId();
-                            switch (qrMessageDto.getOperation()) {
-                                case INIT_REMOTE_SIGNED_SESSION:
-                                    Utils.getProtectionPassword(RC_INIT_REMOTE_SIGNED_SESSION,
-                                            getString(R.string.allow_remote_device_authenticated_session),
-                                            null, ((AppCompatActivity)getActivity()));
-                                    break;
-                                default:
-                                    LOGD(TAG, "QR reader - onActivityResult - unprocessed QR code - " +
-                                            "sessionId: " + qrMessageDto.getSessionId() + " - operation: " +
-                                            qrMessageDto.getOperation());
-                            }
-                        } else LOGD(TAG, "QR reader - onActivityResult - unprocessed QR code");
-                        return;
-                    } catch (Exception e) {
-                        LOGE(TAG, "QRMessageDto is not JSON encoded");
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (result != null && result.getContents() != null) {
+            String qrMessage = result.getContents();
+            LOGD(TAG, "QR reader - onActivityResult - qrMessage: " + qrMessage);
+            qrMessageDto = QRMessageDto.FROM_QR_CODE(qrMessage);
+            if(qrMessageDto.getOperation() != null) {
+                try {
+                    switch (qrMessageDto.getOperation()) {
+                        case INIT_REMOTE_SIGNED_SESSION:
+                            SocketMessageDto socketMessage = SocketMessageDto.
+                                    getQRInfoRequest(qrMessageDto);
+                            sendQRRequestInfo(socketMessage);
+                            break;
                     }
-                    //qr code isn't json encoded
-                    qrMessageDto = QRMessageDto.FROM_QR_CODE(qrMessage);
-                    if(qrMessageDto.getOperation() != null) {
-                        try {
-                            switch (qrMessageDto.getOperation()) {
-                                case INIT_REMOTE_SIGNED_BROWSER_SESSION:
-                                    break;
-                                case QR_MESSAGE_INFO:
-                                    SocketMessageDto socketMessage = SocketMessageDto.
-                                            getQRInfoRequestByTargetDeviceId(
-                                            qrMessageDto.getDevice(), qrMessageDto);
-                                    sendQRRequestInfo(socketMessage);
-                                    break;
-                            }
-                        } catch (Exception ex) { ex.printStackTrace(); }
-                    } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
-                        new GetDataTask().execute(qrMessage);
-                    }
-                }
+                } catch (Exception ex) { ex.printStackTrace(); }
+            } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
+                new GetDataTask().execute(qrMessage);
+            }
         }
     }
 
@@ -239,7 +171,7 @@ public class QRActionsFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.SESSION_KEY, remoteSessionId);
+        outState.putSerializable(ContextVS.DTO_KEY, qrMessageDto);
     }
 
     @Override public void onPause() {
@@ -260,50 +192,6 @@ public class QRActionsFragment extends Fragment {
                 broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
     }
 
-    public class GetDeviceDataTask extends AsyncTask<String, Void, ResponseVS> {
-
-        public final String TAG = GetDeviceDataTask.class.getSimpleName();
-
-        private QRMessageDto qrMessageDto;
-
-        public GetDeviceDataTask(QRMessageDto qrMessageDto) {
-            this.qrMessageDto = qrMessageDto;
-        }
-
-        @Override protected void onPreExecute() {
-            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg));
-        }
-
-        @Override protected ResponseVS doInBackground(String... urls) {
-            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg));
-            try {
-                return  HttpHelper.getData(AppVS.getInstance().getCurrencyServer()
-                        .getDeviceByIdServiceURL(qrMessageDto.getDeviceId()), ContentType.JSON);
-            } catch (Exception ex) {
-                return ResponseVS.ERROR(getString(R.string.connection_error_msg), ex.getMessage());
-            }
-        }
-
-        protected void onProgressUpdate(Integer... progress) {}
-
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
-            setProgressDialogVisible(false, null, null);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                try {
-                    DeviceDto deviceDto = (DeviceDto) responseVS.getMessage(DeviceDto.class);
-                    SocketMessageDto socketMessage = SocketMessageDto.
-                            getQRInfoRequestByTargetDeviceId(deviceDto, qrMessageDto);
-                    sendQRRequestInfo(socketMessage);
-                } catch (Exception e) { e.printStackTrace();}
-            } else {
-                MessageDialogFragment.showDialog(getString(R.string.error_lbl),
-                        responseVS.getMessage(), getFragmentManager());
-            }
-        }
-    }
 
     public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
 

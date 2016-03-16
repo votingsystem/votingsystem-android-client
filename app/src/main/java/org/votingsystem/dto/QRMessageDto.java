@@ -9,7 +9,6 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.Serializable;
 import java.security.KeyFactory;
@@ -30,9 +29,11 @@ public class QRMessageDto<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final int INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
-    public static final int QR_MESSAGE_INFO                    = 1;
-    public static final int CURRENCY_SEND                      = 2;
+    public static final int INIT_REMOTE_SIGNED_SESSION         = 0;
+    public static final int INIT_BROWSER_AUTHENTICATED_SESSION = 1;
+    public static final int QR_MESSAGE_INFO                    = 2;
+    public static final int CURRENCY_SEND                      = 3;
+
 
     public static final String WEB_SOCKET_SESSION_KEY = "wsid";
     public static final String DEVICE_ID_KEY          = "did";
@@ -44,15 +45,16 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
     @JsonIgnore private String origingHashCertVS;
-    @JsonIgnore private Currency currency ;
+    @JsonIgnore private Currency currency;
+    @JsonIgnore private DeviceDto device;
     private TypeVS operation;
-    private String operationId;
+    private String operationCode;
     private Long deviceId;
     private Date dateCreated;
     private String hashCertVS;
     private String sessionId;
     private String currencyChangeCert;
-    private String keyBase64;
+    private String publicKeyBase64;
     private String url;
     private String UUID;
 
@@ -79,8 +81,8 @@ public class QRMessageDto<T> implements Serializable {
         if (msg.contains(OPERATION_KEY + "=")) {
             int operationCode = Integer.valueOf(msg.split(OPERATION_KEY + "=")[1].split(";")[0]);
             switch (operationCode) {
-                case INIT_REMOTE_SIGNED_BROWSER_SESSION:
-                    qrMessageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_BROWSER_SESSION);
+                case INIT_BROWSER_AUTHENTICATED_SESSION:
+                    qrMessageDto.setOperation(TypeVS.INIT_BROWSER_AUTHENTICATED_SESSION);
                     break;
                 case QR_MESSAGE_INFO:
                     qrMessageDto.setOperation(TypeVS.QR_MESSAGE_INFO);
@@ -92,26 +94,32 @@ public class QRMessageDto<T> implements Serializable {
             }
         }
         if (msg.contains(OPERATION_ID_KEY + "="))
-            qrMessageDto.setOperationId(msg.split(OPERATION_ID_KEY + "=")[1].split(";")[0]);
+            qrMessageDto.setOperationCode(msg.split(OPERATION_ID_KEY + "=")[1].split(";")[0]);
         if (msg.contains(WEB_SOCKET_SESSION_KEY + "="))
             qrMessageDto.setSessionId(msg.split(WEB_SOCKET_SESSION_KEY + "=")[1].split(";")[0]);
         if (msg.contains(PUBLIC_KEY_KEY + "="))
-            qrMessageDto.setKeyBase64(msg.split(PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
+            qrMessageDto.setPublicKeyBase64(msg.split(PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
         return qrMessageDto;
     }
 
+    @JsonIgnore
     public PublicKey getRSAPublicKey() throws Exception {
         KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
-        //qr codes replace '+' with spaces
-        keyBase64 = keyBase64.replace(" ", "+");
-        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base64.decode(keyBase64, Base64.NO_WRAP));
+        //fix qr codes replacements of '+' with spaces
+        publicKeyBase64 = publicKeyBase64.replace(" ", "+");
+        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base64.decode(publicKeyBase64, Base64.NO_WRAP));
         return factory.generatePublic(pubKeySpec);
     }
 
+    @JsonIgnore
     public DeviceDto getDevice() throws Exception {
+        if(device != null) return device;
         DeviceDto dto = new DeviceDto(deviceId);
         dto.setPublicKey(getRSAPublicKey());
         return dto;
+    }
+    public void setDevice(DeviceDto device) {
+        this.device = device;
     }
 
     public static String toQRCode(TypeVS operation, String operationId, String deviceId, String sessionId) {
@@ -232,20 +240,20 @@ public class QRMessageDto<T> implements Serializable {
         this.operation = operation;
     }
 
-    public String getOperationId() {
-        return operationId;
+    public String getOperationCode() {
+        return operationCode;
     }
 
-    public void setOperationId(String operationId) {
-        this.operationId = operationId;
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
     }
 
-    public String getKeyBase64() {
-        return keyBase64;
+    public String getPublicKeyBase64() {
+        return publicKeyBase64;
     }
 
-    public void setKeyBase64(String key) {
-        this.keyBase64 = key;
+    public void setPublicKeyBase64(String key) {
+        this.publicKeyBase64 = key;
     }
 
 }

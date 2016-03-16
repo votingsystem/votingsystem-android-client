@@ -10,12 +10,14 @@ public class WebSocketSession<T> {
 
     private TypeVS typeVS;
     private T data;
+    private SocketMessageDto lastMessage;
     private DeviceDto device;
     private String broadCastId;
     private String UUID;
 
     public WebSocketSession(SocketMessageDto socketMsg) {
         this.typeVS = socketMsg.getOperation();
+        this.lastMessage = socketMsg;
     }
 
     public WebSocketSession(DeviceDto device) {
@@ -63,4 +65,13 @@ public class WebSocketSession<T> {
         this.broadCastId = broadCastId;
         return this;
     }
+
+    public SocketMessageDto getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(SocketMessageDto lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
 }

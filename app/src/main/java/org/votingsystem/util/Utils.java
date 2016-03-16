@@ -212,6 +212,24 @@ public class Utils {
         activity.startActivityForResult(intent, requestCode);
     }
 
+    public static void getProtectionPasswordForSocketOperation(String msg, String msgUUID,
+                               Context context) {
+        Intent intent = null;
+        CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
+        switch (passwordAccessMode.getMode()) {
+            case PATTER_LOCK:
+                intent = new Intent(context, PatternLockActivity.class);
+                break;
+            case PIN:
+                intent = new Intent(context, PinActivity.class);
+                break;
+        }
+        intent.putExtra(ContextVS.MESSAGE_KEY, msg);
+        intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.WEB_SOCKET_REQUEST);
+        intent.putExtra(ContextVS.UUID_KEY, msgUUID);
+        context.startActivity(intent);
+    }
+
     //http://stackoverflow.com/questions/1995439/get-android-phone-model-programmatically
     public static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;

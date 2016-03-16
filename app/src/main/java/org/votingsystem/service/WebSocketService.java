@@ -105,43 +105,50 @@ public class WebSocketService extends Service {
         Bundle arguments = intent.getExtras();
         final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
                 (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USER;
-        final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
-        final String message = arguments.getString(ContextVS.MESSAGE_KEY);
-        final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
-        if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
-            executorService.submit(new Runnable() {
-                @Override public void run() {
-                    try {
-                        session.close();
-                    } catch (Exception ex) { ex.printStackTrace();}
-                }});
-        } else if(message != null) {
-            executorService.submit(new Runnable() {
-                @Override public void run() {
-                    try {
-                        LOGD(TAG + ".onStartCommand", "operation: " + operationType +
-                                " - socketMsg: " + message);
-                        switch(operationType) {
-                            case MESSAGEVS:
-                                List<DeviceDto> targetDevicesDto = JSON.readValue(
-                                        dtoStr, new TypeReference<List<DeviceDto>>(){});
-                                for (DeviceDto deviceDto : targetDevicesDto) {
-                                    SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
-                                            deviceDto, null, message, broadCastId);
-                                    session.getBasicRemote().sendText(
-                                            JSON.writeValueAsString(messageDto));
-                                }
-                                break;
-                            default:
-                                session.getBasicRemote().sendText(message);
+        if(operationType == TypeVS.PIN) {
+            String msgUUID = arguments.getString(ContextVS.UUID_KEY);
+            try {
+                processPIN(msgUUID);
+            } catch (Exception ex) { ex.printStackTrace(); }
+        } else {
+            final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
+            final String message = arguments.getString(ContextVS.MESSAGE_KEY);
+            final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
+            if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
+                executorService.submit(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            session.close();
+                        } catch (Exception ex) { ex.printStackTrace();}
+                    }});
+            } else if(message != null) {
+                executorService.submit(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            LOGD(TAG + ".onStartCommand", "operation: " + operationType +
+                                    " - socketMsg: " + message);
+                            switch(operationType) {
+                                case MESSAGEVS:
+                                    List<DeviceDto> targetDevicesDto = JSON.readValue(
+                                            dtoStr, new TypeReference<List<DeviceDto>>(){});
+                                    for (DeviceDto deviceDto : targetDevicesDto) {
+                                        SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
+                                                deviceDto, null, message, broadCastId);
+                                        session.getBasicRemote().sendText(
+                                                JSON.writeValueAsString(messageDto));
+                                    }
+                                    break;
+                                default:
+                                    session.getBasicRemote().sendText(message);
+                            }
+                        } catch(Exception ex) {
+                            ex.printStackTrace();
+                            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
+                                    getString(R.string.error_lbl));
                         }
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                        UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
-                                getString(R.string.error_lbl));
                     }
-                }
-            });
+                });
+            }
         }
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
@@ -161,6 +168,17 @@ public class WebSocketService extends Service {
     private void setWebSocketSession(Session session) {
         this.session = session;
         latch.countDown();
+    }
+
+    private void processPIN(String msgUUID) throws Exception {
+        WebSocketSession webSocketSession = appVS.getWSSession(msgUUID);
+        SocketMessageDto socketMessageDto = webSocketSession.getLastMessage();
+        final SocketMessageDto initSessionMessageDto = SocketMessageDto.
+                INIT_REMOTE_SIGNED_SESSION_REQUEST(socketMessageDto.getSessionId());
+        CMSSignedMessage cmsSignedMessage = AppVS.getInstance().signMessage(
+                JSON.writeValueAsBytes(initSessionMessageDto));
+        initSessionMessageDto.setCMS(cmsSignedMessage);
+        session.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));
     }
 
     private class WebSocketListener implements Runnable {
@@ -276,13 +294,11 @@ public class WebSocketService extends Service {
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 return;
             }
+            socketMsg.decryptMessage();
             if(socketSession == null) {
-                socketMsg.decryptMessage();
                 socketSession = new WebSocketSession(socketMsg);
                 appVS.putWSSession(socketMsg.getUUID(), socketSession);
-            } else {
-                if(socketMsg.isEncrypted()) socketMsg.decryptMessage();
-            }
+            } else socketSession.setLastMessage(socketMsg);
             LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
                     " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
             switch(socketMsg.getOperation()) {
@@ -333,12 +349,14 @@ public class WebSocketService extends Service {
                                 getString(R.string.error_lbl));
                     }
                     break;
-                case QR_MESSAGE_INFO_RESPONSE:
-                    switch (socketMsg.getMessageType()) {
-                        case INIT_REMOTE_SIGNED_SESSION:
-
-                            break;
+                case INIT_REMOTE_SIGNED_SESSION:
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        Utils.getProtectionPasswordForSocketOperation(
+                                getString(R.string.allow_remote_device_authenticated_session,
+                                socketMsg.getOperationCode()), socketMsg.getUUID(), this);
                     }
+                    break;
+                case QR_MESSAGE_INFO_RESPONSE:
                     break;
                 case QR_MESSAGE_INFO:
                     //the payer has read our QR code and ask for details

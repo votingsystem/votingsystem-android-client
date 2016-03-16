@@ -24,6 +24,7 @@ public class EncryptedContentDto implements Serializable {
     public static final long serialVersionUID = 1L;
 
     private TypeVS operation;
+    private String operationCode;
     private TypeVS step;
     private Integer statusCode;
     private String subject;
@@ -66,12 +67,12 @@ public class EncryptedContentDto implements Serializable {
 
     public static EncryptedContentDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
         EncryptedContentDto messageContentDto =  new EncryptedContentDto();
-        messageContentDto.setOperation(TypeVS.QR_MESSAGE_INFO);
+        messageContentDto.setOperation(qrMessageDto.getOperation());
         messageContentDto.setDeviceFromName(Utils.getDeviceName());
+        messageContentDto.setOperationCode(qrMessageDto.getOperationCode());
         messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
         messageContentDto.setX509CertificatePEM(
                 new String(PEMUtils.getPEMEncoded(AppVS.getInstance().getX509UserCert())));
-        messageContentDto.setMessage(qrMessageDto.getUUID());
         return messageContentDto;
     }
 
@@ -261,5 +262,13 @@ public class EncryptedContentDto implements Serializable {
 
     public void setPublicKeyPEM(String publicKeyPEM) {
         this.publicKeyPEM = publicKeyPEM;
+    }
+
+    public String getOperationCode() {
+        return operationCode;
+    }
+
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
     }
 }

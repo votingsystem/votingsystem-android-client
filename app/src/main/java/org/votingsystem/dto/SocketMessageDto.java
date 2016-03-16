@@ -42,19 +42,12 @@ public class SocketMessageDto implements Serializable {
 
     public static final String TAG = SocketMessageDto.class.getSimpleName();
 
-    public String getPublicKeyPEM() {
-        return publicKeyPEM;
-    }
-
-    public void setPublicKeyPEM(String publicKeyPEM) {
-        this.publicKeyPEM = publicKeyPEM;
-    }
-
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
 
     private TypeVS operation;
+    private String operationCode;
     private TypeVS messageType;
-    private TypeVS messageSubType;
+    private TypeVS step;
     private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
@@ -73,7 +66,7 @@ public class SocketMessageDto implements Serializable {
     private String from;
     private String caption;
     private String deviceId;
-    private boolean timeLimited;
+    private Boolean timeLimited;
     private String deviceFromName;
     private String deviceToName;
     private String toUser;
@@ -124,7 +117,7 @@ public class SocketMessageDto implements Serializable {
         return messageDto;
     }
 
-    public static SocketMessageDto INIT_REMOTE_SESSION_REQUEST_BY_TARGET_SESSION_ID(String sessionId)
+    public static SocketMessageDto INIT_REMOTE_SIGNED_SESSION_REQUEST(String sessionId)
             throws NoSuchAlgorithmException {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
@@ -142,13 +135,29 @@ public class SocketMessageDto implements Serializable {
         return this;
     }
 
-    public TypeVS getMessageSubType() {
-        return messageSubType;
+    public TypeVS getStep() {
+        return step;
     }
 
-    public SocketMessageDto setMessageSubType(TypeVS messageSubType) {
-        this.messageSubType = messageSubType;
+    public SocketMessageDto setStep(TypeVS step) {
+        this.step = step;
         return this;
+    }
+
+    public String getPublicKeyPEM() {
+        return publicKeyPEM;
+    }
+
+    public void setPublicKeyPEM(String publicKeyPEM) {
+        this.publicKeyPEM = publicKeyPEM;
+    }
+
+    public String getOperationCode() {
+        return operationCode;
+    }
+
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
     }
 
     public String getToUser() {
@@ -331,11 +340,11 @@ public class SocketMessageDto implements Serializable {
         this.deviceId = deviceId;
     }
 
-    public boolean isTimeLimited() {
+    public Boolean isTimeLimited() {
         return timeLimited;
     }
 
-    public void setTimeLimited(boolean timeLimited) {
+    public void setTimeLimited(Boolean timeLimited) {
         this.timeLimited = timeLimited;
     }
 
@@ -431,23 +440,23 @@ public class SocketMessageDto implements Serializable {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getQRInfoRequestByTargetDeviceId(
-            DeviceDto device, QRMessageDto qrMessageDto) throws Exception {
+    public static SocketMessageDto getQRInfoRequest(
+            QRMessageDto qrMessageDto) throws Exception {
+        DeviceDto device = qrMessageDto.getDevice();
         qrMessageDto.createRequest();
-        WebSocketSession socketSession = checkWebSocketSession(device, null, TypeVS.QR_MESSAGE_INFO);
-        socketSession.setData(qrMessageDto);
+        WebSocketSession socketSession = checkWebSocketSession(device, null,
+                qrMessageDto.getOperation());
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setMessage(qrMessageDto.getOperationId());
-        socketMessageDto.setMessageType(qrMessageDto.getOperation());
         socketMessageDto.setDeviceToId(device.getId());
-        socketMessageDto.setDeviceToName(device.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(
-                qrMessageDto);
+        EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(qrMessageDto);
+        encryptedDto.setDeviceToName(device.getDeviceName());
+        encryptedDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         encryptMessage(socketMessageDto, encryptedDto, device);
+        socketSession.setData(qrMessageDto);
+        socketSession.setLastMessage(socketMessageDto);
         return socketMessageDto;
     }
 
@@ -462,17 +471,6 @@ public class SocketMessageDto implements Serializable {
                     JSON.writeValueAsBytes(encryptedDto), device.getPublicKey());
             socketMessageDto.setEncryptedMessage(new String(encryptedCMS_PEM));
         } else LOGD(TAG, "target device without public key data");
-    }
-
-    public static SocketMessageDto getPlainQRInfoRequestByTargetSessionId(String sessionId) throws Exception {
-        DeviceDto deviceDto = new DeviceDto().setSessionId(sessionId);
-        WebSocketSession socketSession = checkWebSocketSession(deviceDto, null, TypeVS.QR_MESSAGE_INFO);
-        SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
-        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setSessionId(sessionId);
-        socketMessageDto.setUUID(socketSession.getUUID());
-        return socketMessageDto;
     }
 
     public static SocketMessageDto getCurrencyWalletChangeRequest(DeviceDto device,
@@ -524,6 +522,8 @@ public class SocketMessageDto implements Serializable {
             this.messageType = operation;
             operation = encryptedDto.getOperation();
         }
+        if(encryptedDto.getOperationCode() != null) operationCode = encryptedDto.getOperationCode();
+        if(encryptedDto.getStep() != null) step = encryptedDto.getStep();
         if(encryptedDto.getStatusCode() != null) statusCode = encryptedDto.getStatusCode();
         if(encryptedDto.getDeviceFromName() != null) deviceFromName = encryptedDto.getDeviceFromName();
         if(encryptedDto.getFrom() != null) from = encryptedDto.getFrom();

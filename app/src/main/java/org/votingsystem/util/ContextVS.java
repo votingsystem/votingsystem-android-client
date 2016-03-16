@@ -83,6 +83,7 @@ public class ContextVS {
     public static final String CAPTION_KEY = "CAPTION";
     public static final String IMAGE_KEY = "IMAGE_KEY";
     public static final String OPERATION_KEY = "OPERATION_KEY";
+    public static final String UUID_KEY = "UUID_KEY";
     public static final String LIST_STATE_KEY = "LIST_STATE";
     public static final String ITEM_ID_KEY = "ITEM_ID";
     public static final String USER_ACCOUNT_LAST_CHECKED_KEY = "USER_ACCOUNT_LAST_CHECKED_KEY";

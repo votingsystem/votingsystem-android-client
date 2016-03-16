@@ -10,11 +10,13 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
+import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.ui.PatternLockView;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -41,6 +43,8 @@ public class PatternLockActivity extends AppCompatActivity {
     private Boolean withPasswordConfirm;
     private String newPin;
     private String firstPin;
+    private String msgUUID;
+    private TypeVS operation;
     private CryptoDeviceAccessMode passwAccessMode;
     private char[] dniePassword;
 
@@ -52,6 +56,8 @@ public class PatternLockActivity extends AppCompatActivity {
         UIUtils.setSupportActionBar(this);
         mCircleLockView = (PatternLockView) findViewById(R.id.lock_view_circle);
         msgTextView = (TextView) findViewById(R.id.msg);
+        operation = (TypeVS) getIntent().getSerializableExtra(ContextVS.OPERATION_KEY);
+        msgUUID = getIntent().getStringExtra(ContextVS.UUID_KEY);
         if(getIntent().getStringExtra(ContextVS.MESSAGE_KEY) != null) {
             msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(ContextVS.MESSAGE_KEY)));
         }
@@ -148,7 +154,12 @@ public class PatternLockActivity extends AppCompatActivity {
                 if(!passwAccessMode.validateHash(passw, this)) return;
                 break;
         }
-        finishOK(passw);
+        if(operation == TypeVS.WEB_SOCKET_REQUEST) {
+            Intent startIntent = new Intent(this, WebSocketService.class);
+            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.PIN);
+            startIntent.putExtra(ContextVS.UUID_KEY, msgUUID);
+            startService(startIntent);
+        } else finishOK(passw);
     }
 
     private void showResultDialog() {
