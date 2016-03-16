@@ -12,8 +12,10 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.Serializable;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -99,8 +101,11 @@ public class QRMessageDto<T> implements Serializable {
     }
 
     public PublicKey getRSAPublicKey() throws Exception {
-        PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(Base64.decode(keyBase64, Base64.NO_WRAP));
-        return publicKey;
+        KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
+        //qr codes replace '+' with spaces
+        keyBase64 = keyBase64.replace(" ", "+");
+        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base64.decode(keyBase64, Base64.NO_WRAP));
+        return factory.generatePublic(pubKeySpec);
     }
 
     public DeviceDto getDevice() throws Exception {
