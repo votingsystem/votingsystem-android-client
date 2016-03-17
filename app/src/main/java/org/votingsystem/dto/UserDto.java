@@ -8,6 +8,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
+import org.bouncycastle2.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle2.asn1.x500.RDN;
+import org.bouncycastle2.asn1.x500.X500Name;
+import org.bouncycastle2.asn1.x500.style.BCStyle;
+import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.jce.X509Principal;
 import org.votingsystem.util.ContextVS;
@@ -18,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,22 +87,32 @@ public class UserDto implements Serializable {
         this.email = email;
     }
 
+    @JsonIgnore
+    public static UserDto getUser(X500Name subject) {
+        UserDto result = new UserDto();
+        for(RDN rdn : subject.getRDNs()) {
+            AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
+            if(BCStyle.SERIALNUMBER.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setNIF(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.SURNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setLastName(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.GIVENNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setFirstName(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.CN.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setCn(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.C.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setCountry(attributeTypeAndValue.getValue().toString());
+            } else LOGD(TAG, "oid: " + attributeTypeAndValue.getType().getId() +
+                    " - value: " + attributeTypeAndValue.getValue().toString());
+        }
+        return result;
+    }
 
     @JsonIgnore
-    public static UserDto getUser(X509Certificate x509Cert) {
-        UserDto user = new UserDto();
+    public static UserDto getUser(X509Certificate x509Cert) throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(x509Cert).getSubject();
+        UserDto user = getUser(x500name);
         user.setCertificate(x509Cert);
-        String subjectDN = x509Cert.getSubjectDN().getName();
-        if (subjectDN.contains("C="))
-            user.setCountry(subjectDN.split("C=")[1].split(",")[0]);
-        if (subjectDN.contains("SERIALNUMBER="))
-            user.setNIF(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
-        if (subjectDN.contains("SURNAME="))
-            user.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("GIVENNAME="))
-            user.setFirstName(subjectDN.split("GIVENNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("CN="))
-            user.setCn(subjectDN.split("CN=")[1]);
         try {
             CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
                     x509Cert, ContextVS.DEVICE_OID);

@@ -587,10 +587,11 @@
     <string name="retries_exceeded_msg">debe establecer de nuevo la contraseña utilizando su DNI</string>
     <string name="disconnect_from_service_quesion_msg">¿Desea desconectar del servicio?</string>
     <string name="connection_passw_msg">Introduzca la contraseña para poder conectar al servicio</string>
-    <string name="allow_remote_device_authenticated_session"><![CDATA[<b><span style='font-size:1.2em;'>%1$s</span></b><br/>
+    <string name="allow_remote_device_authenticated_session"><![CDATA[<b><span style=\'font-size:1.2em;\'>%1$s</span></b><br/>
         Iniciar autenticación de dispositivo remoto]]></string>
     <string name="non_rooted_phones_required_msg">la aplicación sólo se puede ejecutar en teléfonos que no han sido  rooteados</string>
     <string name="enter_new_passw_to_app_msg">introduzca la contraseña con la que protegerá sus operaciones de firma</string>
     <string name="idcard_signing_caption">Proceso de firma con el DNI electrónico</string>
     <string name="confirm_sign_msg">¿Desea continuar con el procedimiento?</string>
+    <string name="dnie_connection_null_error_msg">por favor, compruebe su conexión a red y vuelva a intentarlo</string>
 </resources>

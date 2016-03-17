@@ -1,6 +1,5 @@
 package org.votingsystem.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,8 +25,6 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.callable.SignerTask;
-import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -139,8 +136,8 @@ public class QRActionsFragment extends Fragment {
                 try {
                     switch (qrMessageDto.getOperation()) {
                         case INIT_REMOTE_SIGNED_SESSION:
-                            SocketMessageDto socketMessage = SocketMessageDto.
-                                    getQRInfoRequest(qrMessageDto);
+                            SocketMessageDto socketMessage =
+                                    SocketMessageDto.getQRInfoRequest(qrMessageDto);
                             sendQRRequestInfo(socketMessage);
                             break;
                     }

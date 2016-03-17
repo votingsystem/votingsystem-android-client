@@ -44,6 +44,7 @@ public class EncryptedContentDto implements Serializable {
     private boolean timeLimited = false;
     private Set<CurrencyDto> currencyList;
     private String URL;
+    private String UUID;
 
     public EncryptedContentDto() { }
 
@@ -55,47 +56,49 @@ public class EncryptedContentDto implements Serializable {
     }
 
     public static EncryptedContentDto getSignRequest(String toUser,
-                                                     String textToSign, String subject) throws Exception {
-        EncryptedContentDto messageContentDto =  new EncryptedContentDto();
-        messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
-        messageContentDto.setDeviceFromName(Utils.getDeviceName());
-        messageContentDto.setToUser(toUser);
-        messageContentDto.setContentToSign(textToSign);
-        messageContentDto.setSubject(subject);
-        return messageContentDto;
+                                         String textToSign, String subject) throws Exception {
+        EncryptedContentDto encryptedContentDto =  new EncryptedContentDto();
+        encryptedContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
+        encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
+        encryptedContentDto.setToUser(toUser);
+        encryptedContentDto.setContentToSign(textToSign);
+        encryptedContentDto.setSubject(subject);
+        return encryptedContentDto;
     }
 
-    public static EncryptedContentDto getQRInfoRequest(QRMessageDto qrMessageDto) throws Exception {
-        EncryptedContentDto messageContentDto =  new EncryptedContentDto();
-        messageContentDto.setOperation(qrMessageDto.getOperation());
-        messageContentDto.setDeviceFromName(Utils.getDeviceName());
-        messageContentDto.setOperationCode(qrMessageDto.getOperationCode());
-        messageContentDto.setHashCertVS(qrMessageDto.getHashCertVS());
-        messageContentDto.setX509CertificatePEM(
+    public static EncryptedContentDto getQRInfoRequest(QRMessageDto qrMessage) throws Exception {
+        EncryptedContentDto encryptedContentDto =  new EncryptedContentDto();
+        encryptedContentDto.setOperation(qrMessage.getOperation());
+        encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
+        encryptedContentDto.setOperationCode(qrMessage.getOperationCode());
+        encryptedContentDto.setHashCertVS(qrMessage.getHashCertVS());
+        encryptedContentDto.setX509CertificatePEM(
                 new String(PEMUtils.getPEMEncoded(AppVS.getInstance().getX509UserCert())));
-        return messageContentDto;
+        encryptedContentDto.setUUID(qrMessage.getUUID());
+        return encryptedContentDto;
     }
 
     public static EncryptedContentDto getCurrencyWalletChangeRequest(
             Collection<Currency> currencyList) throws Exception {
-        EncryptedContentDto messageContentDto = new EncryptedContentDto();
-        messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
-        messageContentDto.setDeviceFromName(Utils.getDeviceName());
-        messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
-        messageContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
-        return messageContentDto;
+        EncryptedContentDto encryptedContentDto = new EncryptedContentDto();
+        encryptedContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
+        encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
+        encryptedContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+        encryptedContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
+        encryptedContentDto.setTimeLimited(true);
+        return encryptedContentDto;
     }
 
     public static EncryptedContentDto getMessageVSToDevice(
             UserDto user, String toUser, String message) throws Exception {
-        EncryptedContentDto messageContentDto = new EncryptedContentDto();
-        messageContentDto.setOperation(TypeVS.MESSAGEVS);
-        messageContentDto.setFrom(user.getFullName());
-        messageContentDto.setDeviceFromName(Utils.getDeviceName());
-        messageContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
-        messageContentDto.setToUser(toUser);
-        messageContentDto.setMessage(message);
-        return messageContentDto;
+        EncryptedContentDto encryptedContentDto = new EncryptedContentDto();
+        encryptedContentDto.setOperation(TypeVS.MESSAGEVS);
+        encryptedContentDto.setFrom(user.getFullName());
+        encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
+        encryptedContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+        encryptedContentDto.setToUser(toUser);
+        encryptedContentDto.setMessage(message);
+        return encryptedContentDto;
     }
 
     public TypeVS getOperation() {
@@ -270,5 +273,14 @@ public class EncryptedContentDto implements Serializable {
 
     public void setOperationCode(String operationCode) {
         this.operationCode = operationCode;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public EncryptedContentDto setUUID(String UUID) {
+        this.UUID = UUID;
+        return this;
     }
 }

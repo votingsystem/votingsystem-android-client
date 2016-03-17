@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 
 /**
@@ -11,6 +12,7 @@ public class WebSocketSession<T> {
     private TypeVS typeVS;
     private T data;
     private SocketMessageDto lastMessage;
+    private QRMessageDto qrMessage;
     private DeviceDto device;
     private String broadCastId;
     private String UUID;
@@ -18,6 +20,7 @@ public class WebSocketSession<T> {
     public WebSocketSession(SocketMessageDto socketMsg) {
         this.typeVS = socketMsg.getOperation();
         this.lastMessage = socketMsg;
+        this.UUID = socketMsg.getUUID();
     }
 
     public WebSocketSession(DeviceDto device) {
@@ -74,4 +77,11 @@ public class WebSocketSession<T> {
         this.lastMessage = lastMessage;
     }
 
+    public QRMessageDto getQrMessage() {
+        return qrMessage;
+    }
+
+    public void setQrMessage(QRMessageDto qrMessage) {
+        this.qrMessage = qrMessage;
+    }
 }

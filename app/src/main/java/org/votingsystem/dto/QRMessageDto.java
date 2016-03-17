@@ -38,7 +38,7 @@ public class QRMessageDto<T> implements Serializable {
     public static final String WEB_SOCKET_SESSION_KEY = "wsid";
     public static final String DEVICE_ID_KEY          = "did";
     public static final String OPERATION_KEY          = "op";
-    public static final String OPERATION_ID_KEY       = "opid";
+    public static final String OPERATION_CODE_KEY = "opid";
     public static final String PUBLIC_KEY_KEY         = "pk";
 
 
@@ -81,6 +81,9 @@ public class QRMessageDto<T> implements Serializable {
         if (msg.contains(OPERATION_KEY + "=")) {
             int operationCode = Integer.valueOf(msg.split(OPERATION_KEY + "=")[1].split(";")[0]);
             switch (operationCode) {
+                case INIT_REMOTE_SIGNED_SESSION:
+                    qrMessageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+                    break;
                 case INIT_BROWSER_AUTHENTICATED_SESSION:
                     qrMessageDto.setOperation(TypeVS.INIT_BROWSER_AUTHENTICATED_SESSION);
                     break;
@@ -93,8 +96,8 @@ public class QRMessageDto<T> implements Serializable {
                     LOGD(TAG, "unknown operation code: " + operationCode);
             }
         }
-        if (msg.contains(OPERATION_ID_KEY + "="))
-            qrMessageDto.setOperationCode(msg.split(OPERATION_ID_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(OPERATION_CODE_KEY + "="))
+            qrMessageDto.setOperationCode(msg.split(OPERATION_CODE_KEY + "=")[1].split(";")[0]);
         if (msg.contains(WEB_SOCKET_SESSION_KEY + "="))
             qrMessageDto.setSessionId(msg.split(WEB_SOCKET_SESSION_KEY + "=")[1].split(";")[0]);
         if (msg.contains(PUBLIC_KEY_KEY + "="))
@@ -122,11 +125,11 @@ public class QRMessageDto<T> implements Serializable {
         this.device = device;
     }
 
-    public static String toQRCode(TypeVS operation, String operationId, String deviceId, String sessionId) {
+    public static String toQRCode(TypeVS operation, String operationCode, String deviceId, String sessionId) {
         StringBuilder result = new StringBuilder();
         if(deviceId != null) result.append(DEVICE_ID_KEY + "=" + deviceId + ";");
         if(operation != null) result.append(OPERATION_KEY + "=" + operation + ";");
-        if(operationId != null) result.append(OPERATION_ID_KEY + "=" + operationId + ";");
+        if(operationCode != null) result.append(OPERATION_CODE_KEY + "=" + operationCode + ";");
         if(sessionId != null) result.append(WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";");
         return result.toString();
     }
@@ -138,17 +141,19 @@ public class QRMessageDto<T> implements Serializable {
         return result;
     }
 
-    public void createRequest() throws NoSuchAlgorithmException {
+    public QRMessageDto createRequest() throws NoSuchAlgorithmException {
         this.origingHashCertVS = java.util.UUID.randomUUID().toString();
         this.hashCertVS = StringUtils.getHashBase64(origingHashCertVS, ContextVS.DATA_DIGEST_ALGORITHM);
+        return this;
     }
 
     public String getUUID() {
         return UUID;
     }
 
-    public void setUUID(String UUID) {
+    public QRMessageDto setUUID(String UUID) {
         this.UUID = UUID;
+        return this;
     }
 
     public Long getDeviceId() {
@@ -246,6 +251,7 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setOperationCode(String operationCode) {
         this.operationCode = operationCode;
+        if(this.operationCode != null) this.operationCode = this.operationCode.toUpperCase();
     }
 
     public String getPublicKeyBase64() {

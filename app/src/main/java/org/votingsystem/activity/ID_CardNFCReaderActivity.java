@@ -239,6 +239,10 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				String msg = ex.getMessage() != null ? ex.getMessage() :
 						getString(R.string.dnie_connection_error_msg);
 				showMessageDialog(getString(R.string.error_lbl), msg);
+			}  catch (NullPointerException ex) {
+				ex.printStackTrace();
+				showMessageDialog(getString(R.string.error_lbl),
+						getString(R.string.dnie_connection_null_error_msg));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				showMessageDialog(getString(R.string.error_lbl), ex.getMessage());

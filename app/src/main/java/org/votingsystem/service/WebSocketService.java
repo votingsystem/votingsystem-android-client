@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -23,6 +24,7 @@ import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.dto.RemoteSignedSessionDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -39,6 +41,7 @@ import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 import org.votingsystem.util.WebSocketSession;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -171,14 +174,26 @@ public class WebSocketService extends Service {
     }
 
     private void processPIN(String msgUUID) throws Exception {
+        //RemoteSignedSessionDto
         WebSocketSession webSocketSession = appVS.getWSSession(msgUUID);
         SocketMessageDto socketMessageDto = webSocketSession.getLastMessage();
-        final SocketMessageDto initSessionMessageDto = SocketMessageDto.
-                INIT_REMOTE_SIGNED_SESSION_REQUEST(socketMessageDto.getSessionId());
-        CMSSignedMessage cmsSignedMessage = AppVS.getInstance().signMessage(
-                JSON.writeValueAsBytes(initSessionMessageDto));
-        initSessionMessageDto.setCMS(cmsSignedMessage);
-        session.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));
+        switch (socketMessageDto.getOperation()) {
+            case INIT_REMOTE_SIGNED_SESSION:
+                RemoteSignedSessionDto remoteSignedSessionDto =
+                        socketMessageDto.getMessage(RemoteSignedSessionDto.class);
+                PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(
+                        remoteSignedSessionDto.getCsr());
+
+                /*CMSSignedMessage cmsSignedMessage = AppVS.getInstance().signMessage(
+                        JSON.writeValueAsBytes(initSessionMessageDto));
+                final SocketMessageDto initSessionMessageDto = SocketMessageDto.
+                        INIT_REMOTE_SIGNED_SESSION_REQUEST(socketMessageDto.getSessionId());
+
+                initSessionMessageDto.setCMS(cmsSignedMessage);
+                session.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));*/
+                break;
+        }
+
     }
 
     private class WebSocketListener implements Runnable {
@@ -264,7 +279,8 @@ public class WebSocketService extends Service {
             Intent intent =  new Intent(ContextVS.WEB_SOCKET_BROADCAST_ID);
             intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
             WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
-            if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_VS) { //check messages from system
+            //check messages from system
+            if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_VS) {
                 socketMsg.setOperation(socketMsg.getMessageType());
                 LOGD(TAG, "MESSAGEVS_FROM_VS - operation: " + socketMsg.getOperation());
                 if(socketMsg.getOperation() != null) {

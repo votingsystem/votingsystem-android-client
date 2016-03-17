@@ -117,12 +117,12 @@ public class SocketMessageDto implements Serializable {
         return messageDto;
     }
 
-    public static SocketMessageDto INIT_REMOTE_SIGNED_SESSION_REQUEST(String sessionId)
-            throws NoSuchAlgorithmException {
+    //message to server
+    public static SocketMessageDto INIT_REMOTE_SIGNED_SESSION_REQUEST(
+            CMSSignedMessage cmsSignedMessage) throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
-        messageDto.setSessionId(sessionId);
-        messageDto.setUUID(java.util.UUID.randomUUID().toString());
+        messageDto.setCMS(cmsSignedMessage);
         return messageDto;
     }
 
@@ -268,12 +268,12 @@ public class SocketMessageDto implements Serializable {
         return message;
     }
 
-    public <S> S getMessage(Class<S> type) throws Exception {
-        return JSON.readValue(message, type);
+    public <T> T getMessage(Class<T> type) throws Exception {
+        return JSON.getMapper().readValue(message, type);
     }
 
-    public <T> T getMessage(TypeReference<T> type) throws Exception {
-        return JSON.readValue(message, type);
+    public <T> T getMessage(TypeReference type) throws Exception {
+        return JSON.getMapper().readValue(message, type);
     }
 
     public void setMessage(String message) {
@@ -440,23 +440,23 @@ public class SocketMessageDto implements Serializable {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getQRInfoRequest(
-            QRMessageDto qrMessageDto) throws Exception {
-        DeviceDto device = qrMessageDto.getDevice();
-        qrMessageDto.createRequest();
+    public static SocketMessageDto getQRInfoRequest(QRMessageDto qrMessage) throws Exception {
+        DeviceDto device = qrMessage.getDevice();
         WebSocketSession socketSession = checkWebSocketSession(device, null,
-                qrMessageDto.getOperation());
+                qrMessage.getOperation());
+        qrMessage.setUUID(socketSession.getUUID()).createRequest();
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(device.getId());
-        socketMessageDto.setUUID(socketSession.getUUID());
-        EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(qrMessageDto);
+        EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(qrMessage)
+                .setUUID(socketSession.getUUID());
         encryptedDto.setDeviceToName(device.getDeviceName());
         encryptedDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
         encryptMessage(socketMessageDto, encryptedDto, device);
-        socketSession.setData(qrMessageDto);
+        socketSession.setData(qrMessage);
         socketSession.setLastMessage(socketMessageDto);
+        socketSession.setQrMessage(qrMessage);
         return socketMessageDto;
     }
 
@@ -479,7 +479,6 @@ public class SocketMessageDto implements Serializable {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
         socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setDeviceToName(device.getDeviceName());
