@@ -247,6 +247,14 @@ public class UserDto implements Serializable {
         return this;
     }
 
+    @JsonIgnore
+    public boolean checkUserFromCSR(UserDto userToChek) {
+        if(!NIF.equals(userToChek.getNIF())) return false;
+        if(!firstName.equals(userToChek.getFirstName())) return false;
+        if(!lastName.equals(userToChek.getLastName())) return false;
+        return true;
+    }
+
     public String getReason() {
         return reason;
     }

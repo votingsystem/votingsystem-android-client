@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
@@ -58,6 +59,12 @@ public class PatternLockActivity extends AppCompatActivity {
         msgTextView = (TextView) findViewById(R.id.msg);
         operation = (TypeVS) getIntent().getSerializableExtra(ContextVS.OPERATION_KEY);
         msgUUID = getIntent().getStringExtra(ContextVS.UUID_KEY);
+        String operationCode = getIntent().getStringExtra(ContextVS.OPERATION_CODE_KEY);
+        if(operationCode != null) {
+            TextView operationCodeText = (TextView) findViewById(R.id.operation_code);
+            operationCodeText.setText(operationCode);
+            operationCodeText.setVisibility(View.VISIBLE);
+        }
         if(getIntent().getStringExtra(ContextVS.MESSAGE_KEY) != null) {
             msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(ContextVS.MESSAGE_KEY)));
         }
@@ -159,7 +166,8 @@ public class PatternLockActivity extends AppCompatActivity {
             startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.PIN);
             startIntent.putExtra(ContextVS.UUID_KEY, msgUUID);
             startService(startIntent);
-        } else finishOK(passw);
+        }
+        finishOK(passw);
     }
 
     private void showResultDialog() {

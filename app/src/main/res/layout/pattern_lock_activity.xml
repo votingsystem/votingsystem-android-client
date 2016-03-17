@@ -24,6 +24,18 @@
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:text="@string/enter_password_msg" />
+    <TextView
+        android:id="@+id/operation_code"
+        android:layout_width="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:layout_height="wrap_content"
+        android:textColor="#888"
+        android:textSize="35dp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:gravity="center"/>
 
     <org.votingsystem.ui.PatternLockView
         android:id="@+id/lock_view_circle"

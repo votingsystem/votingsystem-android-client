@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
+import org.bouncycastle2.pkcs.PKCS10CertificationRequestHolder;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -26,6 +27,7 @@ import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.RemoteSignedSessionDto;
 import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.fragment.PaymentFragment;
@@ -35,6 +37,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
+import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -74,7 +77,8 @@ public class WebSocketService extends Service {
 
     public static final String TAG = WebSocketService.class.getSimpleName();
 
-    public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
+    public static final String SSL_ENGINE_CONFIGURATOR =
+            "org.glassfish.tyrus.client.sslEngineConfigurator";
 
     private AppVS appVS;
     private Session session;
@@ -102,17 +106,20 @@ public class WebSocketService extends Service {
         try {
             if(latch.getCount() > 0) latch.await();
         } catch(Exception ex) {
-            LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET SERVICE: " + ex.getMessage());
+            LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET: " + ex.getMessage());
             ex.printStackTrace();
         }
-        Bundle arguments = intent.getExtras();
+        final Bundle arguments = intent.getExtras();
         final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
                 (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USER;
         if(operationType == TypeVS.PIN) {
-            String msgUUID = arguments.getString(ContextVS.UUID_KEY);
-            try {
-                processPIN(msgUUID);
-            } catch (Exception ex) { ex.printStackTrace(); }
+            executorService.submit(new Runnable() {
+                @Override public void run() {
+                    try {
+                        String msgUUID = arguments.getString(ContextVS.UUID_KEY);
+                        processPIN(msgUUID);
+                    } catch (Exception ex) { ex.printStackTrace();}
+                }});
         } else {
             final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
             final String message = arguments.getString(ContextVS.MESSAGE_KEY);
@@ -174,7 +181,7 @@ public class WebSocketService extends Service {
     }
 
     private void processPIN(String msgUUID) throws Exception {
-        //RemoteSignedSessionDto
+        LOGD(TAG, "processPIN - msgUUID: " + msgUUID);
         WebSocketSession webSocketSession = appVS.getWSSession(msgUUID);
         SocketMessageDto socketMessageDto = webSocketSession.getLastMessage();
         switch (socketMessageDto.getOperation()) {
@@ -182,18 +189,23 @@ public class WebSocketService extends Service {
                 RemoteSignedSessionDto remoteSignedSessionDto =
                         socketMessageDto.getMessage(RemoteSignedSessionDto.class);
                 PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(
-                        remoteSignedSessionDto.getCsr());
-
-                /*CMSSignedMessage cmsSignedMessage = AppVS.getInstance().signMessage(
-                        JSON.writeValueAsBytes(initSessionMessageDto));
-                final SocketMessageDto initSessionMessageDto = SocketMessageDto.
-                        INIT_REMOTE_SIGNED_SESSION_REQUEST(socketMessageDto.getSessionId());
-
-                initSessionMessageDto.setCMS(cmsSignedMessage);
-                session.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));*/
+                        remoteSignedSessionDto.getCsr().getBytes());
+                PKCS10CertificationRequestHolder csrHolder =
+                        new PKCS10CertificationRequestHolder(csr.getEncoded());
+                UserDto userFromCSR = UserDto.getUser(csrHolder.getSubject());
+                if(!appVS.getUser().checkUserFromCSR(userFromCSR)) {
+                    UIUtils.launchMessageActivity(ResponseVS.SC_ERROR,
+                            MsgUtils.userFromCSRMissmatch(userFromCSR),
+                            getString(R.string.error_lbl));
+                } else {
+                    CMSSignedMessage cmsSignedMessage = AppVS.getInstance().signMessage(
+                            JSON.writeValueAsBytes(remoteSignedSessionDto));
+                    SocketMessageDto initSessionMessageDto = SocketMessageDto.
+                            INIT_REMOTE_SIGNED_SESSION_REQUEST(cmsSignedMessage);
+                    session.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));
+                }
                 break;
         }
-
     }
 
     private class WebSocketListener implements Runnable {
@@ -368,8 +380,10 @@ public class WebSocketService extends Service {
                 case INIT_REMOTE_SIGNED_SESSION:
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         Utils.getProtectionPasswordForSocketOperation(
-                                getString(R.string.allow_remote_device_authenticated_session,
-                                socketMsg.getOperationCode()), socketMsg.getUUID(), this);
+                                getString(R.string.allow_remote_device_authenticated_session),
+                                socketMsg.getUUID(),
+                                socketMsg.getOperationCode(),
+                                this);
                     }
                     break;
                 case QR_MESSAGE_INFO_RESPONSE:

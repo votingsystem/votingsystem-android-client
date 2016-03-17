@@ -11,15 +11,15 @@ import java.io.Serializable;
 public class RemoteSignedSessionDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private byte[] csr;
+    private String csr;
     private Long deviceId;
     private String sessionId;
 
-    public byte[] getCsr() {
+    public String getCsr() {
         return csr;
     }
 
-    public void setCsr(byte[] csr) {
+    public void setCsr(String csr) {
         this.csr = csr;
     }
 

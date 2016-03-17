@@ -8,6 +8,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.voting.EventVSDto;
@@ -247,5 +248,10 @@ public class MsgUtils {
         String result = context.getString(R.string.updated_currency_with_error_msg) + ":<br/>" +
                 sb.toString();
         return result;
+    }
+
+    public static String userFromCSRMissmatch(UserDto userFromCSR) {
+        return AppVS.getInstance().getString(R.string.user_from_csr_missmatch_msg,
+                userFromCSR.getName(), userFromCSR.getNIF());
     }
 }

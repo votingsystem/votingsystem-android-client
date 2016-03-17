@@ -212,8 +212,9 @@ public class Utils {
         activity.startActivityForResult(intent, requestCode);
     }
 
+
     public static void getProtectionPasswordForSocketOperation(String msg, String msgUUID,
-                               Context context) {
+                   String operationCode, Context context) {
         Intent intent = null;
         CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
         switch (passwordAccessMode.getMode()) {
@@ -226,6 +227,8 @@ public class Utils {
         }
         intent.putExtra(ContextVS.MESSAGE_KEY, msg);
         intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.WEB_SOCKET_REQUEST);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(ContextVS.OPERATION_CODE_KEY, operationCode);
         intent.putExtra(ContextVS.UUID_KEY, msgUUID);
         context.startActivity(intent);
     }
