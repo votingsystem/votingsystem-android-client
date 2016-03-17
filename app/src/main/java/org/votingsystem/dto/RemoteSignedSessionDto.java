@@ -14,6 +14,11 @@ public class RemoteSignedSessionDto implements Serializable {
     private String csr;
     private Long deviceId;
     private String sessionId;
+    private String UUID;
+
+    public RemoteSignedSessionDto() {
+        UUID = java.util.UUID.randomUUID().toString();
+    }
 
     public String getCsr() {
         return csr;
@@ -37,5 +42,13 @@ public class RemoteSignedSessionDto implements Serializable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 }

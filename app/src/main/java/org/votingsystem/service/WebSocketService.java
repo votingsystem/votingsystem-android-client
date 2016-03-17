@@ -193,7 +193,7 @@ public class WebSocketService extends Service {
                 PKCS10CertificationRequestHolder csrHolder =
                         new PKCS10CertificationRequestHolder(csr.getEncoded());
                 UserDto userFromCSR = UserDto.getUser(csrHolder.getSubject());
-                if(!appVS.getUser().checkUserFromCSR(userFromCSR)) {
+                if(!userFromCSR.checkUserFromCSR(appVS.getX509UserCert())) {
                     UIUtils.launchMessageActivity(ResponseVS.SC_ERROR,
                             MsgUtils.userFromCSRMissmatch(userFromCSR),
                             getString(R.string.error_lbl));

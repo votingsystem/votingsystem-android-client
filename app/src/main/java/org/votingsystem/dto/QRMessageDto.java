@@ -30,9 +30,8 @@ public class QRMessageDto<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int INIT_REMOTE_SIGNED_SESSION         = 0;
-    public static final int INIT_BROWSER_AUTHENTICATED_SESSION = 1;
-    public static final int QR_MESSAGE_INFO                    = 2;
-    public static final int CURRENCY_SEND                      = 3;
+    public static final int QR_MESSAGE_INFO                    = 1;
+    public static final int CURRENCY_SEND                      = 2;
 
 
     public static final String WEB_SOCKET_SESSION_KEY = "wsid";
@@ -83,9 +82,6 @@ public class QRMessageDto<T> implements Serializable {
             switch (operationCode) {
                 case INIT_REMOTE_SIGNED_SESSION:
                     qrMessageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
-                    break;
-                case INIT_BROWSER_AUTHENTICATED_SESSION:
-                    qrMessageDto.setOperation(TypeVS.INIT_BROWSER_AUTHENTICATED_SESSION);
                     break;
                 case QR_MESSAGE_INFO:
                     qrMessageDto.setOperation(TypeVS.QR_MESSAGE_INFO);

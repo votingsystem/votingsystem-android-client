@@ -539,6 +539,7 @@ public class SocketMessageDto implements Serializable {
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
         if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
         if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
+        if(encryptedDto.getUUID() != null) UUID = encryptedDto.getUUID();
         timeLimited = encryptedDto.isTimeLimited();
         this.encryptedMessage = null;
     }

@@ -122,7 +122,7 @@ public class UIUtils  {
         StringBuilder signersInfo = new StringBuilder(context.getString(R.string.num_signers_lbl,
                 signers.size()) + "<br/><br/>");
         for(UserDto signer : signers) {
-            X509Certificate certificate = signer.getCertificate();
+            X509Certificate certificate = signer.getX509Certificate();
             signersInfo.append(context.getString(R.string.cert_info_formated_msg,
                     certificate.getSubjectDN().toString(),
                     certificate.getIssuerDN().toString(),

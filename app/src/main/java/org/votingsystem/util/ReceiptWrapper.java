@@ -135,7 +135,7 @@ public class ReceiptWrapper implements Serializable {
     public Date getDateFrom() {
         Date result = null;
         try {
-            result = getReceipt().getSigner().getCertificate().getNotBefore();
+            result = getReceipt().getSigner().getX509Certificate().getNotBefore();
         } catch(Exception ex) { ex.printStackTrace(); }
         return result;
     }
@@ -143,7 +143,7 @@ public class ReceiptWrapper implements Serializable {
     public Date getDateTo() {
         Date result = null;
         try {
-            result = getReceipt().getSigner().getCertificate().getNotAfter();
+            result = getReceipt().getSigner().getX509Certificate().getNotAfter();
         } catch(Exception ex) { ex.printStackTrace(); }
         return result;
     }

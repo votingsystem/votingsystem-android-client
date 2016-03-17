@@ -70,7 +70,7 @@ public class UserDto implements Serializable {
     private String representativeMessageURL;
     private String imageURL;
     private Address address;
-    @JsonIgnore private X509Certificate certificate;
+    @JsonIgnore private X509Certificate x509Certificate;
     @JsonIgnore private byte[] imageBytes;
     private transient Uri contactURI;
     private Long numRepresentations;
@@ -112,7 +112,7 @@ public class UserDto implements Serializable {
     public static UserDto getUser(X509Certificate x509Cert) throws CertificateEncodingException {
         X500Name x500name = new JcaX509CertificateHolder(x509Cert).getSubject();
         UserDto user = getUser(x500name);
-        user.setCertificate(x509Cert);
+        user.setX509Certificate(x509Cert);
         try {
             CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
                     x509Cert, ContextVS.DEVICE_OID);
@@ -181,12 +181,12 @@ public class UserDto implements Serializable {
         return Base64.encodeToString(signerInformation.getContentDigest(), Base64.NO_WRAP);
     }
 
-    public X509Certificate getCertificate() {
-        return certificate;
+    public X509Certificate getX509Certificate() {
+        return x509Certificate;
     }
 
-    public void setCertificate(X509Certificate certificate) {
-        this.certificate = certificate;
+    public void setX509Certificate(X509Certificate x509Certificate) {
+        this.x509Certificate = x509Certificate;
     }
 
     public String getDeviceId() {
@@ -248,10 +248,13 @@ public class UserDto implements Serializable {
     }
 
     @JsonIgnore
-    public boolean checkUserFromCSR(UserDto userToChek) {
-        if(!NIF.equals(userToChek.getNIF())) return false;
-        if(!firstName.equals(userToChek.getFirstName())) return false;
-        if(!lastName.equals(userToChek.getLastName())) return false;
+    public boolean checkUserFromCSR(X509Certificate x509CertificateToCheck)
+            throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(x509CertificateToCheck).getSubject();
+        UserDto userToCheck = getUser(x500name);
+        if(!NIF.equals(userToCheck.getNIF())) return false;
+        if(!firstName.equals(userToCheck.getFirstName())) return false;
+        if(!lastName.equals(userToCheck.getLastName())) return false;
         return true;
     }
 

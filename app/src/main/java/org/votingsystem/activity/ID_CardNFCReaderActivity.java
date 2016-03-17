@@ -201,7 +201,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				if(MODE_UPDATE_USER_DATA == activityMode) {
 					UserDto userFromCert = UserDto.getUser(PrincipalUtil.getSubjectX509Principal(userCert));
 					appUser = PrefUtils.getAppUser();
-					appUser.setNIF(userFromCert.getNIF()).setCertificate(userCert);
+					appUser.setNIF(userFromCert.getNIF()).setX509Certificate(userCert);
 					appUser.setFirstName(userFromCert.getFirstName());
 					appUser.setLastName(userFromCert.getLastName());
 					if(userFromCert.getCountry() != null) appUser.setCountry(userFromCert.getCountry());
