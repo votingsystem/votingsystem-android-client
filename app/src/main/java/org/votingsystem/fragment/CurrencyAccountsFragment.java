@@ -62,6 +62,7 @@ public class CurrencyAccountsFragment extends Fragment {
     private String broadCastId = CurrencyAccountsFragment.class.getSimpleName();
     private AppVS appVS;
     private TextView last_request_date;
+    private TextView message;
     private RecyclerView accounts_recycler_view;
     private String IBAN;
 
@@ -103,6 +104,7 @@ public class CurrencyAccountsFragment extends Fragment {
         appVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.currency_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
+        message = (TextView)rootView.findViewById(R.id.message);
         //https://developer.android.com/training/material/lists-cards.html
         accounts_recycler_view = (RecyclerView) rootView.findViewById(R.id.accounts_recycler_view);
         accounts_recycler_view.setHasFixedSize(true);
@@ -126,6 +128,7 @@ public class CurrencyAccountsFragment extends Fragment {
     }
 
     private void loadUserInfo(TimePeriod timePeriod) {
+        message.setVisibility(View.GONE);
         Date lastCheckedTime = PrefUtils.getCurrencyAccountsLastCheckDate();
         if(lastCheckedTime == null) {
             updateCurrencyAccountsInfo();
@@ -140,14 +143,19 @@ public class CurrencyAccountsFragment extends Fragment {
                         Currency.getInstance("EUR").getCurrencyCode());
                 if(tagVSBalancesMap != null) {
                     String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
-                    AccountVSInfoAdapter accountVSInfoAdapter = new AccountVSInfoAdapter(appVS,
+                    AccountInfoAdapter accountInfoAdapter = new AccountInfoAdapter(appVS,
                             tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
-                    accounts_recycler_view.setAdapter(accountVSInfoAdapter);
-                }
+                    accounts_recycler_view.setAdapter(accountInfoAdapter);
+                } else showMessage(getString(R.string.cash_no_available_msg));
             }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void showMessage(String msg) {
+        message.setText(msg);
+        message.setVisibility(View.VISIBLE);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -199,7 +207,7 @@ public class CurrencyAccountsFragment extends Fragment {
         outState.putSerializable(ContextVS.TRANSACTION_KEY, transaction);
     }
 
-    public class AccountVSInfoAdapter extends RecyclerView.Adapter<AccountVSInfoAdapter.ViewHolder>{
+    public class AccountInfoAdapter extends RecyclerView.Adapter<AccountInfoAdapter.ViewHolder>{
 
         private final Context context;
         private Map<String, TagVSInfoDto> tagVSListBalances;
@@ -214,8 +222,8 @@ public class CurrencyAccountsFragment extends Fragment {
             }
         }
 
-        public AccountVSInfoAdapter(Context context, Map<String, TagVSInfoDto> tagVSListBalances,
-                        String currencyCode, String[] tagArray) {
+        public AccountInfoAdapter(Context context, Map<String, TagVSInfoDto> tagVSListBalances,
+                                  String currencyCode, String[] tagArray) {
             this.context = context;
             this.currencyCode = currencyCode;
             this.tagVSListBalances = tagVSListBalances;
@@ -223,8 +231,8 @@ public class CurrencyAccountsFragment extends Fragment {
             tagVSList.addAll(tagVSListBalances.keySet());
         }
 
-        @Override public AccountVSInfoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                    int viewType) {
+        @Override public AccountInfoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                                          int viewType) {
             View accountView = ((LayoutInflater) context.getSystemService(Context.
                     LAYOUT_INFLATER_SERVICE)).inflate(R.layout.currency_account_card, parent, false);
             return new ViewHolder(accountView);

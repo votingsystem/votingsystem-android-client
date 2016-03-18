@@ -243,15 +243,10 @@ public class WebSocketService extends Service {
         @Override public void run() {
             try {
                 LOGD(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
-                //sets the incoming buffer size to 1000000 bytes ~ 900K
-                //client.getProperties().put("org.glassfish.tyrus.incomingBufferSize", 1000000);
-                //BUG with Android 5.0 and Tyrus client!!! Not WSS secured connections for now
-                //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
                 final ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().
                         configurator(new ClientEndpointConfig.Configurator() {
                             @Override
                             public void beforeRequest(Map<String, List<String>> headers) {
-                                //headers.put("Cookie", Arrays.asList("sessionVS=7180db71-3331-4e57-a448-5e7755e5dd3c"));
                                 headers.put("Origin", Arrays.asList(appVS.getCurrencyServerURL()));
                             }
 

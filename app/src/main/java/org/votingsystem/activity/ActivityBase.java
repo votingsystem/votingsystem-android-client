@@ -148,13 +148,16 @@ public class ActivityBase extends ActivityConnected
         this.activityResult = null;
         return result;
     }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if(!AppVS.getInstance().isHistoryEmpty()) {
+                selectedContentFragment(AppVS.getInstance().getHistoryItem());
+            } else super.onBackPressed();
         }
     }
 
@@ -206,6 +209,7 @@ public class ActivityBase extends ActivityConnected
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        AppVS.getInstance().addHistoryItem(item.getItemId());
         return selectedContentFragment(item.getItemId());
     }
 

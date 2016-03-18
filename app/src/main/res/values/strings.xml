@@ -594,4 +594,5 @@
     <string name="confirm_sign_msg">¿Desea continuar con el procedimiento?</string>
     <string name="dnie_connection_null_error_msg">por favor, compruebe su conexión a red y vuelva a intentarlo</string>
     <string name="user_from_csr_missmatch_msg">el usuario \'%1$s\' con nif \'%2$s\'  está intentando acceder en su nombre desde el navegador</string>
+    <string name="cash_no_available_msg">no tiene disponible suficiente para retirar efectivo</string>
 </resources>

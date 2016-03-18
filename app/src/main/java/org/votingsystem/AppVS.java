@@ -52,11 +52,13 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -97,6 +99,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private AtomicInteger notificationId = new AtomicInteger(1);
     private boolean isRootedPhone = false;
     private char[] token;
+    private List<Integer> historyList;
+    private int defaultMainView = R.id.currency_accounts;
 
     private static AppVS INSTANCE;
 
@@ -137,6 +141,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             if(!BuildConfig.ALLOW_ROOTED_PHONES && RootUtil.isDeviceRooted()) {
                 isRootedPhone = true;
             }
+            historyList = new ArrayList();
+            historyList.add(defaultMainView);
         } catch(Exception ex) { ex.printStackTrace(); }
 	}
 
@@ -407,4 +413,17 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return isRootedPhone;
     }
 
+    public boolean isHistoryEmpty() {
+        return historyList.isEmpty();
+    }
+
+    public Integer getHistoryItem() {
+        if(historyList.isEmpty()) return null;
+        else if(historyList.size() == 1) return historyList.remove(0);
+        else return historyList.remove(historyList.size() - 2);
+    }
+
+    public void addHistoryItem(Integer item) {
+        historyList.add(item);
+    }
 }
