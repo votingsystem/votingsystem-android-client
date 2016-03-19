@@ -133,7 +133,7 @@ public class PaymentService extends IntentService {
                                 SocketMessageDto socketRespDto = transactionDto.getSocketMessageDto()
                                         .getResponse(ResponseVS.SC_OK, null,receipt,
                                         TypeVS.TRANSACTION_RESPONSE);
-                                socketRespDto.setCMSMessage(base64Receipt);
+                                socketRespDto.setCmsMessagePEM(base64Receipt);
                                 //backup to recover from fails
                                 transactionDto.setSocketMessageDto(socketRespDto);
                                 AppVS.getInstance().getWSSession(socketRespDto.getUUID()).setData(transactionDto);

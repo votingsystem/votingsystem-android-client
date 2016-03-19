@@ -126,6 +126,14 @@ public class SocketMessageDto implements Serializable {
         return messageDto;
     }
 
+    public String getCmsMessagePEM() {
+        return cmsMessagePEM;
+    }
+
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
+    }
+
     public TypeVS getMessageType() {
         return messageType;
     }
@@ -294,14 +302,6 @@ public class SocketMessageDto implements Serializable {
 
     public void setLocale(String locale) {
         this.locale = locale;
-    }
-
-    public String getCMSMessage() {
-        return cmsMessagePEM;
-    }
-
-    public void setCMSMessage(String cmsMessage) {
-        this.cmsMessagePEM = cmsMessage;
     }
 
     @JsonIgnore
