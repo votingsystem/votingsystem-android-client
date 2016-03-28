@@ -73,8 +73,8 @@ public class AccessControlDto extends ActorDto implements Serializable {
                 "&" + stateStr + "&" + typeStr + "&searchText=" + searchText;
     }
 
-    public String getEventVSURL () {
-        return getServerURL() + "/rest/eventVS";
+    public String getEventVSURL (Long id) {
+        return getServerURL() +  "/rest/eventElection/id/" + id;
     }
 
     public String getRepresentativesURL (Long offset, Integer pageSize) {

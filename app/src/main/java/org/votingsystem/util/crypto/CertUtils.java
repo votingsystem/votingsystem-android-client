@@ -33,6 +33,7 @@ import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -61,6 +62,7 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -251,6 +253,14 @@ public class CertUtils {
             // A certification path is not found, so null is returned.
             return null;
         }
+    }
+
+    public static PKIXCertPathValidatorResult verifyCertificate(X509Certificate certToCheck,
+            X509Certificate caCert) throws ExceptionVS {
+        TrustAnchor trustAnchor = new TrustAnchor(caCert, null);
+        Set<TrustAnchor> trustAnchors = Utils.asSet(trustAnchor);
+        List<X509Certificate> certs = Arrays.asList(certToCheck);
+        return verifyCertificate(trustAnchors, false, certs, Calendar.getInstance().getTime());
     }
 
     public static PKIXCertPathValidatorResult verifyCertificate(Set<TrustAnchor> anchors,

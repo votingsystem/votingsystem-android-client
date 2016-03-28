@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.MailTo;
 import android.net.Uri;
+import android.net.http.SslCertificate;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
@@ -17,6 +19,7 @@ import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -36,7 +39,11 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
 
+import java.lang.reflect.Field;
+import java.security.cert.PKIXCertPathValidatorResult;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -132,6 +139,22 @@ public class BrowserActivity extends AppCompatActivity {
                         return true;
                     } else view.loadUrl(url);
                     return true;
+                }
+                @Override
+                public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
+                    SslCertificate serverCertificate = error.getCertificate();
+                    try {
+                        Field f = serverCertificate.getClass().getDeclaredField("mX509Certificate");
+                        f.setAccessible(true);
+                        X509Certificate x509Certificate = (X509Certificate) f.get(serverCertificate);
+                        PKIXCertPathValidatorResult result = CertUtils.verifyCertificate(
+                                x509Certificate, appVS.getSSLServerCert());
+                        LOGD(TAG, "SSL site - trusted cert: " +
+                                result.getTrustAnchor().getTrustedCert().getSubjectX500Principal());
+                        handler.proceed();
+                    }catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             });
             webView.loadUrl(viewerURL);

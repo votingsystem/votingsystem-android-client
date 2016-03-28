@@ -24,12 +24,11 @@ public class BrowserVSAction implements DebugAction {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
-                LOGD(TAG, "doInBackground");
+                String targetURL = "https://192.168.1.5/CurrencyServer/";
+                LOGD(TAG, "doInBackground - targetURL: " + targetURL);
                 Intent intent = new Intent(AppVS.getInstance(), BrowserActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                //intent.putExtra(ContextVS.URL_KEY, appContext.getCurrencyServer().getServerURL());
-                //intent.putExtra(ContextVS.URL_KEY,"http://currency:8086/Currency/testing/testSocket");
-                intent.putExtra(ContextVS.URL_KEY, "http://currency:8080/CurrencyServer/");
+                intent.putExtra(ContextVS.URL_KEY, targetURL);
                 AppVS.getInstance().startActivity(intent);
                 return null;
             }

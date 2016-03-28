@@ -31,9 +31,11 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.ConnectionUtils;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -41,6 +43,7 @@ import org.votingsystem.util.Utils;
 
 import java.security.NoSuchAlgorithmException;
 
+import static org.votingsystem.util.ContextVS.FRAGMENT_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -96,7 +99,7 @@ public class QRActionsFragment extends Fragment {
     }
 
     private void processAction(Action action) {
-        if(!AppVS.getInstance().isWithSocketConnection()) {
+        /*if(!AppVS.getInstance().isWithSocketConnection()) {
             pendingAction = action;
             String caption = (action == Action.CREATE_QR)? getString(R.string.qr_create_lbl):
                     getString(R.string.qr_read_lbl);
@@ -109,19 +112,18 @@ public class QRActionsFragment extends Fragment {
                         }
                     });
             UIUtils.showMessageDialog(builder);
-        } else {
-            switch (action) {
-                case READ_QR:
-                    Utils.launchQRScanner(this);
-                    break;
-                case CREATE_QR:
-                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionFormFragment.class.getName());
-                    intent.putExtra(ContextVS.TYPEVS_KEY, TransactionFormFragment.Type.QR_FORM);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    startActivity(intent);
-                    break;
-            }
+        } else { }*/
+        switch (action) {
+            case READ_QR:
+                Utils.launchQRScanner(this);
+                break;
+            case CREATE_QR:
+                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionFormFragment.class.getName());
+                intent.putExtra(ContextVS.TYPEVS_KEY, TransactionFormFragment.Type.QR_FORM);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                break;
         }
     }
 
@@ -140,10 +142,14 @@ public class QRActionsFragment extends Fragment {
                                     SocketMessageDto.getQRInfoRequest(qrMessageDto);
                             sendQRRequestInfo(socketMessage);
                             break;
+                        case SEND_VOTE:
+                            new GetDataTask(TypeVS.SEND_VOTE).execute(AppVS.getInstance().
+                                    getAccessControl().getEventVSURL(qrMessageDto.getItemId()));
+                            break;
                     }
                 } catch (Exception ex) { ex.printStackTrace(); }
             } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
-                new GetDataTask().execute(qrMessage);
+                new SendDataTask().execute(qrMessage);
             }
         }
     }
@@ -156,7 +162,7 @@ public class QRActionsFragment extends Fragment {
     private void sendQRRequestInfo(SocketMessageDto socketMessage) throws Exception {
         Intent startIntent = new Intent(getActivity(), WebSocketService.class);
         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.QR_MESSAGE_INFO);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MESSAGE_INFO);
         getActivity().startService(startIntent);
     }
 
@@ -190,13 +196,13 @@ public class QRActionsFragment extends Fragment {
     }
 
 
-    public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
+    public class SendDataTask extends AsyncTask<String, Void, ResponseVS> {
 
-        public final String TAG = GetDataTask.class.getSimpleName();
+        public final String TAG = SendDataTask.class.getSimpleName();
 
         private QRMessageDto qrMessageDto;
 
-        public GetDataTask() { }
+        public SendDataTask() { }
 
         @Override protected void onPreExecute() {
             setProgressDialogVisible(true, getString(R.string.loading_data_msg),
@@ -231,6 +237,52 @@ public class QRActionsFragment extends Fragment {
                             Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
                             intent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
                             intent.putExtra(ContextVS.TRANSACTION_KEY, dto);
+                            startActivity(intent);
+                            break;
+                    }
+                } catch (Exception e) { e.printStackTrace();}
+            } else MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                    responseVS.getMessage(), getFragmentManager());
+        }
+    }
+
+    public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
+
+        public final String TAG = GetDataTask.class.getSimpleName();
+
+        private TypeVS operation;
+
+        public GetDataTask(TypeVS operation) {
+            this.operation = operation;
+        }
+
+        @Override protected void onPreExecute() {
+            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg));
+        }
+
+        @Override protected ResponseVS doInBackground(String... urls) {
+            LOGD(TAG + ".doInBackground", "url: " + urls[0]);
+            try {
+                return HttpHelper.getData(urls[0], ContentType.JSON);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return ResponseVS.ERROR(null, ex.getMessage());
+            }
+        }
+
+        protected void onProgressUpdate(Integer... progress) {}
+
+        @Override  protected void onPostExecute(ResponseVS responseVS) {
+            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+            setProgressDialogVisible(false, null, null);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    switch (operation) {
+                        case SEND_VOTE:
+                            Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                            intent.putExtra(FRAGMENT_KEY, EventVSFragment.class.getName());
+                            intent.putExtra(ContextVS.EVENTVS_KEY, responseVS.getMessage());
                             startActivity(intent);
                             break;
                     }

@@ -381,9 +381,9 @@ public class WebSocketService extends Service {
                                 this);
                     }
                     break;
-                case QR_MESSAGE_INFO_RESPONSE:
+                case MESSAGE_INFO_RESPONSE:
                     break;
-                case QR_MESSAGE_INFO:
+                case MESSAGE_INFO:
                     //the payer has read our QR code and ask for details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         SocketMessageDto msgDto = null;
@@ -409,7 +409,7 @@ public class WebSocketService extends Service {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
-                                    ex.getMessage(), null, TypeVS.QR_MESSAGE_INFO);
+                                    ex.getMessage(), null, TypeVS.MESSAGE_INFO);
                         } finally {
                             session.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
                         }

@@ -377,10 +377,12 @@ public class EventVSFragment extends Fragment implements View.OnClickListener {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
-        ActivityResult activityResult = ((EventVSPagerActivity)getActivity()).getActivityResult();
-        if(activityResult != null) {
-            onActivityResult(activityResult.getRequestCode(),
-                    activityResult.getResultCode(), activityResult.getData());
+        if(getActivity() instanceof EventVSPagerActivity) {
+            ActivityResult activityResult = ((EventVSPagerActivity)getActivity()).getActivityResult();
+            if(activityResult != null) {
+                onActivityResult(activityResult.getRequestCode(),
+                        activityResult.getResultCode(), activityResult.getData());
+            }
         }
     }
 

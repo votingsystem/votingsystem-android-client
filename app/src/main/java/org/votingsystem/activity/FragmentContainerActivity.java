@@ -71,5 +71,8 @@ public class FragmentContainerActivity extends AppCompatActivity {
         LOGD(TAG, "onActivityResult - requestCode:  " + requestCode);
         super.onActivityResult(requestCode, resultCode, data);
         ConnectionUtils.onActivityResult(requestCode, resultCode, data, this);
+        if(fragmentRef.get() != null) {
+            fragmentRef.get().onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

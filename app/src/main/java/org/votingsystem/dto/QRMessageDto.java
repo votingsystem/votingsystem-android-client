@@ -30,14 +30,17 @@ public class QRMessageDto<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int INIT_REMOTE_SIGNED_SESSION         = 0;
-    public static final int QR_MESSAGE_INFO                    = 1;
+    public static final int MESSAGE_INFO                       = 1;
     public static final int CURRENCY_SEND                      = 2;
+    public static final int USER_INFO                          = 3;
+    public static final int VOTE                               = 4;
 
 
     public static final String WEB_SOCKET_SESSION_KEY = "wsid";
     public static final String DEVICE_ID_KEY          = "did";
+    public static final String ITEM_ID_KEY            = "iid";
     public static final String OPERATION_KEY          = "op";
-    public static final String OPERATION_CODE_KEY = "opid";
+    public static final String OPERATION_CODE_KEY     = "opid";
     public static final String PUBLIC_KEY_KEY         = "pk";
 
 
@@ -49,6 +52,7 @@ public class QRMessageDto<T> implements Serializable {
     private TypeVS operation;
     private String operationCode;
     private Long deviceId;
+    private Long itemId;
     private Date dateCreated;
     private String hashCertVS;
     private String sessionId;
@@ -77,17 +81,26 @@ public class QRMessageDto<T> implements Serializable {
         QRMessageDto qrMessageDto = new QRMessageDto();
         if (msg.contains(DEVICE_ID_KEY + "="))
             qrMessageDto.setDeviceId(Long.valueOf(msg.split(DEVICE_ID_KEY + "=")[1].split(";")[0]));
+        if (msg.contains(ITEM_ID_KEY + "="))
+            qrMessageDto.setItemId(Long.valueOf(msg.split(ITEM_ID_KEY + "=")[1].split(";")[0]));
         if (msg.contains(OPERATION_KEY + "=")) {
             int operationCode = Integer.valueOf(msg.split(OPERATION_KEY + "=")[1].split(";")[0]);
             switch (operationCode) {
                 case INIT_REMOTE_SIGNED_SESSION:
                     qrMessageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
                     break;
-                case QR_MESSAGE_INFO:
-                    qrMessageDto.setOperation(TypeVS.QR_MESSAGE_INFO);
+                case MESSAGE_INFO:
+                    qrMessageDto.setOperation(TypeVS.MESSAGE_INFO);
                     break;
                 case CURRENCY_SEND:
                     qrMessageDto.setOperation(TypeVS.CURRENCY_SEND);
+                    break;
+                case USER_INFO:
+                    qrMessageDto.setOperation(TypeVS.USER_INFO);
+                    break;
+                case VOTE:
+                    qrMessageDto.setOperation(TypeVS.SEND_VOTE);
+                    break;
                 default:
                     LOGD(TAG, "unknown operation code: " + operationCode);
             }
@@ -258,4 +271,11 @@ public class QRMessageDto<T> implements Serializable {
         this.publicKeyBase64 = key;
     }
 
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
+    }
 }
