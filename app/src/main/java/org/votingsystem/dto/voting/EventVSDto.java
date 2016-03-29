@@ -1,5 +1,6 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.CommentDto;
@@ -41,9 +42,9 @@ public class EventVSDto implements Serializable {
     private AccessControlDto accessControl;
     private Integer numComments = 0;
 
-    private Set<FieldEventDto> fieldEventSet = new HashSet<FieldEventDto>();
-    private Set<EventVSTagVS> eventVSTagVSSet = new HashSet<EventVSTagVS>();
-    private Set<CommentDto> commentDtoSet = new HashSet<CommentDto>();
+    private Set<FieldEventDto> fieldEventSet = new HashSet<>();
+    private Set<EventVSTagVS> eventVSTagVSSet = new HashSet<>();
+    private Set<CommentDto> commentDtoSet = new HashSet<>();
 
     private Date dateBegin;
     private Date dateFinish;
@@ -228,11 +229,12 @@ public class EventVSDto implements Serializable {
         return vote;
     }
 
+    @JsonIgnore
     public String getStatsServiceURL() {
         return accessControl.getServerURL() + "/rest/eventElection/id/" + id + "/stats";
     }
 
-    public boolean isActive() {
+    @JsonIgnore public boolean isActive() {
         Date todayDate = java.util.Calendar.getInstance().getTime();
         if (todayDate.after(dateBegin) && todayDate.before(dateFinish)) return true;
         else return false;

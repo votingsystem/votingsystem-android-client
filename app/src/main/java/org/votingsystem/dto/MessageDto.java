@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.TypeVS;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -12,6 +13,8 @@ public class MessageDto {
 
     private Integer statusCode;
     private String message;
+    private TypeVS operation;
+    private String cmsMessagePEM;
     private String URL;
 
     public MessageDto() {}
@@ -45,5 +48,21 @@ public class MessageDto {
 
     public void setURL(String URL) {
         this.URL = URL;
+    }
+
+    public String getCmsMessagePEM() {
+        return cmsMessagePEM;
+    }
+
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
     }
 }

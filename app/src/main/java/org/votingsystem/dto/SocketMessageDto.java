@@ -47,7 +47,6 @@ public class SocketMessageDto implements Serializable {
     private String operationCode;
     private TypeVS messageType;
     private TypeVS step;
-    private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
     private Long deviceToId;
@@ -75,6 +74,7 @@ public class SocketMessageDto implements Serializable {
 
     @JsonIgnore private UserDto user;
     @JsonIgnore private Set<Currency> currencySet;
+    @JsonIgnore private QRMessageDto qrMessage;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
     @JsonIgnore private transient CMSSignedMessage cms;
@@ -297,14 +297,6 @@ public class SocketMessageDto implements Serializable {
         return this;
     }
 
-    public State getState() {
-        return state;
-    }
-
-    public void setState(State state) {
-        this.state = state;
-    }
-
     public String getFrom() {
         return from;
     }
@@ -396,6 +388,14 @@ public class SocketMessageDto implements Serializable {
 
     public void setX509CertificatePEM(String x509CertificatePEM) {
         this.x509CertificatePEM = x509CertificatePEM;
+    }
+
+    public QRMessageDto getQrMessage() {
+        return qrMessage;
+    }
+
+    public void setQrMessage(QRMessageDto qrMessage) {
+        this.qrMessage = qrMessage;
     }
 
     public String getDeviceToName() {

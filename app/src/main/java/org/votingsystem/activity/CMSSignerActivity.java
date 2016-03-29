@@ -77,6 +77,10 @@ public class CMSSignerActivity extends AppCompatActivity {
         LOGD(TAG + ".sendSocketMessage() ", "sendSocketMessage");
         try {
             Intent startIntent = new Intent(this, WebSocketService.class);
+            if(this.socketMessage != null && this.socketMessage.getQrMessage() != null) {
+                startIntent.putExtra(ContextVS.SESSION_KEY,
+                        this.socketMessage.getQrMessage().getSessionType());
+            }
             startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
             startIntent.putExtra(ContextVS.MESSAGE_KEY,
                     JSON.writeValueAsString(socketMessage));
@@ -95,7 +99,7 @@ public class CMSSignerActivity extends AppCompatActivity {
         try {
             operationDto = socketMessage.getMessage(OperationDto.class);
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
-                    true).writeValueAsString(socketMessage.getMessage());
+                    true).writeValueAsString(operationDto);
             webView.loadData(signatureContent, "application/json", "UTF-8");
         } catch (Exception ex) { ex.printStackTrace(); }
         if(savedInstanceState != null) {
@@ -144,8 +148,7 @@ public class CMSSignerActivity extends AppCompatActivity {
                         @Override public void run() {
                             try {
                                 ResponseVS response = HttpHelper.sendData(cms.toPEM(),
-                                        ContentType.JSON_SIGNED,
-                                        operationDto.getServiceURL());
+                                        ContentType.JSON_SIGNED, operationDto.getServiceURL());
                                 sendSocketMessage(socketMessage.getResponse(response.getStatusCode(),
                                         response.getMessage(), null, TypeVS.OPERATION_RESULT));
                             } catch (Exception e) { e.printStackTrace(); }
@@ -157,7 +160,7 @@ public class CMSSignerActivity extends AppCompatActivity {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     String accessModePassw = new String(responseVS.getMessageBytes());
                     Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getMessage());
+                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, getTextToSign());
                     intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
                     intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
                     intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.sign_send_msg));
@@ -166,6 +169,18 @@ public class CMSSignerActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    private String getTextToSign() {
+        try {
+            switch (operationDto.getOperation()) {
+                case PUBLISH_EVENT:
+                    return JSON.writeValueAsString(operationDto.getEventVS());
+                default:
+                    LOGD(TAG, "unknown operation: " + operationDto.getOperation());
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+        return null;
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

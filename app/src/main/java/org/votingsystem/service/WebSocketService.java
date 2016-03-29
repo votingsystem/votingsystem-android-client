@@ -350,6 +350,7 @@ public class WebSocketService extends Service {
                 if(!socketMsg.getOperationCode().equals(qrMessageDto)) {
                     intent = new Intent(this, CMSSignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    socketMsg.setQrMessage(qrMessageDto);
                     intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
                     startActivity(intent);
                 } else LOGE(TAG, "OPERATION_PROCESS ERROR - unexpected operation code");
