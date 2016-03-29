@@ -37,6 +37,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ResponseVS;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.votingsystem.util.ContextVS.FRAGMENT_KEY;
@@ -204,6 +205,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
     }
 
     private void clearSearchResult() {
+        showSearchResult(new ArrayList<EventVSDto>());
         searchView.setQuery("", false);
         num_results.setText("");
         search_query.setText("");

@@ -268,7 +268,8 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         Intent resultIntent = new Intent(
-                                                RepresentativeDelegationActivity.this, RepresentativesMainActivity.class);
+                                                RepresentativeDelegationActivity.this, ActivityBase.class);
+                                        resultIntent.putExtra(ContextVS.FRAGMENT_KEY, R.id.representatives);
                                         startActivity(resultIntent);
                                         RepresentativeDelegationActivity.this.finish();
                                     }

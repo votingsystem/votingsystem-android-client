@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,26 +15,30 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.activity.EventVSPagerActivity;
+import org.votingsystem.activity.EventVSSearchActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
-import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.service.EventVSService;
-import org.votingsystem.util.ContentType;
+import org.votingsystem.ui.EventVSSpinnerAdapter;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
@@ -54,13 +57,12 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private View rootView;
     private GridView gridView;
     private EventListAdapter mAdapter = null;
-    private EventVSDto.State eventState = null;
+    private EventVSDto.State eventState = EventVSDto.State.ACTIVE;
     private AppVS appVS = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = 0;
     private static final int loaderId = 0;
     private String broadCastId = null;
-    private AccessControlDto accessControl = null;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -84,7 +86,35 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
              Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
         appVS = (AppVS) getActivity().getApplicationContext();
-        eventState = (EventVSDto.State) getArguments().getSerializable(ContextVS.EVENT_STATE_KEY);
+        super.onCreate(savedInstanceState);
+
+        View spinnerContainer = inflater.inflate(R.layout.spinner_eventvs_actionbar, null);
+        EventVSSpinnerAdapter mTopLevelSpinnerAdapter = new EventVSSpinnerAdapter(true, inflater);
+        mTopLevelSpinnerAdapter.clear();
+        mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
+                getString(R.string.open_voting_lbl), false, 0);
+        mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
+                getString(R.string.pending_voting_lbl), false, 0);
+        mTopLevelSpinnerAdapter.addItem("", getString(R.string.polls_lbl) + " " +
+                getString(R.string.closed_voting_lbl), false, 0);
+        Spinner spinner = (Spinner) spinnerContainer.findViewById(R.id.actionbar_spinner);
+        spinner.setAdapter(mTopLevelSpinnerAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> spinner, View view, int position, long itemId) {
+                LOGD(TAG + ".onItemSelected", "position:" + position);
+                if(position == 0) fetchItems(EventVSDto.State.ACTIVE);
+                else if(position == 1) fetchItems(EventVSDto.State.PENDING);
+                else if(position == 2) fetchItems(EventVSDto.State.TERMINATED);
+            }
+            @Override public void onNothingSelected(AdapterView<?> adapterView) { }
+        });
+        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setCustomView(spinnerContainer, lp);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayShowCustomEnabled(true);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(getString(R.string.polls_lbl));
+
         rootView = inflater.inflate(R.layout.eventvs_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         //gridView = (ListView) rootView.findViewById(android.R.id.list);
@@ -107,9 +137,18 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
             firstVisiblePosition = savedInstanceState.getInt(ContextVS.CURSOR_POSITION_KEY);
         }
-        accessControl = appVS.getAccessControl();
-        if(accessControl == null) new AccessControlLoader().execute();
+        fetchItems(0L);
         return rootView;
+    }
+
+    public void setTitle(String title, String subTitle, Integer iconId) {
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(title);
+        if(subTitle != null) ((AppCompatActivity)getActivity()).getSupportActionBar().setSubtitle(subTitle);
+        if(iconId != null) ((AppCompatActivity)getActivity()).getSupportActionBar().setLogo(iconId);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.eventvs_grid, menu);
     }
 
     private void setProgressDialogVisible(final boolean isVisible) {
@@ -192,6 +231,11 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         switch (item.getItemId()) {
             case R.id.update:
                 fetchItems(offset);
+                return true;
+            case R.id.search_item:
+                Intent searchStarter = new Intent(getActivity(), EventVSSearchActivity.class);
+                searchStarter.putExtra(ContextVS.EVENT_STATE_KEY, eventState);
+                startActivityForResult(searchStarter, 0, null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -290,38 +334,5 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
             }
         }
     }
-
-    public class AccessControlLoader extends AsyncTask<String, String, ResponseVS> {
-
-        public AccessControlLoader() { }
-
-        @Override protected void onPreExecute() { setProgressDialogVisible(true); }
-
-        @Override protected ResponseVS doInBackground(String... urls) {
-            return HttpHelper.getData(AccessControlDto.getServerInfoURL(
-                    AppVS.getInstance().getAccessControlURL()), ContentType.JSON);
-        }
-
-        @Override protected void onProgressUpdate(String... progress) { }
-
-        @Override protected void onPostExecute(ResponseVS responseVS) {
-            setProgressDialogVisible(false);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                try {
-                    appVS.setAccessControl((AccessControlDto)
-                            responseVS.getMessage(AccessControlDto.class));
-                    fetchItems(0L);
-                } catch(Exception ex) {ex.printStackTrace();}
-            } else {
-                if(getActivity() != null) {
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                            getString(R.string.error_lbl), getString(R.string.server_connection_error_msg,
-                            AppVS.getInstance().getAccessControlURL()), getFragmentManager());
-                }
-            }
-
-        }
-    }
-
 
 }

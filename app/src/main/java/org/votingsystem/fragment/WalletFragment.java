@@ -103,6 +103,7 @@ public class WalletFragment extends Fragment {
             currencyList = new ArrayList<>(Wallet.getCurrencySet());
             printSummary();
         }
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.wallet_lbl));
         setHasOptionsMenu(true);
         return rootView;
     }

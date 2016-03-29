@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,10 +20,13 @@ import android.view.MenuItem;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
+import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
+import org.votingsystem.fragment.EventVSGridFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.fragment.QRActionsFragment;
 import org.votingsystem.fragment.ReceiptGridFragment;
+import org.votingsystem.fragment.RepresentationStateFragment;
 import org.votingsystem.fragment.WalletFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
@@ -49,12 +53,12 @@ public class ActivityBase extends ActivityConnected
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = ActivityBase.class.getSimpleName();
+    public static final String MENU_KEY = "MENU_KEY";
 
     private WeakReference<Fragment> currentFragment;
 
     private AppVS appVS = null;
     private NavigationView navigationView;
-    private Thread mDataBootstrapThread = null;
     private Menu menu;
     private MenuItem messagesMenuItem;
     private Integer menuType;
@@ -101,6 +105,10 @@ public class ActivityBase extends ActivityConnected
 
         int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
         if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
+        if(savedInstanceState == null) selectedContentFragment(R.id.currency_accounts);
+        else {
+            setMenu(savedInstanceState.getInt(MENU_KEY));
+        }
     }
 
     public void changeConnectionStatus() {
@@ -215,6 +223,7 @@ public class ActivityBase extends ActivityConnected
 
     public void setMenu(int menuType) {
         this.menuType = menuType;
+        navigationView.getMenu().clear();
         navigationView.inflateMenu(menuType);
     }
 
@@ -226,26 +235,19 @@ public class ActivityBase extends ActivityConnected
         switch (menuId) {
             case R.id.polls_menu_item:
             case R.id.polls:
-                intent = new Intent(this, EventVSMainActivity.class);
-                startActivity(intent);
-                finish();
+                replaceFragment(new EventVSGridFragment(), EventVSGridFragment.TAG);
+                setMenu(R.menu.drawer_voting);
                 break;
             case R.id.representatives:
-                intent = new Intent(this, RepresentativesMainActivity.class);
-                startActivity(intent);
-                finish();
+                replaceFragment(new RepresentationStateFragment(), RepresentationStateFragment.TAG);
                 break;
             case R.id.currency_accounts:
             case R.id.currency_menu_item:
-                intent = new Intent(this, CurrencyMainActivity.class);
-                startActivity(intent);
-                finish();
+                replaceFragment(new CurrencyAccountsPagerFragment(), CurrencyAccountsPagerFragment.TAG);
+                setMenu(R.menu.drawer_currency);
                 break;
             case R.id.wallet:
-                getSupportActionBar().setTitle(getString(R.string.wallet_lbl));
-                currentFragment = new WeakReference<Fragment>(new WalletFragment());
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        currentFragment.get(), WalletFragment.TAG).commit();
+                replaceFragment(new WalletFragment(), WalletFragment.TAG);
                 break;
             case R.id.contacts:
                 intent = new Intent(this, ContactsActivity.class);
@@ -253,21 +255,13 @@ public class ActivityBase extends ActivityConnected
                 finish();
                 break;
             case R.id.fa_qrcode:
-                currentFragment = new WeakReference<Fragment>(new QRActionsFragment());
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        currentFragment.get(), QRActionsFragment.TAG).commit();
+                replaceFragment(new QRActionsFragment(), QRActionsFragment.TAG);
                 break;
             case R.id.receipts:
-                getSupportActionBar().setTitle(getString(R.string.receipts_lbl));
-                currentFragment = new WeakReference<Fragment>(new ReceiptGridFragment());
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        currentFragment.get(), ReceiptGridFragment.TAG).commit();
+                replaceFragment(new ReceiptGridFragment(), ReceiptGridFragment.TAG);
                 break;
             case R.id.messages:
-                getSupportActionBar().setTitle(getString(R.string.messages_lbl));
-                currentFragment = new WeakReference<Fragment>(new MessagesGridFragment());
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        currentFragment.get(), MessagesGridFragment.TAG).commit();
+                replaceFragment(new MessagesGridFragment(), MessagesGridFragment.TAG);
                 break;
             case R.id.settings:
                 intent = new Intent(this, SettingsActivity.class);
@@ -277,6 +271,14 @@ public class ActivityBase extends ActivityConnected
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void replaceFragment(Fragment newFragment, String tag) {
+        if(currentFragment != null)
+            getSupportFragmentManager().beginTransaction().remove(currentFragment.get()).commit();
+        currentFragment = new WeakReference<>(newFragment);
+        FragmentTransaction transaction =  getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, currentFragment.get(), tag).commit();
     }
 
     @Override protected void onResume() {
@@ -324,26 +326,9 @@ public class ActivityBase extends ActivityConnected
                 unregisterReceiver(broadcastReceiver);
     }
 
-    @Override public void onStart() {
-        super.onStart();
-        /*if (!PrefUtils.isDataBootstrapDone()) {
-            if(mDataBootstrapThread != null) return;
-            LOGD(TAG, "performDataBootstrap - starting activity bootstrap background thread");
-            mDataBootstrapThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    LOGD(TAG, "Starting data bootstrap process.");
-                    try {// Load data from bootstrap raw resource
-                        String bootstrapJson = StringUtils.parseResource(getApplicationContext(), R.raw.bootstrap_data);
-                        PrefUtils.markDataBootstrapDone();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                    mDataBootstrapThread = null;
-                }
-            });
-            mDataBootstrapThread.start();
-        }*/
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(MENU_KEY, menuType);
     }
 
 }

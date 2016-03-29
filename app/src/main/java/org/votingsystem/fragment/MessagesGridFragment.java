@@ -13,6 +13,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -76,6 +77,7 @@ public class MessagesGridFragment extends Fragment implements
         gridView.setOnScrollListener(this);
         getLoaderManager().initLoader(loaderId, null, this);
         setHasOptionsMenu(true);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.messages_lbl));
         return rootView;
     }
 
