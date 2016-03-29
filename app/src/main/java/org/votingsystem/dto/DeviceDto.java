@@ -55,8 +55,9 @@ public class DeviceDto implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
+    public DeviceDto setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public String getDeviceId() {

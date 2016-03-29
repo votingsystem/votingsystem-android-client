@@ -28,8 +28,10 @@ import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.RemoteSignedSessionDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserDto;
+import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.dto.currency.TransactionDto;
+import org.votingsystem.dto.voting.AccessControlDto;
 import org.votingsystem.fragment.PaymentFragment;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -81,7 +83,8 @@ public class WebSocketService extends Service {
             "org.glassfish.tyrus.client.sslEngineConfigurator";
 
     private AppVS appVS;
-    private Session session;
+    private Session currencySession;
+    private Session votingSystemSession;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private CountDownLatch latch = new CountDownLatch(1);
 
@@ -97,11 +100,21 @@ public class WebSocketService extends Service {
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         LOGD(TAG + ".onStartCommand", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        if(session == null || !session.isOpen()) {
-            latch = new CountDownLatch(1);
-            WebSocketListener socketListener = new WebSocketListener(
-                    appVS.getCurrencyServer().getWebSocketURL());
-            executorService.submit(socketListener);
+        final Bundle arguments = intent.getExtras();
+        final TypeVS sessionType = arguments.containsKey(ContextVS.SESSION_KEY) ?
+                (TypeVS)arguments.getSerializable(ContextVS.SESSION_KEY) : TypeVS.CURRENCY_SYSTEM;
+        if(sessionType == TypeVS.CURRENCY_SYSTEM) {
+            if(currencySession == null || !currencySession.isOpen()) {
+                latch = new CountDownLatch(1);
+                WebSocketListener socketListener = new WebSocketListener(sessionType);
+                executorService.submit(socketListener);
+            }
+        } else {
+            if(votingSystemSession == null || !votingSystemSession.isOpen()) {
+                latch = new CountDownLatch(1);
+                WebSocketListener socketListener = new WebSocketListener(sessionType);
+                executorService.submit(socketListener);
+            }
         }
         try {
             if(latch.getCount() > 0) latch.await();
@@ -109,10 +122,10 @@ public class WebSocketService extends Service {
             LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET: " + ex.getMessage());
             ex.printStackTrace();
         }
-        final Bundle arguments = intent.getExtras();
         final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
                 (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USER;
-        if(operationType == TypeVS.PIN) {
+        if(operationType == TypeVS.WEB_SOCKET_INIT) {
+        } else if(operationType == TypeVS.PIN) {
             executorService.submit(new Runnable() {
                 @Override public void run() {
                     try {
@@ -124,6 +137,7 @@ public class WebSocketService extends Service {
             final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
             final String message = arguments.getString(ContextVS.MESSAGE_KEY);
             final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
+            final Session session = sessionType == TypeVS.CURRENCY_SYSTEM? currencySession : votingSystemSession;
             if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
                 executorService.submit(new Runnable() {
                     @Override public void run() {
@@ -175,8 +189,9 @@ public class WebSocketService extends Service {
         }
     };
 
-    private void setWebSocketSession(Session session) {
-        this.session = session;
+    private void setWebSocketSession(Session session, TypeVS sessionType) {
+        if(TypeVS.CURRENCY == sessionType) this.currencySession = session;
+        else this.votingSystemSession = session;
         latch.countDown();
     }
 
@@ -202,7 +217,7 @@ public class WebSocketService extends Service {
                             JSON.writeValueAsBytes(remoteSignedSessionDto));
                     SocketMessageDto initSessionMessageDto = SocketMessageDto.
                             INIT_REMOTE_SIGNED_SESSION_REQUEST(cmsSignedMessage);
-                    session.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));
+                    currencySession.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));
                 }
                 break;
         }
@@ -210,44 +225,55 @@ public class WebSocketService extends Service {
 
     private class WebSocketListener implements Runnable {
 
-        private String serviceURL = null;
+        private TypeVS sessionType;
         final ClientManager client = ClientManager.createClient();
+        private String serviceURL = null;
 
-        public WebSocketListener(String serviceURL) {
-            this.serviceURL = serviceURL;
-            if(serviceURL.startsWith("wss")) {
-                LOGD(TAG + ".WebsocketListener", "setting SECURE connection");
-                try {
-                    KeyStore p12Store = KeyStore.getInstance("PKCS12");
-                    p12Store.load(null, null);
-                    X509Certificate serverCert = appVS.getSSLServerCert();
-                    p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
-                    ByteArrayOutputStream baos  = new ByteArrayOutputStream();
-                    p12Store.store(baos, "".toCharArray());
-                    byte[] p12KeyStoreBytes = baos.toByteArray();
-                    SSLContextConfigurator sslContext = new SSLContextConfigurator();
-                    sslContext.setTrustStoreType("PKCS12");
-                    sslContext.setTrustStoreBytes(p12KeyStoreBytes);
-                    sslContext.setTrustStorePass("");
-                    SSLEngineConfigurator sslEngineConfigurator =
-                            new SSLEngineConfigurator(sslContext, true, false, false);
-                    //BUG with Android 5.0 and Tyrus client!!!
-                    //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
-                    client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                }
-            } else LOGD(TAG + ".WebsocketListener", "setting INSECURE connection");
+        public WebSocketListener(TypeVS sessionType) {
+            this.sessionType = sessionType;
         }
 
         @Override public void run() {
             try {
+                if(TypeVS.CURRENCY_SYSTEM == sessionType) {
+                    CurrencyServerDto currencyServer = appVS.getActor(CurrencyServerDto.class,
+                            appVS.getCurrencyServerURL());
+                    serviceURL = currencyServer.getWebSocketURL();
+                } else {
+                    AccessControlDto accessControl = appVS.getActor(AccessControlDto.class,
+                            appVS.getAccessControlURL());
+                    serviceURL = accessControl.getWebSocketURL();
+                }
                 LOGD(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
+                if(serviceURL.startsWith("wss")) {
+                    LOGD(TAG + ".WebsocketListener", "setting SECURE connection");
+                    try {
+                        KeyStore p12Store = KeyStore.getInstance("PKCS12");
+                        p12Store.load(null, null);
+                        X509Certificate serverCert = appVS.getSSLServerCert();
+                        p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
+                        ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+                        p12Store.store(baos, "".toCharArray());
+                        byte[] p12KeyStoreBytes = baos.toByteArray();
+                        SSLContextConfigurator sslContext = new SSLContextConfigurator();
+                        sslContext.setTrustStoreType("PKCS12");
+                        sslContext.setTrustStoreBytes(p12KeyStoreBytes);
+                        sslContext.setTrustStorePass("");
+                        SSLEngineConfigurator sslEngineConfigurator =
+                                new SSLEngineConfigurator(sslContext, true, false, false);
+                        //BUG with Android 5.0 and Tyrus client!!!
+                        //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
+                        client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else LOGD(TAG + ".WebsocketListener", "setting INSECURE connection");
+
                 final ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().
                         configurator(new ClientEndpointConfig.Configurator() {
                             @Override
                             public void beforeRequest(Map<String, List<String>> headers) {
-                                headers.put("Origin", Arrays.asList(appVS.getCurrencyServerURL()));
+                                headers.put("Origin", Arrays.asList(serviceURL));
                             }
 
                             @Override
@@ -264,7 +290,7 @@ public class WebSocketService extends Service {
                                 } catch (IOException e) { e.printStackTrace(); }
                             }
                         });
-                        setWebSocketSession(session);
+                        setWebSocketSession(session, sessionType);
                     }
                     @Override public void onClose(Session session, CloseReason closeReason) {
                         appVS.setWithSocketConnection(false);
@@ -288,11 +314,13 @@ public class WebSocketService extends Service {
             WebSocketSession socketSession = appVS.getWSSession(socketMsg.getUUID());
             //check messages from system
             if(socketMsg.getOperation() == TypeVS.MESSAGEVS_FROM_VS) {
-                socketMsg.setOperation(socketMsg.getMessageType());
-                LOGD(TAG, "MESSAGEVS_FROM_VS - operation: " + socketMsg.getOperation());
-                if(socketMsg.getOperation() != null) {
-                    switch(socketMsg.getOperation()) {
+                LOGD(TAG, "MESSAGEVS_FROM_VS - messageType: " + socketMsg.getMessageType());
+                if(socketMsg.getMessageType() != null) {
+                    switch(socketMsg.getMessageType()) {
                         case INIT_SESSION:
+                            if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
+                                appVS.setConnectedDevice(new DeviceDto().setId(socketMsg.getDeviceToId()));
+                            }
                             break;
                         case INIT_SIGNED_SESSION:
                             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
@@ -317,13 +345,23 @@ public class WebSocketService extends Service {
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 return;
             }
+            if(socketMsg.getMessageType() == TypeVS.OPERATION_PROCESS) {
+                QRMessageDto qrMessageDto = socketSession.getQrMessage();
+                if(!socketMsg.getOperationCode().equals(qrMessageDto)) {
+                    intent = new Intent(this, CMSSignerActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
+                    startActivity(intent);
+                } else LOGE(TAG, "OPERATION_PROCESS ERROR - unexpected operation code");
+                return;
+            }
             socketMsg.decryptMessage();
             if(socketSession == null) {
                 socketSession = new WebSocketSession(socketMsg);
                 appVS.putWSSession(socketMsg.getUUID(), socketSession);
             } else socketSession.setLastMessage(socketMsg);
             LOGD(TAG + ".sendWebSocketBroadcast", "statusCode: " + socketMsg.getStatusCode() +
-                    " - Operation: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
+                    " - OperationDto: " + socketMsg.getOperation() + " - MessageType: " + socketMsg.getMessageType());
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS:
                     ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, socketMsg.getMessage());
@@ -332,17 +370,8 @@ public class WebSocketService extends Service {
                     MessageContentProvider.insert(getContentResolver(), socketMsg);
                     Utils.showNewMessageNotification();
                     break;
-                case MESSAGEVS_SIGN:
-                    intent = new Intent(this, CMSSignerActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);
-                    startActivity(intent);
-                    break;
-                case MESSAGEVS_SIGN_RESPONSE:
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                    break;
                 case CURRENCY_WALLET_CHANGE:
-                    if(socketMsg.getMessageType() == TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID) {
+                    if(socketMsg.getStep() == TypeVS.CURRENCY_CHANGE) {
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode() && socketSession != null) {
                             for(Currency currency : (Collection<Currency>) socketSession.getData()) {
                                 currency.setState(Currency.State.EXPENDED);
@@ -350,7 +379,7 @@ public class WebSocketService extends Service {
                             Wallet.remove((Collection<Currency>) socketSession.getData());
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                         }
-                    } else if(socketMsg.getMessageType() == TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID) {
+                    } else {
                         MessageContentProvider.insert(getContentResolver(), socketMsg);
                         Utils.showNewMessageNotification();
                     }
@@ -411,7 +440,7 @@ public class WebSocketService extends Service {
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
                                     ex.getMessage(), null, TypeVS.MESSAGE_INFO);
                         } finally {
-                            session.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
+                            currencySession.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
                         }
                     } else {
                         UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),

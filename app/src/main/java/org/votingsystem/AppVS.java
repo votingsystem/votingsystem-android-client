@@ -166,6 +166,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     public void setServer(ActorDto actorDto) {
+        if(actorDto instanceof CurrencyServerDto) currencyServer = (CurrencyServerDto) actorDto;
+        else if(actorDto instanceof AccessControlDto) accessControl = (AccessControlDto) actorDto;
         if(serverMap.get(actorDto.getServerURL()) == null) {
             serverMap.put(actorDto.getServerURL(), actorDto);
         } else LOGD(TAG + ".setServer", "server with URL '" + actorDto.getServerURL() +

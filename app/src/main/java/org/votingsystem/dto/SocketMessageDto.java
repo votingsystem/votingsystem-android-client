@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
@@ -52,10 +51,8 @@ public class SocketMessageDto implements Serializable {
     private Integer statusCode;
     private Long deviceFromId;
     private Long deviceToId;
-    private String sessionId;
     private String subject;
     private String message;
-    private String contentToSign;
     private String encryptedMessage;
     private String UUID;
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
@@ -95,9 +92,9 @@ public class SocketMessageDto implements Serializable {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
+        messageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        messageDto.setSessionId(sessionId);
+        messageDto.setDeviceToId(this.deviceFromId);
         EncryptedContentDto encryptedDto = new EncryptedContentDto();
         encryptedDto.setStatusCode(statusCode);
         encryptedDto.setOperation(operation);
@@ -176,14 +173,6 @@ public class SocketMessageDto implements Serializable {
         this.toUser = toUser;
     }
 
-    public String getContentToSign() {
-        return contentToSign;
-    }
-
-    public void setContentToSign(String contentToSign) {
-        this.contentToSign = contentToSign;
-    }
-
     public List<CurrencyDto> getCurrencyList() {
         return currencyList;
     }
@@ -234,14 +223,6 @@ public class SocketMessageDto implements Serializable {
 
     public void setDeviceToId(Long deviceToId) {
         this.deviceToId = deviceToId;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
     public TypeVS getOperation() {
@@ -425,35 +406,28 @@ public class SocketMessageDto implements Serializable {
         this.deviceToName = deviceToName;
     }
 
-    public static SocketMessageDto getSignRequest(DeviceDto device, String toUser,
-                              String textToSign, String subject) throws Exception {
-        WebSocketSession socketSession = checkWebSocketSession(device, null, TypeVS.MESSAGEVS_SIGN);
-        SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
-        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setDeviceToId(device.getId());
-        socketMessageDto.setDeviceToName(device.getDeviceName());
-        socketMessageDto.setUUID(socketSession.getUUID());
-        EncryptedContentDto encryptedDto = EncryptedContentDto.getSignRequest(
-                toUser, textToSign, subject);
-        encryptMessage(socketMessageDto, encryptedDto, device);
-        return socketMessageDto;
-    }
-
-    public static SocketMessageDto getQRInfoRequest(QRMessageDto qrMessage) throws Exception {
+    public static SocketMessageDto getQRInfoRequest(QRMessageDto qrMessage,
+                                                    boolean encrypted) throws Exception {
         DeviceDto device = qrMessage.getDevice();
         WebSocketSession socketSession = checkWebSocketSession(device, null,
                 qrMessage.getOperation());
         qrMessage.setUUID(socketSession.getUUID()).createRequest();
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(device.getId());
-        EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(qrMessage)
-                .setUUID(socketSession.getUUID());
-        encryptedDto.setDeviceToName(device.getDeviceName());
-        encryptedDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
-        encryptMessage(socketMessageDto, encryptedDto, device);
+        if(encrypted) {
+            EncryptedContentDto encryptedDto = EncryptedContentDto.getQRInfoRequest(qrMessage)
+                    .setUUID(socketSession.getUUID());
+            encryptedDto.setDeviceToName(device.getDeviceName());
+            encryptedDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+            encryptMessage(socketMessageDto, encryptedDto, device);
+        } else {
+            socketMessageDto.setOperationCode(qrMessage.getOperationCode());
+            socketMessageDto.setMessageType(qrMessage.getOperation());
+            socketMessageDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+            socketMessageDto.setUUID(socketSession.getUUID());
+        }
         socketSession.setData(qrMessage);
         socketSession.setLastMessage(socketMessageDto);
         socketSession.setQrMessage(qrMessage);
@@ -477,7 +451,7 @@ public class SocketMessageDto implements Serializable {
                               List<Currency> currencyList) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(device, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setUUID(socketSession.getUUID());
         socketMessageDto.setDeviceToId(device.getId());
@@ -491,7 +465,6 @@ public class SocketMessageDto implements Serializable {
     public SocketMessageDto getBanResponse(Context context) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.WEB_SOCKET_BAN_SESSION);
-        socketMessageDto.setSessionId(sessionId);
         return socketMessageDto;
     }
 
@@ -502,7 +475,7 @@ public class SocketMessageDto implements Serializable {
                 TypeVS.MESSAGEVS);
         socketSession.setBroadCastId(broadCastId);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setDeviceToName(device.getDeviceName());
@@ -535,7 +508,6 @@ public class SocketMessageDto implements Serializable {
         if(encryptedDto.getToUser() != null) toUser = encryptedDto.getToUser();
         if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
         if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
-        if(encryptedDto.getContentToSign() != null) contentToSign = encryptedDto.getContentToSign();
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
         if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
         if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
@@ -556,20 +528,6 @@ public class SocketMessageDto implements Serializable {
         webSocketSession.setData(data);
         webSocketSession.setTypeVS(typeVS);
         return webSocketSession;
-    }
-
-
-    public ResponseVS getNotificationResponse(Context context) {
-        ResponseVS responseVS = new ResponseVS(statusCode, message);
-        switch (operation) {
-            case MESSAGEVS_SIGN_RESPONSE:
-                if(ResponseVS.SC_WS_MESSAGE_SEND_OK == statusCode) {
-                    responseVS.setCaption(context.getString(R.string.sign_document_lbl));
-                    responseVS.setMessage(context.getString(R.string.sign_document_result_ok_msg));
-                }
-                break;
-        }
-        return responseVS;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

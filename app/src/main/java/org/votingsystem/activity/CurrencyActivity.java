@@ -63,7 +63,7 @@ public class CurrencyActivity extends AppCompatActivity {
             if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
                 switch(socketMsg.getOperation()) {
-                    case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
+                    case MSG_TO_DEVICE:
                         break;
                     case CURRENCY_WALLET_CHANGE:
                         if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {

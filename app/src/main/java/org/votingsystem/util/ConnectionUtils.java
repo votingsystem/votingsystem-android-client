@@ -1,17 +1,13 @@
 package org.votingsystem.util;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -28,6 +24,13 @@ public class ConnectionUtils {
     public static final int RC_PASSWORD_REQUEST        = 1001;
 
     private static SocketMessageDto initSessionMessageDto;
+
+    public static void initUnathenticatedConnection(AppCompatActivity activity, TypeVS sessionType) {
+        Intent startIntent = new Intent(activity, WebSocketService.class);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
+        startIntent.putExtra(ContextVS.SESSION_KEY, sessionType);
+        activity.startService(startIntent);
+    }
 
     public static void initConnection(final AppCompatActivity activity) {
         CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
@@ -50,7 +53,6 @@ public class ConnectionUtils {
                     try {
                         initSessionMessageDto.setCMS(responseVS.getCMS());
                         Intent startIntent = new Intent(activity, WebSocketService.class);
-                        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
                         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));
                         activity.startService(startIntent);
                     } catch (Exception e) {
@@ -78,45 +80,6 @@ public class ConnectionUtils {
         } catch (Exception ex) {
             MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
                     ex.getMessage(), activity.getSupportFragmentManager());
-        }
-    }
-
-    public static class ConnectionTask extends AsyncTask<String, String, Void> {
-
-        private AppCompatActivity activity;
-
-        public ConnectionTask(AppCompatActivity activity) {
-            this.activity = activity;
-        }
-
-        @Override protected void onPreExecute() {
-            if(activity != null) {
-                ProgressDialogFragment.showDialog(
-                        activity.getString(R.string.connecting_caption),
-                        activity.getString(R.string.wait_msg),
-                        activity.getSupportFragmentManager());
-            }
-        }
-
-        @Override protected Void doInBackground(String... urls) {
-            try {
-                SocketMessageDto initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
-                CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(
-                        JSON.writeValueAsBytes(initSessionMessageDto));
-                initSessionMessageDto.setCMS(cmsMessage);
-                Intent startIntent = new Intent(activity, WebSocketService.class);
-                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));
-                activity.startService(startIntent);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                return null;
-            }
-        }
-
-        @Override protected void onPostExecute(Void response) {
-            if(activity != null) ProgressDialogFragment.hide(activity.getSupportFragmentManager());
         }
     }
 

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.Operation;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.TagVSDto;
@@ -677,7 +677,7 @@ public class TransactionDto implements Serializable {
         return transaction;
     }
 
-    public static TransactionDto fromOperation(Operation operation) throws Exception {
+    public static TransactionDto fromOperation(OperationDto operation) throws Exception {
         TransactionDto transactionDto = operation.getSignedContent(TransactionDto.class);
         if(transactionDto.getTagVS() == null) {
             transactionDto.setTagVS(new TagVSDto(TagVSDto.WILDTAG));

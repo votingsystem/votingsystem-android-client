@@ -18,19 +18,20 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,6 +53,7 @@ public class CMSSignerActivity extends AppCompatActivity {
     private CMSSignedMessage cms;
     private TextView signature_state;
     private SocketMessageDto socketMessage;
+    private OperationDto operationDto;
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -61,13 +63,11 @@ public class CMSSignerActivity extends AppCompatActivity {
                 ContextVS.WEBSOCKET_MSG_KEY);
         setProgressDialogVisible(false, null, null);
         if(socketMessageResponse != null) {
-            if(TypeVS.MESSAGEVS_SIGN_RESPONSE == socketMessageResponse.getOperation()) {
-                if(ResponseVS.SC_WS_MESSAGE_SEND_OK == socketMessageResponse.getStatusCode()) {
-                    UIUtils.launchMessageActivity(socketMessageResponse.getNotificationResponse(
-                            CMSSignerActivity.this));
-                    CMSSignerActivity.this.finish();
-                } else showMessage(socketMessageResponse.getStatusCode(),
-                        getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
+            if(TypeVS.OPERATION_RESULT == socketMessageResponse.getMessageType()) {
+                if(ResponseVS.SC_WS_MESSAGE_SEND_OK != socketMessageResponse.getStatusCode()) {
+                    showMessage(socketMessageResponse.getStatusCode(),
+                            getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
+                }
             } else LOGD(TAG + ".broadcastReceiver", "socketMessageResponse:" +
                     socketMessageResponse.getOperation());
         }
@@ -93,10 +93,11 @@ public class CMSSignerActivity extends AppCompatActivity {
         signature_state = (TextView) findViewById(R.id.signature_state);
         socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
+            operationDto = socketMessage.getMessage(OperationDto.class);
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
-                    true).writeValueAsString(socketMessage.getContentToSign());
+                    true).writeValueAsString(socketMessage.getMessage());
             webView.loadData(signatureContent, "application/json", "UTF-8");
-        } catch (IOException ex) { ex.printStackTrace(); }
+        } catch (Exception ex) { ex.printStackTrace(); }
         if(savedInstanceState != null) {
             byte[] cmsBytes = savedInstanceState.getByteArray(ContextVS.CMS_MSG_KEY);
             if(cmsBytes != null) {
@@ -106,8 +107,7 @@ public class CMSSignerActivity extends AppCompatActivity {
             }
         }
         TextView textView = (TextView) findViewById(R.id.deviceName);
-        textView.setText(getString(R.string.signature_request_from_device,
-                socketMessage.getDeviceFromName()));
+        textView.setText(getString(R.string.sign_send_msg));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.sign_request_lbl));
     }
@@ -143,8 +143,11 @@ public class CMSSignerActivity extends AppCompatActivity {
                     executorService.submit(new Runnable() {
                         @Override public void run() {
                             try {
-                                sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_OK, null,
-                                        responseVS.getCMS(), TypeVS.MESSAGEVS_SIGN_RESPONSE));
+                                ResponseVS response = HttpHelper.sendData(cms.toPEM(),
+                                        ContentType.JSON_SIGNED,
+                                        operationDto.getServiceURL());
+                                sendSocketMessage(socketMessage.getResponse(response.getStatusCode(),
+                                        response.getMessage(), null, TypeVS.OPERATION_RESULT));
                             } catch (Exception e) { e.printStackTrace(); }
                         }});
                     setMenu();
@@ -154,11 +157,10 @@ public class CMSSignerActivity extends AppCompatActivity {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     String accessModePassw = new String(responseVS.getMessageBytes());
                     Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getContentToSign());
+                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, socketMessage.getMessage());
                     intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
                     intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.signature_request_from_device,
-                            socketMessage.getDeviceFromName()));
+                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.sign_send_msg));
                     intent.putExtra(ContextVS.PASSWORD_KEY, accessModePassw.toCharArray());
                     startActivityForResult(intent, RC_SIGN_REQUEST);
                 }
@@ -174,12 +176,7 @@ public class CMSSignerActivity extends AppCompatActivity {
                 return true;
             case android.R.id.home:
             case R.id.reject_sign_request:
-                try {
-                    sendSocketMessage(socketMessage.getResponse(ResponseVS.SC_ERROR,
-                            getString(R.string.reject_websocket_request_msg, Utils.getDeviceName()), null,
-                            TypeVS.MESSAGEVS_SIGN_RESPONSE));
-                    finish();
-                } catch(Exception ex) {ex.printStackTrace();}
+                finish();
                 return true;
             case R.id.ban_device:
                 return true;

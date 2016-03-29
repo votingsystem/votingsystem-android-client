@@ -33,8 +33,6 @@ public class EncryptedContentDto implements Serializable {
     private String from;
     private String deviceFromName;
     private Long deviceFromId;
-    private String contentToSign;
-    private String sessionId;
     private String toUser;
     private String deviceToName;
     private String hashCertVS;
@@ -53,17 +51,6 @@ public class EncryptedContentDto implements Serializable {
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
-    }
-
-    public static EncryptedContentDto getSignRequest(String toUser,
-                                         String textToSign, String subject) throws Exception {
-        EncryptedContentDto encryptedContentDto =  new EncryptedContentDto();
-        encryptedContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
-        encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
-        encryptedContentDto.setToUser(toUser);
-        encryptedContentDto.setContentToSign(textToSign);
-        encryptedContentDto.setSubject(subject);
-        return encryptedContentDto;
     }
 
     public static EncryptedContentDto getQRInfoRequest(QRMessageDto qrMessage) throws Exception {
@@ -157,14 +144,6 @@ public class EncryptedContentDto implements Serializable {
         this.deviceFromName = deviceFromName;
     }
 
-    public String getContentToSign() {
-        return contentToSign;
-    }
-
-    public void setContentToSign(String contentToSign) {
-        this.contentToSign = contentToSign;
-    }
-
     public String getToUser() {
         return toUser;
     }
@@ -233,14 +212,6 @@ public class EncryptedContentDto implements Serializable {
 
     public void setHashCertVS(String hashCertVS) {
         this.hashCertVS = hashCertVS;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
     public String getX509CertificatePEM() {

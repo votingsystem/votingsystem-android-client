@@ -125,7 +125,6 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount());
-        setProgressDialogVisible(false);
         ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
         if(cursor.getCount() == 0) {
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
@@ -141,13 +140,6 @@ public class ReceiptGridFragment extends Fragment implements
 
     @Override public void onScroll(AbsListView view, int firstVisibleItem,
            int visibleItemCount, int totalItemCount) { }
-
-    private void setProgressDialogVisible(boolean isVisible) {
-        if(isVisible){
-            ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg), getFragmentManager());
-        } else ProgressDialogFragment.hide(getFragmentManager());
-    }
 
     public class ReceiptGridAdapter extends CursorAdapter {
 

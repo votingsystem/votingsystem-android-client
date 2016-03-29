@@ -28,7 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.votingsystem.AppVS;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.Operation;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
@@ -64,7 +64,7 @@ public class BrowserActivity extends AppCompatActivity {
     private String broadCastId = BrowserActivity.class.getSimpleName();
     private WebView webView;
     private FrameLayout webViewPlaceholder;
-    private Operation operation;
+    private OperationDto operation;
     private boolean doubleBackEnabled = true;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean showBrowserAdvice = true;
@@ -97,7 +97,7 @@ public class BrowserActivity extends AppCompatActivity {
         jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
         doubleBackEnabled = getIntent().getBooleanExtra(ContextVS.DOUBLE_BACK_KEY, true);
         if(savedInstanceState != null) {
-            operation = (Operation) savedInstanceState.getSerializable(ContextVS.OPERATION_KEY);
+            operation = (OperationDto) savedInstanceState.getSerializable(ContextVS.OPERATION_KEY);
         }
         /*if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -224,7 +224,7 @@ public class BrowserActivity extends AppCompatActivity {
     @JavascriptInterface
     public void unescapedMsg(String jsonStr) {
         try {
-            operation = JSON.readValue(jsonStr, Operation.class);
+            operation = JSON.readValue(jsonStr, OperationDto.class);
             switch(operation.getOperation()) {
                 case BROWSER_URL:
                     if(operation.getEmail() != null) {

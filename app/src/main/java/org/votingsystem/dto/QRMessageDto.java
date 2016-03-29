@@ -34,17 +34,21 @@ public class QRMessageDto<T> implements Serializable {
     public static final int CURRENCY_SEND                      = 2;
     public static final int USER_INFO                          = 3;
     public static final int VOTE                               = 4;
+    public static final int OPERATION_PROCESS                  = 5;
 
+    public static final int CURRENCY_SYSTEM                  = 0;
+    public static final int VOTING_SYSTEM                    = 1;
 
-    public static final String WEB_SOCKET_SESSION_KEY = "wsid";
     public static final String DEVICE_ID_KEY          = "did";
     public static final String ITEM_ID_KEY            = "iid";
     public static final String OPERATION_KEY          = "op";
     public static final String OPERATION_CODE_KEY     = "opid";
     public static final String PUBLIC_KEY_KEY         = "pk";
+    public static final String SERVER_KEY             = "srv";
 
 
     @JsonIgnore private TypeVS typeVS;
+    @JsonIgnore private TypeVS sessionType;
     @JsonIgnore private T data;
     @JsonIgnore private String origingHashCertVS;
     @JsonIgnore private Currency currency;
@@ -101,14 +105,28 @@ public class QRMessageDto<T> implements Serializable {
                 case VOTE:
                     qrMessageDto.setOperation(TypeVS.SEND_VOTE);
                     break;
+                case OPERATION_PROCESS:
+                    qrMessageDto.setOperation(TypeVS.OPERATION_PROCESS);
+                    break;
                 default:
                     LOGD(TAG, "unknown operation code: " + operationCode);
             }
         }
+        if (msg.contains(SERVER_KEY + "=")) {
+            int systemCode = Integer.valueOf(msg.split(SERVER_KEY + "=")[1].split(";")[0]);
+            switch (systemCode) {
+                case CURRENCY_SYSTEM:
+                    qrMessageDto.setSessionType(TypeVS.CURRENCY_SYSTEM);
+                    break;
+                case VOTING_SYSTEM:
+                    qrMessageDto.setSessionType(TypeVS.VOTING_SYSTEM);
+                    break;
+                default:
+                    LOGD(TAG, "unknown system code: " + systemCode);
+            }
+        }
         if (msg.contains(OPERATION_CODE_KEY + "="))
             qrMessageDto.setOperationCode(msg.split(OPERATION_CODE_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(WEB_SOCKET_SESSION_KEY + "="))
-            qrMessageDto.setSessionId(msg.split(WEB_SOCKET_SESSION_KEY + "=")[1].split(";")[0]);
         if (msg.contains(PUBLIC_KEY_KEY + "="))
             qrMessageDto.setPublicKeyBase64(msg.split(PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
         return qrMessageDto;
@@ -127,19 +145,18 @@ public class QRMessageDto<T> implements Serializable {
     public DeviceDto getDevice() throws Exception {
         if(device != null) return device;
         DeviceDto dto = new DeviceDto(deviceId);
-        dto.setPublicKey(getRSAPublicKey());
+        if(publicKeyBase64 != null) dto.setPublicKey(getRSAPublicKey());
         return dto;
     }
     public void setDevice(DeviceDto device) {
         this.device = device;
     }
 
-    public static String toQRCode(TypeVS operation, String operationCode, String deviceId, String sessionId) {
+    public static String toQRCode(TypeVS operation, String operationCode, String deviceId) {
         StringBuilder result = new StringBuilder();
         if(deviceId != null) result.append(DEVICE_ID_KEY + "=" + deviceId + ";");
         if(operation != null) result.append(OPERATION_KEY + "=" + operation + ";");
         if(operationCode != null) result.append(OPERATION_CODE_KEY + "=" + operationCode + ";");
-        if(sessionId != null) result.append(WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";");
         return result.toString();
     }
 
@@ -277,5 +294,14 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setItemId(Long itemId) {
         this.itemId = itemId;
+    }
+
+    public TypeVS getSessionType() {
+        if(sessionType == null) return TypeVS.CURRENCY_SYSTEM;
+        return sessionType;
+    }
+
+    public void setSessionType(TypeVS sessionType) {
+        this.sessionType = sessionType;
     }
 }

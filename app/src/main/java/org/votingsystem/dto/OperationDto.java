@@ -2,6 +2,7 @@ package org.votingsystem.dto;
 
 import android.net.Uri;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -14,9 +15,10 @@ import java.io.Serializable;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class Operation implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class OperationDto implements Serializable {
 
-	public static final String TAG = Operation.class.getSimpleName();
+	public static final String TAG = OperationDto.class.getSimpleName();
 
     private static final long serialVersionUID = 1L;
     
@@ -37,31 +39,32 @@ public class Operation implements Serializable {
     private String subject;
     private String UUID;
 
+
     @JsonProperty("objectId") private String callerCallback;
 
 
-    public Operation() {}
+    public OperationDto() {}
 
-    public Operation(int statusCode) {
+    public OperationDto(int statusCode) {
         this.statusCode = statusCode;
     }
     
-    public Operation(TypeVS typeVS) {
+    public OperationDto(TypeVS typeVS) {
         this.operation = typeVS;
     }
 
-    public Operation(TypeVS operation, Uri uriData) {
+    public OperationDto(TypeVS operation, Uri uriData) {
         this.operation = operation;
         this.uriData = uriData;
     }
 
     
-    public Operation(int statusCode, String message) {
+    public OperationDto(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
     
-    public Operation(int statusCode, String message, TypeVS operation) {
+    public OperationDto(int statusCode, String message, TypeVS operation) {
         this.statusCode = statusCode;
         this.message = message;
         this.operation = operation;
@@ -71,7 +74,7 @@ public class Operation implements Serializable {
         return UUID;
     }
 
-    public Operation setUUID(String UUID) {
+    public OperationDto setUUID(String UUID) {
         this.UUID = UUID;
         return this;
     }
