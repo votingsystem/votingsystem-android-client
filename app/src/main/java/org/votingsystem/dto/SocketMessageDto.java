@@ -88,7 +88,7 @@ public class SocketMessageDto implements Serializable {
     }
 
     public SocketMessageDto getResponse(Integer statusCode, String message,
-                                        CMSSignedMessage cmsMessage, TypeVS operation) throws Exception {
+                        CMSSignedMessage cmsMessage, TypeVS operation) throws Exception {
         WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
         socketSession.setTypeVS(operation);
         SocketMessageDto messageDto = new SocketMessageDto();
@@ -102,6 +102,22 @@ public class SocketMessageDto implements Serializable {
         encryptedDto.setMessage(message);
         if(cmsMessage != null) encryptedDto.setCMSMessage(cmsMessage.toPEMStr());
         encryptMessage(messageDto, encryptedDto, socketSession.getDevice());
+        messageDto.setUUID(UUID);
+        return messageDto;
+    }
+
+    public SocketMessageDto getPlainResponse(Integer statusCode, String message,
+                    TypeVS operation) throws Exception {
+        WebSocketSession socketSession = AppVS.getInstance().getWSSession(UUID);
+        socketSession.setTypeVS(operation);
+        SocketMessageDto messageDto = new SocketMessageDto();
+        messageDto.setOperation(TypeVS.MSG_TO_DEVICE);
+        messageDto.setMessageType(operation);
+        if(qrMessage != null) messageDto.setOperationCode(qrMessage.getOperationCode());
+        messageDto.setStatusCode(statusCode);
+        messageDto.setDeviceToId(this.deviceFromId);
+        messageDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+        messageDto.setMessage(message);
         messageDto.setUUID(UUID);
         return messageDto;
     }

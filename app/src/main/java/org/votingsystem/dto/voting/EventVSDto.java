@@ -3,13 +3,11 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.dto.CommentDto;
 import org.votingsystem.util.TypeVS;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,17 +38,14 @@ public class EventVSDto implements Serializable {
     private ControlCenterDto controlCenter;
     private String user;
     private AccessControlDto accessControl;
-    private Integer numComments = 0;
 
-    private Set<FieldEventDto> fieldEventSet = new HashSet<>();
-    private Set<EventVSTagVS> eventVSTagVSSet = new HashSet<>();
-    private Set<CommentDto> commentDtoSet = new HashSet<>();
+    private Set<FieldEventDto> fieldsEventVS = new HashSet<>();
+    private List<String> tags;
 
     private Date dateBegin;
     private Date dateFinish;
     private Date dateCreated;
     private Date lastUpdated;
-    private String[] tags;
     private State state;
     private VoteDto vote;
     private String UUID;
@@ -103,20 +98,12 @@ public class EventVSDto implements Serializable {
         this.cardinality = cardinality;
     }
 
-    public Set<FieldEventDto> getFieldsEventVS() {
-        return fieldEventSet;
+    public List<String> getTags() {
+        return tags;
     }
 
-    public void setFieldsEventVS(Set<FieldEventDto> fieldsEventVS) {
-        this.fieldEventSet = fieldsEventVS;
-    }
-
-    public void setEventTagVSes(Set<EventVSTagVS> eventVSTagVSSet) {
-        this.eventVSTagVSSet = eventVSTagVSSet;
-    }
-
-    public Set<EventVSTagVS> getEventTagVSes() {
-        return eventVSTagVSSet;
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     public void setId(Long id) {
@@ -135,9 +122,6 @@ public class EventVSDto implements Serializable {
         return eventId;
     }
 
-    public String[] getTags() {
-        return tags;
-    }
 
     public String getUser() {
         return user;
@@ -147,30 +131,6 @@ public class EventVSDto implements Serializable {
         this.user = user;
     }
 
-    public void setTags(String[] tags) {
-        if (tags.length == 0) return;
-        ArrayList<String> arrayTags = new ArrayList<String>();
-        for (String tag:tags) {
-            arrayTags.add(tag.toLowerCase());
-        }
-        this.tags = arrayTags.toArray(tags);
-    }
-
-    public void setCommentVSes(Set<CommentDto> commentDtoSet) {
-        this.commentDtoSet = commentDtoSet;
-    }
-
-    public Set<CommentDto> getCommentVSes() {
-        return commentDtoSet;
-    }
-
-    public void setNumComments(int numComments) {
-        this.numComments = numComments;
-    }
-
-    public int getNumComments() {
-        return numComments;
-    }
 
     public ControlCenterDto getControlCenter() {
         return controlCenter;
@@ -220,6 +180,13 @@ public class EventVSDto implements Serializable {
         this.accessControl = accessControl;
     }
 
+    public Set<FieldEventDto> getFieldsEventVS() {
+        return fieldsEventVS;
+    }
+
+    public void setFieldsEventVS(Set<FieldEventDto> fieldsEventVS) {
+        this.fieldsEventVS = fieldsEventVS;
+    }
 
     public void setVote(VoteDto vote) {
         this.vote = vote;

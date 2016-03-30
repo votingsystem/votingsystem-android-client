@@ -40,14 +40,14 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CMSSignerActivity extends AppCompatActivity {
+public class OperationSignerActivity extends AppCompatActivity {
 	
-	public static final String TAG = CMSSignerActivity.class.getSimpleName();
+	public static final String TAG = OperationSignerActivity.class.getSimpleName();
 
     public static final int RC_PASSWORD_REQUEST   = 0;
     public static final int RC_SIGN_REQUEST       = 1;
 
-    private String broadCastId = CMSSignerActivity.class.getSimpleName();
+    private String broadCastId = OperationSignerActivity.class.getSimpleName();
     private WebView webView;
     private Menu menu;
     private CMSSignedMessage cms;
@@ -111,7 +111,8 @@ public class CMSSignerActivity extends AppCompatActivity {
             }
         }
         TextView textView = (TextView) findViewById(R.id.deviceName);
-        textView.setText(getString(R.string.sign_send_msg));
+        if(operationDto.getSubject() != null) textView.setText(operationDto.getSubject());
+        else textView.setText(getString(R.string.sign_send_msg));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.sign_request_lbl));
     }
@@ -149,8 +150,9 @@ public class CMSSignerActivity extends AppCompatActivity {
                             try {
                                 ResponseVS response = HttpHelper.sendData(cms.toPEM(),
                                         ContentType.JSON_SIGNED, operationDto.getServiceURL());
-                                sendSocketMessage(socketMessage.getResponse(response.getStatusCode(),
-                                        response.getMessage(), null, TypeVS.OPERATION_RESULT));
+                                sendSocketMessage(socketMessage.getPlainResponse(response.getStatusCode(),
+                                        response.getMessage(), TypeVS.OPERATION_RESULT));
+                                finish();
                             } catch (Exception e) { e.printStackTrace(); }
                         }});
                     setMenu();
@@ -176,6 +178,8 @@ public class CMSSignerActivity extends AppCompatActivity {
             switch (operationDto.getOperation()) {
                 case PUBLISH_EVENT:
                     return JSON.writeValueAsString(operationDto.getEventVS());
+                case EVENT_CANCELLATION:
+                    return operationDto.getJsonStr();
                 default:
                     LOGD(TAG, "unknown operation: " + operationDto.getOperation());
             }

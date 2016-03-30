@@ -17,7 +17,7 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.CMSSignerActivity;
+import org.votingsystem.activity.OperationSignerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
@@ -348,7 +348,7 @@ public class WebSocketService extends Service {
             if(socketMsg.getMessageType() == TypeVS.OPERATION_PROCESS) {
                 QRMessageDto qrMessageDto = socketSession.getQrMessage();
                 if(!socketMsg.getOperationCode().equals(qrMessageDto)) {
-                    intent = new Intent(this, CMSSignerActivity.class);
+                    intent = new Intent(this, OperationSignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     socketMsg.setQrMessage(qrMessageDto);
                     intent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMsg);

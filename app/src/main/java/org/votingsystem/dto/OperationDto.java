@@ -28,10 +28,8 @@ public class OperationDto implements Serializable {
     private String message;
     private String email;
     private String serviceURL;
-    private String documentURL;
     private String serverURL;
     private String receiverName;
-    private String signedMessageSubject;
     private EventVSDto eventVS;
     private Uri uriData;
     private String toUser;
@@ -109,14 +107,6 @@ public class OperationDto implements Serializable {
 
     public void setReceiverName(String receiverName) {
         this.receiverName = receiverName;
-    }
-
-    public String getSignedMessageSubject() {
-        return signedMessageSubject;
-    }
-
-    public void setSignedMessageSubject(String signedMessageSubject) {
-        this.signedMessageSubject = signedMessageSubject;
     }
 
     public String getCaption() {
@@ -210,13 +200,6 @@ public class OperationDto implements Serializable {
         this.email = email;
     }
 
-    public String getDocumentURL() {
-        return documentURL;
-    }
-
-    public void setDocumentURL(String documentURL) {
-        this.documentURL = documentURL;
-    }
 }
 
 

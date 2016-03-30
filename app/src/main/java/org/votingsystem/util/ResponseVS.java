@@ -268,7 +268,7 @@ public class ResponseVS<T> implements Parcelable {
     }
 
     public String getCaption() {
-        if(caption == null && operation != null) return operation.getSignedMessageSubject();
+        if(caption == null && operation != null) return operation.getSubject();
         else return caption;
     }
 

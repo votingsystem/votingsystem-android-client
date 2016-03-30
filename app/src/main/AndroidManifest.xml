@@ -85,7 +85,7 @@
 
         <activity android:name="org.votingsystem.activity.SettingsActivity" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.CMSSignerActivity" android:theme="@style/ThemeVS"/>
+        <activity android:name="org.votingsystem.activity.OperationSignerActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.TransactionPagerActivity" android:theme="@style/ThemeVS"/>
 
