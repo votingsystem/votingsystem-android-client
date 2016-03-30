@@ -35,6 +35,7 @@ public class QRMessageDto<T> implements Serializable {
     public static final int USER_INFO                          = 3;
     public static final int VOTE                               = 4;
     public static final int OPERATION_PROCESS                  = 5;
+    public static final int ANONYMOUS_REPRESENTATIVE_SELECTION = 6;
 
     public static final int CURRENCY_SYSTEM                  = 0;
     public static final int VOTING_SYSTEM                    = 1;
@@ -107,6 +108,9 @@ public class QRMessageDto<T> implements Serializable {
                     break;
                 case OPERATION_PROCESS:
                     qrMessageDto.setOperation(TypeVS.OPERATION_PROCESS);
+                    break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                    qrMessageDto.setOperation(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
                     break;
                 default:
                     LOGD(TAG, "unknown operation code: " + operationCode);

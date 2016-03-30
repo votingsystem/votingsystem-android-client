@@ -46,7 +46,6 @@ public class RepresentativeFragment extends Fragment {
 
     private static final int REPRESENTATIVE_DELEGATION   = 1;
 
-    private AppVS appVS = null;
     private View rootView;
     private String broadCastId = null;
     private Button selectButton;
@@ -68,7 +67,7 @@ public class RepresentativeFragment extends Fragment {
     public static Fragment newInstance(Long representativeId) {
         RepresentativeFragment fragment = new RepresentativeFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.CURSOR_POSITION_KEY, representativeId);
+        args.putLong(ContextVS.ITEM_ID_KEY, representativeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -78,15 +77,12 @@ public class RepresentativeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        representativeId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY);
-        Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
-                getUserURI(representativeId), null, null, null, null);
-        cursor.moveToFirst();
-        final UserDto representative = (UserDto) ObjectUtils.deSerializeObject(cursor.getBlob(
-                cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+        representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
+        broadCastId = RepresentativeFragment.class.getSimpleName() + "_" + representativeId;
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
+                broadcastReceiver, new IntentFilter(broadCastId));
         rootView = inflater.inflate(R.layout.representative, container, false);
         representative_image = (ImageView) rootView.findViewById(R.id.representative_image);
-        appVS = (AppVS) getActivity().getApplicationContext();
         selectButton = (Button) rootView.findViewById(R.id.select_representative_button);
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -97,19 +93,25 @@ public class RepresentativeFragment extends Fragment {
         });
         selectButton.setVisibility(View.GONE);
         setHasOptionsMenu(true);
-        broadCastId = RepresentativeFragment.class.getSimpleName() + "_" + representativeId;
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
-        if(representative.getDescription() != null) printRepresentativeData(representative);
-        else {
-            setProgressDialogVisible(true);
-            Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
-            startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEM_REQUEST);
-            getActivity().startService(startIntent);
-        }
+        Cursor cursor = getActivity().getContentResolver().query(UserContentProvider.
+                getUserURI(representativeId), null, null, null, null);
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            final UserDto representative = (UserDto) ObjectUtils.deSerializeObject(cursor.getBlob(
+                    cursor.getColumnIndex(UserContentProvider.SERIALIZED_OBJECT_COL)));
+            if(representative.getDescription() != null) printRepresentativeData(representative);
+            else requestRepresentativeData(representativeId);
+        } else requestRepresentativeData(representativeId);
         return rootView;
+    }
+
+    private void requestRepresentativeData(Long representativeId) {
+        setProgressDialogVisible(true);
+        Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
+        startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
+        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEM_REQUEST);
+        getActivity().startService(startIntent);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -178,7 +180,8 @@ public class RepresentativeFragment extends Fragment {
         @Override protected void onPreExecute() { }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            return  HttpHelper.getData(appVS.getAccessControl().
+            return  HttpHelper.getData(
+                    ((AppVS) getActivity().getApplicationContext()).getAccessControl().
                     getRepresentativeImageURL(representativeId), null);
         }
 

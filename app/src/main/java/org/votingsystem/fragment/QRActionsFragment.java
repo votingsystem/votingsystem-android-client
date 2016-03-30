@@ -166,6 +166,13 @@ public class QRActionsFragment extends Fragment {
                                 qrMessageDto.getSessionType());
                     }
                     break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
+                    intent.putExtra(ContextVS.FRAGMENT_KEY, RepresentativeFragment.class.getName());
+                    intent.putExtra(ContextVS.ITEM_ID_KEY, qrMessageDto.getItemId());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    break;
             }
         } catch (Exception ex) { ex.printStackTrace(); }
     }

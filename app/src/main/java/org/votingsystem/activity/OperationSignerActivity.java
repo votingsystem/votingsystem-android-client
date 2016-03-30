@@ -178,6 +178,7 @@ public class OperationSignerActivity extends AppCompatActivity {
             switch (operationDto.getOperation()) {
                 case PUBLISH_EVENT:
                     return JSON.writeValueAsString(operationDto.getEventVS());
+                case REPRESENTATIVE_REVOKE:
                 case EVENT_CANCELLATION:
                     return operationDto.getJsonStr();
                 default:
