@@ -99,15 +99,8 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind:2.6.2"
     //https://github.com/votingsystem/votingsystem-android-bouncycastle
     compile "org.votingsystem.android:bouncycastle:0.8.0-SNAPSHOT"
-
     compile project(":dniedroid")
-
-    //BUG with Android 5.0 and Tyrus client!!! WSS connections throw SSLHandshakeException
-    //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
-
-
     compile 'com.neovisionaries:nv-websocket-client:1.23'
-
 }
 
 preBuild.dependsOn 'setAndroidEnv'
