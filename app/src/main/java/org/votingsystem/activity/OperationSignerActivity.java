@@ -95,12 +95,15 @@ public class OperationSignerActivity extends AppCompatActivity {
         UIUtils.setSupportActionBar(this);
         webView = (WebView) findViewById(R.id.cms_signed_content);
         signature_state = (TextView) findViewById(R.id.signature_state);
+        TextView textView = (TextView) findViewById(R.id.deviceName);
         socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
         try {
             operationDto = socketMessage.getMessage(OperationDto.class);
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
                     true).writeValueAsString(operationDto);
             webView.loadData(signatureContent, "application/json", "UTF-8");
+            if(operationDto.getSubject() != null) textView.setText(operationDto.getSubject());
+            else textView.setText(getString(R.string.sign_send_msg));
         } catch (Exception ex) { ex.printStackTrace(); }
         if(savedInstanceState != null) {
             byte[] cmsBytes = savedInstanceState.getByteArray(ContextVS.CMS_MSG_KEY);
@@ -110,9 +113,6 @@ public class OperationSignerActivity extends AppCompatActivity {
                 } catch (Exception e) { e.printStackTrace(); }
             }
         }
-        TextView textView = (TextView) findViewById(R.id.deviceName);
-        if(operationDto.getSubject() != null) textView.setText(operationDto.getSubject());
-        else textView.setText(getString(R.string.sign_send_msg));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.sign_request_lbl));
     }

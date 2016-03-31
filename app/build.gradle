@@ -104,7 +104,9 @@ dependencies {
 
     //BUG with Android 5.0 and Tyrus client!!! WSS connections throw SSLHandshakeException
     //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
-    compile "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12"
+
+
+    compile 'com.neovisionaries:nv-websocket-client:1.23'
 
 }
 

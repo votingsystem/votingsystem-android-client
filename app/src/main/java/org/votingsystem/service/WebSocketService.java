@@ -10,15 +10,16 @@ import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.neovisionaries.ws.client.WebSocket;
+import com.neovisionaries.ws.client.WebSocketAdapter;
+import com.neovisionaries.ws.client.WebSocketFactory;
+import com.neovisionaries.ws.client.WebSocketFrame;
 
 import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.bouncycastle2.pkcs.PKCS10CertificationRequestHolder;
-import org.glassfish.grizzly.ssl.SSLContextConfigurator;
-import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
-import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.OperationSignerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
+import org.votingsystem.activity.OperationSignerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
@@ -40,6 +41,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.MsgUtils;
+import org.votingsystem.util.NaiveSSLContext;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
@@ -49,8 +51,6 @@ import org.votingsystem.util.WebSocketSession;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -61,13 +61,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.HandshakeResponse;
-import javax.websocket.MessageHandler;
-import javax.websocket.Session;
+import javax.net.ssl.SSLContext;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.util.LogUtils.LOGE;
@@ -79,12 +73,10 @@ public class WebSocketService extends Service {
 
     public static final String TAG = WebSocketService.class.getSimpleName();
 
-    public static final String SSL_ENGINE_CONFIGURATOR =
-            "org.glassfish.tyrus.client.sslEngineConfigurator";
 
     private AppVS appVS;
-    private Session currencySession;
-    private Session votingSystemSession;
+    private WebSocket currencySession;
+    private WebSocket votingSystemSession;
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private CountDownLatch latch = new CountDownLatch(1);
 
@@ -137,12 +129,12 @@ public class WebSocketService extends Service {
             final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
             final String message = arguments.getString(ContextVS.MESSAGE_KEY);
             final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
-            final Session session = sessionType == TypeVS.CURRENCY_SYSTEM? currencySession : votingSystemSession;
+            final WebSocket session = sessionType == TypeVS.CURRENCY_SYSTEM? currencySession : votingSystemSession;
             if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
                 executorService.submit(new Runnable() {
                     @Override public void run() {
                         try {
-                            session.close();
+                            session.disconnect();
                         } catch (Exception ex) { ex.printStackTrace();}
                     }});
             } else if(message != null) {
@@ -158,12 +150,11 @@ public class WebSocketService extends Service {
                                     for (DeviceDto deviceDto : targetDevicesDto) {
                                         SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
                                                 deviceDto, null, message, broadCastId);
-                                        session.getBasicRemote().sendText(
-                                                JSON.writeValueAsString(messageDto));
+                                        session.sendText(JSON.writeValueAsString(messageDto));
                                     }
                                     break;
                                 default:
-                                    session.getBasicRemote().sendText(message);
+                                    session.sendText(message);
                             }
                         } catch(Exception ex) {
                             ex.printStackTrace();
@@ -189,7 +180,7 @@ public class WebSocketService extends Service {
         }
     };
 
-    private void setWebSocketSession(Session session, TypeVS sessionType) {
+    private void setWebSocketSession(WebSocket session, TypeVS sessionType) {
         if(TypeVS.CURRENCY == sessionType) this.currencySession = session;
         else this.votingSystemSession = session;
         latch.countDown();
@@ -217,7 +208,7 @@ public class WebSocketService extends Service {
                             JSON.writeValueAsBytes(remoteSignedSessionDto));
                     SocketMessageDto initSessionMessageDto = SocketMessageDto.
                             INIT_REMOTE_SIGNED_SESSION_REQUEST(cmsSignedMessage);
-                    currencySession.getBasicRemote().sendText(JSON.writeValueAsString(initSessionMessageDto));
+                    currencySession.sendText(JSON.writeValueAsString(initSessionMessageDto));
                 }
                 break;
         }
@@ -226,7 +217,6 @@ public class WebSocketService extends Service {
     private class WebSocketListener implements Runnable {
 
         private TypeVS sessionType;
-        final ClientManager client = ClientManager.createClient();
         private String serviceURL = null;
 
         public WebSocketListener(TypeVS sessionType) {
@@ -245,62 +235,38 @@ public class WebSocketService extends Service {
                     serviceURL = accessControl.getWebSocketURL();
                 }
                 LOGD(TAG + ".WebsocketListener", "connecting to '" + serviceURL + "'...");
-                if(serviceURL.startsWith("wss")) {
-                    LOGD(TAG + ".WebsocketListener", "setting SECURE connection");
-                    try {
-                        KeyStore p12Store = KeyStore.getInstance("PKCS12");
-                        p12Store.load(null, null);
-                        X509Certificate serverCert = appVS.getSSLServerCert();
-                        p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
-                        ByteArrayOutputStream baos  = new ByteArrayOutputStream();
-                        p12Store.store(baos, "".toCharArray());
-                        byte[] p12KeyStoreBytes = baos.toByteArray();
-                        SSLContextConfigurator sslContext = new SSLContextConfigurator();
-                        sslContext.setTrustStoreType("PKCS12");
-                        sslContext.setTrustStoreBytes(p12KeyStoreBytes);
-                        sslContext.setTrustStorePass("");
-                        SSLEngineConfigurator sslEngineConfigurator =
-                                new SSLEngineConfigurator(sslContext, true, false, false);
-                        //BUG with Android 5.0 and Tyrus client!!!
-                        //https://java.net/projects/tyrus/lists/users/archive/2015-01/message/0
-                        client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
-                    } catch(Exception ex) {
-                        ex.printStackTrace();
-                    }
-                } else LOGD(TAG + ".WebsocketListener", "setting INSECURE connection");
+                KeyStore p12Store = KeyStore.getInstance("PKCS12");
+                p12Store.load(null, null);
+                X509Certificate serverCert = appVS.getSSLServerCert();
+                p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
+                ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+                p12Store.store(baos, "".toCharArray());
+                byte[] p12KeyStoreBytes = baos.toByteArray();
 
-                final ClientEndpointConfig clientEndpointConfig = ClientEndpointConfig.Builder.create().
-                        configurator(new ClientEndpointConfig.Configurator() {
-                            @Override
-                            public void beforeRequest(Map<String, List<String>> headers) {
-                                headers.put("Origin", Arrays.asList(serviceURL));
-                            }
 
-                            @Override
-                            public void afterResponse(HandshakeResponse handshakeResponse) {
-                                //final Map<String, List<String>> headers = handshakeResponse.getHeaders();
-                            }
-                        }).build();
-                client.connectToServer(new Endpoint() {
-                    @Override public void onOpen(Session session, EndpointConfig endpointConfig) {
-                        session.addMessageHandler(new MessageHandler.Whole<String>() {
-                            @Override public void onMessage(String message) {
-                                try {
-                                    sendWebSocketBroadcast(JSON.readValue(message, SocketMessageDto.class));
-                                } catch (IOException e) { e.printStackTrace(); }
-                            }
-                        });
-                        setWebSocketSession(session, sessionType);
+                WebSocketFactory factory = new WebSocketFactory();
+                SSLContext context = NaiveSSLContext.getInstance("TLS");
+                factory.setSSLContext(context);
+                WebSocket webSocket = factory.createSocket(serviceURL);
+                webSocket.addListener(new WebSocketAdapter() {
+                    @Override
+                    public void onTextMessage(WebSocket websocket, String message) throws Exception {
+                        sendWebSocketBroadcast(JSON.readValue(message, SocketMessageDto.class));
                     }
-                    @Override public void onClose(Session session, CloseReason closeReason) {
-                        appVS.setWithSocketConnection(false);
-                        try {
-                            sendWebSocketBroadcast(new SocketMessageDto(
-                                    ResponseVS.SC_OK, null, TypeVS.MESSAGEVS_FROM_VS)
-                                    .setMessageType(TypeVS.WEB_SOCKET_CLOSE));
-                        } catch (Exception ex) {  ex.printStackTrace(); }
+                    @Override
+                    public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
+                        setWebSocketSession(websocket, sessionType);
                     }
-                }, clientEndpointConfig, URI.create(serviceURL));
+                    @Override
+                    public void onDisconnected(WebSocket websocket,
+                                               WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame,
+                                               boolean closedByServer) throws Exception {
+                        sendWebSocketBroadcast(new SocketMessageDto(
+                                ResponseVS.SC_WS_CONNECTION_CLOSED, null,
+                                TypeVS.MESSAGEVS_FROM_VS).setMessageType(TypeVS.WEB_SOCKET_CLOSE));
+                    }
+                });
+                webSocket.connect();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -441,7 +407,7 @@ public class WebSocketService extends Service {
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
                                     ex.getMessage(), null, TypeVS.MESSAGE_INFO);
                         } finally {
-                            currencySession.getBasicRemote().sendText(JSON.writeValueAsString(msgDto));
+                            currencySession.sendText(JSON.writeValueAsString(msgDto));
                         }
                     } else {
                         UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),

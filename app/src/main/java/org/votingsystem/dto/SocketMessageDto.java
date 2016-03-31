@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.websocket.Session;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -76,7 +74,6 @@ public class SocketMessageDto implements Serializable {
     @JsonIgnore private Set<Currency> currencySet;
     @JsonIgnore private QRMessageDto qrMessage;
     @JsonIgnore private WebSocketSession webSocketSession;
-    @JsonIgnore private Session session;
     @JsonIgnore private transient CMSSignedMessage cms;
 
     public SocketMessageDto () {}
@@ -257,10 +254,6 @@ public class SocketMessageDto implements Serializable {
         this.remoteAddress = remoteAddress;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
     public Integer getStatusCode() {
         return statusCode;
     }
@@ -386,9 +379,6 @@ public class SocketMessageDto implements Serializable {
         this.webSocketSession = webSocketSession;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
 
     public String getEncryptedMessage() {
         return encryptedMessage;

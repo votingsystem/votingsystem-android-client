@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.util.TypeVS;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
