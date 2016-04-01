@@ -252,7 +252,6 @@ public class ActivityBase extends ActivityConnected
             case R.id.contacts:
                 intent = new Intent(this, ContactsActivity.class);
                 startActivity(intent);
-                finish();
                 break;
             case R.id.fa_qrcode:
                 replaceFragment(new QRActionsFragment(), QRActionsFragment.TAG);

@@ -1,7 +1,9 @@
 package org.votingsystem.fragment;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
@@ -35,6 +37,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
 import java.security.NoSuchAlgorithmException;
@@ -97,20 +100,6 @@ public class QRActionsFragment extends Fragment {
     }
 
     private void processAction(Action action) {
-        /*if(!AppVS.getInstance().isWithSocketConnection()) {
-            pendingAction = action;
-            String caption = (action == Action.CREATE_QR)? getString(R.string.qr_create_lbl):
-                    getString(R.string.qr_read_lbl);
-            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(caption,
-                    getString(R.string.qr_connection_required_msg),
-                    getActivity()).setPositiveButton(getString(R.string.connect_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            ConnectionUtils.initConnection(((ActivityBase)getActivity()));
-                        }
-                    });
-            UIUtils.showMessageDialog(builder);
-        } else { }*/
         switch (action) {
             case READ_QR:
                 Utils.launchQRScanner(this);
@@ -148,8 +137,21 @@ public class QRActionsFragment extends Fragment {
             SocketMessageDto socketMessage = null;
             switch (qrMessageDto.getOperation()) {
                 case INIT_REMOTE_SIGNED_SESSION:
-                    socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, true);
-                    sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
+                    if(!AppVS.getInstance().isWithSocketConnection()) {
+                        pendingAction = Action.OPERATION;
+                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
+                                getString(R.string.qr_connection_required_msg),
+                                getActivity()).setPositiveButton(getString(R.string.connect_lbl),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        ConnectionUtils.initConnection(((ActivityBase)getActivity()));
+                                    }
+                                });
+                        UIUtils.showMessageDialog(builder);
+                    } else {
+                        socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, true);
+                        sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
+                    }
                     break;
                 case SEND_VOTE:
                     new GetDataTask(TypeVS.SEND_VOTE).execute(AppVS.getInstance().

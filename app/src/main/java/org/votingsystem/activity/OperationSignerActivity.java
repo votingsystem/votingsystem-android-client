@@ -114,6 +114,7 @@ public class OperationSignerActivity extends AppCompatActivity {
             }
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setSubtitle(socketMessage.getOperationCode());
         getSupportActionBar().setTitle(getString(R.string.sign_request_lbl));
     }
 
@@ -130,7 +131,6 @@ public class OperationSignerActivity extends AppCompatActivity {
             if(menu != null) {
                 menu.setGroupVisible(R.id.signature_items, true);
                 menu.removeItem(R.id.sign_document);
-                menu.removeItem(R.id.reject_sign_request);
             }
             findViewById(R.id.signature_state).setVisibility(View.VISIBLE);
         }
@@ -178,11 +178,8 @@ public class OperationSignerActivity extends AppCompatActivity {
             switch (operationDto.getOperation()) {
                 case PUBLISH_EVENT:
                     return JSON.writeValueAsString(operationDto.getEventVS());
-                case REPRESENTATIVE_REVOKE:
-                case EVENT_CANCELLATION:
-                    return operationDto.getJsonStr();
                 default:
-                    LOGD(TAG, "unknown operation: " + operationDto.getOperation());
+                    return operationDto.getJsonStr();
             }
         } catch (Exception ex) { ex.printStackTrace(); }
         return null;
@@ -195,7 +192,6 @@ public class OperationSignerActivity extends AppCompatActivity {
                 Utils.getProtectionPassword(RC_PASSWORD_REQUEST, null, null, this);
                 return true;
             case android.R.id.home:
-            case R.id.reject_sign_request:
                 finish();
                 return true;
             case R.id.ban_device:

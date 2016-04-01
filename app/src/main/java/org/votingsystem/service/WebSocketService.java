@@ -90,7 +90,6 @@ public class WebSocketService extends Service {
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        LOGD(TAG + ".onStartCommand", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
         final Bundle arguments = intent.getExtras();
         final TypeVS sessionType = arguments.containsKey(ContextVS.SESSION_KEY) ?
@@ -181,7 +180,8 @@ public class WebSocketService extends Service {
     };
 
     private void setWebSocketSession(WebSocket session, TypeVS sessionType) {
-        if(TypeVS.CURRENCY == sessionType) this.currencySession = session;
+        LOGD(TAG + ".setWebSocketSession", "sessionType: " + sessionType);
+        if(TypeVS.CURRENCY_SYSTEM == sessionType) this.currencySession = session;
         else this.votingSystemSession = session;
         latch.countDown();
     }
@@ -313,7 +313,7 @@ public class WebSocketService extends Service {
             }
             if(socketMsg.getMessageType() == TypeVS.OPERATION_PROCESS) {
                 QRMessageDto qrMessageDto = socketSession.getQrMessage();
-                if(!socketMsg.getOperationCode().equals(qrMessageDto)) {
+                if(socketMsg.getOperationCode().equals(qrMessageDto.getOperationCode())) {
                     intent = new Intent(this, OperationSignerActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     socketMsg.setQrMessage(qrMessageDto);
@@ -357,7 +357,7 @@ public class WebSocketService extends Service {
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         TransactionDto dto = socketMsg.getMessage(TransactionDto.class);
                         dto.setSocketMessageDto(socketMsg);
-                        dto.setQrMessageDto((QRMessageDto) socketSession.getData());
+                        dto.setQrMessageDto(socketSession.getQrMessage());
                         Intent resultIntent = new Intent(this, FragmentContainerActivity.class);
                         resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
                         resultIntent.putExtra(ContextVS.TRANSACTION_KEY, dto);
@@ -418,8 +418,7 @@ public class WebSocketService extends Service {
                     //the payer has completed the payment and send the details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         try {
-                            QRMessageDto<TransactionDto> qrDto =
-                                    (QRMessageDto<TransactionDto>) socketSession.getData();
+                            QRMessageDto<TransactionDto> qrDto = socketSession.getQrMessage();
                             CMSSignedMessage cmsMessage = socketMsg.getCMS();
                             TransactionDto dto = cmsMessage.getSignedContent(TransactionDto.class);
                             TypeVS typeVS = dto.getOperation();

@@ -434,7 +434,6 @@ public class SocketMessageDto implements Serializable {
             socketMessageDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
             socketMessageDto.setUUID(socketSession.getUUID());
         }
-        socketSession.setData(qrMessage);
         socketSession.setLastMessage(socketMessageDto);
         socketSession.setQrMessage(qrMessage);
         return socketMessageDto;
