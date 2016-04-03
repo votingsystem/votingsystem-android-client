@@ -293,7 +293,7 @@ public class ActivityBase extends ActivityConnected
                     R.string.non_rooted_phones_required_msg), positiveButton, null, this);
             return;
         }
-        if(!PrefUtils.isDNIeEnabled()) {
+        /*if(!PrefUtils.isDNIeEnabled()) {
             AppVS.getInstance().setToken(UUID.randomUUID().toString().toCharArray());
             startActivity(new Intent(getBaseContext(), UserDataFormActivity.class));
             return;
@@ -309,7 +309,7 @@ public class ActivityBase extends ActivityConnected
             UIUtils.showMessageDialog(getString(R.string.msg_lbl), getString(
                     R.string.access_mode_passw_required_msg), positiveButton, null, this);
             return;
-        }
+        }*/
         if(messagesMenuItem != null)
             messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
         changeConnectionStatus();

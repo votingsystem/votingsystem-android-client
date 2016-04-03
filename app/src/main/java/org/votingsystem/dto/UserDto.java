@@ -23,11 +23,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.security.auth.x500.X500Principal;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -123,6 +126,10 @@ public class UserDto implements Serializable {
             }
         } catch(Exception ex) {ex.printStackTrace();}
         return user;
+    }
+
+    public static UserDto getUser(Principal principal) {
+        return getUser(new X500Name(principal.getName()));
     }
 
     public static UserDto getUser(X509Principal principal) {

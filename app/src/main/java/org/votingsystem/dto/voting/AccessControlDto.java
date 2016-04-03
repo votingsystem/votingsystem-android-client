@@ -130,10 +130,6 @@ public class AccessControlDto extends ActorDto implements Serializable {
         return getServerURL() +  "/accessRequest";
     }
 
-    public String getCheckDatesServiceURL (Long id) {
-        return getServerURL() +  "/rest/eventVS/checkDates?id=" + id;
-    }
-
     public String getAnonymousDelegationRequestServiceURL() {
         return getServerURL() + "/representative/anonymousDelegationRequest";
     }

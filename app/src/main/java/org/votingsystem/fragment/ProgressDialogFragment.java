@@ -79,16 +79,18 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     public static void hide(FragmentManager fragmentManager) {
-        if(fragmentManager == null) {
-            LOGD(TAG, "fragmentManager null");
-            return;
-        }
-        List<Fragment> fragmentList = fragmentManager.getFragments();
-        if(fragmentList != null) {
-            for(Fragment fragment : fragmentList) {
-                if(fragment instanceof ProgressDialogFragment) ((ProgressDialogFragment)fragment).dismiss();
+        try {
+            if(fragmentManager == null) {
+                LOGD(TAG, "fragmentManager null");
+                return;
             }
-        }
+            List<Fragment> fragmentList = fragmentManager.getFragments();
+            if(fragmentList != null) {
+                for(Fragment fragment : fragmentList) {
+                    if(fragment instanceof ProgressDialogFragment) ((ProgressDialogFragment)fragment).dismiss();
+                }
+            }
+        } catch (Exception ex) { ex.printStackTrace();}
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {

@@ -19,8 +19,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.ResponseVS;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -35,27 +33,6 @@ public class EventVSService extends IntentService {
     public EventVSService() { super(TAG); }
 
     private AppVS appVS = null;
-
-    public void checkDates(EventVSDto eventVS) {
-        Date todayDate = Calendar.getInstance().getTime();
-        final String checkURL = appVS.getAccessControl().
-                getCheckDatesServiceURL(eventVS.getId());
-        Runnable runnable = null;
-        if(eventVS.getState() == EventVSDto.State.ACTIVE) {
-            if(todayDate.after(eventVS.getDateFinish())){
-                runnable = new Runnable() {
-                    public void run() {HttpHelper.getData(checkURL, null);}
-                };
-            }
-        } else if(eventVS.getState() == EventVSDto.State.PENDING) {
-            if(todayDate.after(eventVS.getDateBegin())){
-                runnable = new Runnable() {
-                    public void run() {HttpHelper.getData(checkURL, null);}
-                };
-            }
-        }
-        if(runnable != null) new Thread(runnable).start();
-    }
 
     @Override protected void onHandleIntent(Intent intent) {
         LOGD(TAG + ".onHandleIntent", "onHandleIntent ");
@@ -99,7 +76,6 @@ public class EventVSService extends IntentService {
                         EventVSDto.State eventVSState = eventVS.getState();
                         if(eventVSState == EventVSDto.State.CANCELLED) eventVSState =
                                 EventVSDto.State.TERMINATED;
-                        checkDates(eventVS);
                         ContentValues values = new ContentValues(5);
                         values.put(EventVSContentProvider.SQL_INSERT_OR_REPLACE, true );
                         values.put(EventVSContentProvider.ID_COL, eventVS.getId());

@@ -35,6 +35,10 @@ public class DNIePasswordDialog implements DialogUIHandler {
         this.password = password;
     }
 
+    public void setPassword(char[] password) {
+        this.password = password;
+    }
+
     @Override
     public int showConfirmDialog(String message) {
         return doShowConfirmDialog(message);
