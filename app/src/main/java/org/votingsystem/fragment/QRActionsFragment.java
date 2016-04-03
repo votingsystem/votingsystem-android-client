@@ -140,7 +140,7 @@ public class QRActionsFragment extends Fragment {
                     if(!AppVS.getInstance().isWithSocketConnection()) {
                         pendingAction = Action.OPERATION;
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
-                                getString(R.string.qr_connection_required_msg),
+                                getString(R.string.connection_required_msg),
                                 getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {

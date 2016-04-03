@@ -290,15 +290,16 @@ public class WebSocketService extends Service {
                             break;
                         case INIT_SIGNED_SESSION:
                             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                                appVS.setConnectedDevice(socketMsg.getConnectedDevice());
                                 appVS.setWithSocketConnection(true);
+                                appVS.setConnectedDevice(socketMsg.getConnectedDevice());
                                 appVS.setToken(socketMsg.getMessage().toCharArray());
-                            } else appVS.setWithSocketConnection(false);
+                            }
                             break;
                         case TRANSACTION_INFO:
                             break;
                         case WEB_SOCKET_CLOSE:
                             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                            appVS.setWithSocketConnection(false);
                             return;
                         default: LOGD(TAG, "MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
                     }
