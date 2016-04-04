@@ -395,7 +395,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         this.withSocketConnection = withSocketConnection;
     }
 
-    public boolean isEventsStateLoaded(EventVSDto.State eventsState) {
+    public  boolean isEventsStateLoaded(EventVSDto.State eventsState) {
         return eventsStateLoaded.contains(eventsState);
     }
 

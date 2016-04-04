@@ -53,7 +53,7 @@ public class QRActionsFragment extends Fragment {
 	public static final String TAG = QRActionsFragment.class.getSimpleName();
     public static final String PENDING_ACTION_KEY = "PENDING_ACTION_KEY";
 
-    private enum Action {READ_QR, CREATE_QR, OPERATION}
+    private enum Action {READ_QR, CREATE_QR, OPERATION, AUTHENTICATED_OPERATION}
 
     private String broadCastId = QRActionsFragment.class.getSimpleName();
     private QRMessageDto qrMessageDto;
@@ -66,8 +66,14 @@ public class QRActionsFragment extends Fragment {
             if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
                 if(AppVS.getInstance().getConnectedDevice() != null && pendingAction != null) {
-                    processAction(pendingAction);
-                    pendingAction = null;
+                    if(pendingAction == Action.OPERATION) {
+                        processAction(pendingAction);
+                        pendingAction = null;
+                    } else if(pendingAction == Action.AUTHENTICATED_OPERATION &&
+                            AppVS.getInstance().isWithSocketConnection()) {
+                        processAction(pendingAction);
+                        pendingAction = null;
+                    }
                 }
             }
         }
@@ -111,6 +117,7 @@ public class QRActionsFragment extends Fragment {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 break;
+            case AUTHENTICATED_OPERATION:
             case OPERATION:
                 processQRCode(qrMessageDto);
                 break;
@@ -133,12 +140,14 @@ public class QRActionsFragment extends Fragment {
     }
 
     private void processQRCode(QRMessageDto qrMessageDto) {
+        LOGD(TAG, "processQRCode - isWithSocketConnection: " + AppVS.getInstance().isWithSocketConnection() +
+                " - ConnectedDevice: " + AppVS.getInstance().getConnectedDevice());
         try {
             SocketMessageDto socketMessage = null;
             switch (qrMessageDto.getOperation()) {
                 case INIT_REMOTE_SIGNED_SESSION:
                     if(!AppVS.getInstance().isWithSocketConnection()) {
-                        pendingAction = Action.OPERATION;
+                        pendingAction = Action.AUTHENTICATED_OPERATION;
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
                                 getString(R.string.connection_required_msg),
                                 getActivity()).setPositiveButton(getString(R.string.connect_lbl),
@@ -146,6 +155,7 @@ public class QRActionsFragment extends Fragment {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         if(getActivity() != null) ConnectionUtils.initConnection(
                                                 ((ActivityBase)getActivity()));
+                                        dialog.cancel();
                                     }
                                 });
                         UIUtils.showMessageDialog(builder);
