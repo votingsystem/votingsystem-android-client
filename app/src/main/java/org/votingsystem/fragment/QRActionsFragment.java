@@ -186,6 +186,7 @@ public class QRActionsFragment extends Fragment {
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(intent);
                     break;
+                default: LOGD(TAG, "processQRCode: " + qrMessageDto.getOperation());
             }
         } catch (Exception ex) { ex.printStackTrace(); }
     }

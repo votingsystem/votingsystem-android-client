@@ -159,9 +159,9 @@ public class CurrencyAccountsFragment extends Fragment {
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        //menu.clear();
-        super.onCreateOptionsMenu(menu, menuInflater);
+        menu.clear();
         menuInflater.inflate(R.menu.currency_accounts, menu);
+        super.onCreateOptionsMenu(menu, menuInflater);
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {

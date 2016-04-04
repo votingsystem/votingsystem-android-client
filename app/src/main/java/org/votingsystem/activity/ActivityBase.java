@@ -171,14 +171,14 @@ public class ActivityBase extends ActivityConnected
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_base, menu);
         if (!BuildConfig.DEBUG) {
-            menu.findItem(R.id.menu_debug).setVisible(false);
+            MenuItem debugMenuItem = menu.findItem(R.id.menu_debug);
+            if(debugMenuItem != null) debugMenuItem.setVisible(false);
         }
-        if(menuType != null && menuType == R.menu.drawer_currency) {
-            menu.findItem(R.id.connect).setVisible(true);
-        } else if(menuType != null && menuType == R.menu.drawer_voting) {
-            menu.findItem(R.id.connect).setVisible(false);
+        if(menuType != null &&
+                (menuType == R.menu.drawer_currency || menuType == R.menu.drawer_voting)) {
+            MenuItem connectMenuItem = menu.findItem(R.id.connect);
+            if(connectMenuItem != null) connectMenuItem.setVisible(false);
         }
         this.menu = menu;
         changeConnectionStatus();

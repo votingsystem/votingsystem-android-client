@@ -148,7 +148,9 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menu.clear();
         menuInflater.inflate(R.menu.eventvs_grid, menu);
+        super.onCreateOptionsMenu(menu, menuInflater);
     }
 
     private void setProgressDialogVisible(final boolean isVisible) {

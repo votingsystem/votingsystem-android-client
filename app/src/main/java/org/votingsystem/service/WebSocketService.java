@@ -91,79 +91,81 @@ public class WebSocketService extends Service {
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        final Bundle arguments = intent.getExtras();
-        final TypeVS sessionType = arguments.containsKey(ContextVS.SESSION_KEY) ?
-                (TypeVS)arguments.getSerializable(ContextVS.SESSION_KEY) : TypeVS.CURRENCY_SYSTEM;
-        if(sessionType == TypeVS.CURRENCY_SYSTEM) {
-            if(currencySession == null || !currencySession.isOpen()) {
-                latch = new CountDownLatch(1);
-                WebSocketListener socketListener = new WebSocketListener(sessionType);
-                executorService.submit(socketListener);
-            }
-        } else {
-            if(votingSystemSession == null || !votingSystemSession.isOpen()) {
-                latch = new CountDownLatch(1);
-                WebSocketListener socketListener = new WebSocketListener(sessionType);
-                executorService.submit(socketListener);
-            }
-        }
         try {
-            if(latch.getCount() > 0) latch.await();
-        } catch(Exception ex) {
-            LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET: " + ex.getMessage());
-            ex.printStackTrace();
-        }
-        final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
-                (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USER;
-        if(operationType == TypeVS.WEB_SOCKET_INIT) {
-        } else if(operationType == TypeVS.PIN) {
-            executorService.submit(new Runnable() {
-                @Override public void run() {
-                    try {
-                        String msgUUID = arguments.getString(ContextVS.UUID_KEY);
-                        processPIN(msgUUID);
-                    } catch (Exception ex) { ex.printStackTrace();}
-                }});
-        } else {
-            final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
-            final String message = arguments.getString(ContextVS.MESSAGE_KEY);
-            final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
-            final WebSocket session = sessionType == TypeVS.CURRENCY_SYSTEM? currencySession : votingSystemSession;
-            if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
+            final Bundle arguments = intent.getExtras();
+            final TypeVS sessionType = arguments.containsKey(ContextVS.SESSION_KEY) ?
+                    (TypeVS)arguments.getSerializable(ContextVS.SESSION_KEY) : TypeVS.CURRENCY_SYSTEM;
+            if(sessionType == TypeVS.CURRENCY_SYSTEM) {
+                if(currencySession == null || !currencySession.isOpen()) {
+                    latch = new CountDownLatch(1);
+                    WebSocketListener socketListener = new WebSocketListener(sessionType);
+                    executorService.submit(socketListener);
+                }
+            } else {
+                if(votingSystemSession == null || !votingSystemSession.isOpen()) {
+                    latch = new CountDownLatch(1);
+                    WebSocketListener socketListener = new WebSocketListener(sessionType);
+                    executorService.submit(socketListener);
+                }
+            }
+            try {
+                if(latch.getCount() > 0) latch.await();
+            } catch(Exception ex) {
+                LOGE(TAG + ".onStartCommand", "ERROR CONNECTING TO WEBSOCKET: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+            final TypeVS operationType = arguments.containsKey(ContextVS.TYPEVS_KEY) ?
+                    (TypeVS)arguments.getSerializable(ContextVS.TYPEVS_KEY) : TypeVS.FROM_USER;
+            if(operationType == TypeVS.WEB_SOCKET_INIT) {
+            } else if(operationType == TypeVS.PIN) {
                 executorService.submit(new Runnable() {
                     @Override public void run() {
                         try {
-                            session.disconnect();
+                            String msgUUID = arguments.getString(ContextVS.UUID_KEY);
+                            processPIN(msgUUID);
                         } catch (Exception ex) { ex.printStackTrace();}
                     }});
-            } else if(message != null) {
-                executorService.submit(new Runnable() {
-                    @Override public void run() {
-                        try {
-                            LOGD(TAG + ".onStartCommand", "operation: " + operationType +
-                                    " - socketMsg: " + message);
-                            switch(operationType) {
-                                case MESSAGEVS:
-                                    List<DeviceDto> targetDevicesDto = JSON.readValue(
-                                            dtoStr, new TypeReference<List<DeviceDto>>(){});
-                                    for (DeviceDto deviceDto : targetDevicesDto) {
-                                        SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
-                                                deviceDto, null, message, broadCastId);
-                                        session.sendText(JSON.writeValueAsString(messageDto));
-                                    }
-                                    break;
-                                default:
-                                    session.sendText(message);
+            } else {
+                final String dtoStr = arguments.getString(ContextVS.DTO_KEY);
+                final String message = arguments.getString(ContextVS.MESSAGE_KEY);
+                final String broadCastId = arguments.getString(ContextVS.CALLER_KEY);
+                final WebSocket session = sessionType == TypeVS.CURRENCY_SYSTEM? currencySession : votingSystemSession;
+                if(operationType == TypeVS.WEB_SOCKET_CLOSE && session != null && session.isOpen()) {
+                    executorService.submit(new Runnable() {
+                        @Override public void run() {
+                            try {
+                                session.disconnect();
+                            } catch (Exception ex) { ex.printStackTrace();}
+                        }});
+                } else if(message != null) {
+                    executorService.submit(new Runnable() {
+                        @Override public void run() {
+                            try {
+                                LOGD(TAG + ".onStartCommand", "operation: " + operationType +
+                                        " - socketMsg: " + message);
+                                switch(operationType) {
+                                    case MESSAGEVS:
+                                        List<DeviceDto> targetDevicesDto = JSON.readValue(
+                                                dtoStr, new TypeReference<List<DeviceDto>>(){});
+                                        for (DeviceDto deviceDto : targetDevicesDto) {
+                                            SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(
+                                                    deviceDto, null, message, broadCastId);
+                                            session.sendText(JSON.writeValueAsString(messageDto));
+                                        }
+                                        break;
+                                    default:
+                                        session.sendText(message);
+                                }
+                            } catch(Exception ex) {
+                                ex.printStackTrace();
+                                UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
+                                        getString(R.string.error_lbl));
                             }
-                        } catch(Exception ex) {
-                            ex.printStackTrace();
-                            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, ex.getMessage(),
-                                    getString(R.string.error_lbl));
                         }
-                    }
-                });
+                    });
+                }
             }
-        }
+        } catch (Exception ex) { ex.printStackTrace();}
         //We want this service to continue running until it is explicitly stopped, so return sticky.
         return START_STICKY;
     }
