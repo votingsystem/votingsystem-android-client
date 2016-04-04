@@ -61,7 +61,10 @@ public class QRActionsFragment extends Fragment {
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+            LOGD(TAG, "broadcastReceiver - pendingAction: " + pendingAction +
+                    " - isWithSocketConnection: " + AppVS.getInstance().isWithSocketConnection() +
+                    " - ConnectedDevice: " + AppVS.getInstance().getConnectedDevice());
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
             if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
@@ -140,19 +143,17 @@ public class QRActionsFragment extends Fragment {
     }
 
     private void processQRCode(QRMessageDto qrMessageDto) {
-        LOGD(TAG, "processQRCode - isWithSocketConnection: " + AppVS.getInstance().isWithSocketConnection() +
-                " - ConnectedDevice: " + AppVS.getInstance().getConnectedDevice());
         try {
             SocketMessageDto socketMessage = null;
             switch (qrMessageDto.getOperation()) {
                 case INIT_REMOTE_SIGNED_SESSION:
                     if(!AppVS.getInstance().isWithSocketConnection()) {
-                        pendingAction = Action.AUTHENTICATED_OPERATION;
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
                                 getString(R.string.connection_required_msg),
                                 getActivity()).setPositiveButton(getString(R.string.connect_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
+                                        pendingAction = Action.AUTHENTICATED_OPERATION;
                                         if(getActivity() != null) ConnectionUtils.initConnection(
                                                 ((ActivityBase)getActivity()));
                                         dialog.cancel();

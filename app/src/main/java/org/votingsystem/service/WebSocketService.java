@@ -294,7 +294,9 @@ public class WebSocketService extends Service {
                             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
                                 appVS.setWithSocketConnection(true);
                                 appVS.setConnectedDevice(socketMsg.getConnectedDevice());
-                                appVS.setToken(socketMsg.getMessage().toCharArray());
+                                if(socketMsg.getMessage() != null) {
+                                    appVS.setToken(socketMsg.getMessage().toCharArray());
+                                } else LOGD(TAG, "socket session without token");
                             }
                             break;
                         case TRANSACTION_INFO:
@@ -307,7 +309,8 @@ public class WebSocketService extends Service {
                     }
                 }
                 if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
-                        ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                        ResponseVS.SC_ERROR == socketMsg.getStatusCode() ||
+                        ResponseVS.SC_WS_CONNECTION_INIT_ERROR == socketMsg.getStatusCode()) {
                     UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, socketMsg.getMessage(),
                             getString(R.string.error_lbl));
                 }

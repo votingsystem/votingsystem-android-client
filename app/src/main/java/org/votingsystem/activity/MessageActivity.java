@@ -21,7 +21,6 @@ public class MessageActivity extends AppCompatActivity {
 
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        //boolean isTablet = getResources().getBoolean(R.bool.isTablet); this doesn't work
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.message_activity);

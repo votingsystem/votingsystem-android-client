@@ -21,14 +21,12 @@ public class ResponseVS<T> implements Parcelable {
     public static final String TAG = ResponseVS.class.getSimpleName();
 
     public static final int SC_OK                       = 200;
-    public static final int SC_OK_WITHOUT_BODY          = 204;
     public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
     public static final int SC_REQUEST_TIMEOUT          = 408;
     public static final int SC_ERROR_REQUEST            = 400;
     public static final int SC_NOT_FOUND                = 404;
     public static final int SC_ERROR_REQUEST_REPEATED   = 409;
     public static final int SC_EXCEPTION                = 490;
-    public static final int SC_NULL_REQUEST             = 472;
     public static final int SC_ERROR                    = 500;
     public static final int SC_CONNECTION_TIMEOUT       = 522;
     public static final int SC_ERROR_TIMESTAMP          = 570;

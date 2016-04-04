@@ -155,7 +155,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				p.setProviderCan(dnieCAN);
 				Security.insertProviderAt(p, 1);
 				//Deactivate fastmode
-				System.setProperty("es.gob.jmulticard.fastmode", "false");
+				//System.setProperty("es.gob.jmulticard.fastmode", "false");
 				DNIePasswordDialog passwordDialog = new DNIePasswordDialog(ID_CardNFCReaderActivity.this, password, true);
 				DNIeDialogManager.setDialogUIHandler(passwordDialog);
 				KeyStore ksUserDNIe = KeyStore.getInstance("MRTD");
@@ -217,18 +217,14 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 					setResult(Activity.RESULT_OK, resultIntent);
 					finish();
 				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				String msg = ex.getMessage() != null ? ex.getMessage() :
-						getString(R.string.dnie_connection_error_msg);
-				showMessageDialog(getString(R.string.error_lbl), msg);
-			}  catch (NullPointerException ex) {
+			} catch (NullPointerException ex) {
 				ex.printStackTrace();
 				showMessageDialog(getString(R.string.error_lbl),
 						getString(R.string.dnie_connection_null_error_msg));
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				showMessageDialog(getString(R.string.error_lbl), ex.getMessage());
+				showMessageDialog(getString(R.string.error_lbl),
+						getString(R.string.dnie_connection_error_msg));
 			}
 		}
 	};
