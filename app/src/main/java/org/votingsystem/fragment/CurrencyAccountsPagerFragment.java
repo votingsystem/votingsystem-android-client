@@ -1,6 +1,8 @@
 package org.votingsystem.fragment;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,7 +14,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.votingsystem.AppVS;
+import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.currency.CurrencyServerDto;
+import org.votingsystem.util.ConnectionUtils;
+import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -31,6 +38,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
                                        Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "onCreateView");
         super.onCreate(savedInstanceState);
+        AppVS.getInstance().getActor(CurrencyServerDto.class, AppVS.getInstance().getCurrencyServerURL());
         View rootView = inflater.inflate(R.layout.currency_accounts_main, container, false);
         ViewPager mViewPager = (ViewPager) rootView.findViewById(R.id.pager);
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -64,13 +72,25 @@ public class CurrencyAccountsPagerFragment extends Fragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
-            /*case R.id.admin_currency_menu_item:
-                Intent intent = new Intent(this, BrowserActivity.class);
-                intent.putExtra(ContextVS.URL_KEY, appVS.getCurrencyServer().getMenuAdminURL());
-                startActivity(intent);
-                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        if (!AppVS.getInstance().isWithSocketConnection()) {
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
+                    getString(R.string.connection_required_msg),
+                    getActivity()).setPositiveButton(getString(R.string.connect_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            if(getActivity() != null) ConnectionUtils.initConnection(
+                                    ((ActivityBase)getActivity()));
+                            dialog.cancel();
+                        }
+                    });
+            UIUtils.showMessageDialog(builder);
         }
     }
 

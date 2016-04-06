@@ -193,7 +193,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
 
         @Override protected ResponseVS doInBackground(String... urls) {
             try {
-                CurrencyStateDto currencyStateDto = HttpHelper.getData(CurrencyStateDto.class,
+                CurrencyStateDto currencyStateDto = HttpHelper.getInstance().getData(CurrencyStateDto.class,
                         urls[0], MediaType.JSON);
                 currency.setState(currencyStateDto.getState());
                 getContentResolver().update(CurrencyContentProvider.getURI(currency.getLocalId()),

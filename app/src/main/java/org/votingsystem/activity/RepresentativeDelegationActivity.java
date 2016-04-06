@@ -199,7 +199,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 Map<String, Object> mapToSend = new HashMap<>();
                 mapToSend.put(ContextVS.CSR_FILE_NAME, delegationDto.getCertificationRequest().getCsrPEM());
                 mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
-                responseVS = HttpHelper.sendObjectMap(mapToSend,
+                responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                         AppVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     delegationDto.getCertificationRequest().initSigner(responseVS.getMessageBytes());
@@ -211,7 +211,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                             signatureMechanism, contentToSign);
                     cmsMessage = delegationDto.getCertificationRequest().signData(
                             contentToSign, timeStampToken);
-                    responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
+                    responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                             AppVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         delegationDto.setDelegationReceipt(responseVS.getCMS(),

@@ -17,6 +17,7 @@
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
+                android:textColor="@color/body_text"
                 android:text="@string/receptor_lbl" />
 
             <TextView android:id="@+id/receptor"
@@ -40,6 +41,7 @@
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
+                android:textColor="@color/msg_content_vs"
                 android:text="@string/subject_lbl" />
 
             <TextView android:id="@+id/subject"

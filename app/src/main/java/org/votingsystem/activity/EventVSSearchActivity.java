@@ -184,7 +184,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
             }
             String serviceURL = AppVS.getInstance().getAccessControl().getSearchServiceURL(null, null, queryStr,
                     EventVSDto.Type.ELECTION, eventState);
-            responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
+            responseVS = HttpHelper.getInstance().getData(serviceURL, ContentType.JSON);
             try {
                 ResultListDto<EventVSDto> resultListDto = (ResultListDto<EventVSDto>)
                         responseVS.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});

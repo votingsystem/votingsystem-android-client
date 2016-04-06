@@ -237,7 +237,7 @@ public class CurrencyActivity extends AppCompatActivity {
 
         @Override protected ResponseVS doInBackground(String... urls) {
             String currencyURL = urls[0];
-            return HttpHelper.getData(currencyURL, null);
+            return HttpHelper.getInstance().getData(currencyURL, null);
         }
 
         @Override protected void onProgressUpdate(String... progress) { }

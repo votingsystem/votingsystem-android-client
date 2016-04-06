@@ -3,9 +3,11 @@ package org.votingsystem.util;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
+import org.votingsystem.AppVS;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
+import org.votingsystem.dto.InitSessionDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.service.WebSocketService;
@@ -51,6 +53,7 @@ public class ConnectionUtils {
             case RC_INIT_CONNECTION_REQUEST:
                 if(responseVS != null && responseVS.getCMS() != null) {
                     try {
+                        initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
                         initSessionMessageDto.setCMS(responseVS.getCMS());
                         Intent startIntent = new Intent(activity, WebSocketService.class);
                         startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));
@@ -70,8 +73,10 @@ public class ConnectionUtils {
     private static void launchNFC_IDCard(AppCompatActivity activity, char[] accessModePassw) {
         try {
             Intent intent = new Intent(activity, ID_CardNFCReaderActivity.class);
-            initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
-            intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionMessageDto));
+            InitSessionDto initSessionDto = new InitSessionDto(PrefUtils.getDeviceId(),
+                    HttpHelper.getInstance().getSessionId(
+                    StringUtils.getDomain(AppVS.getInstance().getCurrencyServerURL())));
+            intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionDto));
             intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
                     activity.getString(R.string.init_authenticated_session_msg_subject));
             if(accessModePassw != null)

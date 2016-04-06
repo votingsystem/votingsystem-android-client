@@ -247,11 +247,6 @@ public class ReceiptFragment extends Fragment {
                             requestDto.getEventURL());
                     receiptSubjectStr = getString(R.string.access_request_lbl);
                     break;
-                case FROM_GROUP_TO_ALL_MEMBERS:
-                    TransactionDto transactionDto = receiptWrapperCMS.getSignedContent(
-                            TransactionDto.class);
-                    contentFormatted = transactionDto.getFormatted(getActivity());
-                    break;
                 default:
                     contentFormatted = receiptWrapper.getReceipt().getSignedContentStr();
 
@@ -460,7 +455,7 @@ public class ReceiptFragment extends Fragment {
             ResponseVS responseVS = null;
             try {
                 String hashHex = StringUtils.toHex(params[0]);
-                responseVS = HttpHelper.getData(appVS.getAccessControl().
+                responseVS = HttpHelper.getInstance().getData(appVS.getAccessControl().
                         getVoteCheckServiceURL(hashHex), ContentType.JSON);
             } catch(Exception ex) {
                 responseVS = ResponseVS.EXCEPTION(ex, getActivity());
@@ -478,7 +473,7 @@ public class ReceiptFragment extends Fragment {
         }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            return HttpHelper.getData(urls[0], ContentType.TEXT);
+            return HttpHelper.getInstance().getData(urls[0], ContentType.TEXT);
         }
 
         @Override  protected void onPostExecute(ResponseVS responseVS) {

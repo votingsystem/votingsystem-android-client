@@ -213,7 +213,7 @@ public class MessageFormFragment extends Fragment {
         @Override protected UserDto doInBackground(String... params) {
             UserDto result = null;
             try {
-                result = HttpHelper.getData(UserDto.class, serviceURL, MediaType.JSON);
+                result = HttpHelper.getInstance().getData(UserDto.class, serviceURL, MediaType.JSON);
             } catch (Exception ex) { ex.printStackTrace();}
             return result;
         }

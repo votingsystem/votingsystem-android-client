@@ -41,7 +41,6 @@ public class TransactionDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE, FROM_BANK, FROM_USER,
-        FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_MEMBER, FROM_GROUP_TO_ALL_MEMBERS,
         CURRENCY_PERIOD_INIT, TRANSACTION_INFO;}
 
     private TypeVS operation;
@@ -625,8 +624,6 @@ public class TransactionDto implements Serializable {
                 return R.drawable.edit_undo_24;
             case CURRENCY_SEND:
                 return R.drawable.fa_money_24;
-            case FROM_GROUP_TO_ALL_MEMBERS:
-                return R.drawable.system_users_16;
             default:
                 return R.drawable.pending;
         }
@@ -634,9 +631,9 @@ public class TransactionDto implements Serializable {
 
     public static String getDescription(Context context, Type type) {
         switch(type) {
-            case FROM_GROUP_TO_ALL_MEMBERS:
-            case FROM_GROUP_TO_MEMBER:
-            case FROM_GROUP_TO_MEMBER_GROUP:
+            case FROM_BANK:
+                return context.getString(R.string.account_input_from_bank);
+            case FROM_USER:
                 return context.getString(R.string.account_input);
             case CURRENCY_REQUEST:
                 return context.getString(R.string.account_output);
@@ -650,11 +647,6 @@ public class TransactionDto implements Serializable {
     public String getFormatted(Context context) throws Exception {
         String result = null;
         switch(operation) {
-            case FROM_GROUP_TO_ALL_MEMBERS:
-                result = timeLimited ? context.getString(R.string.time_limited_lbl) + "</br>":"";
-                result = result + context.getString(R.string.from_group_to_all_member_cms_content,
-                        fromUserName, subject, amount, currencyCode, getTagVS().getName());
-                break;
             default:
                 result = JSON.writeValueAsString(this);
         }

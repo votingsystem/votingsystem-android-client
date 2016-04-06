@@ -16,6 +16,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -87,6 +89,12 @@ public class StringUtils {
             if(string == null) return null;
             else return normalize(string).replaceAll(" ", "_").replaceAll("[\\/:.]", "");
 	}
+
+    public static String getDomain(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        String domain = uri.getHost();
+        return  domain.startsWith("www.") ? domain.substring(4) : domain;
+    }
 
     public static String checkURL(String url) {
         if(url == null) return null;

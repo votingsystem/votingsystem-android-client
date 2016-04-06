@@ -296,7 +296,7 @@ public class RepresentationStateFragment extends Fragment implements
                 Map<String, Object> mapToSend = new HashMap<>();
                 mapToSend.put(ContextVS.CMS_FILE_NAME, cmsSignedMessage.toPEM());
                 mapToSend.put(ContextVS.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());
-                responseVS =  HttpHelper.sendObjectMap(mapToSend,
+                responseVS =  HttpHelper.getInstance().sendObjectMap(mapToSend,
                         AppVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     CMSSignedMessage delegationReceipt = responseVS.getCMS();

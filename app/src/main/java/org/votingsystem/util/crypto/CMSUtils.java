@@ -124,7 +124,7 @@ public class CMSUtils {
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         TimeStampRequest timeStampRequest = reqgen.generate(
                 digAlgId.getAlgorithm().getId(), digestBytes);
-        ResponseVS responseVS = HttpHelper.sendData(
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(
                 timeStampRequest.getEncoded(), ContentType.TIMESTAMP_QUERY,
                 AppVS.getInstance().getTimeStampServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

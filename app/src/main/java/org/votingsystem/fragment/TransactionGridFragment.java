@@ -42,7 +42,6 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -150,9 +149,8 @@ public class TransactionGridFragment extends Fragment
                int visibleItemCount, int totalItemCount) { }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menu.clear();
         menuInflater.inflate(R.menu.currency_accounts, menu);
-        menu.setGroupVisible(R.id.general_items, false);
-        menu.removeItem(R.id.search_item);
         List<String> transactionWeekList = TransactionContentProvider.getTransactionWeekList (
                 (AppVS)getActivity().getApplicationContext());
         for(final String weekLbl: transactionWeekList) {
@@ -246,7 +244,6 @@ public class TransactionGridFragment extends Fragment
                     } catch (IOException e) { e.printStackTrace(); }
                     String weekLapseStr = cursor.getString(cursor.getColumnIndex(
                             TransactionContentProvider.WEEK_LAPSE_COL));
-                    Date weekLapse = DateUtils.getDateFromPath(weekLapseStr);
                     TextView transaction_type = (TextView) view.findViewById(R.id.transaction_type);
                     transaction_type.setText(transaction.getDescription(getActivity(),
                             transaction.getType()));

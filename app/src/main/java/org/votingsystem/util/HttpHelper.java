@@ -9,24 +9,30 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.throwable.BadRequestExceptionVS;
@@ -54,8 +60,9 @@ public class HttpHelper {
     
 	public static final String TAG = HttpHelper.class.getSimpleName();
     
-    private static DefaultHttpClient httpclient;
-    private static ThreadSafeClientConnManager cm;
+    private DefaultHttpClient httpclient;
+    private ThreadSafeClientConnManager cm;
+    private HttpContext httpContext;
     private static HttpHelper INSTANCE;
 
     private HttpHelper(X509Certificate trustedSSLServerCert) {
@@ -78,21 +85,46 @@ public class HttpHelper {
             LOGD(TAG, "Added Scheme https with port 443 to Apache httpclient");
             cm = new ThreadSafeClientConnManager(params, schemeRegistry);
             httpclient = new DefaultHttpClient(cm, params);
+            CookieStore cookieStore = new BasicCookieStore();
+            httpContext = new BasicHttpContext();
+            httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
         } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public Cookie getCookie(String domain) {
+        CookieStore cookieStore = (CookieStore) httpContext.getAttribute(ClientContext.COOKIE_STORE);
+        Cookie result = null;
+        for(Cookie cookie : cookieStore.getCookies()) {
+            if(cookie.getDomain().equals(domain)) result = cookie;
+        }
+        return result;
+    }
+
+    public String getSessionId(String domain) {
+        Cookie cookie = getCookie(domain);
+        String result = null;
+        if(cookie != null) {
+            result = cookie.getValue().contains(".") ? cookie.getValue().split("\\.")[0] : cookie.getValue();
+        }
+        return result;
     }
 
     public static void init(X509Certificate trustedSSLServerCert) {
         INSTANCE = new HttpHelper(trustedSSLServerCert);
     }
+
+    public static HttpHelper getInstance() {
+        return INSTANCE;
+    }
     
-    public static void shutdown () {
+    public void shutdown () {
         LOGD(TAG, "shutdown");
         try {
             httpclient.getConnectionManager().shutdown();
         } catch (Exception ex) { ex.printStackTrace(); }
     }
     
-    public static ResponseVS getData (String serverURL, ContentType contentType) {
+    public ResponseVS getData (String serverURL, ContentType contentType) {
         LOGD(TAG + ".getData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpResponse response = null;
         ResponseVS responseVS = null;
@@ -100,7 +132,7 @@ public class HttpHelper {
         try {
             HttpGet httpget = new HttpGet(serverURL);
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
-            response = httpclient.execute(httpget);
+            response = httpclient.execute(httpget, httpContext);
             LOGD(TAG + ".getData", "----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
@@ -127,13 +159,13 @@ public class HttpHelper {
         return responseVS;
     }
 
-    public static <T> T getData(Class<T> type, TypeReference typeReference, String serverURL, String mediaType) throws Exception {
+    public <T> T getData(Class<T> type, TypeReference typeReference, String serverURL, String mediaType) throws Exception {
         LOGD(TAG + ".getData" , "serverURL: " + serverURL + " - mediaType: " + mediaType);
         HttpResponse response = null;
         String responseContentType = null;
         HttpGet httpget = new HttpGet(serverURL);
         if(mediaType != null) httpget.setHeader("Content-Type", mediaType);
-        response = httpclient.execute(httpget);
+        response = httpclient.execute(httpget, httpContext);
         LOGD(TAG + ".getData", "----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
@@ -163,23 +195,23 @@ public class HttpHelper {
         }
     }
 
-    public static <T> T getData(TypeReference type, String serverURL, String mediaType) throws Exception {
+    public <T> T getData(TypeReference type, String serverURL, String mediaType) throws Exception {
         return getData(null, type, serverURL, mediaType);
     }
 
-    public static <T> T getData(Class<T> type, String serverURL, String mediaType) throws Exception {
+    public <T> T getData(Class<T> type, String serverURL, String mediaType) throws Exception {
         return getData(type, null, serverURL, mediaType);
     }
 
-    public static <T> T sendData(TypeReference type, byte[] data, String serverURL, String mediaType) throws Exception {
+    public <T> T sendData(TypeReference type, byte[] data, String serverURL, String mediaType) throws Exception {
         return sendData(null, type, data, mediaType, serverURL);
     }
 
-    public static <T> T sendData1(Class<T> type, byte[] data, String serverURL, String mediaType) throws Exception {
+    public <T> T sendData1(Class<T> type, byte[] data, String serverURL, String mediaType) throws Exception {
         return sendData(type, null, data, mediaType, serverURL);
     }
 
-    public static <T> T sendData(Class<T> type, TypeReference typeReference, byte[] data,
+    public <T> T sendData(Class<T> type, TypeReference typeReference, byte[] data,
             String contentType, String serverURL, String... headerNames) throws IOException, ExceptionVS {
         HttpPost httpPost = new HttpPost(serverURL);
         LOGD(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
@@ -190,7 +222,7 @@ public class HttpHelper {
         if(contentType != null) reqEntity.setContentType(contentType);
         httpPost.setEntity(reqEntity);
         httpPost.setEntity(reqEntity);
-        response = httpclient.execute(httpPost);
+        response = httpclient.execute(httpPost, httpContext);
         Header header = response.getFirstHeader("Content-Type");
         if(header != null) responseContentType = header.getValue();
         LOGD(TAG + ".sendData" ,"----------------------------------------");
@@ -217,7 +249,7 @@ public class HttpHelper {
         }
     }
 
-    public static ResponseVS sendData(byte[] data, ContentType contentType,
+    public ResponseVS sendData(byte[] data, ContentType contentType,
               String serverURL, String... headerNames) {
         LOGD(TAG + ".sendData" , "serverURL: " + serverURL + " - contentType: " + contentType);
         HttpPost httpPost = new HttpPost(serverURL);
@@ -229,7 +261,7 @@ public class HttpHelper {
             if(contentType != null) reqEntity.setContentType(contentType.getName());
             httpPost.setEntity(reqEntity);
             httpPost.setEntity(reqEntity);
-            response = httpclient.execute(httpPost);
+            response = httpclient.execute(httpPost, httpContext);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentType.getByName(header.getValue());
             LOGD(TAG + ".sendData" ,"----------------------------------------");
@@ -255,7 +287,7 @@ public class HttpHelper {
         return responseVS;
     }
 
-    public static ResponseVS sendFile (File file, String serverURL) {
+    public ResponseVS sendFile (File file, String serverURL) {
         ResponseVS responseVS = null;
         ContentType responseContentType = null;
         try {
@@ -266,7 +298,7 @@ public class HttpHelper {
             MultipartEntity reqEntity = new MultipartEntity();
             reqEntity.addPart(SIGNED_FILE_NAME, fileBody);
             httpPost.setEntity(reqEntity);
-            HttpResponse response = httpclient.execute(httpPost);
+            HttpResponse response = httpclient.execute(httpPost, httpContext);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentType.getByName(header.getValue());
             LOGD(TAG + ".sendFile" , "----------------------------------------");
@@ -290,7 +322,7 @@ public class HttpHelper {
         return responseVS;
     }
      
-     public static ResponseVS sendObjectMap(
+     public ResponseVS sendObjectMap(
              Map<String, Object> fileMap, String serverURL) throws Exception {
     	 LOGD(TAG + ".sendObjectMap" , "serverURL: " + serverURL);
          ResponseVS responseVS = null;
@@ -316,7 +348,7 @@ public class HttpHelper {
                  }
              }
              httpPost.setEntity(reqEntity);
-             response = httpclient.execute(httpPost);
+             response = httpclient.execute(httpPost, httpContext);
              Header header = response.getFirstHeader("Content-Type");
              if(header != null) responseContentType = ContentType.getByName(header.getValue());
              LOGD(TAG + ".sendObjectMap" ,"----------------------------------------");
@@ -341,7 +373,7 @@ public class HttpHelper {
          return responseVS;
      }
 
-    public static boolean isOnline(Context context) {
+    public boolean isOnline(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();

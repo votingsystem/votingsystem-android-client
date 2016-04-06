@@ -431,7 +431,7 @@ public class WebSocketService extends Service {
                             if(TypeVS.CURRENCY_CHANGE == typeVS) {
                                 Currency currency = qrDto.getCurrency();
                                 currency.initSigner(socketMsg.getMessage().getBytes());
-                                CurrencyStateDto currencyStateDto = HttpHelper.getData(CurrencyStateDto.class,
+                                CurrencyStateDto currencyStateDto = HttpHelper.getInstance().getData(CurrencyStateDto.class,
                                         AppVS.getInstance().getCurrencyServer()
                                         .getCurrencyStateServiceURL(currency.getHashCertVS()),
                                         MediaType.JSON);

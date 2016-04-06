@@ -306,7 +306,7 @@ public class UserDataFormActivity extends AppCompatActivity {
         @Override protected ResponseVS doInBackground(String... urls) {
             ResponseVS responseVS = null;
             try {
-                responseVS = HttpHelper.sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
+                responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                         AppVS.getInstance().getCurrencyServer().getCSRSignedWithIDCardServiceURL());
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");

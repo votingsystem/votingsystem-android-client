@@ -52,7 +52,7 @@ public class EventVSService extends IntentService {
             }
             String serviceURL = appVS.getAccessControl().getEventVSURL(eventState,
                     ContextVS.EVENTS_PAGE_SIZE, offset);
-            responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
+            responseVS = HttpHelper.getInstance().getData(serviceURL, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     ResultListDto<EventVSDto> resultListDto = JSON.readValue(

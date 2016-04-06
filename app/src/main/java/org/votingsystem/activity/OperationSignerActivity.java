@@ -148,7 +148,7 @@ public class OperationSignerActivity extends AppCompatActivity {
                     executorService.submit(new Runnable() {
                         @Override public void run() {
                             try {
-                                ResponseVS response = HttpHelper.sendData(cms.toPEM(),
+                                ResponseVS response = HttpHelper.getInstance().sendData(cms.toPEM(),
                                         ContentType.JSON_SIGNED, operationDto.getServiceURL());
                                 sendSocketMessage(socketMessage.getPlainResponse(response.getStatusCode(),
                                         response.getMessage(), TypeVS.OPERATION_RESULT));

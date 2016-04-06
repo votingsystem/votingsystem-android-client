@@ -180,7 +180,7 @@ public class RepresentativeFragment extends Fragment {
         @Override protected void onPreExecute() { }
 
         @Override protected ResponseVS doInBackground(String... urls) {
-            return  HttpHelper.getData(
+            return  HttpHelper.getInstance().getData(
                     ((AppVS) getActivity().getApplicationContext()).getAccessControl().
                     getRepresentativeImageURL(representativeId), null);
         }

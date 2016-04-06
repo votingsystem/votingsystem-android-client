@@ -378,7 +378,7 @@ public class ContactsGridFragment extends Fragment
             } else {
                 contactsURL = appVS.getCurrencyServer().getSearchServiceURL(params[0]);
             }
-            return HttpHelper.getData(contactsURL, ContentType.JSON);
+            return HttpHelper.getInstance().getData(contactsURL, ContentType.JSON);
         }
 
         @Override protected void onProgressUpdate(String... progress) { }

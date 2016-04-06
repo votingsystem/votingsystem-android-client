@@ -250,7 +250,7 @@ public class QRActionsFragment extends Fragment {
             LOGD(TAG + ".doInBackground", "url: " + urls[0]);
             try {
                 qrMessageDto = QRMessageDto.FROM_URL(urls[0]);
-                return  HttpHelper.sendData(qrMessageDto.getHashCertVS().getBytes(), null, urls[0]);
+                return  HttpHelper.getInstance().sendData(qrMessageDto.getHashCertVS().getBytes(), null, urls[0]);
             } catch (NoSuchAlgorithmException ex) {
                 ex.printStackTrace();
                 return ResponseVS.ERROR(null, ex.getMessage());
@@ -301,7 +301,7 @@ public class QRActionsFragment extends Fragment {
         @Override protected ResponseVS doInBackground(String... urls) {
             LOGD(TAG + ".doInBackground", "url: " + urls[0]);
             try {
-                return HttpHelper.getData(urls[0], ContentType.JSON);
+                return HttpHelper.getInstance().getData(urls[0], ContentType.JSON);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return ResponseVS.ERROR(null, ex.getMessage());

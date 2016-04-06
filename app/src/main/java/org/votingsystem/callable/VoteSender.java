@@ -51,14 +51,14 @@ public class VoteSender implements Callable<ResponseVS> {
             mapToSend.put(ContextVS.CSR_FILE_NAME,
                     voteHelper.getCertificationRequest().getCsrPEM());
             mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, accessRequest.toPEM());
-            responseVS = HttpHelper.sendObjectMap(mapToSend,
+            responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     AppVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             voteHelper.getCertificationRequest().initSigner(responseVS.getMessageBytes());
 
 
             CMSSignedMessage signedVote = voteHelper.getCMSVote();
-            responseVS = HttpHelper.sendData(signedVote.toPEM(), ContentType.VOTE,
+            responseVS = HttpHelper.getInstance().sendData(signedVote.toPEM(), ContentType.VOTE,
                     AppVS.getInstance().getControlCenter().getVoteServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 cancelAccessRequest(); //AccesRequest OK and Vote error -> Cancel access request
@@ -83,7 +83,7 @@ public class VoteSender implements Callable<ResponseVS> {
             String serviceURL = AppVS.getInstance().getAccessControl().getCancelVoteServiceURL();
             CMSSignedMessage cmsMessage = AppVS.getInstance().signMessage(
                     JSON.writeValueAsBytes(voteHelper.getVoteCanceler()));
-            return HttpHelper.sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED, serviceURL);
+            return HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED, serviceURL);
         } catch(Exception ex) {
             ex.printStackTrace();
             return ResponseVS.EXCEPTION(ex.getMessage(),

@@ -161,7 +161,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     public void finish() {
         LOGD(TAG, "finish");
         stopService(new Intent(getApplicationContext(), WebSocketService.class));
-        HttpHelper.shutdown();
+        HttpHelper.getInstance().shutdown();
         UIUtils.killApp(true);
     }
 
@@ -268,7 +268,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private <T> T getActorDtoFromURL(Class<T> type, String serverURL) {
         T targetServer = null;
         try {
-            targetServer = HttpHelper.getData(type, ActorDto.getServerInfoURL(serverURL), MediaType.JSON);
+            targetServer = HttpHelper.getInstance().getData(type,
+                    ActorDto.getServerInfoURL(serverURL), MediaType.JSON);
             setServer((ActorDto) targetServer);
         } catch(Exception ex) {
             LOGE(TAG + ".getActorDtoFromURL", "ERROR fetching: " + serverURL);

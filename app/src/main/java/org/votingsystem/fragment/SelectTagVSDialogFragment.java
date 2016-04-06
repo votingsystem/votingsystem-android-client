@@ -129,7 +129,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         @Override protected List<String> doInBackground(String... params) {
             if(tagList.size() > 0) return tagList;
             try {
-                ResponseVS responseVS  = HttpHelper.getData(params[0], ContentType.JSON);
+                ResponseVS responseVS  = HttpHelper.getInstance().getData(params[0], ContentType.JSON);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     ResultListDto<TagVSDto> resultListDto = (ResultListDto<TagVSDto>) responseVS.getMessage(
                             new TypeReference<ResultListDto<TagVSDto>>() { });

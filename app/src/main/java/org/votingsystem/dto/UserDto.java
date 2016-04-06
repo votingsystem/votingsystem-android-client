@@ -30,8 +30,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.security.auth.x500.X500Principal;
-
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**

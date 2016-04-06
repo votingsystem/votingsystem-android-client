@@ -78,11 +78,11 @@ public class RepresentativeService extends IntentService {
                 appVS.getUser().getNIF());
         ResponseVS responseVS = null;
         try {
-            RepresentationStateDto stateDto = HttpHelper.getData(
+            RepresentationStateDto stateDto = HttpHelper.getInstance().getData(
                     RepresentationStateDto.class, serviceURL, MediaType.JSON);
             switch (stateDto.getState()) {
                 case REPRESENTATIVE:
-                    ResponseVS representativeImageReponse = HttpHelper.getData(
+                    ResponseVS representativeImageReponse = HttpHelper.getInstance().getData(
                             appVS.getAccessControl().getRepresentativeImageURL(
                                     stateDto.getRepresentative().getId()), null);
                     if (ResponseVS.SC_OK == representativeImageReponse.getStatusCode()) {
@@ -107,7 +107,7 @@ public class RepresentativeService extends IntentService {
 
 
     private void requestRepresentatives(String serviceURL, String serviceCaller) {
-        ResponseVS responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
+        ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentType.JSON);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             try {
                 ResultListDto<UserDto> resultListDto = (ResultListDto<UserDto>)
@@ -143,10 +143,10 @@ public class RepresentativeService extends IntentService {
         ResponseVS responseVS = null;
         UserDto representative = null;
         try {
-            responseVS = HttpHelper.getData(imageServiceURL, null);
+            responseVS = HttpHelper.getInstance().getData(imageServiceURL, null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode())
                 representativeImageBytes = responseVS.getMessageBytes();
-            responseVS = HttpHelper.getData(serviceURL, ContentType.JSON);
+            responseVS = HttpHelper.getInstance().getData(serviceURL, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 representative = (UserDto) responseVS.getMessage(UserDto.class);
                 representative.setImageBytes(representativeImageBytes);

@@ -7,7 +7,6 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.NfcA;
 import android.nfc.tech.NfcB;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +36,6 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.CertificationRequestVS;
 
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;

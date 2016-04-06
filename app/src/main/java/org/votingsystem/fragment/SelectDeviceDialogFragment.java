@@ -149,7 +149,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         @Override protected List<String> doInBackground(String... params) {
             connectedDeviceList.clear();
             try {
-                UserDto userDto = HttpHelper.getData(UserDto.class, params[0], MediaType.JSON);
+                UserDto userDto = HttpHelper.getInstance().getData(UserDto.class, params[0], MediaType.JSON);
                 for(DeviceDto deviceDto : userDto.getConnectedDevices()) {
                     if(!Utils.getDeviceName().toLowerCase().equals(
                             deviceDto.getDeviceName().toLowerCase()))

@@ -57,8 +57,6 @@ public class ReceiptWrapper implements Serializable {
                 return context.getString(R.string.delegation_lbl);
             case ACCESS_REQUEST:
                 return context.getString(R.string.access_request_lbl);
-            case FROM_GROUP_TO_ALL_MEMBERS:
-                return context.getString(R.string.from_group_to_all_member_lbl);
             default:
                 return context.getString(R.string.receipt_lbl) + ": " + getTypeVS().toString();
         }
