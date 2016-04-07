@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:textSize="16sp"
-        android:textColor="@color/event_subject"
+        android:textColor="@color/grey_dark"
         android:layout_gravity="center_horizontal"/>
 
     <View
@@ -17,7 +17,7 @@
         android:layout_height="1dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="@color/bkg_vs"/>
+        android:background="@color/red_vs"/>
 
     <TextView android:id="@+id/msg"
         android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
         android:padding="3dp"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
-        android:textColor="@color/bkg_vs"
+        android:textColor="@color/red_vs"
         android:layout_gravity="center_horizontal"/>
 
     <View
@@ -34,6 +34,6 @@
         android:layout_height="1dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="@color/bkg_vs"/>
+        android:background="@color/red_vs"/>
 
 </LinearLayout>

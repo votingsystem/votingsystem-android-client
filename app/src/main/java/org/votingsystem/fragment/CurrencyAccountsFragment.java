@@ -16,32 +16,30 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.CurrencyRequesActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.dto.voting.TagVSInfoDto;
+import org.votingsystem.dto.currency.TagVSInfoDto;
 import org.votingsystem.service.PaymentService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.UIUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,14 +55,11 @@ public class CurrencyAccountsFragment extends Fragment {
 
     private static final int CURRENCY_REQUEST   = 1;
 
-    private TransactionDto transaction;
     private View rootView;
     private String broadCastId = CurrencyAccountsFragment.class.getSimpleName();
-    private AppVS appVS;
     private TextView last_request_date;
     private TextView message;
-    private RecyclerView accounts_recycler_view;
-    private String IBAN;
+    private RecyclerView accounts_container;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -73,12 +68,17 @@ public class CurrencyAccountsFragment extends Fragment {
         switch(responseVS.getTypeVS()) {
             case CURRENCY_ACCOUNTS_INFO:
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    loadUserInfo(DateUtils.getCurrentWeekPeriod());
+                    loadUserInfo();
                 }
                 break;
             default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
                     responseVS.getCaption(), responseVS.getNotificationMessage(),
                     getFragmentManager());
+        }
+        if(ResponseVS.SC_FORBIDDEN == responseVS.getStatusCode()) {
+            if(getActivity() instanceof ActivityBase) {
+                UIUtils.showConnectionRequiredDialog((ActivityBase) getActivity());
+            }
         }
         setProgressDialogVisible(false, null, null);
         }
@@ -101,55 +101,39 @@ public class CurrencyAccountsFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
            Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
         rootView = inflater.inflate(R.layout.currency_accounts, container, false);
         last_request_date = (TextView)rootView.findViewById(R.id.last_request_date);
         message = (TextView)rootView.findViewById(R.id.message);
         //https://developer.android.com/training/material/lists-cards.html
-        accounts_recycler_view = (RecyclerView) rootView.findViewById(R.id.accounts_recycler_view);
-        accounts_recycler_view.setHasFixedSize(true);
-        accounts_recycler_view.setLayoutManager(new LinearLayoutManager(getActivity()));
+        accounts_container = (RecyclerView) rootView.findViewById(R.id.accounts_container);
+        accounts_container.setHasFixedSize(true);
+        accounts_container.setLayoutManager(new LinearLayoutManager(getActivity()));
         setHasOptionsMenu(true);
-        loadUserInfo(DateUtils.getWeekPeriod(Calendar.getInstance()));
-        if(savedInstanceState != null) {
-            transaction = (TransactionDto)savedInstanceState.getSerializable(ContextVS.TRANSACTION_KEY);
-        } else {
-            Intent intent = getActivity().getIntent();
-            if(intent.getBooleanExtra(ContextVS.REFRESH_KEY, false)) updateCurrencyAccountsInfo();
-        }
+        loadUserInfo();
+        Intent intent = getActivity().getIntent();
+        if(intent.getBooleanExtra(ContextVS.REFRESH_KEY, false)) updateCurrencyAccountsInfo();
         return rootView;
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         if(Activity.RESULT_OK == resultCode) {
-            loadUserInfo(DateUtils.getCurrentWeekPeriod());
+            loadUserInfo();
         }
     }
 
-    private void loadUserInfo(TimePeriod timePeriod) {
+    private void loadUserInfo() {
         message.setVisibility(View.GONE);
         Date lastCheckedTime = PrefUtils.getCurrencyAccountsLastCheckDate();
-        if(lastCheckedTime == null) {
-            updateCurrencyAccountsInfo();
-            return;
-        }
-        try {
-            last_request_date.setText(Html.fromHtml(getString(R.string.currency_last_request_info_lbl,
-                    DateUtils.getDayWeekDateStr(lastCheckedTime, "HH:mm"))));
-            BalancesDto userInfo = PrefUtils.getBalances();
-            if(userInfo != null) {
-                Map<String, TagVSInfoDto> tagVSBalancesMap = userInfo.getTagVSInfoMap(
-                        Currency.getInstance("EUR").getCurrencyCode());
-                if(tagVSBalancesMap != null) {
-                    String[] tagVSArray = tagVSBalancesMap.keySet().toArray(new String[tagVSBalancesMap.keySet().size()]);
-                    AccountInfoAdapter accountInfoAdapter = new AccountInfoAdapter(appVS,
-                            tagVSBalancesMap, Currency.getInstance("EUR").getCurrencyCode(), tagVSArray);
-                    accounts_recycler_view.setAdapter(accountInfoAdapter);
-                } else showMessage(getString(R.string.cash_no_available_msg));
+        if(lastCheckedTime != null) {
+            try {
+                last_request_date.setText(Html.fromHtml(getString(R.string.currency_last_request_info_lbl,
+                        DateUtils.getDayWeekDateStr(lastCheckedTime, "HH:mm"))));
+                BalancesDto userBalances = PrefUtils.getBalances();
+                accounts_container.setAdapter(new AccountInfoAdapter(getActivity(), userBalances));
+            } catch(Exception ex) {
+                ex.printStackTrace();
             }
-        } catch(Exception ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -205,15 +189,14 @@ public class CurrencyAccountsFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.TRANSACTION_KEY, transaction);
     }
 
     public class AccountInfoAdapter extends RecyclerView.Adapter<AccountInfoAdapter.ViewHolder>{
 
         private final Context context;
-        private Map<String, TagVSInfoDto> tagVSListBalances;
-        private List<String> tagVSList;
-        private String currencyCode;
+        private BalancesDto userBalances;
+        private List<String> currencyCodes;
+
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public View accountView;
@@ -223,13 +206,10 @@ public class CurrencyAccountsFragment extends Fragment {
             }
         }
 
-        public AccountInfoAdapter(Context context, Map<String, TagVSInfoDto> tagVSListBalances,
-                                  String currencyCode, String[] tagArray) {
+        public AccountInfoAdapter(Context context, BalancesDto userBalances) {
             this.context = context;
-            this.currencyCode = currencyCode;
-            this.tagVSListBalances = tagVSListBalances;
-            tagVSList = new ArrayList<String>();
-            tagVSList.addAll(tagVSListBalances.keySet());
+            this.userBalances = userBalances;
+            this.currencyCodes = new ArrayList<>(userBalances.getCurrencyCodes());
         }
 
         @Override public AccountInfoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
@@ -240,46 +220,66 @@ public class CurrencyAccountsFragment extends Fragment {
         }
 
         @Override public void onBindViewHolder(ViewHolder holder, int position) {
-            View accountView = holder.accountView;
-            TagVSInfoDto selectedTag = tagVSListBalances.get(tagVSList.get(position));
-            final BigDecimal accountBalance = selectedTag.getCash();
-            Button request_button = (Button) accountView.findViewById(R.id.cash_button);
-            if(TagVSDto.WILDTAG.equals(selectedTag.getName())) {
-                if(accountBalance.compareTo(BigDecimal.ZERO) == 1) {
-                    request_button.setOnClickListener(new OnClickListener() {
-                        public void onClick(View v) {
-                            Intent intent = new Intent(getActivity(), CurrencyRequesActivity.class);
-                            intent.putExtra(ContextVS.MAX_VALUE_KEY, accountBalance);
-                            intent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
-                            intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cash_dialog_msg,
-                                    accountBalance, currencyCode));
-                            startActivityForResult(intent, CURRENCY_REQUEST);
-                        }
-                    });
-                    request_button.setVisibility(View.VISIBLE);
-                } else request_button.setVisibility(View.GONE);
-            } else request_button.setVisibility(View.GONE);
-
-            TextView tag_text = (TextView)accountView.findViewById(R.id.tag_text);
-            String tag_text_msg = "'" + MsgUtils.getTagVSMessage(selectedTag.getName()) +
-                    "' " + getString(R.string.currency_lbl) + " " + currencyCode;
-            tag_text.setText(tag_text_msg);
-            TextView cash_info = (TextView)accountView.findViewById(R.id.cash_info);
-            cash_info.setText(Html.fromHtml(getString(R.string.account_amount_info_lbl,
-                    accountBalance, currencyCode)));
-            if(selectedTag.getTimeLimitedRemaining().compareTo(BigDecimal.ZERO) > 0) {
-                String timeLimitedMsg = selectedTag.getTimeLimitedRemaining().toPlainString() +
-                        " " + currencyCode + " " + getString(R.string.in_lbl) + " " +
-                        selectedTag.getName();
-                TextView time_limited_text = ((TextView)accountView.findViewById(R.id.time_limited_text));
-                time_limited_text.setText(getString(R.string.time_remaining_info_lbl, timeLimitedMsg));
-                time_limited_text.setVisibility(View.VISIBLE);
-            }
+            try {
+                View accountView = holder.accountView;
+                final String currencyCode = currencyCodes.get(position);
+                GridView tag_container = (GridView) accountView.findViewById(R.id.tag_container);
+                Map<String, TagVSInfoDto> tagVSBalancesMap = userBalances.getTagMap(currencyCode);
+                if(tagVSBalancesMap != null) {
+                    TagInfoAdapter tagInfoAdapter = new TagInfoAdapter(context,
+                            new ArrayList<>(tagVSBalancesMap.values()));
+                    tag_container.setAdapter(tagInfoAdapter);
+                } else showMessage(getString(R.string.cash_no_available_msg));
+                final BigDecimal currencyBalance = BalancesDto.getTagMapTotal(tagVSBalancesMap);
+                TextView currency_text = (TextView) accountView.findViewById(R.id.currency_text);
+                currency_text.setText(currencyBalance + " " + currencyCode);
+                Button request_button = (Button)accountView.findViewById(R.id.cash_button);
+                request_button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), CurrencyRequesActivity.class);
+                        intent.putExtra(ContextVS.MAX_VALUE_KEY, currencyBalance);
+                        intent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
+                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cash_dialog_msg,
+                                currencyBalance, currencyCode));
+                        startActivityForResult(intent, CURRENCY_REQUEST);
+                    }
+                });
+            } catch (Exception ex) { ex.printStackTrace(); }
         }
 
         @Override public int getItemCount() {
-            return tagVSListBalances.size();
+            return currencyCodes.size();
         }
+    }
+
+
+    public class TagInfoAdapter extends ArrayAdapter<TagVSInfoDto> {
+
+        private final Context context;
+        private List<TagVSInfoDto> tagList;
+
+        public TagInfoAdapter(Context context, List<TagVSInfoDto> tagList) {
+            super(context, R.layout.currency_tag_card, tagList);
+            this.context = context;
+            this.tagList = tagList;
+        }
+
+        @Override public View getView(int position, View itemView, ViewGroup parent) {
+            TagVSInfoDto selectedTag = tagList.get(position);
+            LayoutInflater inflater =
+                    (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View cardView = inflater.inflate(R.layout.currency_tag_card, null);
+            TextView total_amount = (TextView)cardView.findViewById(R.id.total_amount);
+            total_amount.setText(selectedTag.getTotal().setScale(2, BigDecimal.ROUND_DOWN).toString());
+            TextView timelimited_amount = (TextView)cardView.findViewById(R.id.timelimited_amount);
+            timelimited_amount.setText(selectedTag.getTimeLimited().setScale(2, BigDecimal.ROUND_DOWN).toString());
+            TextView tag_msg = (TextView)cardView.findViewById(R.id.tag_msg);
+            tag_msg.setText(selectedTag.getName());
+            TextView currency_symbol = (TextView)cardView.findViewById(R.id.currency_symbol);
+            currency_symbol.setText(StringUtils.getCurrencySymbol(selectedTag.getCurrencyCode()));
+            return cardView;
+        }
+
     }
 
 }

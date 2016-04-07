@@ -121,7 +121,7 @@ public class TransactionContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         // NOTE Argument checking code omitted. Check your parameters!
-        values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+        values.put(TransactionContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
         int updateCount = 0;
         switch (URI_MATCHER.match(uri)){
             case ALL_ITEMS:
@@ -147,8 +147,8 @@ public class TransactionContentProvider extends ContentProvider {
         long rowId = -1;
         Uri newUri = null;
         if(values != null) {
-            values.put(ReceiptContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
-            values.put(ReceiptContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
+            values.put(TransactionContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());
+            values.put(TransactionContentProvider.TIMESTAMP_UPDATED_COL, System.currentTimeMillis());
             //identifies the primary key and finds a matching row to update, inserting a new one if none is found.
             rowId = database.replace(TABLE_NAME, null, values);
             newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);

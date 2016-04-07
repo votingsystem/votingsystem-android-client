@@ -270,6 +270,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                     Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                     if(PrefUtils.getCryptoDeviceAccessMode() == null) {
                         intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                        PrefUtils.putCryptoDeviceAccessMode(new CryptoDeviceAccessMode(accessMode, password));
                     }
                     intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_UPDATE_USER_DATA);
                     intent.putExtra(ContextVS.CSR_KEY, true);
@@ -330,16 +331,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                     Set<Currency> wallet = PrefUtils.getWallet(password, AppVS.getInstance().getToken());
                     PrefUtils.putWallet(wallet, password, newToken);
                 } catch (Exception ex) { ex.printStackTrace();}
-                try {
-                    CryptoDeviceAccessMode passwordAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-                    if(passwordAccessMode == null) {
-                        passwordAccessMode = new CryptoDeviceAccessMode(accessMode, password);
-                        PrefUtils.putCryptoDeviceAccessMode(passwordAccessMode);
-                        PrefUtils.putProtectedPassword(passwordAccessMode.getMode(),
-                                password, protectedPassword);
-                    }
-                    AppVS.getInstance().setToken(newToken);
-                } catch (Exception ex) { ex.printStackTrace();}
+                AppVS.getInstance().setToken(newToken);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 responseVS = ResponseVS.EXCEPTION(ex, UserDataFormActivity.this);

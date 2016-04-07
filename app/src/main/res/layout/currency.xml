@@ -19,12 +19,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/msg_content_vs"
+                android:textColor="@color/grey_dark"
                 android:textSize="10sp"/>
             <TextView android:id="@+id/currency_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/bkg_vs"
+                android:textColor="@color/red_vs"
                 android:textStyle="bold"
                 android:layout_gravity="center"
                 android:visibility="gone"
@@ -37,7 +37,7 @@
                 <TextView android:id="@+id/currency_amount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/currency_value"
+                    android:textColor="@color/active_vs"
                     android:textStyle="bold"
                     android:textSize="30sp"/>
             </LinearLayout>
@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/currency_value"
+                android:textColor="@color/active_vs"
                 android:paddingTop="5dp"
                 android:paddingBottom="15dp"
                 android:text="para gastos libres"
@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/currency_date_info"
+                android:textColor="@color/green_light"
                 android:text="valido desde 11 nov 2192 12:12 hasta 23 dic 2133 13:34"
                 android:textSize="15sp"/>
         </LinearLayout>

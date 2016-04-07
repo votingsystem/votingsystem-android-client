@@ -14,7 +14,7 @@
         <TextView android:id="@+id/caption_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/text_header"
+            android:textColor="@color/grey_dark"
             android:layout_gravity="center"
             android:gravity="center"
             android:layout_weight="1"
@@ -30,7 +30,7 @@
         <View android:id="@+id/separator"
             android:layout_width="fill_parent"
             android:layout_height="1dp"
-            android:background="@color/text_header"/>
+            android:background="@color/grey_dark"/>
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -42,7 +42,7 @@
                 android:ems="10"
                 android:padding="10dp"
                 android:gravity="left|top"
-                android:textColor="@color/msg_content_vs"
+                android:textColor="@color/grey_dark"
                 android:textSize="17sp"
                 android:inputType="textMultiLine" >
                 <requestFocus />

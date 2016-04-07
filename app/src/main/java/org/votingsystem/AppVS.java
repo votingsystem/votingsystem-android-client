@@ -116,7 +116,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             PrefUtils.init();
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
-            currencyServerURL = props.getProperty(ContextVS.CURRENCY_SERVER_URL);
+            currencyServerURL = props.getProperty(ContextVS.CURRENCY_SERVER_URL_KEY);
             accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
             LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL +
                     " - currencyServerURL: " + currencyServerURL);
@@ -127,7 +127,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             if(accessControl == null || currencyServer == null) {
                 Intent startIntent = new Intent(this, BootStrapService.class);
                 startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
-                startIntent.putExtra(ContextVS.CURRENCY_SERVER_URL, currencyServerURL);
+                startIntent.putExtra(ContextVS.CURRENCY_SERVER_URL_KEY, currencyServerURL);
                 startService(startIntent);
             }
             PrefUtils.registerPreferenceChangeListener(this);
@@ -219,7 +219,6 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         LOGD(TAG + ".setAccessControl", "serverURL: " + accessControl.getServerURL());
         this.accessControl = accessControl;
         serverMap.put(accessControl.getServerURL(), accessControl);
-        PrefUtils.markAccessControlLoaded(accessControl.getServerURL());
     }
 
     public String getCurrentWeekLapseId() {

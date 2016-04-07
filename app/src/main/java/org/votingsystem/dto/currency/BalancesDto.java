@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.voting.TagVSInfoDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TimePeriod;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,8 +119,8 @@ public class BalancesDto {
         return cash;
     }
 
-    public Map<String, TagVSInfoDto> getTagVSInfoMap(String currencyCode) throws ExceptionVS {
-        balancesInfo = new HashMap<String, Map<String, TagVSInfoDto>>();
+    public Map<String, TagVSInfoDto> getTagMap(String currencyCode) throws ExceptionVS {
+        balancesInfo = new HashMap<>();
         Set<String> currencySet = balancesTo.keySet();
         BigDecimal wildTagExpendedInTags = BigDecimal.ZERO;
         for(String currency : currencySet) {
@@ -223,4 +223,19 @@ public class BalancesDto {
     public void setBalancesTo(Map<String, Map<String, IncomesDto>> balancesTo) {
         this.balancesTo = balancesTo;
     }
+
+    public Set<String> getCurrencyCodes() {
+        if(this.balancesCash != null) {
+            return balancesCash.keySet();
+        } else return Collections.emptySet();
+    }
+
+    public static BigDecimal getTagMapTotal(Map<String, TagVSInfoDto> tagMap) {
+        BigDecimal result = BigDecimal.ZERO;
+        for(Map.Entry<String, TagVSInfoDto> entry:tagMap.entrySet()) {
+            result = result.add(entry.getValue().getCash());
+        }
+        return result;
+    }
+
 }

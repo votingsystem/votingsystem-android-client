@@ -113,7 +113,7 @@ public class EventVSSpinnerAdapter  extends BaseAdapter {
     }
 
     private int getColor(int position) {
-        return position >= 0 && position < mItems.size() ? mItems.get(position).color : R.color.bkg_vs;
+        return position >= 0 && position < mItems.size() ? mItems.get(position).color : R.color.red_vs;
     }
 
     private String getTag(int position) {

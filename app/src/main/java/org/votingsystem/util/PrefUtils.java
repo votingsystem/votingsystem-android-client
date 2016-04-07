@@ -43,16 +43,19 @@ public class PrefUtils {
 
     private static RepresentationStateDto representation;
     private static RepresentativeDelegationDto representativeDelegationDto;
+    private static BalancesDto userBalances;
 
     public static void init() {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
-        //initialize listened keys
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, false).commit();
-        sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, null).commit();
-        sp.edit().remove(ContextVS.USER_ACCOUNT_LAST_CHECKED_KEY).commit();
         new Thread(new Runnable() {
-            @Override public void run() { getRepresentationState(); }
+            @Override public void run() {
+                try {
+                    getRepresentationState();
+                    getBalances();
+                } catch (Exception ex) { ex.printStackTrace();}
+            }
         }).start();
     }
 
@@ -60,12 +63,6 @@ public class PrefUtils {
         SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
         sp.edit().putBoolean(ContextVS.BOOTSTRAP_DONE, true).commit();
-    }
-
-    public static void markAccessControlLoaded(String accessControlURL) {
-        SharedPreferences sp = AppVS.getInstance().getSharedPreferences(
-                PRIVATE_PREFS, Context.MODE_PRIVATE);
-        sp.edit().putString(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL).commit();
     }
 
     public static boolean isDataBootstrapDone() {
@@ -154,15 +151,16 @@ public class PrefUtils {
     }
 
     public static BalancesDto getBalances() throws Exception {
+        if(userBalances != null) return userBalances;
         Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
         String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = AppVS.getInstance().getSharedPreferences(
                 ContextVS.PRIVATE_PREFS, Context.MODE_PRIVATE);
         String balancesStr = pref.getString(editorKey, null);
         try {
-            return JSON.readValue(balancesStr, BalancesDto.class);
+            userBalances = JSON.readValue(balancesStr, BalancesDto.class);
         } catch (Exception ex) { ex.printStackTrace();}
-        return null;
+        return userBalances;
     }
 
     public static void putBalances(BalancesDto balancesDto, TimePeriod timePeriod) throws Exception {
@@ -175,6 +173,7 @@ public class PrefUtils {
         try {
             editor.putString(editorKey, JSON.writeValueAsString(balancesDto));
             editor.commit();
+            userBalances = balancesDto;
         } catch (Exception ex) { ex.printStackTrace();}
     }
 

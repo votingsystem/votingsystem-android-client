@@ -18,44 +18,44 @@
 
     <style name="ThemeVS" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:popupMenuStyle">@style/ThemeVS.PopupMenu</item>
-        <item name="android:panelBackground">@color/bkg_vs</item>
+        <item name="android:panelBackground">@color/red_vs</item>
         <item name="android:actionBarWidgetTheme">@style/ThemeVS</item>
-        <item name="android:panelFullBackground">@color/bkg_vs</item>
+        <item name="android:panelFullBackground">@color/red_vs</item>
         <item name="android:itemTextAppearance">@style/popupItemTextStyle</item>
         <item name="searchViewStyle">@style/ThemeVS.SearchView</item>
     </style>
 
     <style name="ThemeVS.SearchView" parent="Widget.AppCompat.SearchView">
-        <item name="suggestionRowLayout">@color/bkg_vs</item>
-        <item name="queryBackground">@color/bkg_vs</item>
-        <item name="submitBackground">@color/bkg_vs</item>
+        <item name="suggestionRowLayout">@color/red_vs</item>
+        <item name="queryBackground">@color/red_vs</item>
+        <item name="submitBackground">@color/red_vs</item>
     </style>
 
     <style name="ItemVS">
-        <item name="android:textColor">@color/frg_vs</item>
+        <item name="android:textColor">@color/white_vs</item>
     </style>
     <style name="popupItemTextStyle" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
-        <item name="android:textColor">@color/bkg_vs</item>
+        <item name="android:textColor">@color/red_vs</item>
         <item name="android:textSize">20sp</item>
     </style>
     <style name="ThemeVS.PopupMenu" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:popupBackground">@color/bkg_vs</item>
+        <item name="android:popupBackground">@color/red_vs</item>
     </style>
 
     <style name="ToolBarVS" parent="Theme.AppCompat">
         <item name="android:itemTextAppearance">@style/ItemVS</item>
-        <item name="android:background">@color/bkg_vs</item>
+        <item name="android:background">@color/red_vs</item>
         <item name="android:titleTextStyle">@style/ToolBarVS.TitleTextStyle</item>
         <item name="android:subtitleTextStyle">@style/ToolBarVS.SubTitleTextStyle</item>
     </style>
 
     <style name="ToolBarVS.TitleTextStyle"
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/bkg_vs</item>
+        <item name="android:textColor">@color/red_vs</item>
     </style>
     <style name="ToolBarVS.SubTitleTextStyle"
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
-        <item name="android:textColor">@color/frg_vs</item>
+        <item name="android:textColor">@color/white_vs</item>
     </style>
 
     <style name="electionOptionText">

@@ -105,8 +105,10 @@ public class ActivityBase extends ActivityConnected
 
         int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
         if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
-        if(savedInstanceState == null) selectedContentFragment(R.id.currency_accounts);
-        else {
+        if(savedInstanceState == null) {
+            selectedContentFragment(R.id.fa_qrcode);
+            setMenu(R.menu.drawer_currency);
+        } else {
             setMenu(savedInstanceState.getInt(MENU_KEY));
         }
     }

@@ -56,7 +56,7 @@ public class CurrencyFragment extends Fragment {
             if(currency.getState() != null && Currency.State.OK != currency.getState()) {
                 currency_state.setText(MsgUtils.getCurrencyStateMessage(currency, getActivity()));
                 currency_state.setVisibility(View.VISIBLE);
-                currency_amount.setTextColor(getResources().getColor(R.color.bkg_vs));
+                currency_amount.setTextColor(getResources().getColor(R.color.red_vs));
             }
         } catch(Exception ex) {
             ex.printStackTrace();

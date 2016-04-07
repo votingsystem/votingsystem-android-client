@@ -18,7 +18,7 @@
             <TextView android:id="@+id/transaction_subject"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/event_subject"
+                android:textColor="@color/grey_dark"
                 android:textSize="23sp"
                 android:layout_weight="1.0"/>
             <TextView android:id="@+id/transaction_content"

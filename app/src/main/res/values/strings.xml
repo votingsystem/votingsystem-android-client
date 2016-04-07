@@ -234,7 +234,7 @@
     <string name="time_remaining_lbl">si no lo gastas antes del domingo a las 24:00 horas el importe pasará al sistema</string>
     <string name="cash_request_dialog_caption">retirar efectivo</string>
     <string name="cash_send_dialog_caption">realizar pago</string>
-    <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>\'%1$s\'</b> %2$s]]></string>
+    <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <b>%1$s</b> %2$s]]></string>
     <string name="cash_for_payment_dialog_msg"><![CDATA[para completar la operación necesita retirar
      <b>%2$s %1$s</b><br/> su límite es de <b>%3$s %1$s</b>]]></string>
     <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
@@ -588,4 +588,5 @@
     <string name="user_from_csr_missmatch_msg">el usuario \'%1$s\' con nif \'%2$s\'  está intentando acceder en su nombre desde el navegador</string>
     <string name="cash_no_available_msg">no tiene disponible suficiente para retirar efectivo</string>
     <string name="account_input_from_bank">ingeso desde entidad bancaria</string>
+    <string name="connection_required_caption">acceso restringido</string>
 </resources>

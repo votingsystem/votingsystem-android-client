@@ -70,7 +70,7 @@ public class ContextVS {
     public static final String USER_KEY = "USER_KEY";
     public static final String URI_KEY = "URI_DATA";
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
-    public static final String CURRENCY_SERVER_URL = "CURRENCY_SERVER_URL";
+    public static final String CURRENCY_SERVER_URL_KEY = "CURRENCY_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
     public static final String MESSAGE_CONTENT_KEY = "MESSAGE_CONTENT_KEY";

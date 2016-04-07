@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="nif"
-            android:textColor="@color/bkg_vs"
+            android:textColor="@color/red_vs"
             android:gravity="center_vertical" />
     </LinearLayout>
 </android.support.v7.widget.CardView>

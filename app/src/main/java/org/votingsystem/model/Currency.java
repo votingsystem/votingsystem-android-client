@@ -278,10 +278,10 @@ public class Currency extends ReceiptWrapper {
     }
 
     public Integer getStateColor(Context context) {
-        if(state == null) return context.getResources().getColor(R.color.unknown_vs);
+        if(state == null) return context.getResources().getColor(R.color.orange_vs);
         switch (state) {
             case OK: return context.getResources().getColor(R.color.active_vs);
-            default: return context.getResources().getColor(R.color.terminated_vs);
+            default: return context.getResources().getColor(R.color.red_vs);
         }
     }
 

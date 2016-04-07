@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:visibility="gone"
-        android:textColor="@color/empty_msg"
+        android:textColor="@color/red_vs"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/empty_search_lbl"/>
     <GridView android:id="@+id/gridview"

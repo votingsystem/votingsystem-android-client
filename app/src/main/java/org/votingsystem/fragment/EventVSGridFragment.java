@@ -301,7 +301,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 String eventJSON = cursor.getString(cursor.getColumnIndex(
                         EventVSContentProvider.JSON_DATA_COL));
                 EventVSDto eventVS = JSON.readValue(eventJSON, EventVSDto.class);
-                int state_color = R.color.frg_vs;
+                int state_color = R.color.white_vs;
                 String tameInfoMsg = null;
                 switch(eventVS.getState()) {
                     case ACTIVE:
@@ -311,11 +311,11 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                         break;
                     case CANCELLED:
                     case TERMINATED:
-                        state_color = R.color.terminated_vs;
+                        state_color = R.color.red_vs;
                         tameInfoMsg = getString(R.string.voting_closed_lbl);
                         break;
                     case PENDING:
-                        state_color = R.color.pending_vs;
+                        state_color = R.color.orange_vs;
                         tameInfoMsg = getString(R.string.pending_lbl, DateUtils.
                                 getElapsedTimeStr(eventVS.getDateBegin()));
                         break;

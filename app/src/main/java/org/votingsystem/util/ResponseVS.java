@@ -24,6 +24,7 @@ public class ResponseVS<T> implements Parcelable {
     public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
     public static final int SC_REQUEST_TIMEOUT          = 408;
     public static final int SC_ERROR_REQUEST            = 400;
+    public static final int SC_FORBIDDEN                = 403;
     public static final int SC_NOT_FOUND                = 404;
     public static final int SC_ERROR_REQUEST_REPEATED   = 409;
     public static final int SC_EXCEPTION                = 490;

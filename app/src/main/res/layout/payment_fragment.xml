@@ -27,7 +27,7 @@
                 android:layout_marginRight="20dp"
                 android:text="@string/receptor_lbl"
                 android:textSize="21sp"
-                android:textColor="@color/msg_content_vs"
+                android:textColor="@color/grey_dark"
                 android:textStyle="bold"
                 android:gravity="left">
             </TextView>
@@ -41,7 +41,7 @@
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:textColor="@color/msg_content_vs"
+                android:textColor="@color/grey_dark"
                 android:text="@string/subject_lbl" />
 
             <TextView android:id="@+id/subject"
@@ -50,7 +50,7 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:textSize="18sp"
-                android:textColor="@color/msg_content_vs"
+                android:textColor="@color/grey_dark"
                 android:textStyle="bold"
                 android:gravity="left">
             </TextView>

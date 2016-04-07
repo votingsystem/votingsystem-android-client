@@ -141,4 +141,15 @@ public class StringUtils {
         return new String(hexBytes, ContextVS.UTF_8);
     }
 
+    public static String getCurrencySymbol(String currencyCode) {
+        switch (currencyCode) {
+            case "EUR": return "€";
+            case "USD": return "$";
+            case "CNY":
+            case "JPY":
+                return "¥";
+        }
+        return currencyCode;
+    }
+
 }

@@ -14,8 +14,8 @@
         android:text="@string/signed_document_msg"
         android:gravity="center"
         android:visibility="gone"
-        android:background="@color/terminated_vs"
-        android:textColor="@color/white"
+        android:background="@color/red_vs"
+        android:textColor="@color/white_vs"
         android:layout_margin="10dp"
         android:textStyle="bold"
         android:textSize="24sp" />
@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@color/event_subject"
+        android:textColor="@color/grey_dark"
         android:layout_margin="10dp"
         android:textSize="20sp" />
     <WebView android:id="@+id/cms_signed_content"

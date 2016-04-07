@@ -1,8 +1,6 @@
 package org.votingsystem.fragment;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,11 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.votingsystem.AppVS;
-import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.CurrencyServerDto;
-import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -30,7 +25,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
 
     public static final String TAG = CurrencyAccountsPagerFragment.class.getSimpleName();
 
-    //corresponds to finance section child screens order
+    //screens order
     private static final int USER_ACCOUNTS_POS       = 0;
     private static final int TRANSANCTIONVS_LIST_POS = 1;
 
@@ -77,29 +72,10 @@ public class CurrencyAccountsPagerFragment extends Fragment {
         }
     }
 
-    @Override public void onResume() {
-        super.onResume();
-        if (!AppVS.getInstance().isWithSocketConnection()) {
-            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
-                    getString(R.string.connection_required_msg),
-                    getActivity()).setPositiveButton(getString(R.string.connect_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            if(getActivity() != null) ConnectionUtils.initConnection(
-                                    ((ActivityBase)getActivity()));
-                            dialog.cancel();
-                        }
-                    });
-            UIUtils.showMessageDialog(builder);
-        }
-    }
-
     class CurrencyPagerAdapter extends FragmentStatePagerAdapter {
 
         final String TAG = CurrencyPagerAdapter.class.getSimpleName();
 
-        private static final int USER_MONETARY_INFO = 0;
-        private static final int CURRENCY_LIST = 1;
 
         private String searchQuery = null;
         private Bundle args;
@@ -112,10 +88,10 @@ public class CurrencyAccountsPagerFragment extends Fragment {
         @Override public Fragment getItem(int position) {
             Fragment selectedFragment = null;
             switch(position) {
-                case USER_MONETARY_INFO:
+                case USER_ACCOUNTS_POS:
                     selectedFragment = new CurrencyAccountsFragment();
                     break;
-                case CURRENCY_LIST:
+                case TRANSANCTIONVS_LIST_POS:
                     selectedFragment = new TransactionGridFragment();
                     break;
             }
@@ -128,7 +104,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
 
         @Override public int getCount() {
             return 2;
-        } //CURRENCY_ACCOUNTS_INFO and CURRENCY_LIST
+        } //CURRENCY_ACCOUNTS and TRANSANCTIONVS_LIST
 
     }
 

@@ -57,7 +57,7 @@
                 <TextView android:id="@+id/time_limited_msg"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/terminated_vs"
+                    android:textColor="@color/red_vs"
                     android:layout_weight="1"
                     android:textSize="12sp"
                     android:layout_marginRight="3dp"

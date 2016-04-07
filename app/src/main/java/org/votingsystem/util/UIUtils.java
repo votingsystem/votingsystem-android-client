@@ -56,6 +56,7 @@ import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.votingsystem.AppVS;
+import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
@@ -262,13 +263,6 @@ public class UIUtils  {
                 break;
             }
         }
-    }
-
-    public static Drawable getLogoIcon(Context context, int iconId) {
-        Drawable logoIcon = context.getResources().getDrawable(iconId);
-        logoIcon.setBounds(0, 0, 32, 32);
-        //logoIcon.setColorFilter(R.color.navdrawer_background, PorterDuff.Mode.MULTIPLY);
-        return logoIcon;
     }
 
     public static boolean isTablet(Context context) {
@@ -489,6 +483,22 @@ public class UIUtils  {
                 } else return false;
             }
         });
+    }
+
+    public static void showConnectionRequiredDialog(final ActivityBase activityBase) {
+        if (!AppVS.getInstance().isWithSocketConnection()) {
+            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
+                    activityBase.getString(R.string.connection_required_caption),
+                    activityBase.getString(R.string.connection_required_msg),
+                    activityBase).setPositiveButton(activityBase.getString(R.string.connect_lbl),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            if(activityBase != null) ConnectionUtils.initConnection(activityBase);
+                            dialog.cancel();
+                        }
+                    });
+            UIUtils.showMessageDialog(builder);
+        }
     }
 
     //Mandatory dialog, only process y user click on dialog buttons

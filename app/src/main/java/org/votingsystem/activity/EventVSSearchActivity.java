@@ -282,7 +282,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
                         (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 itemView = inflater.inflate(R.layout.eventvs_card, null);
             }
-            int state_color = R.color.frg_vs;
+            int state_color = R.color.white_vs;
             String tameInfoMsg = null;
             switch(eventVS.getState()) {
                 case ACTIVE:
@@ -292,11 +292,11 @@ public class EventVSSearchActivity extends AppCompatActivity {
                     break;
                 case CANCELLED:
                 case TERMINATED:
-                    state_color = R.color.terminated_vs;
+                    state_color = R.color.red_vs;
                     tameInfoMsg = getString(R.string.voting_closed_lbl);
                     break;
                 case PENDING:
-                    state_color = R.color.pending_vs;
+                    state_color = R.color.orange_vs;
                     tameInfoMsg = getString(R.string.pending_lbl, DateUtils.
                             getElapsedTimeStr(eventVS.getDateBegin()));
                     break;
