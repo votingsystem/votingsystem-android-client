@@ -14,7 +14,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 import org.votingsystem.util.crypto.Encryptor;
 
 import java.io.IOException;
@@ -152,26 +152,24 @@ public class PrefUtils {
 
     public static BalancesDto getBalances() throws Exception {
         if(userBalances != null) return userBalances;
-        Calendar currentMonday = DateUtils.getMonday(Calendar.getInstance());
-        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(currentMonday.getTime());
         SharedPreferences pref = AppVS.getInstance().getSharedPreferences(
                 ContextVS.PRIVATE_PREFS, Context.MODE_PRIVATE);
-        String balancesStr = pref.getString(editorKey, null);
+        String balancesStr = pref.getString(ContextVS.BALANCE_KEY, null);
+        if(balancesStr == null) return new BalancesDto();
         try {
             userBalances = JSON.readValue(balancesStr, BalancesDto.class);
         } catch (Exception ex) { ex.printStackTrace();}
         return userBalances;
     }
 
-    public static void putBalances(BalancesDto balancesDto, TimePeriod timePeriod) throws Exception {
+    public static void putBalances(BalancesDto balancesDto) throws Exception {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(ContextVS.USER_ACCOUNT_LAST_CHECKED_KEY,
                 Calendar.getInstance().getTimeInMillis());
-        String editorKey = ContextVS.PERIOD_KEY + "_" + DateUtils.getPath(timePeriod.getDateFrom());
         try {
-            editor.putString(editorKey, JSON.writeValueAsString(balancesDto));
+            editor.putString(ContextVS.BALANCE_KEY, JSON.writeValueAsString(balancesDto));
             editor.commit();
             userBalances = balancesDto;
         } catch (Exception ex) { ex.printStackTrace();}
@@ -282,7 +280,7 @@ public class PrefUtils {
         return settings.getString(ContextVS.CSR_KEY, null);
     }
 
-    public static void putCsrRequest(CertificationRequestVS certificationRequest) {
+    public static void putCsrRequest(CertificationRequest certificationRequest) {
         SharedPreferences settings = AppVS.getInstance().getSharedPreferences(
                 PRIVATE_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();

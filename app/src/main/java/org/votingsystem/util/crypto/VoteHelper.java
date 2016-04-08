@@ -45,7 +45,7 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     private AccessRequestDto accessRequestDto;
     private transient CMSSignedMessage voteReceipt;
     private transient CMSSignedMessage cancelVoteReceipt;
-    private CertificationRequestVS certificationRequest;
+    private CertificationRequest certificationRequest;
 
     public static VoteHelper load(VoteDto voteDto) throws Exception {
         VoteHelper voteHelper = new VoteHelper();
@@ -59,7 +59,7 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
         voteHelper.eventVSURL = voteDto.getEventVS().getURL();
         voteHelper.eventVS = voteDto.getEventVS();
         voteHelper.genVote(voteDto.getOptionSelected());
-        voteHelper.certificationRequest = CertificationRequestVS.getVoteRequest(
+        voteHelper.certificationRequest = CertificationRequest.getVoteRequest(
                 SIGNATURE_ALGORITHM, PROVIDER,
                 voteDto.getEventVS().getAccessControl().getServerURL(),
                 voteDto.getEventVS().getId(),
@@ -173,11 +173,11 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
         this.cancelVoteReceipt = cancelVoteReceipt;
     }
 
-    public CertificationRequestVS getCertificationRequest() {
+    public CertificationRequest getCertificationRequest() {
         return certificationRequest;
     }
 
-    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
+    public void setCertificationRequest(CertificationRequest certificationRequest) {
         this.certificationRequest = certificationRequest;
     }
 

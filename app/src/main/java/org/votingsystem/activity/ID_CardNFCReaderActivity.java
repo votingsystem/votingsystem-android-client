@@ -34,7 +34,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.crypto.CMSUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -175,7 +175,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 						if(userFromCert.getCountry() != null) appUser.setCountry(userFromCert.getCountry());
 						if(userFromCert.getCn() != null) appUser.setCn(userFromCert.getCn());
 						if(requestCsr) {
-							CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
+							CertificationRequest certificationRequest = CertificationRequest.getUserRequest(
 									SIGNATURE_ALGORITHM, PROVIDER, appUser.getNIF(), appUser.getEmail(),
 									appUser.getPhone(), PrefUtils.getDeviceId(), appUser.getFirstName(),
 									appUser.getLastName(), DeviceDto.Type.MOBILE);

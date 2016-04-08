@@ -23,7 +23,6 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.AppVS;
 import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.CurrencyRequesActivity;
 import org.votingsystem.android.R;

@@ -14,7 +14,7 @@ import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class Currency extends ReceiptWrapper {
     private transient CMSSignedMessage receipt;
     private transient CMSSignedMessage cmsMessage;
     private transient X509Certificate x509AnonymousCert;
-    private CertificationRequestVS certificationRequest;
+    private CertificationRequest certificationRequest;
     private byte[] receiptBytes;
     private String originHashCertVS;
     private String hashCertVS;
@@ -85,7 +85,7 @@ public class Currency extends ReceiptWrapper {
         this.timeLimited = timeLimited;
         try {
             this.hashCertVS = hashCertVS;
-            certificationRequest = CertificationRequestVS.getCurrencyRequest(
+            certificationRequest = CertificationRequest.getCurrencyRequest(
                     ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
@@ -102,7 +102,7 @@ public class Currency extends ReceiptWrapper {
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
             this.hashCertVS = StringUtils.getHashBase64(getOriginHashCertVS(), ContextVS.DATA_DIGEST_ALGORITHM);
-            certificationRequest = CertificationRequestVS.getCurrencyRequest(
+            certificationRequest = CertificationRequest.getCurrencyRequest(
                     ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
@@ -226,12 +226,12 @@ public class Currency extends ReceiptWrapper {
         initCertData(certificationRequest.getCertificate());
     }
 
-    public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest)
+    public static Currency fromCertificationRequest(CertificationRequest certificationRequest)
             throws Exception {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
         if(certificationRequest.getSignedCsr() != null) currency.initSigner(certificationRequest.getSignedCsr());
-        else LOGD(TAG + ".fromCertificationRequestVS", "CertificationRequestVS with NULL SignedCSR");
+        else LOGD(TAG + ".fromCertificationRequest", "CertificationRequest with NULL SignedCSR");
         return currency;
     }
 
@@ -263,7 +263,7 @@ public class Currency extends ReceiptWrapper {
         this.timeLimited = timeLimited;
     }
 
-    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
+    public void setCertificationRequest(CertificationRequest certificationRequest) {
         this.certificationRequest = certificationRequest;
     }
 
@@ -319,7 +319,7 @@ public class Currency extends ReceiptWrapper {
         return "ERROR - Currency with hash: " + hashCertVS + " - ";
     }
 
-    public CertificationRequestVS getCertificationRequest() {
+    public CertificationRequest getCertificationRequest() {
         return certificationRequest;
     }
 
@@ -436,7 +436,7 @@ public class Currency extends ReceiptWrapper {
         s.defaultReadObject();
         byte[] cmsMessageBytes = (byte[]) s.readObject();
         if(cmsMessageBytes != null) cmsMessage = new CMSSignedMessage(cmsMessageBytes);
-        if(certificationRequest != null) fromCertificationRequestVS(certificationRequest);
+        if(certificationRequest != null) fromCertificationRequest(certificationRequest);
     }
 
 }

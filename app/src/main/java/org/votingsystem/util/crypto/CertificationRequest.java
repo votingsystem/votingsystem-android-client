@@ -47,9 +47,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class CertificationRequestVS implements java.io.Serializable {
+public class CertificationRequest implements java.io.Serializable {
 
-    public static final String TAG = CertificationRequestVS.class.getSimpleName();
+    public static final String TAG = CertificationRequest.class.getSimpleName();
 
     private static final long serialVersionUID = 1L;
     
@@ -63,16 +63,16 @@ public class CertificationRequestVS implements java.io.Serializable {
     private byte[] signedCsr;
     private byte[] csrPEM;
 
-    private CertificationRequestVS(KeyPair keyPair, PKCS10CertificationRequest csr,
-            String signatureMechanism) throws IOException {
+    private CertificationRequest(KeyPair keyPair, PKCS10CertificationRequest csr,
+                                 String signatureMechanism) throws IOException {
         this.keyPair = keyPair;
         this.csr = csr;
         this.csrPEM = PEMUtils.getPEMEncoded(getCsr());
         this.signatureMechanism = signatureMechanism;
     }
 
-    public static CertificationRequestVS getVoteRequest(String signatureMechanism,
-            String provider, String accessControlURL, Long eventId, String hashCertVS) throws
+    public static CertificationRequest getVoteRequest(String signatureMechanism,
+                                                      String provider, String accessControlURL, Long eventId, String hashCertVS) throws
             NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException,
             IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
@@ -85,10 +85,10 @@ public class CertificationRequestVS implements java.io.Serializable {
                 new DERSet(new DERBoolean(true))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
-        return new CertificationRequestVS(keyPair, csr, signatureMechanism);
+        return new CertificationRequest(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getAnonymousDelegationRequest(
+    public static CertificationRequest getAnonymousDelegationRequest(
             String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
             Integer weeksOperationActive, Date validFrom, Date validTo) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
@@ -105,10 +105,10 @@ public class CertificationRequestVS implements java.io.Serializable {
                 new DERSet(new DERBoolean(true))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
-        return new CertificationRequestVS(keyPair, csr, signatureMechanism);
+        return new CertificationRequest(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getCurrencyRequest(
+    public static CertificationRequest getCurrencyRequest(
             String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
             BigDecimal amount, String currencyCode, Boolean timeLimited, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
@@ -126,12 +126,12 @@ public class CertificationRequestVS implements java.io.Serializable {
                 new DERSet(new DERBoolean(true))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
-        return new CertificationRequestVS(keyPair, csr, signatureMechanism);
+        return new CertificationRequest(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getUserRequest(String signatureMechanism, String provider,
-             String nif, String email, String phone, String deviceId,
-             String givenName, String surName, DeviceDto.Type deviceType)
+    public static CertificationRequest getUserRequest(String signatureMechanism, String provider,
+                                                      String nif, String email, String phone, String deviceId,
+                                                      String givenName, String surName, DeviceDto.Type deviceType)
             throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
@@ -143,14 +143,14 @@ public class CertificationRequestVS implements java.io.Serializable {
         X500Principal subject = new X500Principal(principal);
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(attribute), keyPair.getPrivate(), provider);
-        return new CertificationRequestVS(keyPair, csr, signatureMechanism);
+        return new CertificationRequest(keyPair, csr, signatureMechanism);
     }
 
     public String getSignatureMechanism() {
         return signatureMechanism;
     }
 
-    public CertificationRequestVS initSigner (byte[] signedCsr) {
+    public CertificationRequest initSigner (byte[] signedCsr) {
         this.signedCsr = signedCsr;
         return this;
     }
@@ -258,7 +258,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         return userCertificationRequestDto;
     }
 
-    public CertificationRequestVS setUserCertificationRequestDto(
+    public CertificationRequest setUserCertificationRequestDto(
             UserCertificationRequestDto userCertificationRequestDto) {
         this.userCertificationRequestDto = userCertificationRequestDto;
         return this;

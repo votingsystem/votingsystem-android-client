@@ -38,7 +38,7 @@ import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.KeyStore;
@@ -312,7 +312,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
                 keyStore.load(null);
-                CertificationRequestVS certificationRequest = (CertificationRequestVS)
+                CertificationRequest certificationRequest = (CertificationRequest)
                         ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest().getBytes());
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
                 Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(

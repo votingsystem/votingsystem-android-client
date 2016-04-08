@@ -12,7 +12,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -119,7 +119,7 @@ public class CurrencyDto implements Serializable {
         currencyDto.setTag(currency.getTag());
         currencyDto.setState(currency.getState());
         currencyDto.setTimeLimited(currency.isTimeLimited());
-        //CertificationRequestVS instead of Currency to make it easier deserialization on JavaFX
+        //CertificationRequest instead of Currency to make it easier deserialization on JavaFX
         currencyDto.setObject(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
         return currencyDto;
     }
@@ -138,9 +138,9 @@ public class CurrencyDto implements Serializable {
 
     public Currency deSerialize() throws Exception {
         try {
-            CertificationRequestVS certificationRequestVS =
-                    (CertificationRequestVS) ObjectUtils.deSerializeObject(object.getBytes());
-            Currency currency = Currency.fromCertificationRequestVS(certificationRequestVS);
+            CertificationRequest certificationRequest =
+                    (CertificationRequest) ObjectUtils.deSerializeObject(object.getBytes());
+            Currency currency = Currency.fromCertificationRequest(certificationRequest);
             currency.setState(state);
             return currency;
         }catch (Exception ex) {

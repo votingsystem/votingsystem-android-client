@@ -60,7 +60,6 @@ public class ContextVS {
     public static final String CAN_KEY = "CAN_KEY";
     public static final String DOUBLE_BACK_KEY = "DOUBLE_BACK_KEY";
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY = "ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY";
-    public static final String PERIOD_KEY = "PERIOD";
     public static final String URL_KEY = "URL";
     public static final String SESSION_KEY = "SESSION_KEY";
     public static final String TAG_KEY = "TAG";
@@ -72,6 +71,7 @@ public class ContextVS {
     public static final String ACCESS_CONTROL_URL_KEY = "ACCESS_CONTROL_URL";
     public static final String CURRENCY_SERVER_URL_KEY = "CURRENCY_SERVER_URL";
     public static final String CALLER_KEY = "CALLER_KEY";
+    public static final String BALANCE_KEY = "BALANCE_KEY";
     public static final String MESSAGE_KEY = "MESSAGE_KEY";
     public static final String MESSAGE_CONTENT_KEY = "MESSAGE_CONTENT_KEY";
     public static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";

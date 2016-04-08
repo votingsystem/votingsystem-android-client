@@ -355,7 +355,7 @@ public class PaymentService extends IntentService {
             responseVS = HttpHelper.getInstance().getData(targetService, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 BalancesDto accountsInfo = (BalancesDto) responseVS.getMessage(BalancesDto.class);
-                PrefUtils.putBalances(accountsInfo, DateUtils.getCurrentWeekPeriod());
+                PrefUtils.putBalances(accountsInfo);
                 TransactionContentProvider.updateUserTransactionList(appVS, accountsInfo);
             } else responseVS.setCaption(getString(R.string.error_lbl));
         } catch(Exception ex) {
