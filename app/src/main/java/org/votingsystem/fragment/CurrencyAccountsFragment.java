@@ -109,8 +109,8 @@ public class CurrencyAccountsFragment extends Fragment {
         accounts_container.setLayoutManager(new LinearLayoutManager(getActivity()));
         setHasOptionsMenu(true);
         loadUserInfo();
-        Intent intent = getActivity().getIntent();
-        if(intent.getBooleanExtra(ContextVS.REFRESH_KEY, false)) updateCurrencyAccountsInfo();
+        if(getActivity().getIntent().getBooleanExtra(ContextVS.REFRESH_KEY, false))
+            updateCurrencyAccountsInfo();
         return rootView;
     }
 

@@ -1,5 +1,6 @@
 package org.votingsystem.dto.currency;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.dto.TagVSDto;
@@ -224,6 +225,7 @@ public class BalancesDto {
         this.balancesTo = balancesTo;
     }
 
+    @JsonIgnore
     public Set<String> getCurrencyCodes() {
         if(this.balancesCash != null) {
             return balancesCash.keySet();
