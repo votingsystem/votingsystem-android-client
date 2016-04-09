@@ -7,7 +7,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.dto.InitSessionDto;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.service.WebSocketService;
@@ -73,7 +73,7 @@ public class ConnectionUtils {
     private static void launchNFC_IDCard(AppCompatActivity activity, char[] accessModePassw) {
         try {
             Intent intent = new Intent(activity, ID_CardNFCReaderActivity.class);
-            InitSessionDto initSessionDto = new InitSessionDto(PrefUtils.getDeviceId(),
+            MessageDto initSessionDto = MessageDto.REQUEST(PrefUtils.getDeviceId(),
                     HttpHelper.getInstance().getSessionId(
                     StringUtils.getDomain(AppVS.getInstance().getCurrencyServerURL())));
             intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionDto));

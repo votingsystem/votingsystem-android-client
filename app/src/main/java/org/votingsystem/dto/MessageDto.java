@@ -12,12 +12,20 @@ import org.votingsystem.util.TypeVS;
 public class MessageDto {
 
     private Integer statusCode;
-    private String message;
     private TypeVS operation;
+    private String message;
     private String cmsMessagePEM;
     private String URL;
+    private String deviceId;
+    private String httpSessionId;
+    private String UUID;
 
     public MessageDto() {}
+
+    public MessageDto(String deviceId, String httpSessionId) {
+        this.deviceId = deviceId;
+        this.httpSessionId = httpSessionId;
+    }
 
     public MessageDto(Integer statusCode, String message, String URL) {
         this.statusCode = statusCode;
@@ -64,5 +72,23 @@ public class MessageDto {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public String getHttpSessionId() {
+        return httpSessionId;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public static MessageDto REQUEST(String deviceId, String httpSessionId) {
+        MessageDto result = new MessageDto(deviceId, httpSessionId);
+        result.UUID = java.util.UUID.randomUUID().toString();
+        return result;
     }
 }

@@ -217,10 +217,12 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				}
 			} catch (NullPointerException ex) {
 				ex.printStackTrace();
+				myHandler.post(askForRead);
 				showMessageDialog(getString(R.string.error_lbl),
 						getString(R.string.dnie_connection_null_error_msg));
 			} catch (Exception ex) {
 				ex.printStackTrace();
+				myHandler.post(askForRead);
 				showMessageDialog(getString(R.string.error_lbl),
 						getString(R.string.dnie_connection_error_msg));
 			}
