@@ -25,6 +25,7 @@ import org.votingsystem.AppVS;
 import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -39,6 +40,7 @@ import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
+import org.votingsystem.util.WebSocketSession;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -161,6 +163,7 @@ public class QRActionsFragment extends Fragment {
                                 });
                         UIUtils.showMessageDialog(builder);
                     } else {
+                        qrMessageDto.setAesParams(AESParamsDto.CREATE());
                         socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, true);
                         sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
                     }
@@ -186,6 +189,19 @@ public class QRActionsFragment extends Fragment {
                     intent.putExtra(ContextVS.ITEM_ID_KEY, qrMessageDto.getItemId());
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(intent);
+                    break;
+                case GET_AES_PARAMS:
+                    WebSocketSession socketSession = AppVS.getInstance()
+                            .getWSSessionByIV(qrMessageDto.getMsg());
+                    if(socketSession == null) {
+                        MessageDialogFragment.showDialog(null, getString(R.string.error_lbl),
+                                getString(R.string.session_missing_error_msg), getFragmentManager());
+                    } else {
+                        qrMessageDto.setOperation(TypeVS.SEND_AES_PARAMS)
+                                .setAesParams(socketSession.getAesParams());
+                        socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, true);
+                        sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
+                    }
                     break;
                 default: LOGD(TAG, "processQRCode: " + qrMessageDto.getOperation());
             }

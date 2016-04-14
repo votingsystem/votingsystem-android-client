@@ -37,6 +37,7 @@ public class EncryptedContentDto implements Serializable {
     private String deviceToName;
     private String hashCertVS;
     private String cmsMessage;
+    private AESParamsDto aesParams;
     private String x509CertificatePEM;
     private String publicKeyPEM;
     private boolean timeLimited = false;
@@ -55,6 +56,7 @@ public class EncryptedContentDto implements Serializable {
 
     public static EncryptedContentDto getQRInfoRequest(QRMessageDto qrMessage) throws Exception {
         EncryptedContentDto encryptedContentDto =  new EncryptedContentDto();
+        encryptedContentDto.setAesParams(qrMessage.getAesParams());
         encryptedContentDto.setOperation(qrMessage.getOperation());
         encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
         encryptedContentDto.setOperationCode(qrMessage.getOperationCode());
@@ -253,5 +255,13 @@ public class EncryptedContentDto implements Serializable {
     public EncryptedContentDto setUUID(String UUID) {
         this.UUID = UUID;
         return this;
+    }
+
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
     }
 }

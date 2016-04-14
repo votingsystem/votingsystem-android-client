@@ -589,4 +589,5 @@
     <string name="cash_no_available_msg">no tiene disponible suficiente para retirar efectivo</string>
     <string name="account_input_from_bank">ingeso desde entidad bancaria</string>
     <string name="connection_required_caption">acceso restringido</string>
+    <string name="session_missing_error_msg">por favor, identifíquese otra vez desde el navegador</string>
 </resources>

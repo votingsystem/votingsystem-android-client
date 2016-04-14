@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -12,6 +13,7 @@ public class WebSocketSession<T> {
     private TypeVS typeVS;
     private T data;
     private SocketMessageDto lastMessage;
+    private AESParamsDto aesParams;;
     private QRMessageDto qrMessage;
     private DeviceDto device;
     private String broadCastId;
@@ -83,5 +85,13 @@ public class WebSocketSession<T> {
 
     public void setQrMessage(QRMessageDto qrMessage) {
         this.qrMessage = qrMessage;
+    }
+
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
     }
 }

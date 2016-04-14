@@ -36,6 +36,8 @@ public class QRMessageDto<T> implements Serializable {
     public static final int VOTE                               = 4;
     public static final int OPERATION_PROCESS                  = 5;
     public static final int ANONYMOUS_REPRESENTATIVE_SELECTION = 6;
+    public static final int GET_AES_PARAMS                     = 7;
+
 
     public static final int CURRENCY_SYSTEM                  = 0;
     public static final int VOTING_SYSTEM                    = 1;
@@ -46,6 +48,7 @@ public class QRMessageDto<T> implements Serializable {
     public static final String OPERATION_CODE_KEY     = "opid";
     public static final String PUBLIC_KEY_KEY         = "pk";
     public static final String SERVER_KEY             = "srv";
+    public static final String MSG_KEY                = "msg";
 
 
     @JsonIgnore private TypeVS typeVS;
@@ -54,6 +57,7 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private String origingHashCertVS;
     @JsonIgnore private Currency currency;
     @JsonIgnore private DeviceDto device;
+    @JsonIgnore private AESParamsDto aesParams;;
     private TypeVS operation;
     private String operationCode;
     private Long deviceId;
@@ -64,6 +68,7 @@ public class QRMessageDto<T> implements Serializable {
     private String currencyChangeCert;
     private String publicKeyBase64;
     private String url;
+    private String msg;
     private String UUID;
 
     public QRMessageDto() {}
@@ -112,6 +117,9 @@ public class QRMessageDto<T> implements Serializable {
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
                     qrMessageDto.setOperation(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
                     break;
+                case GET_AES_PARAMS:
+                    qrMessageDto.setOperation(TypeVS.GET_AES_PARAMS);
+                    break;
                 default:
                     LOGD(TAG, "unknown operation code: " + operationCode);
             }
@@ -133,6 +141,8 @@ public class QRMessageDto<T> implements Serializable {
             qrMessageDto.setOperationCode(msg.split(OPERATION_CODE_KEY + "=")[1].split(";")[0]);
         if (msg.contains(PUBLIC_KEY_KEY + "="))
             qrMessageDto.setPublicKeyBase64(msg.split(PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(MSG_KEY + "="))
+            qrMessageDto.setMsg(msg.split(MSG_KEY + "=")[1].split(";")[0]);
         return qrMessageDto;
     }
 
@@ -271,8 +281,9 @@ public class QRMessageDto<T> implements Serializable {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public QRMessageDto setOperation(TypeVS operation) {
         this.operation = operation;
+        return this;
     }
 
     public String getOperationCode() {
@@ -307,5 +318,21 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setSessionType(TypeVS sessionType) {
         this.sessionType = sessionType;
+    }
+
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 }

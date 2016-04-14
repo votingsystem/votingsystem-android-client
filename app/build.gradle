@@ -85,8 +85,8 @@ ext {
 }
 
 dependencies {
-    compile 'com.android.support:multidex:1.0.0'
-    compile ('org.apache.httpcomponents:httpmime:4.2.2') {
+    compile "com.android.support:multidex:1.0.0"
+    compile ("org.apache.httpcomponents:httpmime:4.2.2") {
         exclude module: 'httpcore'
     }
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
@@ -100,7 +100,7 @@ dependencies {
     //see https://github.com/votingsystem/votingsystem-android-bouncycastle
     compile "org.votingsystem.android:bouncycastle:0.8.0-SNAPSHOT"
     compile project(":dniedroid")
-    compile 'com.neovisionaries:nv-websocket-client:1.23'
+    compile "com.neovisionaries:nv-websocket-client:1.23"
 }
 
 preBuild.dependsOn 'setAndroidEnv'

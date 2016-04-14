@@ -296,11 +296,19 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     }
 
     public WebSocketSession getWSSession(Long deviceID) {
-        WebSocketSession socketSession = null;
-        for(String sessionUUID : sessionsMap.keySet()) {
-            socketSession = sessionsMap.get(sessionUUID);
-            if(socketSession != null && socketSession.getDevice() != null && socketSession.getDevice().
-                    getId() == deviceID) {
+        for(WebSocketSession socketSession : sessionsMap.values()) {
+            if(socketSession.getDevice() != null && socketSession.getDevice().
+                    getId().equals(deviceID)) {
+                return socketSession;
+            }
+        }
+        return null;
+    }
+
+    public WebSocketSession getWSSessionByIV(String iv) {
+        for(WebSocketSession socketSession : sessionsMap.values()) {
+            if(socketSession.getAesParams() != null &&
+                    socketSession.getAesParams().getIv().startsWith(iv)) {
                 return socketSession;
             }
         }

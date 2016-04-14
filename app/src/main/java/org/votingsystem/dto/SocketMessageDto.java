@@ -55,6 +55,7 @@ public class SocketMessageDto implements Serializable {
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
     private String remoteAddress;
     private String cmsMessagePEM;
+    private AESParamsDto aesParams;
     private String x509CertificatePEM;
     private String publicKeyPEM;
     private String from;
@@ -396,6 +397,14 @@ public class SocketMessageDto implements Serializable {
         this.x509CertificatePEM = x509CertificatePEM;
     }
 
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
+    }
+
     public QRMessageDto getQrMessage() {
         return qrMessage;
     }
@@ -417,6 +426,7 @@ public class SocketMessageDto implements Serializable {
         DeviceDto device = qrMessage.getDevice();
         WebSocketSession socketSession = checkWebSocketSession(device, null,
                 qrMessage.getOperation());
+        socketSession.setAesParams(qrMessage.getAesParams());
         qrMessage.setUUID(socketSession.getUUID()).createRequest();
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
@@ -440,7 +450,7 @@ public class SocketMessageDto implements Serializable {
     }
 
     private static void encryptMessage(SocketMessageDto socketMessageDto,
-                                       EncryptedContentDto encryptedDto, DeviceDto device) throws Exception {
+               EncryptedContentDto encryptedDto, DeviceDto device) throws Exception {
         if(device.getX509Certificate() != null) {
             byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(
                     JSON.writeValueAsBytes(encryptedDto), device.getX509Certificate());
@@ -514,6 +524,7 @@ public class SocketMessageDto implements Serializable {
         if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
         if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
+        if(encryptedDto.getAesParams() != null) aesParams = encryptedDto.getAesParams();
         if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
         if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
         if(encryptedDto.getUUID() != null) UUID = encryptedDto.getUUID();
