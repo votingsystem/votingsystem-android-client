@@ -225,7 +225,7 @@ public class PaymentService extends IntentService {
                 responseVS = ResponseVS.EXCEPTION(ex, this);
             }
         } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                getString(R.string.payment_session_expired_msg));
+                getString(R.string.session_expired_msg));
         appVS.broadcastResponse(Utils.getBroadcastResponse(transactionDto.getOperation(),
                 serviceCaller, responseVS, appVS));
     }

@@ -294,7 +294,7 @@
     <string name="hint_surname">apellidos</string>
     <string name="hint_name">nombre</string>
     <string name="disconnect_from_service_lbl">desconectar de servicio</string>
-    <string name="init_authenticated_session_msg_subject">inicio de sesión websocket</string>
+    <string name="init_authenticated_session_msg_subject">inicio de sesión</string>
     <string name="decrypt_cert_notfound_msg">imposible descifrar desde este dispositivo</string>
     <string name="connecting_to_service_msg">conectando a servicio</string>
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
@@ -451,7 +451,7 @@
     <string name="do_payment_lbl">realizar pago</string>
     <string name="sending_payment_lbl">realizando pago</string>
     <string name="check_available_lbl">comprobar disponible</string>
-    <string name="payment_session_expired_msg">la sesión de pago ha caducado</string>
+    <string name="session_expired_msg">la sesión ha expirado, por favor, vuelva a identificarse</string>
     <string name="payment_ok_caption">pago completado con éxito</string>
     <string name="available_exceded_error_msg">el importe seleccionado excede el máximo disponible</string>
     <string name="updated_currency_with_error_msg">se han eliminado de su monedero</string>
@@ -579,7 +579,7 @@
     <string name="retries_exceeded_msg">debe establecer de nuevo la contraseña utilizando su DNI</string>
     <string name="disconnect_from_service_quesion_msg">¿Desea desconectar del servicio?</string>
     <string name="connection_passw_msg">Introduzca la contraseña para poder conectar al servicio</string>
-    <string name="allow_remote_device_authenticated_session"><![CDATA[Iniciar autenticación de dispositivo remoto]]></string>
+    <string name="allow_remote_device_authenticated_session">Iniciar autenticación de dispositivo remoto</string>
     <string name="non_rooted_phones_required_msg">la aplicación sólo se puede ejecutar en teléfonos que no han sido  rooteados</string>
     <string name="enter_new_passw_to_app_msg">introduzca la contraseña con la que protegerá sus operaciones de firma</string>
     <string name="idcard_signing_caption">Proceso de firma con el DNI electrónico</string>
@@ -589,5 +589,5 @@
     <string name="cash_no_available_msg">no tiene disponible suficiente para retirar efectivo</string>
     <string name="account_input_from_bank">ingeso desde entidad bancaria</string>
     <string name="connection_required_caption">acceso restringido</string>
-    <string name="session_missing_error_msg">por favor, identifíquese otra vez desde el navegador</string>
+    <string name="browser_session_expired_msg">por favor, identifíquese otra vez desde el navegador</string>
 </resources>

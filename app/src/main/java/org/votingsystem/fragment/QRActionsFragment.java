@@ -140,7 +140,7 @@ public class QRActionsFragment extends Fragment {
                 processQRCode(qrMessageDto);
             } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
                 new SendDataTask().execute(qrMessage);
-            }
+            } else LOGD(TAG, "onActivityResult - qrMessage unprocessed");
         }
     }
 
@@ -195,7 +195,7 @@ public class QRActionsFragment extends Fragment {
                             .getWSSessionByIV(qrMessageDto.getMsg());
                     if(socketSession == null) {
                         MessageDialogFragment.showDialog(null, getString(R.string.error_lbl),
-                                getString(R.string.session_missing_error_msg), getFragmentManager());
+                                getString(R.string.browser_session_expired_msg), getFragmentManager());
                     } else {
                         qrMessageDto.setOperation(TypeVS.SEND_AES_PARAMS)
                                 .setAesParams(socketSession.getAesParams());

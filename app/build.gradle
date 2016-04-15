@@ -95,8 +95,8 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
     compile "com.google.zxing:android-core:3.2.1"
     compile "com.google.zxing:core:3.2.1"
-    compile "com.fasterxml.jackson.core:jackson-core:2.6.2"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.6.2"
+    compile "com.fasterxml.jackson.core:jackson-core:2.7.3"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.7.3"
     //see https://github.com/votingsystem/votingsystem-android-bouncycastle
     compile "org.votingsystem.android:bouncycastle:0.8.0-SNAPSHOT"
     compile project(":dniedroid")
