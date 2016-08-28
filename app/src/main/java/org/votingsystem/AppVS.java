@@ -31,7 +31,6 @@ import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.PrefUtils;
@@ -42,7 +41,6 @@ import org.votingsystem.util.WebSocketSession;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.Encryptor;
 import org.votingsystem.util.crypto.KeyGeneratorVS;
-import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -55,7 +53,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -132,12 +129,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             }
             PrefUtils.registerPreferenceChangeListener(this);
             user = PrefUtils.getAppUser();
-            byte[] certBytes = FileUtils.getBytesFromInputStream(getAssets().open(
-                    "VotingSystemSSLCert.pem"));
-            Collection<X509Certificate> votingSystemSSLCerts =
-                    PEMUtils.fromPEMToX509CertCollection(certBytes);
-            sslServerCert = votingSystemSSLCerts.iterator().next();
-            HttpHelper.init(sslServerCert);
+            HttpHelper.init(null);
             if(!BuildConfig.ALLOW_ROOTED_PHONES && RootUtil.isDeviceRooted()) {
                 isRootedPhone = true;
             }

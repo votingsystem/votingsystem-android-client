@@ -30,6 +30,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
@@ -43,12 +44,23 @@ import org.votingsystem.throwable.ServerExceptionVS;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import static org.votingsystem.util.ContextVS.SIGNED_FILE_NAME;
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -65,29 +77,82 @@ public class HttpHelper {
     private HttpContext httpContext;
     private static HttpHelper INSTANCE;
 
+    public class MySSLSocketFactory extends SSLSocketFactory {
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+
+        public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException,
+                KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+            super(truststore);
+            TrustManager tm = new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] chain, String authType)
+                        throws CertificateException {
+                    LOGD(TAG, "checkServerTrusted BYPASSING CERT VALIDATION!!!");
+                }
+                public void checkServerTrusted(X509Certificate[] chain, String authType)
+                        throws CertificateException {
+                    LOGD(TAG, "checkServerTrusted BYPASSING CERT VALIDATION!!!");
+                }
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+            };
+            sslContext.init(null, new TrustManager[] { tm }, null);
+        }
+
+        @Override
+        public Socket createSocket(Socket socket, String host, int port, boolean autoClose)
+                throws IOException, UnknownHostException {
+            return sslContext.getSocketFactory().createSocket(socket, host, port, autoClose);
+        }
+
+        @Override
+        public Socket createSocket() throws IOException {
+            return sslContext.getSocketFactory().createSocket();
+        }
+    }
+
     private HttpHelper(X509Certificate trustedSSLServerCert) {
         try {
-            HttpParams params = new BasicHttpParams();
-            params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-            params.setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, HTTP.UTF_8);
-            params.setParameter(CoreProtocolPNames.USER_AGENT, "Apache-HttpClient/Android");
-            params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15000);
-            params.setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
-            SchemeRegistry schemeRegistry = new SchemeRegistry();
-            schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-            KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
-            trustStore.setCertificateEntry(trustedSSLServerCert.getSubjectDN().toString(),
-                    trustedSSLServerCert);
-            SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-            //schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-            schemeRegistry.register(new Scheme("https", socketFactory, 443));
-            LOGD(TAG, "Added Scheme https with port 443 to Apache httpclient");
-            cm = new ThreadSafeClientConnManager(params, schemeRegistry);
-            httpclient = new DefaultHttpClient(cm, params);
-            CookieStore cookieStore = new BasicCookieStore();
-            httpContext = new BasicHttpContext();
-            httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            if(trustedSSLServerCert != null) {
+                HttpParams params = new BasicHttpParams();
+                params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+                params.setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, HTTP.UTF_8);
+                params.setParameter(CoreProtocolPNames.USER_AGENT, "Apache-HttpClient/Android");
+                params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15000);
+                params.setParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false);
+                SchemeRegistry schemeRegistry = new SchemeRegistry();
+                schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+                KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+                trustStore.load(null, null);
+                trustStore.setCertificateEntry(trustedSSLServerCert.getSubjectDN().toString(),
+                        trustedSSLServerCert);
+                SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+                //schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+                schemeRegistry.register(new Scheme("https", socketFactory, 443));
+                LOGD(TAG, "Added Scheme https with port 443 to Apache httpclient");
+                cm = new ThreadSafeClientConnManager(params, schemeRegistry);
+                httpclient = new DefaultHttpClient(cm, params);
+                CookieStore cookieStore = new BasicCookieStore();
+                httpContext = new BasicHttpContext();
+                httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            } else {
+                LOGD(TAG, "httpContext BYPASSING CERT VALIDATION!!!");
+                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                trustStore.load(null, null);
+                MySSLSocketFactory sf = new MySSLSocketFactory(trustStore);
+                sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                HttpParams params = new BasicHttpParams();
+                HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+                HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
+                SchemeRegistry registry = new SchemeRegistry();
+                registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+                registry.register(new Scheme("https", sf, 443));
+                cm = new ThreadSafeClientConnManager(params, registry);
+                httpclient = new DefaultHttpClient(cm, params);
+                CookieStore cookieStore = new BasicCookieStore();
+                httpContext = new BasicHttpContext();
+                httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            }
         } catch (Exception ex) { ex.printStackTrace(); }
     }
 

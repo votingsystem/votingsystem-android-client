@@ -26,10 +26,10 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion  18
-        compileSdkVersion 23
-        buildToolsVersion "23.0.2"
-        targetSdkVersion  23
+        minSdkVersion 19
+        compileSdkVersion 24
+        buildToolsVersion "24.0.2"
+        targetSdkVersion 24
         multiDexEnabled  true
         sourceCompatibility = JavaVersion.VERSION_1_7
     }
@@ -77,14 +77,15 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/ASL2.0'
     }
-    buildToolsVersion '23.0.2'
+
 }
 
 ext {
-    supportLibVersion = '23.2.0'
+    supportLibVersion = "24.2.0"
 }
 
 dependencies {
+    compile files('libs/bouncycastle-0.8.0-SNAPSHOT.jar')
     compile "com.android.support:multidex:1.0.0"
     compile ("org.apache.httpcomponents:httpmime:4.2.2") {
         exclude module: 'httpcore'
@@ -98,16 +99,7 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-core:2.7.3"
     compile "com.fasterxml.jackson.core:jackson-databind:2.7.3"
     //see https://github.com/votingsystem/votingsystem-android-bouncycastle
-    compile "org.votingsystem.android:bouncycastle:0.8.0-SNAPSHOT"
+    //compile "org.votingsystem.android:bouncycastle:0.8.0-SNAPSHOT"
     compile project(":dniedroid")
     compile "com.neovisionaries:nv-websocket-client:1.23"
-}
-
-preBuild.dependsOn 'setAndroidEnv'
-
-
-task setAndroidEnv() << {
-    //env.each{println it}
-    String androidHome= System.getenv()['ANDROID_HOME']
-    if(!androidHome) throw new RuntimeException('Android SDK not Found you must install -> http://developer.android.com/sdk/index.html')
 }
