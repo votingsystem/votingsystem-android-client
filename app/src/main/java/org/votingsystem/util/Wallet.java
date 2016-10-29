@@ -1,6 +1,6 @@
 package org.votingsystem.util;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
@@ -34,22 +34,22 @@ public class Wallet {
         return new HashSet<>(currencySet);
     }
 
-    public static Set<String> getHashCertVSSet() {
+    public static Set<String> getRevocationHashSet() {
         Set<String> result = new HashSet<>();
         for(Currency currency : currencySet) {
-            result.add(currency.getHashCertVS());
+            result.add(currency.getRevocationHash());
         }
         return result;
     }
 
     public static Set<Currency> getCurrencySet(char[] pin) throws Exception {
-        currencySet = PrefUtils.getWallet(pin, AppVS.getInstance().getToken());
+        currencySet = PrefUtils.getWallet(pin, App.getInstance().getToken());
         return new HashSet<>(currencySet);
     }
 
-    public static Currency getCurrency(String hashCertVS) throws Exception {
+    public static Currency getCurrency(String revocationHash) throws Exception {
         for(Currency currency : currencySet) {
-            if(currency.getHashCertVS().equals(hashCertVS)) return currency;
+            if(currency.getRevocationHash().equals(revocationHash)) return currency;
         }
         return null;
     }
@@ -65,12 +65,12 @@ public class Wallet {
     public static void remove(Collection<Currency> currencyCollection) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
-            currencyMap.put(currency.getHashCertVS(), currency);
+            currencyMap.put(currency.getRevocationHash(), currency);
         }
         for(Currency currency : currencyCollection) {
-            if(currencyMap.remove(currency.getHashCertVS()) != null) {
-                LOGD(TAG +  ".remove", "removed currency: " + currency.getHashCertVS());
-                AppVS.getInstance().updateCurrencyDB(currency);
+            if(currencyMap.remove(currency.getRevocationHash()) != null) {
+                LOGD(TAG +  ".remove", "removed currency: " + currency.getRevocationHash());
+                App.getInstance().updateCurrencyDB(currency);
             }
         }
         Wallet.saveWallet(currencyMap.values(), null);
@@ -82,10 +82,10 @@ public class Wallet {
         Set<Currency> removedSet = new HashSet<>();
         Map<String, Currency> currencyMap = getCurrencyMap();
         for(CurrencyStateDto currencyStateDto : currencyWithErrors) {
-            Currency removedCurrency = currencyMap.remove(currencyStateDto.getHashCertVS());
+            Currency removedCurrency = currencyMap.remove(currencyStateDto.getRevocationHash());
             if(removedCurrency != null)  {
-                LOGD(TAG +  ".removeErrors", "removed currency: " + currencyStateDto.getHashCertVS());
-                AppVS.getInstance().updateCurrencyDB(removedCurrency.setState(currencyStateDto.getState()));
+                LOGD(TAG +  ".removeErrors", "removed currency: " + currencyStateDto.getRevocationHash());
+                App.getInstance().updateCurrencyDB(removedCurrency.setState(currencyStateDto.getState()));
                 removedSet.add(removedCurrency);
             }
         }
@@ -96,7 +96,7 @@ public class Wallet {
     public static Map<String, Currency> getCurrencyMap() {
         Map<String, Currency> currencyMap = new HashMap<>();
         for(Currency currency : currencySet) {
-            currencyMap.put(currency.getHashCertVS(), currency);
+            currencyMap.put(currency.getRevocationHash(), currency);
         }
         return currencyMap;
     }
@@ -104,10 +104,10 @@ public class Wallet {
     public static void updateCurrencyState(Set<String> currencySet, Currency.State state)
             throws Exception {
         Map<String, Currency> currencyMap = getCurrencyMap();
-        for(String hashCertVS : currencySet) {
-            Currency currency = currencyMap.get(hashCertVS);
+        for(String revocationHash : currencySet) {
+            Currency currency = currencyMap.get(revocationHash);
             if(currency != null)  {
-                LOGD(TAG + ".updateCurrencyState", "hash: " + hashCertVS + " - state:" + state);
+                LOGD(TAG + ".updateCurrencyState", "hash: " + revocationHash + " - state:" + state);
                 currency.setState(state);
             }
         }
@@ -142,20 +142,20 @@ public class Wallet {
     }
 
     public static void saveWallet(Collection<Currency> currencyCollection, char[] passw) throws Exception {
-        PrefUtils.putWallet(currencyCollection, passw, AppVS.getInstance().getToken());
+        PrefUtils.putWallet(currencyCollection, passw, App.getInstance().getToken());
         currencySet = new HashSet<>(currencyCollection);
     }
 
     public static void updateWallet(Collection<Currency> currencyCollection) throws Exception {
         Map<String, Currency> currencyMap = new HashMap<String, Currency>();
         for(Currency currency : currencyCollection) {
-            currencyMap.put(currency.getHashCertVS(), currency);
+            currencyMap.put(currency.getRevocationHash(), currency);
         }
         for(Currency currency : currencySet) {
-            if(currencyMap.containsKey(currency.getHashCertVS())) throw new ValidationExceptionVS(
-                    AppVS.getInstance().getString(R.string.currency_repeated_wallet_error_msg,
+            if(currencyMap.containsKey(currency.getRevocationHash())) throw new ValidationExceptionVS(
+                    App.getInstance().getString(R.string.currency_repeated_wallet_error_msg,
                             currency.getAmount().toString() + " " + currency.getCurrencyCode()));
-            else currencyMap.put(currency.getHashCertVS(), currency);
+            else currencyMap.put(currency.getRevocationHash(), currency);
         }
         Wallet.saveWallet(currencyMap.values(), null);
     }

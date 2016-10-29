@@ -18,13 +18,14 @@ import android.telephony.TelephonyManager;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.PatternLockActivity;
 import org.votingsystem.activity.PinActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.service.PaymentService;
 
@@ -115,16 +116,16 @@ public class Utils {
         return result;
     }
 
-    public static ResponseVS getBroadcastResponse(TypeVS operation, String serviceCaller,
-              ResponseVS responseVS, Context context) {
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            if(responseVS.getCaption() == null) responseVS.setCaption(context.getString(R.string.ok_lbl));
+    public static ResponseDto getBroadcastResponse(OperationType operation, String serviceCaller,
+                                                   ResponseDto responseDto, Context context) {
+        if (ResponseDto.SC_OK == responseDto.getStatusCode()) {
+            if(responseDto.getCaption() == null) responseDto.setCaption(context.getString(R.string.ok_lbl));
 
         } else {
-            if(responseVS.getCaption() == null) responseVS.setCaption(context.getString(R.string.error_lbl));
+            if(responseDto.getCaption() == null) responseDto.setCaption(context.getString(R.string.error_lbl));
         }
-        responseVS.setTypeVS(operation).setServiceCaller(serviceCaller);
-        return responseVS;
+        responseDto.setOperationType(operation).setServiceCaller(serviceCaller);
+        return responseDto;
     }
 
     public static void printKeyStoreInfo() throws CertificateException, NoSuchAlgorithmException,
@@ -156,12 +157,12 @@ public class Utils {
         return arguments;
     }
 
-    public static void launchCurrencyStatusCheck(String broadCastId, String hashCertVS) {
-        Intent startIntent = new Intent(AppVS.getInstance(), PaymentService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_CHECK);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.HASH_CERTVS_KEY, hashCertVS);
-        AppVS.getInstance().startService(startIntent);
+    public static void launchCurrencyStatusCheck(String broadCastId, String revocationHash) {
+        Intent startIntent = new Intent(App.getInstance(), PaymentService.class);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.CURRENCY_CHECK);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.HASH_CERTVS_KEY, revocationHash);
+        App.getInstance().startService(startIntent);
     }
 
     public static void showAccountsUpdatedNotification(Context context){
@@ -169,31 +170,31 @@ public class Utils {
                 Context.NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Intent clickIntent = new Intent(context, ActivityBase.class);
-        clickIntent.putExtra(ContextVS.FRAGMENT_KEY, R.id.currency_accounts);
+        clickIntent.putExtra(Constants.FRAGMENT_KEY, R.id.currency_accounts);
         PendingIntent pendingIntent = PendingIntent.getActivity(context,
-                ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+                Constants.ACCOUNTS_UPDATED_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
                 .setAutoCancel(true).setContentTitle(context.getString(R.string.currency_accounts_updated))
                 .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime(), "HH:mm"))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_money_32);
-        mgr.notify(ContextVS.ACCOUNTS_UPDATED_NOTIFICATION_ID, builder.build());
+        mgr.notify(Constants.ACCOUNTS_UPDATED_NOTIFICATION_ID, builder.build());
     }
 
     public static void showNewMessageNotification(){
-        final NotificationManager mgr = (NotificationManager)AppVS.getInstance().getSystemService(
+        final NotificationManager mgr = (NotificationManager) App.getInstance().getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Intent clickIntent = new Intent(AppVS.getInstance(), FragmentContainerActivity.class);
-        clickIntent.putExtra(ContextVS.FRAGMENT_KEY, MessagesGridFragment.class.getName());
-        PendingIntent pendingIntent = PendingIntent.getActivity(AppVS.getInstance(),
-                ContextVS.NEW_MESSAGE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(AppVS.getInstance())
+        Intent clickIntent = new Intent(App.getInstance(), FragmentContainerActivity.class);
+        clickIntent.putExtra(Constants.FRAGMENT_KEY, MessagesGridFragment.class.getName());
+        PendingIntent pendingIntent = PendingIntent.getActivity(App.getInstance(),
+                Constants.NEW_MESSAGE_NOTIFICATION_ID, clickIntent, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getInstance())
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
-                .setAutoCancel(true).setContentTitle(AppVS.getInstance().getString(R.string.msg_lbl))
+                .setAutoCancel(true).setContentTitle(App.getInstance().getString(R.string.msg_lbl))
                 .setContentText(DateUtils.getDayWeekDateStr(Calendar.getInstance().getTime(), "HH:mm"))
                 .setSound(soundUri).setSmallIcon(R.drawable.fa_comment_32);
-        mgr.notify(ContextVS.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
+        mgr.notify(Constants.NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
     public static void getProtectionPassword(Integer requestCode, String msg,
@@ -208,8 +209,8 @@ public class Utils {
                 intent = new Intent(activity, PinActivity.class);
                 break;
         }
-        intent.putExtra(ContextVS.MESSAGE_KEY, msg);
-        intent.putExtra(ContextVS.MODE_KEY, activityMode);
+        intent.putExtra(Constants.MESSAGE_KEY, msg);
+        intent.putExtra(Constants.MODE_KEY, activityMode);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -226,11 +227,11 @@ public class Utils {
                 intent = new Intent(context, PinActivity.class);
                 break;
         }
-        intent.putExtra(ContextVS.MESSAGE_KEY, msg);
-        intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.WEB_SOCKET_REQUEST);
+        intent.putExtra(Constants.MESSAGE_KEY, msg);
+        intent.putExtra(Constants.OPERATION_KEY, OperationType.WEB_SOCKET_REQUEST);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(ContextVS.OPERATION_CODE_KEY, operationCode);
-        intent.putExtra(ContextVS.UUID_KEY, msgUUID);
+        intent.putExtra(Constants.OPERATION_CODE_KEY, operationCode);
+        intent.putExtra(Constants.UUID_KEY, msgUUID);
         context.startActivity(intent);
     }
 
@@ -248,7 +249,7 @@ public class Utils {
     //http://www.pocketmagic.net/android-unique-device-id/
     //requires adding a permission in AndroidManifest.xml -> android.permission.READ_PHONE_STATE
     public static String getDeviceId() {
-        TelephonyManager telephonyManager = (TelephonyManager)AppVS.getInstance().getSystemService(
+        TelephonyManager telephonyManager = (TelephonyManager) App.getInstance().getSystemService(
                 Context.TELEPHONY_SERVICE);
         // phone = telephonyManager.getLine1Number(); -> operator dependent
         //IMSI
@@ -269,7 +270,7 @@ public class Utils {
         byte[] imageBytes = null;
         try {
             ParcelFileDescriptor parcelFileDescriptor =
-                    AppVS.getInstance().getContentResolver().openFileDescriptor(imageUri, "r");
+                    App.getInstance().getContentResolver().openFileDescriptor(imageUri, "r");
             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
             Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
             parcelFileDescriptor.close();
@@ -287,7 +288,7 @@ public class Utils {
                 compressFactor = compressFactor - 10;
                 LOGD(TAG + ".reduceImageFileSize", "compressFactor: " + compressFactor +
                         " - imageBytes: " + imageBytes.length);
-            } while(imageBytes.length > ContextVS.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
+            } while(imageBytes.length > Constants.MAX_REPRESENTATIVE_IMAGE_FILE_SIZE);
         } catch(Exception ex) {
             ex.printStackTrace();
         }

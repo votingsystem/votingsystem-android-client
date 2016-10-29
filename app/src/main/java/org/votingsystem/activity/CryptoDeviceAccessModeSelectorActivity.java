@@ -10,7 +10,7 @@ import android.widget.RadioGroup;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.UIUtils;
 
@@ -55,7 +55,7 @@ public class CryptoDeviceAccessModeSelectorActivity extends AppCompatActivity {
                     return;
                 }
                 intent = new Intent(this, PinActivity.class);
-                intent.putExtra(ContextVS.MODE_KEY, PinActivity.MODE_CHANGE_PASSWORD);
+                intent.putExtra(Constants.MODE_KEY, PinActivity.MODE_CHANGE_PASSWORD);
                 startActivityForResult(intent, RC_PIN);
                 break;
             case R.id.radio_pattern:
@@ -65,8 +65,8 @@ public class CryptoDeviceAccessModeSelectorActivity extends AppCompatActivity {
                     return;
                 }
                 intent = new Intent(this, PatternLockActivity.class);
-                intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_CHANGE_PASSWORD);
-                intent.putExtra(ContextVS.PASSWORD_CONFIRM_KEY, true);
+                intent.putExtra(Constants.MODE_KEY, PatternLockActivity.MODE_CHANGE_PASSWORD);
+                intent.putExtra(Constants.PASSWORD_CONFIRM_KEY, true);
                 startActivityForResult(intent, RC_PATTERN_LOCK);
                 break;
         }

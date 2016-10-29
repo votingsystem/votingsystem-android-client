@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 import java.io.Serializable;
 
@@ -22,7 +22,7 @@ public class OperationDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private TypeVS operation;
+    private OperationType operation;
     private Integer statusCode;
     private String caption;
     private String message;
@@ -47,11 +47,11 @@ public class OperationDto implements Serializable {
         this.statusCode = statusCode;
     }
     
-    public OperationDto(TypeVS typeVS) {
-        this.operation = typeVS;
+    public OperationDto(OperationType operationType) {
+        this.operation = operationType;
     }
 
-    public OperationDto(TypeVS operation, Uri uriData) {
+    public OperationDto(OperationType operation, Uri uriData) {
         this.operation = operation;
         this.uriData = uriData;
     }
@@ -62,7 +62,7 @@ public class OperationDto implements Serializable {
         this.message = message;
     }
     
-    public OperationDto(int statusCode, String message, TypeVS operation) {
+    public OperationDto(int statusCode, String message, OperationType operation) {
         this.statusCode = statusCode;
         this.message = message;
         this.operation = operation;
@@ -184,11 +184,11 @@ public class OperationDto implements Serializable {
         this.jsonStr = jsonStr;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

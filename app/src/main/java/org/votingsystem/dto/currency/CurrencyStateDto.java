@@ -13,7 +13,7 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyStateDto {
 
-    private String hashCertVS;
+    private String revocationHash;
     private Long batchId;
     private Currency.State state;
     private Currency.Type type;
@@ -24,12 +24,12 @@ public class CurrencyStateDto {
 
     public CurrencyStateDto() {}
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public Currency.State getState() {

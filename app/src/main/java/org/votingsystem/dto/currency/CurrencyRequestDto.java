@@ -7,8 +7,8 @@ import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -31,7 +31,7 @@ public class CurrencyRequestDto {
 
     private static Logger log = Logger.getLogger(CurrencyRequestDto.class.getSimpleName());
 
-    private TypeVS operation = TypeVS.CURRENCY_REQUEST;
+    private OperationType operation = OperationType.CURRENCY_REQUEST;
     private String subject;
     private String serverURL;
     private String currencyCode;
@@ -67,7 +67,7 @@ public class CurrencyRequestDto {
             Currency currency = new Currency(serverURL, currencyValue, transactionDto.getCurrencyCode(),
                     transactionDto.isTimeLimited(), currencyRequestDto.tagVS.getName());
             requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
-            currencyMap.put(currency.getHashCertVS(), currency);
+            currencyMap.put(currency.getRevocationHash(), currency);
         }
         currencyRequestDto.requestCSRSet = requestCSRSet;
         currencyRequestDto.setCurrencyMap(currencyMap);
@@ -83,7 +83,7 @@ public class CurrencyRequestDto {
         }
         for(String pemCert:currencyCerts) {
             Currency currency = loadCurrencyCert(pemCert);
-            currencyMap.put(currency.getHashCertVS(), currency);
+            currencyMap.put(currency.getRevocationHash(), currency);
         }
     }
 
@@ -92,17 +92,17 @@ public class CurrencyRequestDto {
         if(certificates.isEmpty()) throw new ExceptionVS("Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                x509Certificate, ContextVS.CURRENCY_OID);
-        Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(Currency.State.OK);
+                x509Certificate, Constants.CURRENCY_OID);
+        Currency currency = currencyMap.get(certExtensionDto.getRevocationHash()).setState(Currency.State.OK);
         currency.initSigner(pemCert.getBytes());
         return currency;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

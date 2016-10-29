@@ -15,7 +15,7 @@ import org.bouncycastle2.asn1.x500.style.BCStyle;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.jce.X509Principal;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.Country;
 import org.votingsystem.util.crypto.CertUtils;
 
@@ -116,7 +116,7 @@ public class UserDto implements Serializable {
         user.setX509Certificate(x509Cert);
         try {
             CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                    x509Cert, ContextVS.DEVICE_OID);
+                    x509Cert, Constants.DEVICE_OID);
             if(certExtensionDto != null) {
                 user.setEmail(certExtensionDto.getEmail());
                 user.setPhone(certExtensionDto.getMobilePhone());

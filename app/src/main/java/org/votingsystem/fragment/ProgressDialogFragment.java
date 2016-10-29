@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 
 import java.util.List;
 
@@ -39,8 +39,8 @@ public class ProgressDialogFragment extends DialogFragment {
             return dialog;
         }
         Bundle args = new Bundle();
-        args.putString(ContextVS.MESSAGE_KEY, progressMessage);
-        args.putString(ContextVS.CAPTION_KEY, caption);
+        args.putString(Constants.MESSAGE_KEY, progressMessage);
+        args.putString(Constants.CAPTION_KEY, caption);
         dialog.setArguments(args);
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(dialog, ProgressDialogFragment.TAG);
@@ -56,9 +56,9 @@ public class ProgressDialogFragment extends DialogFragment {
             return dialog;
         }
         Bundle args = new Bundle();
-        args.putString(ContextVS.MESSAGE_KEY, progressMessage);
-        args.putString(ContextVS.CAPTION_KEY, caption);
-        args.putString(ContextVS.TAG_KEY, dialogTag);
+        args.putString(Constants.MESSAGE_KEY, progressMessage);
+        args.putString(Constants.CAPTION_KEY, caption);
+        args.putString(Constants.TAG_KEY, dialogTag);
         dialog.setArguments(args);
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(dialog, ProgressDialogFragment.TAG + dialogTag);
@@ -94,9 +94,9 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        progressMessage = getArguments().getString(ContextVS.MESSAGE_KEY);
-        caption = getArguments().getString(ContextVS.CAPTION_KEY);
-        dialogTag = getArguments().getString(ContextVS.TAG_KEY);
+        progressMessage = getArguments().getString(Constants.MESSAGE_KEY);
+        caption = getArguments().getString(Constants.CAPTION_KEY);
+        dialogTag = getArguments().getString(Constants.TAG_KEY);
         if(dialogTag == null) dialogTag = ProgressDialogFragment.TAG;
         else dialogTag = ProgressDialogFragment.TAG + dialogTag;
         View view = getActivity().getLayoutInflater().inflate(R.layout.progress_dialog, null);
@@ -124,8 +124,8 @@ public class ProgressDialogFragment extends DialogFragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ContextVS.MESSAGE_KEY, progressMessage);
-        outState.putString(ContextVS.CAPTION_KEY, caption);
+        outState.putString(Constants.MESSAGE_KEY, progressMessage);
+        outState.putString(Constants.CAPTION_KEY, caption);
     }
 
 }

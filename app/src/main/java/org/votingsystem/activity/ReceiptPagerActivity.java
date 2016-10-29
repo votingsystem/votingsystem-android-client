@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.fragment.ReceiptFragment;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -32,7 +32,7 @@ public class ReceiptPagerActivity extends AppCompatActivity {
         setContentView(R.layout.pager_activity);
         UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, 0);
+        int cursorPosition = getIntent().getIntExtra(Constants.CURSOR_POSITION_KEY, 0);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         ReceiptPagerAdapter pagerAdapter = new ReceiptPagerAdapter(getSupportFragmentManager());

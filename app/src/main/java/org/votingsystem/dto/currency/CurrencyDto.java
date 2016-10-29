@@ -8,9 +8,9 @@ import org.bouncycastle2.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.CertificationRequest;
 
@@ -30,14 +30,14 @@ public class CurrencyDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private TypeVS operation = TypeVS.CURRENCY_SEND;
+    private OperationType operation = OperationType.CURRENCY_SEND;
     private Long id;
     private BigDecimal amount;
     private BigDecimal batchAmount;
     private Currency.State state;
     private String currencyCode;
     private String currencyServerURL;
-    private String hashCertVS;
+    private String revocationHash;
     private String subject;
     private String toUserIBAN;
     private String toUserName;
@@ -55,7 +55,7 @@ public class CurrencyDto implements Serializable {
 
     public CurrencyDto(Currency currency) {
         this.id = currency.getId();
-        this.hashCertVS = currency.getHashCertVS();
+        this.revocationHash = currency.getRevocationHash();
         this.amount = currency.getAmount();
         this.currencyCode = currency.getCurrencyCode();
         this.tag = currency.getTag();
@@ -70,14 +70,14 @@ public class CurrencyDto implements Serializable {
         CertificationRequestInfo info = csrPKCS10.getCertificationRequestInfo();
         String subjectDN = info.getSubject().toString();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                csrPKCS10, ContextVS.CURRENCY_OID);
+                csrPKCS10, Constants.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
-        hashCertVS = certExtensionDto.getHashCertVS();
+        revocationHash = certExtensionDto.getRevocationHash();
         amount = certExtensionDto.getAmount();
         currencyCode = certExtensionDto.getCurrencyCode();
         tag = certExtensionDto.getTag();
-        CurrencyDto certSubjectDto = getCertSubjectDto(subjectDN, hashCertVS);
+        CurrencyDto certSubjectDto = getCertSubjectDto(subjectDN, revocationHash);
         if(!certSubjectDto.getCurrencyServerURL().equals(currencyServerURL))
             throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
@@ -115,7 +115,7 @@ public class CurrencyDto implements Serializable {
         CurrencyDto currencyDto = new CurrencyDto();
         currencyDto.setAmount(currency.getAmount());
         currencyDto.setCurrencyCode(currency.getCurrencyCode());
-        currencyDto.setHashCertVS(currency.getHashCertVS());
+        currencyDto.setRevocationHash(currency.getRevocationHash());
         currencyDto.setTag(currency.getTag());
         currencyDto.setState(currency.getState());
         currencyDto.setTimeLimited(currency.isTimeLimited());
@@ -180,12 +180,12 @@ public class CurrencyDto implements Serializable {
         this.object = object;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public String getCurrencyCode() {
@@ -236,11 +236,11 @@ public class CurrencyDto implements Serializable {
         this.notAfter = notAfter;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 
@@ -312,7 +312,7 @@ public class CurrencyDto implements Serializable {
         this.csrPKCS10 = csrPKCS10;
     }
 
-    public static CurrencyDto getCertSubjectDto(String subjectDN, String hashCertVS) {
+    public static CurrencyDto getCertSubjectDto(String subjectDN, String revocationHash) {
         CurrencyDto currencyDto = new CurrencyDto();
         if (subjectDN.contains("CURRENCY_CODE:"))
             currencyDto.setCurrencyCode(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]);
@@ -321,7 +321,7 @@ public class CurrencyDto implements Serializable {
         if (subjectDN.contains("TAG:")) currencyDto.setTag(subjectDN.split("TAG:")[1].split(",")[0]);
         if (subjectDN.contains("currencyServerURL:"))
             currencyDto.setCurrencyServerURL(subjectDN.split("currencyServerURL:")[1].split(",")[0]);
-        currencyDto.setHashCertVS(hashCertVS);
+        currencyDto.setRevocationHash(revocationHash);
         return currencyDto;
     }
 

@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -14,9 +14,9 @@ import static org.votingsystem.util.LogUtils.LOGD;
 public class NFCActivityAction implements DebugAction {
     private static final String TAG = NFCActivityAction.class.getSimpleName();
 
-    private AppVS appContext;
+    private App appContext;
 
-    public NFCActivityAction(AppVS context) {
+    public NFCActivityAction(App context) {
         this.appContext = context;
     }
 
@@ -25,10 +25,10 @@ public class NFCActivityAction implements DebugAction {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
                 Intent intent = new Intent(appContext, ID_CardNFCReaderActivity.class);
-                //intent.putExtra(ContextVS.OPERATION_KEY, TypeVS.CURRENCY_REQUEST);
-                intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, "message content");
-                intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, "cms message subject");
-                intent.putExtra(ContextVS.MESSAGE_KEY, "Do you want to sign the message?");
+                //intent.putExtra(Constants.OPERATION_KEY, OperationType.CURRENCY_REQUEST);
+                intent.putExtra(Constants.MESSAGE_CONTENT_KEY, "message content");
+                intent.putExtra(Constants.MESSAGE_SUBJECT_KEY, "cms message subject");
+                intent.putExtra(Constants.MESSAGE_KEY, "Do you want to sign the message?");
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 appContext.startActivity(intent);
                 return null;

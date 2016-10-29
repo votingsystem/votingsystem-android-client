@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.UIUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -43,8 +43,8 @@ public class ConfirmImageActivity extends AppCompatActivity {
         setContentView(R.layout.confirm_image_activity);
         UIUtils.setSupportActionBar(this);
         image = (ImageView) findViewById(R.id.selected_image);
-        imageUri = (Uri) getIntent().getParcelableExtra(ContextVS.URI_KEY);
-        String title = getIntent().getStringExtra(ContextVS.CAPTION_KEY);
+        imageUri = (Uri) getIntent().getParcelableExtra(Constants.URI_KEY);
+        String title = getIntent().getStringExtra(Constants.CAPTION_KEY);
         if(imageUri != null) {
             try {
                 title = getString(R.string.confirm_selection_msg);
@@ -88,9 +88,9 @@ public class ConfirmImageActivity extends AppCompatActivity {
             BigDecimal imageHeight = new BigDecimal(printedBitmap.getHeight());
             BigDecimal imageWidth = new BigDecimal(printedBitmap.getWidth());
             BigDecimal scaleFactor = imageWidth.divide(
-                    new BigDecimal(ContextVS.MAX_REPRESENTATIVE_IMAGE_WIDTH), 2, RoundingMode.CEILING);
+                    new BigDecimal(Constants.MAX_REPRESENTATIVE_IMAGE_WIDTH), 2, RoundingMode.CEILING);
             imageHeight = imageHeight.divide(scaleFactor, 2, RoundingMode.CEILING);
-            imageWidth = new BigDecimal(ContextVS.MAX_REPRESENTATIVE_IMAGE_WIDTH);
+            imageWidth = new BigDecimal(Constants.MAX_REPRESENTATIVE_IMAGE_WIDTH);
             LOGD(TAG, "imageWidth: " + imageWidth +
                     " - imageHeight: " + imageHeight + " - scaleFactor: " + scaleFactor);
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(capturedBitmap,
@@ -99,7 +99,7 @@ public class ConfirmImageActivity extends AppCompatActivity {
             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
             LOGD(TAG, "captured byteArray length: " + byteArray.length);
-            resultIntent.putExtra(ContextVS.IMAGE_KEY, byteArray);
+            resultIntent.putExtra(Constants.IMAGE_KEY, byteArray);
         }
         setResult(result, resultIntent);
         finish();

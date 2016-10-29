@@ -11,8 +11,8 @@ import org.bouncycastle2.ocsp.RevokedStatus;
 import org.bouncycastle2.ocsp.SingleResp;
 import org.bouncycastle2.ocsp.UnknownStatus;
 import org.votingsystem.dto.CertificateDto;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -34,7 +34,7 @@ public class OCSPClient {
         OCSPReqGenerator ocspReqGen = new OCSPReqGenerator();
         ocspReqGen.addRequest(new CertificateID(CertificateID.HASH_SHA1, certificate, serialNumber));
         OCSPReq ocspReq = ocspReqGen.generate();
-        URL url = new URL(ContextVS.OCSP_DNIE_URL);
+        URL url = new URL(Constants.OCSP_DNIE_URL);
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestProperty("Content-Type", ContentType.OCSP_REQUEST.getName());
         con.setRequestProperty("Accept", ContentType.OCSP_RESPONSE.getName());

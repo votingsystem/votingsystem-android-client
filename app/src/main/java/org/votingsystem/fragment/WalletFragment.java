@@ -28,10 +28,10 @@ import org.votingsystem.activity.CurrencyActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
 
@@ -59,14 +59,14 @@ public class WalletFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        switch(responseVS.getTypeVS()) {
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+        switch(responseDto.getOperationType()) {
             case CURRENCY_CHECK:
                 currencyList = new ArrayList<>(Wallet.getCurrencySet());
                 printSummary();
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                            getString(R.string.error_lbl), responseVS.getMessage(),
+                if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
+                    MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
+                            getString(R.string.error_lbl), responseDto.getMessage(),
                             getFragmentManager());
                 }
                 break;
@@ -90,7 +90,7 @@ public class WalletFragment extends Fragment {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 Intent intent = new Intent(getActivity(), CurrencyActivity.class);
-                intent.putExtra(ContextVS.CURRENCY_KEY, currencyList.get(position));
+                intent.putExtra(Constants.CURRENCY_KEY, currencyList.get(position));
                 startActivity(intent);
             }
         });
@@ -143,15 +143,15 @@ public class WalletFragment extends Fragment {
         switch (requestCode) {
             case RC_OPEN_WALLET:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
                     try {
                         currencyList = new ArrayList<>(Wallet.getCurrencySet(
-                                new String(responseVS.getMessageBytes()).toCharArray()));
+                                new String(responseDto.getMessageBytes()).toCharArray()));
                         Utils.launchCurrencyStatusCheck(broadCastId, null);
                         printSummary();
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                        MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                                 getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
                     }
                 }

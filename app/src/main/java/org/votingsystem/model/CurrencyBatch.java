@@ -8,8 +8,8 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -49,7 +49,7 @@ public class CurrencyBatch {
     private List<Currency> currencyList;
     private Currency leftOverCurrency;
     private BigDecimal leftOver;
-    private TypeVS operation;
+    private OperationType operation;
     private String currencyCode;
     private String toUserIBAN;
     private String tag;
@@ -90,12 +90,12 @@ public class CurrencyBatch {
         for(int i = 0; i < dataMap.size(); i++) {
             Map receiptData = (Map) dataMap.get(i);
             //TODO
-            String hashCertVS = (String) receiptData.keySet().iterator().next();
+            String revocationHash = (String) receiptData.keySet().iterator().next();
             CMSSignedMessage cmsReceipt = new CMSSignedMessage(
-                    Base64.decode(((String) receiptData.get(hashCertVS)).getBytes(), Base64.NO_WRAP));
+                    Base64.decode(((String) receiptData.get(revocationHash)).getBytes(), Base64.NO_WRAP));
             CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    cmsReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
-            Currency currency = currencyMap.remove(certExtensionDto.getHashCertVS());
+                    cmsReceipt.getCurrencyCert(), Constants.CURRENCY_OID);
+            Currency currency = currencyMap.remove(certExtensionDto.getRevocationHash());
             currency.validateReceipt(cmsReceipt, trustAnchor);
         }
         if(currencyMap.size() != 0) throw new ExceptionVS(currencyMap.size() + " Currency transactions without receipt");
@@ -150,8 +150,8 @@ public class CurrencyBatch {
                 "Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
-                CurrencyCertExtensionDto.class, x509Certificate, ContextVS.CURRENCY_OID);
-        Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(Currency.State.OK);
+                CurrencyCertExtensionDto.class, x509Certificate, Constants.CURRENCY_OID);
+        Currency currency = currencyMap.get(certExtensionDto.getRevocationHash()).setState(Currency.State.OK);
         currency.initSigner(signedCsr.getBytes());
         return currency;
     }
@@ -164,7 +164,7 @@ public class CurrencyBatch {
         }
         for(String issuedCurrency : issuedCurrencyCollection) {
             Currency currency = initCurrency(issuedCurrency);
-            currencyMap.put(currency.getHashCertVS(), currency);
+            currencyMap.put(currency.getRevocationHash(), currency);
         }
     }
 
@@ -238,11 +238,11 @@ public class CurrencyBatch {
         this.tagCurrencyList = tagCurrencyList;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

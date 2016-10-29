@@ -29,24 +29,24 @@ public class ReceiptWrapper implements Serializable {
 
     private Long localId = -1L;
     private transient CMSSignedMessage receipt;
-    private TypeVS typeVS;
+    private OperationType operationType;
     private String subject;
     private String url;
 
     public ReceiptWrapper() {}
 
-    public ReceiptWrapper(TypeVS typeVS, String url) {
-        this.typeVS = typeVS;
+    public ReceiptWrapper(OperationType operationType, String url) {
+        this.operationType = operationType;
         this.url = url;
     }
 
     public ReceiptWrapper(TransactionDto transaction) {
-        this.typeVS = transaction.getOperation();
+        this.operationType = transaction.getOperation();
         this.url = transaction.getCmsMessageURL();
     }
 
     public String getTypeDescription(Context context) {
-        switch(getTypeVS()) {
+        switch(getOperationType()) {
             case SEND_VOTE:
                 return context.getString(R.string.receipt_vote_subtitle);
             case ANONYMOUS_SELECTION_CERT_REQUEST:
@@ -58,12 +58,12 @@ public class ReceiptWrapper implements Serializable {
             case ACCESS_REQUEST:
                 return context.getString(R.string.access_request_lbl);
             default:
-                return context.getString(R.string.receipt_lbl) + ": " + getTypeVS().toString();
+                return context.getString(R.string.receipt_lbl) + ": " + getOperationType().toString();
         }
     }
 
     public String getCardSubject(Context context) {
-        switch(getTypeVS()) {
+        switch(getOperationType()) {
             case ACCESS_REQUEST:
                 return  context.getString(R.string.access_request_lbl);
             case SEND_VOTE:
@@ -80,7 +80,7 @@ public class ReceiptWrapper implements Serializable {
     }
 
     public int getLogoId() {
-        switch(getTypeVS()) {
+        switch(getOperationType()) {
             case SEND_VOTE:
                 return R.drawable.poll_32;
             case ANONYMOUS_SELECTION_CERT_REQUEST:
@@ -102,7 +102,7 @@ public class ReceiptWrapper implements Serializable {
         this.receipt = cmsSignedMessage;
         Map dataMap = receipt.getSignedContent(new TypeReference<Map<String, Object>>() { });
         if(dataMap.containsKey("operation"))
-            this.typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
+            this.operationType = OperationType.valueOf((String) dataMap.get("operation"));
         if(dataMap.containsKey("subject")) subject = (String) dataMap.get("subject");
     }
 
@@ -114,20 +114,20 @@ public class ReceiptWrapper implements Serializable {
         return subject;
     }
 
-    public TypeVS getTypeVS() {
-        if(typeVS == null && receipt != null) {
+    public OperationType getOperationType() {
+        if(operationType == null && receipt != null) {
             try {
                 Map signedContent = receipt.getSignedContent(new TypeReference<Map<String, Object>>() {});
                 if (signedContent.containsKey("operation")) {
-                    typeVS = TypeVS.valueOf((String) signedContent.get("operation"));
+                    operationType = OperationType.valueOf((String) signedContent.get("operation"));
                 }
             } catch (Exception ex) { ex.printStackTrace(); }
         }
-        return typeVS;
+        return operationType;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public Date getDateFrom() {

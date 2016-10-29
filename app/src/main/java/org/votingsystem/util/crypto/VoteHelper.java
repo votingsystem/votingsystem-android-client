@@ -1,18 +1,18 @@
 package org.votingsystem.util.crypto;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.FieldEventDto;
 import org.votingsystem.dto.voting.VoteCancelerDto;
 import org.votingsystem.dto.voting.VoteDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,8 +22,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.votingsystem.util.ContextVS.PROVIDER;
-import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.util.Constants.PROVIDER;
+import static org.votingsystem.util.Constants.SIGNATURE_ALGORITHM;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -37,8 +37,8 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     private String NIF;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
-    private String originHashCertVote;
-    private String hashCertVSBase64;
+    private String originRevocationHash;
+    private String revocationHashBase64;
     private VoteDto voteDto;
     private EventVSDto eventVS;
     private VoteCancelerDto cancelerDto;
@@ -51,10 +51,10 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
         VoteHelper voteHelper = new VoteHelper();
         voteHelper.originHashAccessRequest = UUID.randomUUID().toString();
         voteHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
-                voteHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
-        voteHelper.originHashCertVote = UUID.randomUUID().toString();
-        voteHelper.hashCertVSBase64 = StringUtils.getHashBase64(
-                voteHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
+                voteHelper.originHashAccessRequest, Constants.DATA_DIGEST_ALGORITHM);
+        voteHelper.originRevocationHash = UUID.randomUUID().toString();
+        voteHelper.revocationHashBase64 = StringUtils.getHashBase64(
+                voteHelper.originRevocationHash, Constants.DATA_DIGEST_ALGORITHM);
         voteHelper.eventVSId = voteDto.getEventVS().getId();
         voteHelper.eventVSURL = voteDto.getEventVS().getURL();
         voteHelper.eventVS = voteDto.getEventVS();
@@ -63,7 +63,7 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
                 SIGNATURE_ALGORITHM, PROVIDER,
                 voteDto.getEventVS().getAccessControl().getServerURL(),
                 voteDto.getEventVS().getId(),
-                voteHelper.hashCertVSBase64);
+                voteHelper.revocationHashBase64);
         return voteHelper;
     }
 
@@ -91,8 +91,8 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     private void genVote(FieldEventDto optionSelected) {
         genAccessRequest();
         voteDto = new VoteDto();
-        voteDto.setOperation(TypeVS.SEND_VOTE);
-        voteDto.setHashCertVSBase64(hashCertVSBase64);
+        voteDto.setOperation(OperationType.SEND_VOTE);
+        voteDto.setRevocationHashBase64(revocationHashBase64);
         voteDto.setEventVSId(eventVSId);
         voteDto.setEventURL(eventVSURL);
         voteDto.setOptionSelected(optionSelected);
@@ -119,11 +119,11 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     public VoteCancelerDto getVoteCanceler() {
         if(cancelerDto == null) {
             cancelerDto = new VoteCancelerDto();
-            cancelerDto.setOperation(TypeVS.CANCEL_VOTE);
+            cancelerDto.setOperation(OperationType.CANCEL_VOTE);
             cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
             cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-            cancelerDto.setOriginHashCertVote(originHashCertVote);
-            cancelerDto.setHashCertVSBase64(hashCertVSBase64);
+            cancelerDto.setOriginRevocationHash(originRevocationHash);
+            cancelerDto.setRevocationHashBase64(revocationHashBase64);
             cancelerDto.setUUID(UUID.randomUUID().toString());
         }
         return cancelerDto;
@@ -141,12 +141,12 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
         return hashAccessRequestBase64;
     }
 
-    public String getOriginHashCertVote() {
-        return originHashCertVote;
+    public String getOriginRevocationHash() {
+        return originRevocationHash;
     }
 
-    public String getHashCertVSBase64() {
-        return hashCertVSBase64;
+    public String getRevocationHashBase64() {
+        return revocationHashBase64;
     }
 
     public String getNIF() {
@@ -215,8 +215,8 @@ public class VoteHelper extends ReceiptWrapper implements Serializable {
     public String getCMSVoteURL() {
         String result = null;
         try {
-            String hashHex = StringUtils.toHex(hashCertVSBase64);
-            result = AppVS.getInstance().getAccessControl().getCMSVoteURL(hashHex);
+            String hashHex = StringUtils.toHex(revocationHashBase64);
+            result = App.getInstance().getAccessControl().getCMSVoteURL(hashHex);
         } catch (Exception ex) { ex.printStackTrace();}
         return result;
     }

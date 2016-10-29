@@ -9,10 +9,10 @@ import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.ReceiptWrapper;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.CertificationRequest;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -46,15 +46,15 @@ public class Currency extends ReceiptWrapper {
 
     private Long localId = -1L;
     private Long id;
-    private TypeVS operation;
+    private OperationType operation;
     private BigDecimal batchAmount;
     private transient CMSSignedMessage receipt;
     private transient CMSSignedMessage cmsMessage;
     private transient X509Certificate x509AnonymousCert;
     private CertificationRequest certificationRequest;
     private byte[] receiptBytes;
-    private String originHashCertVS;
-    private String hashCertVS;
+    private String originRevocationHash;
+    private String revocationHash;
     private BigDecimal amount;
     private String subject;
     private State state;
@@ -77,17 +77,17 @@ public class Currency extends ReceiptWrapper {
     public Currency() {}
 
     public Currency(String currencyServerURL, BigDecimal amount, String currencyCode,
-                    Boolean timeLimited, String hashCertVS, String tag) {
+                    Boolean timeLimited, String revocationHash, String tag) {
         this.amount = amount;
         this.currencyServerURL = currencyServerURL;
         this.currencyCode = currencyCode;
         this.tag = tag;
         this.timeLimited = timeLimited;
         try {
-            this.hashCertVS = hashCertVS;
+            this.revocationHash = revocationHash;
             certificationRequest = CertificationRequest.getCurrencyRequest(
-                    ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
-                    currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);
+                    Constants.SIGNATURE_ALGORITHM, Constants.PROVIDER,
+                    currencyServerURL, revocationHash, amount, this.currencyCode, timeLimited, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
@@ -100,11 +100,11 @@ public class Currency extends ReceiptWrapper {
         this.tag = tag;
         this.timeLimited = timeLimited;
         try {
-            this.originHashCertVS = UUID.randomUUID().toString();
-            this.hashCertVS = StringUtils.getHashBase64(getOriginHashCertVS(), ContextVS.DATA_DIGEST_ALGORITHM);
+            this.originRevocationHash = UUID.randomUUID().toString();
+            this.revocationHash = StringUtils.getHashBase64(getOriginRevocationHash(), Constants.DATA_DIGEST_ALGORITHM);
             certificationRequest = CertificationRequest.getCurrencyRequest(
-                    ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
-                    currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag);
+                    Constants.SIGNATURE_ALGORITHM, Constants.PROVIDER,
+                    currencyServerURL, revocationHash, amount, this.currencyCode, timeLimited, tag);
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
@@ -156,11 +156,11 @@ public class Currency extends ReceiptWrapper {
         this.batchAmount = batchAmount;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 
@@ -192,7 +192,7 @@ public class Currency extends ReceiptWrapper {
         CurrencyDto batchItemDto = cmsMessage.getSignedContent(CurrencyDto.class);
         this.batchUUID = batchItemDto.getBatchUUID();
         this.batchAmount = batchItemDto.getBatchAmount();
-        if(TypeVS.CURRENCY_SEND != batchItemDto.getOperation())
+        if(OperationType.CURRENCY_SEND != batchItemDto.getOperation())
             throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + batchItemDto.getOperation() + "'");
         if(!this.currencyCode.equals(batchItemDto.getCurrencyCode())) {
             throw new ExceptionVS(getErrorPrefix() +
@@ -316,7 +316,7 @@ public class Currency extends ReceiptWrapper {
     }
 
     private String getErrorPrefix() {
-        return "ERROR - Currency with hash: " + hashCertVS + " - ";
+        return "ERROR - Currency with hash: " + revocationHash + " - ";
     }
 
     public CertificationRequest getCertificationRequest() {
@@ -370,20 +370,20 @@ public class Currency extends ReceiptWrapper {
         this.receiptBytes = receiptBytes;
     }
 
-    public String getOriginHashCertVS() {
-        return originHashCertVS;
+    public String getOriginRevocationHash() {
+        return originRevocationHash;
     }
 
-    public void setOriginHashCertVS(String originHashCertVS) {
-        this.originHashCertVS = originHashCertVS;
+    public void setOriginRevocationHash(String originRevocationHash) {
+        this.originRevocationHash = originRevocationHash;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public BigDecimal getAmount() {
@@ -399,18 +399,18 @@ public class Currency extends ReceiptWrapper {
         content = x509AnonymousCert.getEncoded();
         serialNumber = x509AnonymousCert.getSerialNumber().longValue();
         certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                x509AnonymousCert, ContextVS.CURRENCY_OID);
+                x509AnonymousCert, Constants.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
         amount = certExtensionDto.getAmount();
         currencyCode = certExtensionDto.getCurrencyCode();
-        hashCertVS = certExtensionDto.getHashCertVS();
+        revocationHash = certExtensionDto.getRevocationHash();
         timeLimited = certExtensionDto.getTimeLimited();
         tag = certExtensionDto.getTag().trim();
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
         validFrom = x509AnonymousCert.getNotBefore();
         validTo = x509AnonymousCert.getNotAfter();
         String subjectDN = x509AnonymousCert.getSubjectDN().toString();
-        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
+        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, revocationHash);
         if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
             throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)

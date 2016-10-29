@@ -20,14 +20,14 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.HttpConnection;
+import org.votingsystem.dto.ResponseDto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,13 +48,13 @@ public class SelectTagVSDialogFragment extends DialogFragment {
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
         SelectTagVSDialogFragment dialogFragment = new SelectTagVSDialogFragment();
         Bundle args = new Bundle();
-        args.putString(ContextVS.CALLER_KEY, dialogCaller);
+        args.putString(Constants.CALLER_KEY, dialogCaller);
         dialogFragment.setArguments(args);
         dialogFragment.show(manager, tag);
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
+        dialogCaller = getArguments().getString(Constants.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.select_tagvs_dialog, null);
         /*final EditText search_text = (EditText) view.findViewById(R.id.search_text);
@@ -76,7 +76,7 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         tag_list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 Intent intent = new Intent(dialogCaller);
-                intent.putExtra(ContextVS.TAG_KEY, new TagVSDto(tagList.get(position)));
+                intent.putExtra(Constants.TAG_KEY, new TagVSDto(tagList.get(position)));
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 dialog.dismiss();
             }
@@ -88,22 +88,22 @@ public class SelectTagVSDialogFragment extends DialogFragment {
     private void processSearch(String searchParam) {
         /*if(previousSearch != null && previousSearch.equals(searchParam)) return;
         previousSearch = searchParam;*/
-        new TagVSLoader().execute(((AppVS) getActivity().getApplicationContext()).getCurrencyServer().
+        new TagVSLoader().execute(((App) getActivity().getApplicationContext()).getCurrencyServer().
                 getTagVSServiceURL());
 
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ContextVS.CALLER_KEY, dialogCaller);
-        outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) tagList);
+        outState.putString(Constants.CALLER_KEY, dialogCaller);
+        outState.putSerializable(Constants.FORM_DATA_KEY, (Serializable) tagList);
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null && savedInstanceState.containsKey(ContextVS.FORM_DATA_KEY)) {
-            dialogCaller = savedInstanceState.getString(ContextVS.CALLER_KEY);
-            tagList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
+        if(savedInstanceState != null && savedInstanceState.containsKey(Constants.FORM_DATA_KEY)) {
+            dialogCaller = savedInstanceState.getString(Constants.CALLER_KEY);
+            tagList = (List<String>) savedInstanceState.getSerializable(Constants.FORM_DATA_KEY);
             simpleAdapter.setItemList(tagList);
             simpleAdapter.notifyDataSetChanged();
         }
@@ -129,15 +129,15 @@ public class SelectTagVSDialogFragment extends DialogFragment {
         @Override protected List<String> doInBackground(String... params) {
             if(tagList.size() > 0) return tagList;
             try {
-                ResponseVS responseVS  = HttpHelper.getInstance().getData(params[0], ContentType.JSON);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ResultListDto<TagVSDto> resultListDto = (ResultListDto<TagVSDto>) responseVS.getMessage(
+                ResponseDto responseDto = HttpConnection.getInstance().getData(params[0], ContentType.JSON);
+                if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                    ResultListDto<TagVSDto> resultListDto = (ResultListDto<TagVSDto>) responseDto.getMessage(
                             new TypeReference<ResultListDto<TagVSDto>>() { });
                     for(TagVSDto tagVSDto : resultListDto.getResultList()) {
                         if(!TagVSDto.WILDTAG.equals(tagVSDto.getName())) tagList.add(tagVSDto.getName());
                     }
-                } else MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                        getString(R.string.error_lbl), responseVS.getMessage(),
+                } else MessageDialogFragment.showDialog(responseDto.getStatusCode(),
+                        getString(R.string.error_lbl), responseDto.getMessage(),
                         getFragmentManager());
             } catch (Exception ex) {
                 ex.printStackTrace();

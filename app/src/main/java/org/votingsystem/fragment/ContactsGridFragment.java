@@ -37,19 +37,19 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.ContactPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
 import java.util.List;
@@ -70,7 +70,7 @@ public class ContactsGridFragment extends Fragment
     private GridView gridView;
     private String queryStr = null;
     private Mode mode = Mode.CONTACT;
-    private AppVS appVS = null;
+    private App app = null;
     private String broadCastId = ContactsGridFragment.class.getSimpleName();
     private static final int loaderId = 0;
     private AtomicBoolean isProgressDialogVisible = new AtomicBoolean(false);
@@ -80,17 +80,17 @@ public class ContactsGridFragment extends Fragment
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
             setProgressDialogVisible(false);
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
+            if(ResponseDto.SC_CONNECTION_TIMEOUT == responseDto.getStatusCode()) {
                 if(gridView.getAdapter().getCount() == 0)
                     rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
             }
-            if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-                MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                        responseVS.getNotificationMessage(), getFragmentManager());
-            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            if(responseDto != null && responseDto.getOperationType() == OperationType.REPRESENTATIVE_REVOKE) {
+                MessageDialogFragment.showDialog(responseDto.getStatusCode(), responseDto.getCaption(),
+                        responseDto.getNotificationMessage(), getFragmentManager());
+            } else if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
+                MessageDialogFragment.showDialog(responseDto, getFragmentManager());
             }
         }
     };
@@ -98,13 +98,13 @@ public class ContactsGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
+        app = (App) getActivity().getApplicationContext();
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);
         }
         if(savedInstanceState != null) {
-            mode = (Mode) savedInstanceState.getSerializable(ContextVS.STATE_KEY);
+            mode = (Mode) savedInstanceState.getSerializable(Constants.STATE_KEY);
         }
         LOGD(TAG + ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId +
                 " - queryStr: " + queryStr + " - mode: " + mode);
@@ -128,17 +128,17 @@ public class ContactsGridFragment extends Fragment
         rootView = inflater.inflate(R.layout.contacts_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         if(savedInstanceState != null) {
-            String dtoStr = savedInstanceState.getString(ContextVS.DTO_KEY);
+            String dtoStr = savedInstanceState.getString(Constants.DTO_KEY);
             if(dtoStr != null) {
                 try {
                     userList = JSON.readValue(dtoStr, new TypeReference<List<UserDto>>(){});
-                    ContactListAdapter adapter = new ContactListAdapter(userList, appVS);
+                    ContactListAdapter adapter = new ContactListAdapter(userList, app);
                     gridView.setAdapter(adapter);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                contactUser = (UserDto) savedInstanceState.getSerializable(ContextVS.USER_KEY);
-                Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+                contactUser = (UserDto) savedInstanceState.getSerializable(Constants.USER_KEY);
+                Parcelable gridState = savedInstanceState.getParcelable(Constants.LIST_STATE_KEY);
                 gridView.onRestoreInstanceState(gridState);
             }
         } else {
@@ -220,12 +220,12 @@ public class ContactsGridFragment extends Fragment
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putSerializable(ContextVS.STATE_KEY, mode);
-        outState.putSerializable(ContextVS.USER_KEY, contactUser);
+        outState.putParcelable(Constants.LIST_STATE_KEY, gridState);
+        outState.putSerializable(Constants.STATE_KEY, mode);
+        outState.putSerializable(Constants.USER_KEY, contactUser);
         if(userList != null) {
             try {
-                outState.putString(ContextVS.DTO_KEY, JSON.writeValueAsString(userList));
+                outState.putString(Constants.DTO_KEY, JSON.writeValueAsString(userList));
             } catch (Exception ex) { ex.printStackTrace();}
         }
     }
@@ -257,12 +257,12 @@ public class ContactsGridFragment extends Fragment
 
     private void launchPager(Integer position, UserDto user) {
         Intent intent = new Intent(getActivity(), ContactPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
-        intent.putExtra(ContextVS.STATE_KEY, mode);
+        intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
+        intent.putExtra(Constants.STATE_KEY, mode);
         try {
-            intent.putExtra(ContextVS.DTO_KEY, JSON.writeValueAsString(userList));
+            intent.putExtra(Constants.DTO_KEY, JSON.writeValueAsString(userList));
         } catch (Exception ex) { ex.printStackTrace();}
-        intent.putExtra(ContextVS.USER_KEY, user);
+        intent.putExtra(Constants.USER_KEY, user);
         startActivity(intent);
     }
 
@@ -358,7 +358,7 @@ public class ContactsGridFragment extends Fragment
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    public class ContactsFetcher extends AsyncTask<String, String, ResponseVS> {
+    public class ContactsFetcher extends AsyncTask<String, String, ResponseDto> {
 
         private String phone, email;
 
@@ -371,43 +371,43 @@ public class ContactsGridFragment extends Fragment
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true); }
 
-        @Override protected ResponseVS doInBackground(String... params) {
+        @Override protected ResponseDto doInBackground(String... params) {
             String contactsURL = null;
             if(phone != null || email != null) {
-                contactsURL = appVS.getCurrencyServer().getSearchServiceURL(phone, email);
+                contactsURL = app.getCurrencyServer().getSearchServiceURL(phone, email);
             } else {
-                contactsURL = appVS.getCurrencyServer().getSearchServiceURL(params[0]);
+                contactsURL = app.getCurrencyServer().getSearchServiceURL(params[0]);
             }
-            return HttpHelper.getInstance().getData(contactsURL, ContentType.JSON);
+            return HttpConnection.getInstance().getData(contactsURL, ContentType.JSON);
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(ResponseVS responseVS) {
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        @Override protected void onPostExecute(ResponseDto responseDto) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 try {
                     if(phone != null || email != null) {
                         userList = null;
-                        UserDto user = (UserDto) responseVS.getMessage(UserDto.class);
+                        UserDto user = (UserDto) responseDto.getMessage(UserDto.class);
                         if(contactUser != null) user.setContactURI(contactUser.getContactURI());
                         launchPager(null, user);
                     } else {
-                        ResultListDto<UserDto> resultList = ((ResultListDto<UserDto>) responseVS
+                        ResultListDto<UserDto> resultList = ((ResultListDto<UserDto>) responseDto
                                 .getMessage(new TypeReference<ResultListDto<UserDto>>() {}));
                         userList = resultList.getResultList();
                         if(userList.size() > 0)
                             rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
-                        ContactListAdapter adapter = new ContactListAdapter(userList, appVS);
+                        ContactListAdapter adapter = new ContactListAdapter(userList, app);
                         gridView.setAdapter(adapter);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                             getString(R.string.exception_lbl), ex.getMessage(), getFragmentManager());
                 }
             } else {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                        responseVS.getMessage(), getFragmentManager());
+                MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, getString(R.string.error_lbl),
+                        responseDto.getMessage(), getFragmentManager());
             }
             setProgressDialogVisible(false);
         }

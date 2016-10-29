@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -11,24 +11,24 @@ import org.votingsystem.util.TypeVS;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionResponseDto {
 
-    private TypeVS operation;
+    private OperationType operation;
     private String cmsMessagePEM;
     private String currencyChangeCert;
 
     public TransactionResponseDto() {}
 
-    public TransactionResponseDto(TypeVS operation, String currencyChangeCert,
+    public TransactionResponseDto(OperationType operation, String currencyChangeCert,
                                   CMSSignedMessage cmsMessage) throws Exception {
         this.operation = operation;
         this.cmsMessagePEM = cmsMessage.toPEMStr();
         this.currencyChangeCert = currencyChangeCert;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

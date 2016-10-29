@@ -20,7 +20,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.Address;
@@ -29,13 +29,13 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.Country;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.crypto.CertificationRequest;
@@ -108,7 +108,7 @@ public class UserDataFormActivity extends AppCompatActivity {
             if(can != null) canText.setText(can);
             userDto = PrefUtils.getAppUser();
             if(userDto == null) {//first run
-                if(savedInstanceState == null) MessageDialogFragment.showDialog(ResponseVS.SC_OK,
+                if(savedInstanceState == null) MessageDialogFragment.showDialog(ResponseDto.SC_OK,
                         getString(R.string.msg_lbl), getString(R.string.first_run_msg), getSupportFragmentManager());
 
             } else {
@@ -127,8 +127,8 @@ public class UserDataFormActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         if(savedInstanceState != null) {
-            password = savedInstanceState.getCharArray(ContextVS.PASSWORD_KEY);
-            accessMode = (CryptoDeviceAccessMode.Mode) savedInstanceState.getSerializable(ContextVS.MODE_KEY);
+            password = savedInstanceState.getCharArray(Constants.PASSWORD_KEY);
+            accessMode = (CryptoDeviceAccessMode.Mode) savedInstanceState.getSerializable(Constants.MODE_KEY);
         }
     }
 
@@ -190,7 +190,7 @@ public class UserDataFormActivity extends AppCompatActivity {
                                         intent = new Intent(UserDataFormActivity.this, PinActivity.class);
                                         break;
                                 }
-                                intent.putExtra(ContextVS.MODE_KEY, PatternLockActivity.MODE_VALIDATE_INPUT);
+                                intent.putExtra(Constants.MODE_KEY, PatternLockActivity.MODE_VALIDATE_INPUT);
                                 startActivityForResult(intent, RC_REQUEST_ACCESS_MODE_PASSW);
                             } else {
                                 intent = new Intent(UserDataFormActivity.this,
@@ -254,8 +254,8 @@ public class UserDataFormActivity extends AppCompatActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putCharArray(ContextVS.PASSWORD_KEY, password);
-        outState.putSerializable(ContextVS.MODE_KEY, accessMode);
+        outState.putCharArray(Constants.PASSWORD_KEY, password);
+        outState.putSerializable(Constants.MODE_KEY, accessMode);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -264,32 +264,32 @@ public class UserDataFormActivity extends AppCompatActivity {
         switch (requestCode) {
             case RC_REQUEST_ACCESS_MODE_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    this.password = new String(responseVS.getMessageBytes()).toCharArray();
-                    accessMode = (CryptoDeviceAccessMode.Mode) data.getSerializableExtra(ContextVS.MODE_KEY);
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    this.password = new String(responseDto.getMessageBytes()).toCharArray();
+                    accessMode = (CryptoDeviceAccessMode.Mode) data.getSerializableExtra(Constants.MODE_KEY);
                     Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
                     if(PrefUtils.getCryptoDeviceAccessMode() == null) {
-                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                        intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.enter_password_msg));
                         PrefUtils.putCryptoDeviceAccessMode(new CryptoDeviceAccessMode(accessMode, password));
                     }
-                    intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_UPDATE_USER_DATA);
-                    intent.putExtra(ContextVS.CSR_KEY, true);
-                    intent.putExtra(ContextVS.PASSWORD_KEY, password);
+                    intent.putExtra(Constants.MODE_KEY, ID_CardNFCReaderActivity.MODE_UPDATE_USER_DATA);
+                    intent.putExtra(Constants.CSR_KEY, true);
+                    intent.putExtra(Constants.PASSWORD_KEY, password);
                     startActivityForResult(intent, RC_SIGN_USER_DATA);
                 }
                 break;
             case RC_SIGN_USER_DATA:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    new DataSender(responseVS.getCMS(),
-                            new String(responseVS.getMessageBytes()).toCharArray()).execute();
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    new DataSender(responseDto.getCMS(),
+                            new String(responseDto.getMessageBytes()).toCharArray()).execute();
                 }
                 break;
         }
 
     }
 
-    public class DataSender extends AsyncTask<String, String, ResponseVS> {
+    public class DataSender extends AsyncTask<String, String, ResponseDto> {
 
         private CMSSignedMessage cmsMessage;
         private char[] protectedPassword;
@@ -304,52 +304,52 @@ public class UserDataFormActivity extends AppCompatActivity {
                     getString(R.string.connecting_caption), getString(R.string.wait_msg));
         }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
-            ResponseVS responseVS = null;
+        @Override protected ResponseDto doInBackground(String... urls) {
+            ResponseDto responseDto = null;
             try {
-                responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                        AppVS.getInstance().getCurrencyServer().getCSRSignedWithIDCardServiceURL());
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                responseDto = HttpConnection.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
+                        App.getInstance().getCurrencyServer().getCSRSignedWithIDCardServiceURL());
+                if(ResponseDto.SC_OK != responseDto.getStatusCode()) return responseDto;
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
                 keyStore.load(null);
                 CertificationRequest certificationRequest = (CertificationRequest)
                         ObjectUtils.deSerializeObject(PrefUtils.getCsrRequest().getBytes());
                 PrivateKey privateKey = certificationRequest.getPrivateKey();
                 Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(
-                        responseVS.getMessageBytes());
+                        responseDto.getMessageBytes());
                 X509Certificate x509Cert = certificates.iterator().next();
                 UserDto user = UserDto.getUser(x509Cert);
                 LOGD(TAG, "updateKeyStore - user: " + user.getNIF() +
                         " - certificates.size(): " + certificates.size());
                 X509Certificate[] certsArray = new X509Certificate[certificates.size()];
                 certificates.toArray(certsArray);
-                keyStore.setKeyEntry(ContextVS.USER_CERT_ALIAS, privateKey, null, certsArray);
+                keyStore.setKeyEntry(Constants.USER_CERT_ALIAS, privateKey, null, certsArray);
 
                 char[] newToken = new String(certificationRequest.getUserCertificationRequestDto()
                         .getPlainToken()).toCharArray();
                 try {
-                    Set<Currency> wallet = PrefUtils.getWallet(password, AppVS.getInstance().getToken());
+                    Set<Currency> wallet = PrefUtils.getWallet(password, App.getInstance().getToken());
                     PrefUtils.putWallet(wallet, password, newToken);
                 } catch (Exception ex) { ex.printStackTrace();}
-                AppVS.getInstance().setToken(newToken);
+                App.getInstance().setToken(newToken);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.EXCEPTION(ex, UserDataFormActivity.this);
+                responseDto = ResponseDto.EXCEPTION(ex, UserDataFormActivity.this);
             } finally {
                 PrefUtils.putCsrRequest(null);
-                return responseVS;
+                return responseDto;
             }
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(ResponseVS responseVS) {
+        @Override protected void onPostExecute(ResponseDto responseDto) {
             setProgressDialogVisible(false, null, null);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 PrefUtils.putDNIeEnabled(true);
                 finish();
             } else {
-                MessageDialogFragment.showDialog(responseVS, getSupportFragmentManager());
+                MessageDialogFragment.showDialog(responseDto, getSupportFragmentManager());
             }
         }
     }

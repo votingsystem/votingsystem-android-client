@@ -25,7 +25,7 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
@@ -36,16 +36,16 @@ import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.service.VoteService;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.ReceiptWrapper;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.crypto.VoteHelper;
@@ -63,7 +63,7 @@ public class ReceiptFragment extends Fragment {
 
     public static final int RC_CANCEL_VOTE          = 0;
 
-    private AppVS appVS;
+    private App app;
     private ReceiptWrapper receiptWrapper;
     private TransactionDto transactionDto;
     private TextView receiptSubject;
@@ -77,16 +77,16 @@ public class ReceiptFragment extends Fragment {
     public static Fragment newInstance(int cursorPosition) {
         ReceiptFragment fragment = new ReceiptFragment();
         Bundle args = new Bundle();
-        args.putInt(ContextVS.CURSOR_POSITION_KEY, cursorPosition);
+        args.putInt(Constants.CURSOR_POSITION_KEY, cursorPosition);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static Fragment newInstance(String receiptURL, TypeVS type) {
+    public static Fragment newInstance(String receiptURL, OperationType type) {
         ReceiptFragment fragment = new ReceiptFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ContextVS.TYPEVS_KEY, type);
-        args.putString(ContextVS.URL_KEY, receiptURL);
+        args.putSerializable(Constants.TYPEVS_KEY, type);
+        args.putString(Constants.URL_KEY, receiptURL);
         fragment.setArguments(args);
         return fragment;
     }
@@ -94,11 +94,11 @@ public class ReceiptFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(responseVS.getTypeVS() == TypeVS.CANCEL_VOTE){
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+        if(responseDto.getOperationType() == OperationType.CANCEL_VOTE){
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                        responseVS.getCaption(), responseVS.getNotificationMessage(), getActivity());
+                        responseDto.getCaption(), responseDto.getNotificationMessage(), getActivity());
                 builder.setPositiveButton(getString(R.string.accept_lbl),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
@@ -109,15 +109,15 @@ public class ReceiptFragment extends Fragment {
             }
         }
         setProgressDialogVisible(null, null, false);
-        MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+        MessageDialogFragment.showDialog(responseDto, getFragmentManager());
         }
     };
 
     private void launchVoteCancelation(VoteHelper voteHelper) {
         Intent startIntent = new Intent(getActivity(), VoteService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CANCEL_VOTE);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.VOTE_KEY, voteHelper);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.CANCEL_VOTE);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.VOTE_KEY, voteHelper);
         setProgressDialogVisible(getString(R.string.loading_data_msg),
                 getString(R.string.loading_info_msg), true);
         getActivity().startService(startIntent);
@@ -126,8 +126,8 @@ public class ReceiptFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
-        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        app = (App) getActivity().getApplicationContext();
+        int cursorPosition =  getArguments().getInt(Constants.CURSOR_POSITION_KEY);
         broadCastId = ReceiptFragment.class.getSimpleName() + "_" + cursorPosition;
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
@@ -142,10 +142,10 @@ public class ReceiptFragment extends Fragment {
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        TypeVS type = (TypeVS) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        receiptURL = getArguments().getString(ContextVS.URL_KEY);
-        receiptWrapper = (ReceiptWrapper) getArguments().getSerializable(ContextVS.RECEIPT_KEY);
-        transactionDto = (TransactionDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+        OperationType type = (OperationType) getArguments().getSerializable(Constants.TYPEVS_KEY);
+        receiptURL = getArguments().getString(Constants.URL_KEY);
+        receiptWrapper = (ReceiptWrapper) getArguments().getSerializable(Constants.RECEIPT_KEY);
+        transactionDto = (TransactionDto) getArguments().getSerializable(Constants.TRANSACTION_KEY);
         if(transactionDto != null) receiptWrapper = new ReceiptWrapper(transactionDto);
         if(receiptWrapper != null) {
             if(receiptWrapper.hashReceipt()) initReceiptScreen(receiptWrapper);
@@ -153,7 +153,7 @@ public class ReceiptFragment extends Fragment {
         }
         if(savedInstanceState != null) {
             receiptWrapper = (ReceiptWrapper) savedInstanceState.getSerializable(
-                    ContextVS.RECEIPT_KEY);
+                    Constants.RECEIPT_KEY);
             initReceiptScreen(receiptWrapper);
         } else {
             if(receiptURL != null) {
@@ -178,7 +178,7 @@ public class ReceiptFragment extends Fragment {
                     receiptURL = null;
                 }
             } else {
-                Integer cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+                Integer cursorPosition =  getArguments().getInt(Constants.CURSOR_POSITION_KEY);
                 Cursor cursor = getActivity().getContentResolver().query(
                         ReceiptContentProvider.CONTENT_URI, null, null, null, null);
                 cursor.moveToPosition(cursorPosition);
@@ -198,13 +198,13 @@ public class ReceiptFragment extends Fragment {
     }
 
     private void initReceiptScreen (ReceiptWrapper receiptWrapper) {
-        LOGD(TAG + ".initReceiptScreen", "type: " + receiptWrapper.getTypeVS());
+        LOGD(TAG + ".initReceiptScreen", "type: " + receiptWrapper.getOperationType());
         try {
             String contentFormatted = "";
             String dateStr = null;
             receiptWrapperCMS = receiptWrapper.getReceipt();
             String receiptSubjectStr = null;
-            switch(receiptWrapper.getTypeVS()) {
+            switch(receiptWrapper.getOperationType()) {
                 case ANONYMOUS_SELECTION_CERT_REQUEST:
                     RepresentativeDelegationDto delegationDto = receiptWrapper.getReceipt()
                             .getSignedContent(org.votingsystem.dto.voting.RepresentativeDelegationDto.class);
@@ -269,15 +269,15 @@ public class ReceiptFragment extends Fragment {
             LOGD(TAG + ".setActionBarMenu", "menu null");
             return;
         }
-        if(receiptWrapper == null || receiptWrapper.getTypeVS() == null) {
+        if(receiptWrapper == null || receiptWrapper.getOperationType() == null) {
             LOGD(TAG + ".receiptWrapper", "receiptWrapper undefined");
             return;
         }
-        if(TypeVS.SEND_VOTE != receiptWrapper.getTypeVS()) {
+        if(OperationType.SEND_VOTE != receiptWrapper.getOperationType()) {
             menu.removeItem(R.id.cancel_vote);
             menu.removeItem(R.id.check_receipt);
         }
-        switch(receiptWrapper.getTypeVS()) {
+        switch(receiptWrapper.getOperationType()) {
             case SEND_VOTE:
                 if(((VoteHelper)receiptWrapper).getEventVS().getDateFinish().before(
                         new Date(System.currentTimeMillis()))) {
@@ -289,7 +289,7 @@ public class ReceiptFragment extends Fragment {
                 menu.removeItem(R.id.cancel_vote);
                 break;
             default: LOGD(TAG + ".setActionBarMenu", "unprocessed type: " +
-                    receiptWrapper.getTypeVS());
+                    receiptWrapper.getOperationType());
         }
         if(receiptWrapper.getLocalId() < 0) menu.removeItem(R.id.delete_item);
         else menu.removeItem(R.id.save_receipt);
@@ -305,7 +305,7 @@ public class ReceiptFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(receiptWrapper != null) outState.putSerializable(ContextVS.RECEIPT_KEY,receiptWrapper);
+        if(receiptWrapper != null) outState.putSerializable(Constants.RECEIPT_KEY,receiptWrapper);
     }
 
     @Override public void onPause() {
@@ -321,7 +321,7 @@ public class ReceiptFragment extends Fragment {
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         LOGD(TAG + ".onCreateOptionsMenu", " selected receipt type:" +
-                receiptWrapper.getTypeVS());
+                receiptWrapper.getOperationType());
         this.menu = menu;
         menuInflater.inflate(R.menu.receipt_fragment, menu);
         if(receiptWrapper != null) setActionBarMenu(menu);
@@ -340,7 +340,7 @@ public class ReceiptFragment extends Fragment {
                     break;
                 case R.id.show_timestamp_info:
                     UIUtils.showTimeStampInfoDialog(receiptWrapperCMS.getSigner().getTimeStampToken(),
-                            appVS.getTimeStampCert(), getFragmentManager(), getActivity());
+                            app.getTimeStampCert(), getFragmentManager(), getActivity());
                     break;
                 case R.id.share_receipt:
                     Intent sendIntent = new Intent();
@@ -354,21 +354,21 @@ public class ReceiptFragment extends Fragment {
                     ContentValues values = new ContentValues();
                     values.put(ReceiptContentProvider.SERIALIZED_OBJECT_COL,
                             ObjectUtils.serializeObject(receiptWrapper));
-                    values.put(ReceiptContentProvider.TYPE_COL, receiptWrapper.getTypeVS().toString());
+                    values.put(ReceiptContentProvider.TYPE_COL, receiptWrapper.getOperationType().toString());
                     values.put(ReceiptContentProvider.URL_COL, receiptWrapper.getURL());
                     values.put(ReceiptContentProvider.STATE_COL, ReceiptWrapper.State.ACTIVE.toString());
                     menu.removeItem(R.id.save_receipt);
                     break;
                 case R.id.signature_content:
                     try {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(
+                        MessageDialogFragment.showDialog(ResponseDto.SC_OK, getString(
                                         R.string.signature_content), receiptWrapperCMS.getSignedContentStr(),
                                 getFragmentManager());
                     } catch(Exception ex) { ex.printStackTrace();}
                     break;
                 case R.id.check_receipt:
                     if(receiptWrapper instanceof VoteHelper) {
-                        new VoteChecker().execute(((VoteHelper)receiptWrapper).getHashCertVSBase64());
+                        new VoteChecker().execute(((VoteHelper)receiptWrapper).getRevocationHashBase64());
                     }
                     return true;
                 case R.id.delete_item:
@@ -420,24 +420,24 @@ public class ReceiptFragment extends Fragment {
         switch (requestCode) {
             case RC_CANCEL_VOTE:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
                     launchVoteCancelation((VoteHelper) receiptWrapper);
                 }
                 break;
         }
     }
 
-    private class VoteChecker extends AsyncTask<String, Void, ResponseVS> {
+    private class VoteChecker extends AsyncTask<String, Void, ResponseDto> {
 
-        @Override protected void onPostExecute(ResponseVS responseVS) {
-            super.onPostExecute(responseVS);
+        @Override protected void onPostExecute(ResponseDto responseDto) {
+            super.onPostExecute(responseDto);
             setProgressDialogVisible(null, null, false);
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
-                    responseVS, getFragmentManager());
+            if(ResponseDto.SC_OK != responseDto.getStatusCode()) MessageDialogFragment.showDialog(
+                    responseDto, getFragmentManager());
             else {
                 try {
-                    VoteDto voteDtoDto = (VoteDto) responseVS.getMessage(VoteDto.class);
-                    MessageDialogFragment.showDialog(ResponseVS.SC_OK,
+                    VoteDto voteDtoDto = (VoteDto) responseDto.getMessage(VoteDto.class);
+                    MessageDialogFragment.showDialog(ResponseDto.SC_OK,
                             MsgUtils.getVoteStateMsg(voteDtoDto.getState(), getActivity()),
                             getString(R.string.votvs_value_msg, voteDtoDto.getOptionSelected().getContent()),
                             getFragmentManager());
@@ -451,19 +451,19 @@ public class ReceiptFragment extends Fragment {
                     getString(R.string.checking_vote_state_lbl), true);
         }
 
-        @Override protected ResponseVS doInBackground(String... params) {
-            ResponseVS responseVS = null;
+        @Override protected ResponseDto doInBackground(String... params) {
+            ResponseDto responseDto = null;
             try {
                 String hashHex = StringUtils.toHex(params[0]);
-                responseVS = HttpHelper.getInstance().getData(appVS.getAccessControl().
+                responseDto = HttpConnection.getInstance().getData(app.getAccessControl().
                         getVoteCheckServiceURL(hashHex), ContentType.JSON);
             } catch(Exception ex) {
-                responseVS = ResponseVS.EXCEPTION(ex, getActivity());
-            } finally {return responseVS;}
+                responseDto = ResponseDto.EXCEPTION(ex, getActivity());
+            } finally {return responseDto;}
         }
     }
 
-    public class ReceiptFetcher extends AsyncTask<String, String, ResponseVS> {
+    public class ReceiptFetcher extends AsyncTask<String, String, ResponseDto> {
 
         public ReceiptFetcher() { }
 
@@ -472,27 +472,27 @@ public class ReceiptFragment extends Fragment {
                     getString(R.string.wait_msg), true);
         }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
-            return HttpHelper.getInstance().getData(urls[0], ContentType.TEXT);
+        @Override protected ResponseDto doInBackground(String... urls) {
+            return HttpConnection.getInstance().getData(urls[0], ContentType.TEXT);
         }
 
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        @Override  protected void onPostExecute(ResponseDto responseDto) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 try {
-                    receiptWrapper.setReceipt(CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes()));
+                    receiptWrapper.setReceipt(CMSSignedMessage.FROM_PEM(responseDto.getMessageBytes()));
                     if(transactionDto != null) {
-                        transactionDto.setCMSMessage(responseVS.getCMS());
-                        TransactionContentProvider.updateTransaction(appVS, transactionDto);
+                        transactionDto.setCMSMessage(responseDto.getCMS());
+                        TransactionContentProvider.updateTransaction(app, transactionDto);
                     }
                     initReceiptScreen(receiptWrapper);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.exception_lbl),
+                    MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, getString(R.string.exception_lbl),
                             ex.getMessage(), getFragmentManager());
                 }
             } else {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
-                        responseVS.getMessage(), getFragmentManager());
+                MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, getString(R.string.error_lbl),
+                        responseDto.getMessage(), getFragmentManager());
             }
             setProgressDialogVisible(null, null, false);
         }

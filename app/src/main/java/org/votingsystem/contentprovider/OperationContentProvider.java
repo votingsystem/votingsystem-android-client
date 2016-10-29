@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.Operation;
 
@@ -196,8 +196,8 @@ public class OperationContentProvider extends ContentProvider {
     public static ContentValues getContentValues(Operation operation) {
         ContentValues values = new ContentValues();
         values.put(OperationContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(operation));
-        values.put(OperationContentProvider.URL_COL, AppVS.getInstance().getCurrencyServerURL());
-        values.put(OperationContentProvider.TYPE_COL, operation.getTypeVS().toString());
+        values.put(OperationContentProvider.URL_COL, App.getInstance().getCurrencyServerURL());
+        values.put(OperationContentProvider.TYPE_COL, operation.getOperationType().toString());
         values.put(OperationContentProvider.STATE_COL, operation.getState().toString());
         if(operation.getLocalId() == null) {
             values.put(OperationContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());

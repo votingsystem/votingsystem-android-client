@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 import org.votingsystem.android.R;
 import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
@@ -36,7 +36,7 @@ public class FragmentContainerActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             return;
         }
-        String fragmentClass = getIntent().getStringExtra(ContextVS.FRAGMENT_KEY);
+        String fragmentClass = getIntent().getStringExtra(Constants.FRAGMENT_KEY);
         try {
             Class clazz = Class.forName(fragmentClass);
             Fragment fragment = (Fragment)clazz.newInstance();

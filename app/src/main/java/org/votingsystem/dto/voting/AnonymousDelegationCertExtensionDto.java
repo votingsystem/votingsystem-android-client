@@ -8,17 +8,17 @@ import java.util.Date;
 public class AnonymousDelegationCertExtensionDto {
 
     private String accessControlURL;
-    private String hashCertVS;
+    private String revocationHash;
     private Integer weeksOperationActive;
     private Date validFrom;
     private Date validTo;
 
     public AnonymousDelegationCertExtensionDto() {}
 
-    public AnonymousDelegationCertExtensionDto(String accessControlURL, String hashCertVS, Integer weeksOperationActive,
+    public AnonymousDelegationCertExtensionDto(String accessControlURL, String revocationHash, Integer weeksOperationActive,
                                                Date validFrom, Date validTo) {
         this.accessControlURL = accessControlURL;
-        this.hashCertVS = hashCertVS;
+        this.revocationHash = revocationHash;
         this.weeksOperationActive = weeksOperationActive;
         this.validFrom = validFrom;
         this.validTo = validTo;
@@ -33,12 +33,12 @@ public class AnonymousDelegationCertExtensionDto {
         this.accessControlURL = accessControlURL;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public Integer getWeeksOperationActive() {

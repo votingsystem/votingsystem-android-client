@@ -203,7 +203,7 @@ public class ReceiptContentProvider extends ContentProvider {
         ContentValues values = new ContentValues();
         values.put(SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(voteHelper));
         values.put(URL_COL, voteHelper.getCMSVoteURL());
-        values.put(TYPE_COL, voteHelper.getTypeVS().toString());
+        values.put(TYPE_COL, voteHelper.getOperationType().toString());
         values.put(STATE_COL, state.toString());
         if(voteHelper.getLocalId() == null) values.put(TIMESTAMP_CREATED_COL, System.currentTimeMillis());
         values.put(TIMESTAMP_UPDATED_COL, System.currentTimeMillis());

@@ -31,7 +31,7 @@ import org.bouncycastle2.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle2.x509.extension.X509ExtensionUtil;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Utils;
 
@@ -110,7 +110,7 @@ public class CertUtils {
         certGen.setNotAfter(dateFinish);
         certGen.setSubjectDN(x509Principal);
         certGen.setPublicKey(requestPublicKey);
-        certGen.setSignatureAlgorithm(ContextVS.SIGNATURE_ALGORITHM);
+        certGen.setSignatureAlgorithm(Constants.SIGNATURE_ALGORITHM);
         certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
                 new SubjectKeyIdentifierStructure(requestPublicKey));
         certGen.addExtension(X509Extensions.BasicConstraints, true,
@@ -122,7 +122,7 @@ public class CertUtils {
             for (int i = 0; i != attributes.size(); i++) {
                 if(attributes.getObjectAt(i) instanceof DERTaggedObject) {
                     DERTaggedObject taggedObject = (DERTaggedObject)attributes.getObjectAt(i);
-                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(Constants.VOTING_SYSTEM_BASE_OID +
                             taggedObject.getTagNo());
                     certGen.addExtension(oid, true, taggedObject);
                 } else {
@@ -142,13 +142,13 @@ public class CertUtils {
         if(certExtensions != null) {
             for(DERTaggedObject taggedObject: certExtensions) {
                 if(taggedObject != null) {
-                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(ContextVS.VOTING_SYSTEM_BASE_OID +
+                    ASN1ObjectIdentifier oid = new  ASN1ObjectIdentifier(Constants.VOTING_SYSTEM_BASE_OID +
                             taggedObject.getTagNo());
                     certGen.addExtension(oid, true, taggedObject);
                 } LOGD(TAG, "null taggedObject");
             }
         }
-        return certGen.generate(caKey, ContextVS.PROVIDER);
+        return certGen.generate(caKey, Constants.PROVIDER);
     }
 
     /**
@@ -274,7 +274,7 @@ public class CertUtils {
             PKIXParameters pkixParameters = new PKIXParameters(anchors);
             pkixParameters.setDate(signingDate);
             pkixParameters.setRevocationEnabled(checkCRL); // if false tell system do not check CRL's
-            CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", ContextVS.PROVIDER);
+            CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", Constants.PROVIDER);
             CertificateFactory certFact = CertificateFactory.getInstance("X.509");
             CertPath certPath = certFact.generateCertPath(certs);
             CertPathValidatorResult result = certPathValidator.validate(certPath, pkixParameters);

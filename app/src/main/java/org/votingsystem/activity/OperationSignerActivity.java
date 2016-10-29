@@ -23,12 +23,12 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
@@ -60,11 +60,11 @@ public class OperationSignerActivity extends AppCompatActivity {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
         SocketMessageDto socketMessageResponse = (SocketMessageDto) intent.getSerializableExtra(
-                ContextVS.WEBSOCKET_MSG_KEY);
+                Constants.WEBSOCKET_MSG_KEY);
         setProgressDialogVisible(false, null, null);
         if(socketMessageResponse != null) {
-            if(TypeVS.OPERATION_RESULT == socketMessageResponse.getMessageType()) {
-                if(ResponseVS.SC_WS_MESSAGE_SEND_OK != socketMessageResponse.getStatusCode()) {
+            if(OperationType.OPERATION_RESULT == socketMessageResponse.getMessageType()) {
+                if(ResponseDto.SC_WS_MESSAGE_SEND_OK != socketMessageResponse.getStatusCode()) {
                     showMessage(socketMessageResponse.getStatusCode(),
                             getString(R.string.sign_document_lbl), socketMessageResponse.getMessage());
                 }
@@ -78,11 +78,11 @@ public class OperationSignerActivity extends AppCompatActivity {
         try {
             Intent startIntent = new Intent(this, WebSocketService.class);
             if(this.socketMessage != null && this.socketMessage.getQrMessage() != null) {
-                startIntent.putExtra(ContextVS.SESSION_KEY,
+                startIntent.putExtra(Constants.SESSION_KEY,
                         this.socketMessage.getQrMessage().getSessionType());
             }
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessage.getOperation());
-            startIntent.putExtra(ContextVS.MESSAGE_KEY,
+            startIntent.putExtra(Constants.TYPEVS_KEY, socketMessage.getOperation());
+            startIntent.putExtra(Constants.MESSAGE_KEY,
                     JSON.writeValueAsString(socketMessage));
             startService(startIntent);
         } catch (Exception ex) { ex.printStackTrace();}
@@ -96,7 +96,7 @@ public class OperationSignerActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.cms_signed_content);
         signature_state = (TextView) findViewById(R.id.signature_state);
         TextView textView = (TextView) findViewById(R.id.deviceName);
-        socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(ContextVS.WEBSOCKET_MSG_KEY);
+        socketMessage = (SocketMessageDto) getIntent().getSerializableExtra(Constants.WEBSOCKET_MSG_KEY);
         try {
             operationDto = socketMessage.getMessage(OperationDto.class);
             String signatureContent = JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT,
@@ -106,7 +106,7 @@ public class OperationSignerActivity extends AppCompatActivity {
             else textView.setText(getString(R.string.sign_send_msg));
         } catch (Exception ex) { ex.printStackTrace(); }
         if(savedInstanceState != null) {
-            byte[] cmsBytes = savedInstanceState.getByteArray(ContextVS.CMS_MSG_KEY);
+            byte[] cmsBytes = savedInstanceState.getByteArray(Constants.CMS_MSG_KEY);
             if(cmsBytes != null) {
                 try {
                     cms = new CMSSignedMessage(cmsBytes);
@@ -140,18 +140,18 @@ public class OperationSignerActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         if(data == null) return;
-        final ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        final ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
         switch(requestCode) {
             case RC_SIGN_REQUEST:
-                if(responseVS != null && responseVS.getCMS() != null) {
-                    cms = responseVS.getCMS();
+                if(responseDto != null && responseDto.getCMS() != null) {
+                    cms = responseDto.getCMS();
                     executorService.submit(new Runnable() {
                         @Override public void run() {
                             try {
-                                ResponseVS response = HttpHelper.getInstance().sendData(cms.toPEM(),
+                                ResponseDto response = HttpConnection.getInstance().sendData(cms.toPEM(),
                                         ContentType.JSON_SIGNED, operationDto.getServiceURL());
                                 sendSocketMessage(socketMessage.getPlainResponse(response.getStatusCode(),
-                                        response.getMessage(), TypeVS.OPERATION_RESULT));
+                                        response.getMessage(), OperationType.OPERATION_RESULT));
                                 finish();
                             } catch (Exception e) { e.printStackTrace(); }
                         }});
@@ -159,14 +159,14 @@ public class OperationSignerActivity extends AppCompatActivity {
                 }
                 break;
             case RC_PASSWORD_REQUEST:
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    String accessModePassw = new String(responseVS.getMessageBytes());
+                if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                    String accessModePassw = new String(responseDto.getMessageBytes());
                     Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, getTextToSign());
-                    intent.putExtra(ContextVS.USER_KEY, socketMessage.getDeviceFromName());
-                    intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.sign_send_msg));
-                    intent.putExtra(ContextVS.PASSWORD_KEY, accessModePassw.toCharArray());
+                    intent.putExtra(Constants.MESSAGE_CONTENT_KEY, getTextToSign());
+                    intent.putExtra(Constants.USER_KEY, socketMessage.getDeviceFromName());
+                    intent.putExtra(Constants.MESSAGE_SUBJECT_KEY, getString(R.string.sign_request_lbl));
+                    intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.sign_send_msg));
+                    intent.putExtra(Constants.PASSWORD_KEY, accessModePassw.toCharArray());
                     startActivityForResult(intent, RC_SIGN_REQUEST);
                 }
                 break;
@@ -231,7 +231,7 @@ public class OperationSignerActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
+                new IntentFilter(Constants.WEB_SOCKET_BROADCAST_ID));
     }
 
     @Override public void onPause() {
@@ -241,7 +241,7 @@ public class OperationSignerActivity extends AppCompatActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         try {
-            if(cms != null) outState.putByteArray(ContextVS.CMS_MSG_KEY, cms.getEncoded());
+            if(cms != null) outState.putByteArray(Constants.CMS_MSG_KEY, cms.getEncoded());
         }catch (Exception e) { e.printStackTrace(); }
         super.onSaveInstanceState(outState);
     }

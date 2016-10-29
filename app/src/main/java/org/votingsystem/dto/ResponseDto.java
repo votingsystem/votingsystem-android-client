@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.dto;
 
 import android.content.Context;
 import android.net.Uri;
@@ -9,16 +9,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.OperationDto;
+import org.votingsystem.util.ContentType;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.OperationType;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public class ResponseVS<T> implements Parcelable {
+public class ResponseDto<T> implements Parcelable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String TAG = ResponseVS.class.getSimpleName();
+    public static final String TAG = ResponseDto.class.getSimpleName();
 
     public static final int SC_OK                       = 200;
     public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
@@ -50,7 +52,7 @@ public class ResponseVS<T> implements Parcelable {
     private String message;
     private String serviceCaller;
     private T data;
-    private TypeVS typeVS;
+    private OperationType operationType;
     private CMSSignedMessage cmsMessage;
     private byte[] cmsPEMMessageBytes;
     private ContentType contentType = ContentType.TEXT;
@@ -59,9 +61,9 @@ public class ResponseVS<T> implements Parcelable {
 
 
 
-    public ResponseVS() {  }
+    public ResponseDto() {  }
 
-    public ResponseVS(Parcel source) {
+    public ResponseDto(Parcel source) {
         // Must read values in the same order as they were placed in
         statusCode = source.readInt();
         serviceCaller = source.readString();
@@ -74,7 +76,7 @@ public class ResponseVS<T> implements Parcelable {
                 operation = JSON.readValue(operationStr, OperationDto.class);
             } catch (Exception ex) { ex.printStackTrace();}
         }
-        typeVS = (TypeVS) source.readSerializable();
+        operationType = (OperationType) source.readSerializable();
         contentType = (ContentType) source.readSerializable();
         messageBytes = new byte[source.readInt()];
         source.readByteArray(messageBytes);
@@ -83,104 +85,104 @@ public class ResponseVS<T> implements Parcelable {
         uri = source.readParcelable(Uri.class.getClassLoader());
     }
 
-    public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-                      TypeVS typeVS) {
+    public ResponseDto(int statusCode, String serviceCaller, String caption, String message,
+                       OperationType operationType) {
         this.statusCode = statusCode;
         this.serviceCaller = serviceCaller;
         this.caption = caption;
         this.message = message;
-        this.typeVS = typeVS;
+        this.operationType = operationType;
     }
 
-    public ResponseVS(int statusCode, String serviceCaller, String caption, String message,
-              TypeVS typeVS, CMSSignedMessage cmsMessage) {
+    public ResponseDto(int statusCode, String serviceCaller, String caption, String message,
+                       OperationType operationType, CMSSignedMessage cmsMessage) {
         this.statusCode = statusCode;
         this.serviceCaller = serviceCaller;
         this.caption = caption;
         this.message = message;
-        this.typeVS = typeVS;
+        this.operationType = operationType;
         this.cmsMessage = cmsMessage;
     }
 
-    public ResponseVS(int statusCode, TypeVS typeVS) {
+    public ResponseDto(int statusCode, OperationType operationType) {
         this.statusCode = statusCode;
-        this.typeVS = typeVS;
+        this.operationType = operationType;
     }
 
 
-    public ResponseVS(int statusCode, String message, byte[] messageBytes) {
+    public ResponseDto(int statusCode, String message, byte[] messageBytes) {
         this.statusCode = statusCode;
         this.message = message;
         this.messageBytes = messageBytes;
     }
 
-    public ResponseVS(int statusCode, CMSSignedMessage cmsMessage) {
+    public ResponseDto(int statusCode, CMSSignedMessage cmsMessage) {
         this.statusCode = statusCode;
         this.cmsMessage = cmsMessage;
     }
 
-    public ResponseVS(int statusCode, String message) {
+    public ResponseDto(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
 
-    public ResponseVS(int statusCode, String message, ContentType contentType) {
+    public ResponseDto(int statusCode, String message, ContentType contentType) {
         this.statusCode = statusCode;
         this.message = message;
         this.contentType = contentType;
     }
 
-    public ResponseVS(int statusCode, byte[] messageBytes) {
+    public ResponseDto(int statusCode, byte[] messageBytes) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
     }
 
-    public ResponseVS(int statusCode, byte[] messageBytes, ContentType contentType) {
+    public ResponseDto(int statusCode, byte[] messageBytes, ContentType contentType) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
         this.contentType = contentType;
     }
 
-    public ResponseVS(int statusCode) {
+    public ResponseDto(int statusCode) {
         this.statusCode = statusCode;
     }
-    public ResponseVS(TypeVS typeVS, T data) {
-        this.typeVS = typeVS;
+    public ResponseDto(OperationType operationType, T data) {
+        this.operationType = operationType;
         this.data = data;
     }
 
-    public static ResponseVS getResponse(Integer statusCode, String serviceCaller, String caption,
-             String notificationMessage, TypeVS typeVS) {
-        ResponseVS result = new ResponseVS(statusCode);
+    public static ResponseDto getResponse(Integer statusCode, String serviceCaller, String caption,
+                                          String notificationMessage, OperationType operationType) {
+        ResponseDto result = new ResponseDto(statusCode);
         result.setCaption(caption).setNotificationMessage(notificationMessage);
         result.setServiceCaller(serviceCaller);
-        result.setTypeVS(typeVS);
+        result.setOperationType(operationType);
         return result;
     }
 
-    public static ResponseVS EXCEPTION(String caption, String message) {
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
-        responseVS.setCaption(caption);
-        responseVS.setNotificationMessage(message);
-        return responseVS;
+    public static ResponseDto EXCEPTION(String caption, String message) {
+        ResponseDto responseDto = new ResponseDto(ResponseDto.SC_ERROR);
+        responseDto.setCaption(caption);
+        responseDto.setNotificationMessage(message);
+        return responseDto;
     }
 
-    public static ResponseVS EXCEPTION(Exception ex, Context context) {
+    public static ResponseDto EXCEPTION(Exception ex, Context context) {
         String message = ex.getMessage();
         if(message == null || message.isEmpty()) message = context.getString(R.string.exception_lbl);
         return EXCEPTION(context.getString(R.string.exception_lbl), message);
     }
 
-    public static ResponseVS ERROR(String caption, String message) {
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_ERROR);
-        responseVS.setCaption(caption);
-        responseVS.setNotificationMessage(message);
-        return responseVS;
+    public static ResponseDto ERROR(String caption, String message) {
+        ResponseDto responseDto = new ResponseDto(ResponseDto.SC_ERROR);
+        responseDto.setCaption(caption);
+        responseDto.setNotificationMessage(message);
+        return responseDto;
     }
 
-    public static ResponseVS OK() {
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-        return responseVS;
+    public static ResponseDto OK() {
+        ResponseDto responseDto = new ResponseDto(ResponseDto.SC_OK);
+        return responseDto;
     }
 
     public String getMessage() {
@@ -202,7 +204,7 @@ public class ResponseVS<T> implements Parcelable {
         return JSON.readValue(getMessage(), type);
     }
 
-    public ResponseVS setMessage(String message) {
+    public ResponseDto setMessage(String message) {
         this.message = message;
         return this;
     }
@@ -211,17 +213,17 @@ public class ResponseVS<T> implements Parcelable {
         return statusCode;
     }
 
-    public ResponseVS setStatusCode(int statusCode) {
+    public ResponseDto setStatusCode(int statusCode) {
         this.statusCode = statusCode;
         return this;
     }
 
-    public TypeVS getTypeVS() {
-        return typeVS;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public ResponseVS setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public ResponseDto setOperationType(OperationType operationType) {
+        this.operationType = operationType;
         return this;
     }
 
@@ -229,7 +231,7 @@ public class ResponseVS<T> implements Parcelable {
         return data;
     }
 
-    public ResponseVS setData(T data) {
+    public ResponseDto setData(T data) {
         this.data = data;
         return this;
     }
@@ -238,7 +240,7 @@ public class ResponseVS<T> implements Parcelable {
 		return messageBytes;
 	}
 
-	public ResponseVS setMessageBytes(byte[] messageBytes) {
+	public ResponseDto setMessageBytes(byte[] messageBytes) {
 		this.messageBytes = messageBytes;
         return this;
 	}
@@ -272,7 +274,7 @@ public class ResponseVS<T> implements Parcelable {
         else return caption;
     }
 
-    public ResponseVS setCaption(String caption) {
+    public ResponseDto setCaption(String caption) {
         this.caption = caption;
         return this;
     }
@@ -281,7 +283,7 @@ public class ResponseVS<T> implements Parcelable {
         return serviceCaller;
     }
 
-    public ResponseVS setServiceCaller(String serviceCaller) {
+    public ResponseDto setServiceCaller(String serviceCaller) {
         this.serviceCaller = serviceCaller;
         return this;
     }
@@ -300,15 +302,15 @@ public class ResponseVS<T> implements Parcelable {
 
     }
 
-    public static final Creator<ResponseVS> CREATOR =
-            new Creator<ResponseVS>() {
+    public static final Creator<ResponseDto> CREATOR =
+            new Creator<ResponseDto>() {
 
-        @Override public ResponseVS createFromParcel(Parcel source) {
-            return new ResponseVS(source);
+        @Override public ResponseDto createFromParcel(Parcel source) {
+            return new ResponseDto(source);
         }
 
-        @Override public ResponseVS[] newArray(int size) {
-            return new ResponseVS[size];
+        @Override public ResponseDto[] newArray(int size) {
+            return new ResponseDto[size];
         }
 
     };
@@ -328,7 +330,7 @@ public class ResponseVS<T> implements Parcelable {
                 parcel.writeString(JSON.writeValueAsString(operation));
             } catch (Exception ex) { ex.printStackTrace();}
         } else parcel.writeString(null);
-        parcel.writeSerializable(typeVS);
+        parcel.writeSerializable(operationType);
         parcel.writeSerializable(contentType);
         if(messageBytes != null) {
             parcel.writeInt(messageBytes.length);
@@ -357,7 +359,7 @@ public class ResponseVS<T> implements Parcelable {
         return notificationMessage;
     }
 
-    public ResponseVS setNotificationMessage(String notificationMessage) {
+    public ResponseDto setNotificationMessage(String notificationMessage) {
         this.notificationMessage = notificationMessage;
         return this;
     }
@@ -372,7 +374,7 @@ public class ResponseVS<T> implements Parcelable {
 
     @Override public String toString() {
         return this.getClass().getSimpleName() + " - statusCode: " + statusCode +
-                " - typeVS:" + typeVS;
+                " - operationType:" + operationType;
     }
 
 }

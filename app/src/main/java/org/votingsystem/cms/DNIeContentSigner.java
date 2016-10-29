@@ -21,8 +21,8 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
-import static org.votingsystem.util.ContextVS.PROVIDER;
-import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.util.Constants.PROVIDER;
+import static org.votingsystem.util.Constants.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**

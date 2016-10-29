@@ -14,10 +14,10 @@ import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.ui.PatternLockView;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -45,7 +45,7 @@ public class PatternLockActivity extends AppCompatActivity {
     private String newPin;
     private String firstPin;
     private String msgUUID;
-    private TypeVS operation;
+    private OperationType operation;
     private CryptoDeviceAccessMode passwAccessMode;
     private char[] dniePassword;
 
@@ -57,20 +57,20 @@ public class PatternLockActivity extends AppCompatActivity {
         UIUtils.setSupportActionBar(this);
         mCircleLockView = (PatternLockView) findViewById(R.id.lock_view_circle);
         msgTextView = (TextView) findViewById(R.id.msg);
-        operation = (TypeVS) getIntent().getSerializableExtra(ContextVS.OPERATION_KEY);
-        msgUUID = getIntent().getStringExtra(ContextVS.UUID_KEY);
-        String operationCode = getIntent().getStringExtra(ContextVS.OPERATION_CODE_KEY);
+        operation = (OperationType) getIntent().getSerializableExtra(Constants.OPERATION_KEY);
+        msgUUID = getIntent().getStringExtra(Constants.UUID_KEY);
+        String operationCode = getIntent().getStringExtra(Constants.OPERATION_CODE_KEY);
         if(operationCode != null) {
             TextView operationCodeText = (TextView) findViewById(R.id.operation_code);
             operationCodeText.setText(operationCode);
             operationCodeText.setVisibility(View.VISIBLE);
         }
-        if(getIntent().getStringExtra(ContextVS.MESSAGE_KEY) != null) {
-            msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(ContextVS.MESSAGE_KEY)));
+        if(getIntent().getStringExtra(Constants.MESSAGE_KEY) != null) {
+            msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(Constants.MESSAGE_KEY)));
         }
-        withPasswordConfirm = getIntent().getExtras().getBoolean(ContextVS.PASSWORD_CONFIRM_KEY, false);
+        withPasswordConfirm = getIntent().getExtras().getBoolean(Constants.PASSWORD_CONFIRM_KEY, false);
         passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-        requestMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY, MODE_VALIDATE_INPUT);
+        requestMode = getIntent().getExtras().getInt(Constants.MODE_KEY, MODE_VALIDATE_INPUT);
         switch (requestMode) {
             case MODE_CHANGE_PASSWORD:
                 getSupportActionBar().setTitle(R.string.change_password_lbl);
@@ -78,7 +78,7 @@ public class PatternLockActivity extends AppCompatActivity {
                     processPassword(null);
                 } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PIN) {
                     Intent intent = new Intent(this, PinActivity.class);
-                    intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_actual_passw_msg));
+                    intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.enter_actual_passw_msg));
                     startActivityForResult(intent, RC_PIN_PASSWORD);
                 } else {
                     msgTextView.setText(getString(R.string.enter_actual_passw_msg));
@@ -130,8 +130,8 @@ public class PatternLockActivity extends AppCompatActivity {
                                         passw.toCharArray(), dniePassword);
                             } else if(PrefUtils.isDNIeEnabled()) {
                                 Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                                intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.enter_password_msg));
-                                intent.putExtra(ContextVS.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
+                                intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                                intent.putExtra(Constants.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
                                 startActivityForResult(intent, RC_IDCARD_PASSWORD);
                                 return;
                             }
@@ -161,10 +161,10 @@ public class PatternLockActivity extends AppCompatActivity {
                 if(!passwAccessMode.validateHash(passw, this)) return;
                 break;
         }
-        if(operation == TypeVS.WEB_SOCKET_REQUEST) {
+        if(operation == OperationType.WEB_SOCKET_REQUEST) {
             Intent startIntent = new Intent(this, WebSocketService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.PIN);
-            startIntent.putExtra(ContextVS.UUID_KEY, msgUUID);
+            startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.PIN);
+            startIntent.putExtra(Constants.UUID_KEY, msgUUID);
             startService(startIntent);
         }
         finishOK(passw);
@@ -183,9 +183,9 @@ public class PatternLockActivity extends AppCompatActivity {
 
     private void finishOK(String passw) {
         Intent resultIntent = new Intent();
-        ResponseVS responseVS = ResponseVS.OK().setMessageBytes(passw.getBytes());
-        resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        resultIntent.putExtra(ContextVS.MODE_KEY, CryptoDeviceAccessMode.Mode.PATTER_LOCK);
+        ResponseDto responseDto = ResponseDto.OK().setMessageBytes(passw.getBytes());
+        resultIntent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        resultIntent.putExtra(Constants.MODE_KEY, CryptoDeviceAccessMode.Mode.PATTER_LOCK);
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
     }
@@ -196,9 +196,9 @@ public class PatternLockActivity extends AppCompatActivity {
         switch (requestCode) {
             case RC_PIN_PASSWORD:
                 if(Activity.RESULT_OK == resultCode)  {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    processPassword(new String(responseVS.getMessageBytes()));
-                } else if(ResponseVS.SC_ERROR == resultCode) {
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    processPassword(new String(responseDto.getMessageBytes()));
+                } else if(ResponseDto.SC_ERROR == resultCode) {
                     setResult(Activity.RESULT_CANCELED);
                     finish();
                 } else {
@@ -216,8 +216,8 @@ public class PatternLockActivity extends AppCompatActivity {
                 break;
             case RC_IDCARD_PASSWORD:
                 if(Activity.RESULT_OK == resultCode)  {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    this.dniePassword  = new String(responseVS.getMessageBytes()).toCharArray();
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    this.dniePassword  = new String(responseDto.getMessageBytes()).toCharArray();
                     PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PIN,
                             newPin.toCharArray(), dniePassword);
                     showResultDialog();

@@ -6,14 +6,14 @@ package org.votingsystem.dto.voting;
 public class VoteCertExtensionDto {
 
     private String accessControlURL;
-    private String hashCertVS;
+    private String revocationHash;
     private Long eventId;
 
     public VoteCertExtensionDto() {}
 
-    public VoteCertExtensionDto(String accessControlURL, String hashCertVS, Long eventId) {
+    public VoteCertExtensionDto(String accessControlURL, String revocationHash, Long eventId) {
         this.accessControlURL = accessControlURL;
-        this.hashCertVS = hashCertVS;
+        this.revocationHash = revocationHash;
         this.eventId = eventId;
     }
 
@@ -26,12 +26,12 @@ public class VoteCertExtensionDto {
         this.accessControlURL = accessControlURL;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public Long getEventId() {

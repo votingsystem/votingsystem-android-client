@@ -23,12 +23,12 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
@@ -54,7 +54,7 @@ public class MessageFragment extends Fragment {
 
     private WeakReference<CurrencyFragment> currencyRef;
     private SocketMessageDto socketMessage;
-    private TypeVS typeVS;
+    private OperationType operationType;
     private Currency currency;
     private MessageContentProvider.State messageState;
     private TextView message_content;
@@ -67,7 +67,7 @@ public class MessageFragment extends Fragment {
     public static Fragment newInstance(int cursorPosition) {
         MessageFragment fragment = new MessageFragment();
         Bundle args = new Bundle();
-        args.putInt(ContextVS.CURSOR_POSITION_KEY, cursorPosition);
+        args.putInt(Constants.CURSOR_POSITION_KEY, cursorPosition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -78,7 +78,7 @@ public class MessageFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.message_fragment, container, false);
         fragment_container = (LinearLayout)rootView.findViewById(R.id.fragment_container);
         message_content = (TextView)rootView.findViewById(R.id.message_content);
-        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
+        int cursorPosition =  getArguments().getInt(Constants.CURSOR_POSITION_KEY);
         cursor = getActivity().getContentResolver().query(
                 MessageContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
@@ -90,9 +90,9 @@ public class MessageFragment extends Fragment {
             socketMessage = JSON.readValue(cursor.getString(
                     cursor.getColumnIndex(MessageContentProvider.JSON_COL)), SocketMessageDto.class);
             messageId = cursor.getLong(cursor.getColumnIndex(MessageContentProvider.ID_COL));
-            typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
+            operationType =  OperationType.valueOf(cursor.getString(cursor.getColumnIndex(
                     MessageContentProvider.TYPE_COL)));
-            switch (typeVS) {
+            switch (operationType) {
                 case MESSAGEVS:
                     ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(
                             R.string.msg_lbl));
@@ -148,7 +148,7 @@ public class MessageFragment extends Fragment {
                 fragment_container.addView(tempView);
                 currencyRef = new WeakReference<>(new CurrencyFragment());
                 Bundle args = new Bundle();
-                args.putSerializable(ContextVS.CURRENCY_KEY, currency);
+                args.putSerializable(Constants.CURRENCY_KEY, currency);
                 currencyRef.get().setArguments(args);
                 getFragmentManager().beginTransaction().add(tempView.getId(),
                         currencyRef.get(), fragmentTag).commit();
@@ -187,8 +187,8 @@ public class MessageFragment extends Fragment {
                 break;
             case R.id.send_message:
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
-                resultIntent.putExtra(ContextVS.FRAGMENT_KEY, MessageFormFragment.class.getName());
-                resultIntent.putExtra(ContextVS.WEBSOCKET_MSG_KEY, socketMessage);
+                resultIntent.putExtra(Constants.FRAGMENT_KEY, MessageFormFragment.class.getName());
+                resultIntent.putExtra(Constants.WEBSOCKET_MSG_KEY, socketMessage);
                 resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(resultIntent);
                 return true;
@@ -235,21 +235,21 @@ public class MessageFragment extends Fragment {
                                 }
                             });
                     UIUtils.showMessageDialog(builder);
-                    socketMessageDto = socketMessage.getResponse(ResponseVS.SC_OK, currency.getHashCertVS(),
-                            null, TypeVS.CURRENCY_WALLET_CHANGE);
+                    socketMessageDto = socketMessage.getResponse(ResponseDto.SC_OK, currency.getRevocationHash(),
+                            null, OperationType.CURRENCY_WALLET_CHANGE);
                 } catch (ValidationExceptionVS ex) {
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                             getString(R.string.error_lbl), ex.getMessage(),
                             getFragmentManager());
-                    socketMessageDto = socketMessage.getResponse(ResponseVS.SC_ERROR, ex.getMessage(),
-                            null, TypeVS.CURRENCY_WALLET_CHANGE);
+                    socketMessageDto = socketMessage.getResponse(ResponseDto.SC_ERROR, ex.getMessage(),
+                            null, OperationType.CURRENCY_WALLET_CHANGE);
                 }
                 if(socketMessageDto != null) {
                     Intent startIntent = new Intent(getActivity(), WebSocketService.class);
-                    startIntent.putExtra(ContextVS.TYPEVS_KEY, socketMessageDto.getOperation());
-                    startIntent.putExtra(ContextVS.MESSAGE_KEY,
+                    startIntent.putExtra(Constants.TYPEVS_KEY, socketMessageDto.getOperation());
+                    startIntent.putExtra(Constants.MESSAGE_KEY,
                             JSON.writeValueAsString(socketMessageDto));
-                    startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                    startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
                     getActivity().startService(startIntent);
                 }
                 MessageContentProvider.deleteById(messageId, getActivity());
@@ -262,13 +262,13 @@ public class MessageFragment extends Fragment {
         switch (requestCode) {
             case RC_OPEN_WALLET:
                 try {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
                     Set<Currency> currencyList = Wallet.getCurrencySet(
-                            new String(responseVS.getMessageBytes()).toCharArray());
+                            new String(responseDto.getMessageBytes()).toCharArray());
                     if(currencyList != null) updateWallet();
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                             getString(R.string.error_lbl), ex.getMessage(), getFragmentManager());
                 }
                 break;

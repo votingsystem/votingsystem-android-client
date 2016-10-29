@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.TagVSDto;
@@ -61,11 +61,11 @@ public class MsgUtils {
     public static String getMessagesDrawerItemMessage() {
         Integer messagesNotReaded = MessageContentProvider.countNumMessagesNotReaded();
         String prefix = messagesNotReaded == 0 ? "": messagesNotReaded + "  ";
-        return prefix + AppVS.getInstance().getString(R.string.messages_lbl);
+        return prefix + App.getInstance().getString(R.string.messages_lbl);
     }
 
     public static String getTagVSMessage(String tag) {
-        if(TagVSDto.WILDTAG.equals(tag)) return AppVS.getInstance().getString(R.string.wildtag_lbl);
+        if(TagVSDto.WILDTAG.equals(tag)) return App.getInstance().getString(R.string.wildtag_lbl);
         else return tag.toLowerCase();
     }
 
@@ -133,13 +133,13 @@ public class MsgUtils {
             CurrencyBatchDto batchDto = (CurrencyBatchDto) data;
             switch(batchDto.getOperation()) {
                 case CURRENCY_SEND:
-                    result = AppVS.getInstance().getString(R.string.currency_send_description,
+                    result = App.getInstance().getString(R.string.currency_send_description,
                             batchDto.getSubject(), batchDto.getToUserName(),
                             batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode() + " - " + batchDto.getTag(),
                             batchDto.getLeftOver() + " " + batchDto.getCurrencyCode());
                     break;
                 case CURRENCY_CHANGE:
-                    result = AppVS.getInstance().getString(R.string.currency_change_description,
+                    result = App.getInstance().getString(R.string.currency_change_description,
                             batchDto.getSubject(), batchDto.getToUserName(),
                             batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode() + " - " + batchDto.getTag(),
                             batchDto.getLeftOver() + " " + batchDto.getCurrencyCode());
@@ -251,7 +251,7 @@ public class MsgUtils {
     }
 
     public static String userFromCSRMissmatch(UserDto userFromCSR) {
-        return AppVS.getInstance().getString(R.string.user_from_csr_missmatch_msg,
+        return App.getInstance().getString(R.string.user_from_csr_missmatch_msg,
                 userFromCSR.getName(), userFromCSR.getNIF());
     }
 }

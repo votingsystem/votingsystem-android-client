@@ -28,7 +28,7 @@ import org.bouncycastle2.openssl.PEMReader;
 import org.bouncycastle2.util.Store;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.VoteDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.KeyGeneratorVS;
@@ -186,7 +186,7 @@ public class CMSSignedMessage extends CMSSignedData {
             SignerInformation   signer = (SignerInformation)it.next();
             Collection certCollection = certs.getMatches(signer.getSID());
             Iterator certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(Constants.PROVIDER).getCertificate(
                     (X509CertificateHolder) certIt.next());
             if(requestCert.getSerialNumber().equals(cert.getSerialNumber())) {
                 return checkTimeStampToken(signer);
@@ -247,14 +247,14 @@ public class CMSSignedMessage extends CMSSignedData {
                 SignerInformation   signer = (SignerInformation)it.next();
                 Collection certCollection = certs.getMatches(signer.getSID());
                 Iterator certIt = certCollection.iterator();
-                X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider(Constants.PROVIDER).getCertificate(
                         (X509CertificateHolder) certIt.next());
                 log.info("checkSignature - cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
                 try {
                     signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
-                            ContextVS.PROVIDER).build(cert));
+                            Constants.PROVIDER).build(cert));
                     //concurrency issues ->
-                    //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
+                    //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(Constants.PROVIDER).build(cert));
                 } catch(CMSVerifierCertificateNotValidException ex) {
                     log.log(Level.SEVERE, "checkSignature - cert notBefore: " + cert.getNotBefore() + " - NotAfter: " +
                             cert.getNotAfter());
@@ -275,10 +275,10 @@ public class CMSSignedMessage extends CMSSignedData {
                     timeStampToken = tsToken;
                 }
                 signers.add(user);
-                if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
+                if (cert.getExtensionValue(Constants.VOTE_OID) != null) {
                     vote = getSignedContent(VoteDto.class);
                     vote.loadSignatureData(cert, timeStampToken);
-                } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
+                } else if (cert.getExtensionValue(Constants.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}
             }

@@ -14,11 +14,11 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.fragment.EventVSFragment;
 import org.votingsystem.util.ActivityResult;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
-import static org.votingsystem.util.ContextVS.CURSOR_POSITION_KEY;
-import static org.votingsystem.util.ContextVS.EVENT_STATE_KEY;
+import static org.votingsystem.util.Constants.CURSOR_POSITION_KEY;
+import static org.votingsystem.util.Constants.EVENT_STATE_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -44,7 +44,7 @@ public class EventVSPagerActivity extends AppCompatActivity {
         String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                 EventVSContentProvider.STATE_COL + "= ? ";
         cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
-                null, selection, new String[]{TypeVS.VOTING_EVENT.toString(), eventStateStr}, null);
+                null, selection, new String[]{OperationType.VOTING_EVENT.toString(), eventStateStr}, null);
         cursor.moveToPosition(cursorPosition);
         EventsPagerAdapter eventsPagerAdapter = new EventsPagerAdapter(getSupportFragmentManager(),
                 eventStateStr);
@@ -89,7 +89,7 @@ public class EventVSPagerActivity extends AppCompatActivity {
             String selection = EventVSContentProvider.TYPE_COL + "=? AND " +
                     EventVSContentProvider.STATE_COL + "= ? ";
             cursor = getContentResolver().query(EventVSContentProvider.CONTENT_URI,
-                null, selection, new String[]{TypeVS.VOTING_EVENT.toString(), eventStateStr}, null);
+                null, selection, new String[]{OperationType.VOTING_EVENT.toString(), eventStateStr}, null);
         }
 
         @Override public Fragment getItem(int i) {

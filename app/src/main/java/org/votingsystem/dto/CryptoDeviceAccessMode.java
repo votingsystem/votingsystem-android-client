@@ -5,9 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.UIUtils;
 
@@ -28,7 +27,7 @@ public class CryptoDeviceAccessMode implements Serializable {
     public CryptoDeviceAccessMode(Mode mode, char[] passw) {
         try {
             this.mode = mode;
-            this.hashBase64 = StringUtils.getHashBase64(new String(passw), ContextVS.DATA_DIGEST_ALGORITHM);
+            this.hashBase64 = StringUtils.getHashBase64(new String(passw), Constants.DATA_DIGEST_ALGORITHM);
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
@@ -51,24 +50,24 @@ public class CryptoDeviceAccessMode implements Serializable {
     public boolean validateHash(String passw, AppCompatActivity activity) {
         int numRetries = -1;
         try {
-            String passwHash = StringUtils.getHashBase64(passw, ContextVS.DATA_DIGEST_ALGORITHM);
+            String passwHash = StringUtils.getHashBase64(passw, Constants.DATA_DIGEST_ALGORITHM);
             if(!hashBase64.equals(passwHash)) {
                 numRetries = PrefUtils.incrementPasswordRetries();
                 throw new ExceptionVS(activity.getString(R.string.password_error_msg) + ", " +
                         activity.getString(R.string.enter_password_retry_msg,
-                                (ContextVS.NUM_MAX_PASSW_RETRIES - numRetries)));
+                                (Constants.NUM_MAX_PASSW_RETRIES - numRetries)));
             }
             PrefUtils.resetPasswordRetries();
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
-            if((ContextVS.NUM_MAX_PASSW_RETRIES - numRetries) == 0) {
-                UIUtils.launchMessageActivity(ResponseVS.ERROR(activity.getString(
+            if((Constants.NUM_MAX_PASSW_RETRIES - numRetries) == 0) {
+                UIUtils.launchMessageActivity(ResponseDto.ERROR(activity.getString(
                         R.string.retries_exceeded_caption), null).setNotificationMessage(
-                        activity.getString(R.string.retries_exceeded_msg)));
-                activity.setResult(ResponseVS.SC_ERROR);
+                            activity.getString(R.string.retries_exceeded_msg)));
+                activity.setResult(ResponseDto.SC_ERROR);
                 activity.finish();
-            } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
+            } else MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, activity.getString(R.string.error_lbl),
                     ex.getMessage(), activity.getSupportFragmentManager());
             return false;
         }

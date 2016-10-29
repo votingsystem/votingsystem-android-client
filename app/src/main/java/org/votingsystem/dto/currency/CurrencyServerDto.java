@@ -2,7 +2,7 @@ package org.votingsystem.dto.currency;
 
 import org.bouncycastle2.util.encoders.Hex;
 import org.votingsystem.dto.ActorDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 
 import java.io.Serializable;
@@ -65,9 +65,9 @@ public class CurrencyServerDto extends ActorDto implements Serializable {
         return getServerURL() + "/rest/user/searchByDevice?" + query;
     }
 
-    public String getCurrencyStateServiceURL(String hashCertVS) {
+    public String getCurrencyStateServiceURL(String revocationHash) {
         return getServerURL() + "/rest/currency/hash/" +
-                new String(Hex.encode(hashCertVS.getBytes()), ContextVS.UTF_8) + "/state";
+                new String(Hex.encode(revocationHash.getBytes()), Constants.UTF_8) + "/state";
     }
 
     public String getCurrencyBundleStateServiceURL() {

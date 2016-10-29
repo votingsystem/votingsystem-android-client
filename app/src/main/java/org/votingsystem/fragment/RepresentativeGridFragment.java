@@ -30,15 +30,15 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.RepresentativePagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.service.RepresentativeService;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,7 +54,7 @@ public class RepresentativeGridFragment extends Fragment
     private GridView gridView;
     private RepresentativeListAdapter adapter = null;
     private String queryStr = null;
-    private AppVS appVS = null;
+    private App app = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = RepresentativeGridFragment.class.getSimpleName();
@@ -64,24 +64,24 @@ public class RepresentativeGridFragment extends Fragment
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
         setProgressDialogVisible(false);
-        if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
+        if(ResponseDto.SC_CONNECTION_TIMEOUT == responseDto.getStatusCode()) {
             if(gridView.getAdapter().getCount() == 0)
                 rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
         }
-        if(responseVS != null && responseVS.getTypeVS() == TypeVS.REPRESENTATIVE_REVOKE) {
-            MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                    responseVS.getNotificationMessage(), getFragmentManager());
-        } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+        if(responseDto != null && responseDto.getOperationType() == OperationType.REPRESENTATIVE_REVOKE) {
+            MessageDialogFragment.showDialog(responseDto.getStatusCode(), responseDto.getCaption(),
+                    responseDto.getNotificationMessage(), getFragmentManager());
+        } else if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
+            MessageDialogFragment.showDialog(responseDto, getFragmentManager());
         }
         }
     };
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
+        app = (App) getActivity().getApplicationContext();
         Bundle data = getArguments();
         if (data != null && data.containsKey(SearchManager.QUERY)) {
             queryStr = data.getString(SearchManager.QUERY);
@@ -120,9 +120,9 @@ public class RepresentativeGridFragment extends Fragment
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+            Parcelable gridState = savedInstanceState.getParcelable(Constants.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
-            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
+            offset = savedInstanceState.getLong(Constants.OFFSET_KEY);
         }
     }
 
@@ -169,19 +169,19 @@ public class RepresentativeGridFragment extends Fragment
 
 
     public void fetchItems(Long offset) {
-        if(appVS.getAccessControl() == null) {
-            Toast.makeText(appVS, appVS.getString(R.string.server_connection_error_msg,
-                    appVS.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
+        if(app.getAccessControl() == null) {
+            Toast.makeText(app, app.getString(R.string.server_connection_error_msg,
+                    app.getString(R.string.access_control_lbl)), Toast.LENGTH_LONG).show();
             return;
         }
         LOGD(TAG +  ".fetchItems", "offset: " + offset);
         if(isProgressDialogVisible.get()) return;
         else setProgressDialogVisible(true);
         Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
-        startIntent.putExtra(ContextVS.URL_KEY, appVS.getAccessControl().
-                getRepresentativesURL(offset, ContextVS.REPRESENTATIVE_PAGE_SIZE));
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEMS_REQUEST);
+        startIntent.putExtra(Constants.URL_KEY, app.getAccessControl().
+                getRepresentativesURL(offset, Constants.REPRESENTATIVE_PAGE_SIZE));
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.ITEMS_REQUEST);
         getActivity().startService(startIntent);
     }
 
@@ -204,7 +204,7 @@ public class RepresentativeGridFragment extends Fragment
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         Intent intent = new Intent(getActivity(), RepresentativePagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
+        intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
@@ -279,9 +279,9 @@ public class RepresentativeGridFragment extends Fragment
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(ContextVS.OFFSET_KEY, offset);
+        outState.putLong(Constants.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putParcelable(Constants.LIST_STATE_KEY, gridState);
         LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 

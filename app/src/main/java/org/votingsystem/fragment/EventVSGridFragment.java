@@ -29,7 +29,7 @@ import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.EventVSPagerActivity;
 import org.votingsystem.activity.EventVSSearchActivity;
 import org.votingsystem.android.R;
@@ -37,11 +37,11 @@ import org.votingsystem.contentprovider.EventVSContentProvider;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.service.EventVSService;
 import org.votingsystem.ui.EventVSSpinnerAdapter;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -58,7 +58,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private GridView gridView;
     private EventListAdapter mAdapter = null;
     private EventVSDto.State eventState = EventVSDto.State.ACTIVE;
-    private AppVS appVS = null;
+    private App app = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = 0;
     private static final int loaderId = 0;
@@ -67,17 +67,17 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
             setProgressDialogVisible(false);
-            if(ResponseVS.SC_CONNECTION_TIMEOUT == responseVS.getStatusCode()) {
+            if(ResponseDto.SC_CONNECTION_TIMEOUT == responseDto.getStatusCode()) {
                 if(gridView.getAdapter().getCount() == 0)
                     rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
             }
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 getLoaderManager().restartLoader(loaderId, null, EventVSGridFragment.this);
             } else {
                 MessageDialogFragment.showDialog(
-                        responseVS, getFragmentManager());
+                        responseDto, getFragmentManager());
             }
         }
     };
@@ -85,7 +85,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
              Bundle savedInstanceState) {
         LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
+        app = (App) getActivity().getApplicationContext();
         super.onCreate(savedInstanceState);
 
         View spinnerContainer = inflater.inflate(R.layout.spinner_eventvs_actionbar, null);
@@ -132,10 +132,10 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 broadcastReceiver, new IntentFilter(broadCastId));
         getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+            Parcelable gridState = savedInstanceState.getParcelable(Constants.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
-            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
-            firstVisiblePosition = savedInstanceState.getInt(ContextVS.CURSOR_POSITION_KEY);
+            offset = savedInstanceState.getLong(Constants.OFFSET_KEY);
+            firstVisiblePosition = savedInstanceState.getInt(Constants.CURSOR_POSITION_KEY);
         }
         fetchItems(0L);
         return rootView;
@@ -200,19 +200,19 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
     public void fetchItems(Long offset) {
         LOGD(TAG , "fetchItems - offset: " + offset + " - eventState: " + eventState);
         setProgressDialogVisible(true);
-        AppVS.getInstance().addEventsStateLoaded(eventState);
+        App.getInstance().addEventsStateLoaded(eventState);
         firstVisiblePosition = 0;
         Intent startIntent = new Intent(getActivity(), EventVSService.class);
-        startIntent.putExtra(ContextVS.STATE_KEY, eventState);
-        startIntent.putExtra(ContextVS.OFFSET_KEY, offset);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.STATE_KEY, eventState);
+        startIntent.putExtra(Constants.OFFSET_KEY, offset);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
         getActivity().startService(startIntent);
     }
 
     public void fetchItems(EventVSDto.State eventState) {
         this.offset = 0L;
         this.eventState = eventState;
-        if(AppVS.getInstance().isEventsStateLoaded(eventState)) {
+        if(App.getInstance().isEventsStateLoaded(eventState)) {
             getLoaderManager().restartLoader(loaderId, null, this);
             ((CursorAdapter)gridView.getAdapter()).notifyDataSetChanged();
         } else fetchItems(0L);
@@ -220,10 +220,10 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(ContextVS.OFFSET_KEY, offset);
+        outState.putLong(Constants.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putInt(ContextVS.CURSOR_POSITION_KEY, firstVisiblePosition);
+        outState.putParcelable(Constants.LIST_STATE_KEY, gridState);
+        outState.putInt(Constants.CURSOR_POSITION_KEY, firstVisiblePosition);
         LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 
@@ -236,7 +236,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 return true;
             case R.id.search_item:
                 Intent searchStarter = new Intent(getActivity(), EventVSSearchActivity.class);
-                searchStarter.putExtra(ContextVS.EVENT_STATE_KEY, eventState);
+                searchStarter.putExtra(Constants.EVENT_STATE_KEY, eventState);
                 startActivityForResult(searchStarter, 0, null);
                 return true;
             default:
@@ -248,8 +248,8 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
         LOGD(TAG + ".onListItemClick", "position:" + position + " - id: " + id);
         //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(), EventVSPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
-        intent.putExtra(ContextVS.EVENT_STATE_KEY, eventState.toString());
+        intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
+        intent.putExtra(Constants.EVENT_STATE_KEY, eventState.toString());
         startActivity(intent);
     }
 
@@ -259,7 +259,7 @@ public class EventVSGridFragment extends Fragment implements LoaderManager.Loade
                 EventVSContentProvider.STATE_COL + "= ? ";
         CursorLoader loader = new CursorLoader(this.getActivity(),
                 EventVSContentProvider.CONTENT_URI, null, selection,
-                new String[]{TypeVS.VOTING_EVENT.toString(), eventState.toString()}, null);
+                new String[]{OperationType.VOTING_EVENT.toString(), eventState.toString()}, null);
         return loader;
     }
 

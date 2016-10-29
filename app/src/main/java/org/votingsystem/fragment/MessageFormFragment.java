@@ -22,20 +22,20 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.WebSocketSession;
 
@@ -64,28 +64,28 @@ public class MessageFormFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
             SocketMessageDto socketMessageDto = (SocketMessageDto) intent.getSerializableExtra(
-                    ContextVS.WEBSOCKET_MSG_KEY);
+                    Constants.WEBSOCKET_MSG_KEY);
             if(socketMessageDto != null) {
                 setProgressDialogVisible(null, null, false);
-                WebSocketSession socketSession = AppVS.getInstance().getWSSession(socketMessageDto.getUUID());
+                WebSocketSession socketSession = App.getInstance().getWSSession(socketMessageDto.getUUID());
                 switch(socketMessageDto.getStatusCode()) {
-                    case ResponseVS.SC_WS_CONNECTION_NOT_FOUND:
+                    case ResponseDto.SC_WS_CONNECTION_NOT_FOUND:
                         MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
                                 R.string.error_lbl), getString(R.string.usevs_connection_not_found_error_msg),
                                 getFragmentManager());
                         connectedDevices = new HashSet<>();
                         send_msg_button.setVisibility(View.GONE);
                         break;
-                    case ResponseVS.SC_WS_MESSAGE_SEND_OK:
+                    case ResponseDto.SC_WS_MESSAGE_SEND_OK:
                         if(socketSession.getBroadCastId().equals(broadCastId)) {
                             MessageDialogFragment.showDialog(socketMessageDto.getStatusCode(), getString(
                                     R.string.send_msg_lbl), getString(R.string.messagevs_send_ok_msg),
                                     getFragmentManager());
                         }
                         break;
-                    case ResponseVS.SC_WS_CONNECTION_INIT_OK:
+                    case ResponseDto.SC_WS_CONNECTION_INIT_OK:
                         updateConnectedView();
                         break;
                     default:
@@ -101,15 +101,15 @@ public class MessageFormFragment extends Fragment {
         View view = inflater.inflate(R.layout.messagevs_form_fragment, null);
         messageEditText = (EditText) view.findViewById(R.id.message);
         msg_form =  (LinearLayout) view.findViewById(R.id.msg_form);
-        user =  (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
-        socketMessage = (SocketMessageDto) getArguments().getSerializable(ContextVS.WEBSOCKET_MSG_KEY);
+        user =  (UserDto) getArguments().getSerializable(Constants.USER_KEY);
+        socketMessage = (SocketMessageDto) getArguments().getSerializable(Constants.WEBSOCKET_MSG_KEY);
         String serviceURL = null;
         if(user != null) {
-            serviceURL = ((AppVS)getActivity().getApplication()).getCurrencyServer()
+            serviceURL = ((App)getActivity().getApplication()).getCurrencyServer()
                     .getDeviceConnectedServiceURL(user.getNIF());
         }
         if(socketMessage != null) {
-            serviceURL = ((AppVS)getActivity().getApplication()).getCurrencyServer()
+            serviceURL = ((App)getActivity().getApplication()).getCurrencyServer()
                     .getDeviceConnectedServiceURL(socketMessage.getDeviceFromId(), true);
         }
         caption_text = (TextView) view.findViewById(R.id.caption_text);
@@ -123,20 +123,20 @@ public class MessageFormFragment extends Fragment {
                 }
                 String msg = messageEditText.getText().toString();
                 Intent startIntent = new Intent(getActivity(), WebSocketService.class);
-                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.MESSAGEVS);
-                startIntent.putExtra(ContextVS.MESSAGE_KEY, msg);
+                startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.MESSAGEVS);
+                startIntent.putExtra(Constants.MESSAGE_KEY, msg);
                 try {
-                    startIntent.putExtra(ContextVS.DTO_KEY,
+                    startIntent.putExtra(Constants.DTO_KEY,
                             JSON.writeValueAsString(connectedDevices));
                 } catch(Exception ex) { ex.printStackTrace();}
-                startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+                startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
                 getActivity().startService(startIntent);
             }
         });
         if(savedInstanceState != null) {
             messageDeliveredNotified = savedInstanceState.getBoolean("messageDeliveredNotified");
             try {
-                connectedDevices = JSON.readValue(savedInstanceState.getString(ContextVS.DTO_KEY),
+                connectedDevices = JSON.readValue(savedInstanceState.getString(Constants.DTO_KEY),
                         new TypeReference<Set<DeviceDto>>() {});
             } catch (Exception ex) {ex.printStackTrace();}
         }
@@ -147,7 +147,7 @@ public class MessageFormFragment extends Fragment {
     }
 
     private boolean checkSocketConnection() {
-        if(!AppVS.getInstance().isWithSocketConnection()) {
+        if(!App.getInstance().isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.send_msg_lbl),
                     getString(R.string.connection_required_msg),
@@ -171,7 +171,7 @@ public class MessageFormFragment extends Fragment {
     }
 
     private void updateConnectedView() {
-        if(!connectedDevices.isEmpty() && AppVS.getInstance().isWithSocketConnection()) {
+        if(!connectedDevices.isEmpty() && App.getInstance().isWithSocketConnection()) {
             msg_form.setVisibility(View.VISIBLE);
             caption_text.setText(getString(R.string.user_connected_lbl, user.getFullName()));
         } else {
@@ -185,13 +185,13 @@ public class MessageFormFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
+                broadcastReceiver, new IntentFilter(Constants.WEB_SOCKET_BROADCAST_ID));
     }
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         try {
-            outState.putString(ContextVS.DTO_KEY, JSON.writeValueAsString(connectedDevices));
+            outState.putString(Constants.DTO_KEY, JSON.writeValueAsString(connectedDevices));
             outState.putSerializable("messageDeliveredNotified", messageDeliveredNotified);
         } catch (Exception ex) { ex.printStackTrace();}
     }
@@ -213,7 +213,7 @@ public class MessageFormFragment extends Fragment {
         @Override protected UserDto doInBackground(String... params) {
             UserDto result = null;
             try {
-                result = HttpHelper.getInstance().getData(UserDto.class, serviceURL, MediaType.JSON);
+                result = HttpConnection.getInstance().getData(UserDto.class, serviceURL, MediaType.JSON);
             } catch (Exception ex) { ex.printStackTrace();}
             return result;
         }
@@ -232,7 +232,7 @@ public class MessageFormFragment extends Fragment {
                     }
                     if(user == null) user = userDto;
                     updateConnectedView();
-                } else MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,getString(R.string.error_lbl),
+                } else MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,getString(R.string.error_lbl),
                         getString(R.string.error_fetching_device_info_lbl), getFragmentManager());
                 setProgressDialogVisible(null, null, false);
                 LOGD(TAG + ".UserDataFetcher", "connectedDevices: " + connectedDevices.size());

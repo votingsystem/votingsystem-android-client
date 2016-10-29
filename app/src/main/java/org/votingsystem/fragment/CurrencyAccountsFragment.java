@@ -29,12 +29,12 @@ import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TagVSInfoDto;
 import org.votingsystem.service.PaymentService;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.UIUtils;
 
 import java.math.BigDecimal;
@@ -63,18 +63,18 @@ public class CurrencyAccountsFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        switch(responseVS.getTypeVS()) {
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+        switch(responseDto.getOperationType()) {
             case CURRENCY_ACCOUNTS_INFO:
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                     loadUserInfo();
                 }
                 break;
-            default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                    responseVS.getCaption(), responseVS.getNotificationMessage(),
+            default: MessageDialogFragment.showDialog(responseDto.getStatusCode(),
+                    responseDto.getCaption(), responseDto.getNotificationMessage(),
                     getFragmentManager());
         }
-        if(ResponseVS.SC_FORBIDDEN == responseVS.getStatusCode()) {
+        if(ResponseDto.SC_FORBIDDEN == responseDto.getStatusCode()) {
             if(getActivity() instanceof ActivityBase) {
                 UIUtils.showConnectionRequiredDialog((ActivityBase) getActivity());
             }
@@ -86,7 +86,7 @@ public class CurrencyAccountsFragment extends Fragment {
     public static Fragment newInstance(Long representativeId) {
         CurrencyAccountsFragment fragment = new CurrencyAccountsFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.USER_KEY, representativeId);
+        args.putLong(Constants.USER_KEY, representativeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -109,7 +109,7 @@ public class CurrencyAccountsFragment extends Fragment {
         accounts_container.setLayoutManager(new LinearLayoutManager(getActivity()));
         setHasOptionsMenu(true);
         loadUserInfo();
-        if(getActivity().getIntent().getBooleanExtra(ContextVS.REFRESH_KEY, false))
+        if(getActivity().getIntent().getBooleanExtra(Constants.REFRESH_KEY, false))
             updateCurrencyAccountsInfo();
         return rootView;
     }
@@ -168,8 +168,8 @@ public class CurrencyAccountsFragment extends Fragment {
         Toast.makeText(getActivity(), getString(R.string.fetching_user_accounts_info_msg),
                 Toast.LENGTH_SHORT).show();
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_ACCOUNTS_INFO);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.CURRENCY_ACCOUNTS_INFO);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                 getString(R.string.fetching_user_accounts_info_msg));
         getActivity().startService(startIntent);
@@ -236,9 +236,9 @@ public class CurrencyAccountsFragment extends Fragment {
                 request_button.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         Intent intent = new Intent(getActivity(), CurrencyRequesActivity.class);
-                        intent.putExtra(ContextVS.MAX_VALUE_KEY, currencyBalance);
-                        intent.putExtra(ContextVS.CURRENCY_KEY, currencyCode);
-                        intent.putExtra(ContextVS.MESSAGE_KEY, getString(R.string.cash_dialog_msg,
+                        intent.putExtra(Constants.MAX_VALUE_KEY, currencyBalance);
+                        intent.putExtra(Constants.CURRENCY_KEY, currencyCode);
+                        intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.cash_dialog_msg,
                                 currencyBalance, currencyCode));
                         startActivityForResult(intent, CURRENCY_REQUEST);
                     }

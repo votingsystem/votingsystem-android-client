@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.MsgUtils;
 
@@ -37,8 +37,8 @@ public class CurrencyFragment extends Fragment {
         date_info = (TextView)rootView.findViewById(R.id.date_info);
         hash_cert = (TextView)rootView.findViewById(R.id.hash_cert);
         tag_info = (TextView)rootView.findViewById(R.id.tag_info);
-        if(getArguments() != null && getArguments().containsKey(ContextVS.CURRENCY_KEY)) {
-            Currency currency = (Currency) getArguments().getSerializable(ContextVS.CURRENCY_KEY);
+        if(getArguments() != null && getArguments().containsKey(Constants.CURRENCY_KEY)) {
+            Currency currency = (Currency) getArguments().getSerializable(Constants.CURRENCY_KEY);
             initCurrencyScreen(currency);
         }
         return rootView;
@@ -46,7 +46,7 @@ public class CurrencyFragment extends Fragment {
 
     public void initCurrencyScreen(Currency currency) {
         try {
-            hash_cert.setText(currency.getHashCertVS());
+            hash_cert.setText(currency.getRevocationHash());
             currency_amount.setText(currency.getAmount().toPlainString() + " " +
                     currency.getCurrencyCode());
             getActivity().setTitle(MsgUtils.getCurrencyDescriptionMessage(currency, getActivity()));

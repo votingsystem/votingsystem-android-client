@@ -15,7 +15,7 @@ import android.webkit.WebView;
 import android.widget.EditText;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
@@ -24,15 +24,15 @@ import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.ReceiptFragment;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.InputFilterMinMax;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.crypto.CMSUtils;
@@ -64,14 +64,14 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        representative = (UserDto) getIntent().getSerializableExtra(ContextVS.USER_KEY);
+        representative = (UserDto) getIntent().getSerializableExtra(Constants.USER_KEY);
         setContentView(R.layout.representative_delegation);
         UIUtils.setSupportActionBar(this, getString(R.string.representative_delegation_lbl));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         weeks_delegation = (EditText)findViewById(R.id.weeks_delegation);
         EditText et = (EditText) findViewById(R.id.weeks_delegation);
         et.setFilters(new InputFilter[]{
-                new InputFilterMinMax(1, ContextVS.MAX_WEEKS_ANONYMOUS_DELEGATION)});
+                new InputFilterMinMax(1, Constants.MAX_WEEKS_ANONYMOUS_DELEGATION)});
         String fileToLoad = "delegation_message_" +
                 Locale.getDefault().getLanguage().toLowerCase() + ".html";
         try {
@@ -85,7 +85,7 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
         webView.loadUrl("file:///android_asset/" + fileToLoad);
         if(savedInstanceState != null) {
             delegationDto = (RepresentativeDelegationDto) savedInstanceState.getSerializable(
-                    ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY);
+                    Constants.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY);
         }
     }
 
@@ -143,24 +143,24 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
             case RC_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
                     try {
-                        ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                        ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
                         delegationDto = new RepresentativeDelegationDto();
-                        delegationDto.setServerURL(AppVS.getInstance().getAccessControl().getServerURL());
-                        delegationDto.setOperation(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
+                        delegationDto.setServerURL(App.getInstance().getAccessControl().getServerURL());
+                        delegationDto.setOperation(OperationType.ANONYMOUS_REPRESENTATIVE_SELECTION);
                         delegationDto.setRepresentative(representative);
                         delegationDto.setWeeksOperationActive(
                                 Integer.valueOf(weeks_delegation.getText().toString()));
                         RepresentativeDelegationDto anonymousCertRequest = delegationDto.getAnonymousCertRequest();
                         Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                        intent.putExtra(ContextVS.PASSWORD_KEY, new
-                                String(responseVS.getMessageBytes()).toCharArray());
-                        intent.putExtra(ContextVS.USER_KEY,
-                                AppVS.getInstance().getAccessControl().getName());
-                        intent.putExtra(ContextVS.MESSAGE_KEY,
+                        intent.putExtra(Constants.PASSWORD_KEY, new
+                                String(responseDto.getMessageBytes()).toCharArray());
+                        intent.putExtra(Constants.USER_KEY,
+                                App.getInstance().getAccessControl().getName());
+                        intent.putExtra(Constants.MESSAGE_KEY,
                                 getString(R.string.anonimous_representative_request_lbl));
-                        intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY,
+                        intent.putExtra(Constants.MESSAGE_CONTENT_KEY,
                                 JSON.writeValueAsString(anonymousCertRequest));
-                        intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
+                        intent.putExtra(Constants.MESSAGE_SUBJECT_KEY,
                                 getString(R.string.anonimous_representative_request_lbl));
                         startActivityForResult(intent, RC_SIGN_ANONYMOUS_CERT_REQUEST);
                     } catch ( Exception ex) { ex.printStackTrace();}
@@ -168,8 +168,8 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                 break;
             case RC_SIGN_ANONYMOUS_CERT_REQUEST:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    new AnonymousDelegationTask(responseVS.getCMS()).execute();
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    new AnonymousDelegationTask(responseDto.getCMS()).execute();
                 }
                 break;
         }
@@ -177,10 +177,10 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, delegationDto);
+        outState.putSerializable(Constants.ANONYMOUS_REPRESENTATIVE_DELEGATION_KEY, delegationDto);
     }
 
-    public class AnonymousDelegationTask extends AsyncTask<String, String, ResponseVS> {
+    public class AnonymousDelegationTask extends AsyncTask<String, String, ResponseDto> {
 
         private CMSSignedMessage cmsMessage;
 
@@ -191,18 +191,18 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
         @Override protected void onPreExecute() { setProgressDialogVisible(true,
                 getString(R.string.representative_delegation_lbl), getString(R.string.wait_msg)); }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
-            ResponseVS responseVS = null;
+        @Override protected ResponseDto doInBackground(String... urls) {
+            ResponseDto responseDto = null;
             try {
                 RepresentativeDelegationDto anonymousDelegationRequest = delegationDto.getDelegation();
                 delegationDto.setAnonymousDelegationRequestBase64ContentDigest(cmsMessage.getContentDigestStr());
                 Map<String, Object> mapToSend = new HashMap<>();
-                mapToSend.put(ContextVS.CSR_FILE_NAME, delegationDto.getCertificationRequest().getCsrPEM());
-                mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
-                responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                        AppVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    delegationDto.getCertificationRequest().initSigner(responseVS.getMessageBytes());
+                mapToSend.put(Constants.CSR_FILE_NAME, delegationDto.getCertificationRequest().getCsrPEM());
+                mapToSend.put(Constants.CMS_FILE_NAME, cmsMessage.toPEM());
+                responseDto = HttpConnection.getInstance().sendObjectMap(mapToSend,
+                        App.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
+                if (ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                    delegationDto.getCertificationRequest().initSigner(responseDto.getMessageBytes());
                     //this is the delegation request signed with anonymous cert
                     byte[] contentToSign = JSON.getMapper().writeValueAsBytes(anonymousDelegationRequest);
                     String signatureMechanism =
@@ -211,65 +211,65 @@ public class RepresentativeDelegationActivity extends AppCompatActivity {
                             signatureMechanism, contentToSign);
                     cmsMessage = delegationDto.getCertificationRequest().signData(
                             contentToSign, timeStampToken);
-                    responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                            AppVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        delegationDto.setDelegationReceipt(responseVS.getCMS(),
-                                AppVS.getInstance().getAccessControl().getCertificate());
-                        CMSSignedMessage delegationReceipt = CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes());
+                    responseDto = HttpConnection.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
+                            App.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
+                    if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                        delegationDto.setDelegationReceipt(responseDto.getCMS(),
+                                App.getInstance().getAccessControl().getCertificate());
+                        CMSSignedMessage delegationReceipt = CMSSignedMessage.FROM_PEM(responseDto.getMessageBytes());
                         Collection matches = delegationReceipt.checkSignerCert(
-                                AppVS.getInstance().getAccessControl().getCertificate());
+                                App.getInstance().getAccessControl().getCertificate());
                         if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
 
                         PrefUtils.putAnonymousDelegation(delegationDto);
-                        responseVS.setCaption(getString(R.string.anonymous_delegation_caption))
+                        responseDto.setCaption(getString(R.string.anonymous_delegation_caption))
                                 .setNotificationMessage(getString(R.string.anonymous_delegation_msg,
                                         delegationDto.getRepresentative().getName(),
                                         delegationDto.getWeeksOperationActive()));
                     }
                 } else {
-                    responseVS.setCaption(getString(R.string.error_lbl));
-                    if(ContentType.JSON == responseVS.getContentType()) {
-                        MessageDto messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
-                        responseVS.setNotificationMessage(messageDto.getMessage());
-                        responseVS.setData(messageDto.getURL());
-                    } else responseVS.setNotificationMessage(responseVS.getMessage());
+                    responseDto.setCaption(getString(R.string.error_lbl));
+                    if(ContentType.JSON == responseDto.getContentType()) {
+                        MessageDto messageDto = (MessageDto) responseDto.getMessage(MessageDto.class);
+                        responseDto.setNotificationMessage(messageDto.getMessage());
+                        responseDto.setData(messageDto.getURL());
+                    } else responseDto.setNotificationMessage(responseDto.getMessage());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.EXCEPTION(ex, RepresentativeDelegationActivity.this);
+                responseDto = ResponseDto.EXCEPTION(ex, RepresentativeDelegationActivity.this);
             } finally {
-                return responseVS;
+                return responseDto;
             }
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(final ResponseVS responseVS) {
+        @Override protected void onPostExecute(final ResponseDto responseDto) {
             setProgressDialogVisible(false, null, null);
-            if(ResponseVS.SC_ERROR_REQUEST_REPEATED == responseVS.getStatusCode()) {
+            if(ResponseDto.SC_ERROR_REQUEST_REPEATED == responseDto.getStatusCode()) {
                 AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                         getString(R.string.error_lbl),
-                        responseVS.getNotificationMessage(), RepresentativeDelegationActivity.this).
+                        responseDto.getNotificationMessage(), RepresentativeDelegationActivity.this).
                         setPositiveButton(getString(R.string.open_receipt_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         Intent intent = new Intent(getApplicationContext(), FragmentContainerActivity.class);
-                                        intent.putExtra(ContextVS.URL_KEY, (String) responseVS.getData());
-                                        intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                                        intent.putExtra(Constants.URL_KEY, (String) responseDto.getData());
+                                        intent.putExtra(Constants.FRAGMENT_KEY, ReceiptFragment.class.getName());
                                         startActivity(intent);
                                     }
                                 });
                 UIUtils.showMessageDialog(builder);
             } else {
-                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(responseVS.getCaption(),
-                        responseVS.getNotificationMessage(),  RepresentativeDelegationActivity.this).
+                AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(responseDto.getCaption(),
+                        responseDto.getNotificationMessage(),  RepresentativeDelegationActivity.this).
                         setPositiveButton(getString(R.string.accept_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
                                         Intent resultIntent = new Intent(
                                                 RepresentativeDelegationActivity.this, ActivityBase.class);
-                                        resultIntent.putExtra(ContextVS.FRAGMENT_KEY, R.id.representatives);
+                                        resultIntent.putExtra(Constants.FRAGMENT_KEY, R.id.representatives);
                                         startActivity(resultIntent);
                                         RepresentativeDelegationActivity.this.finish();
                                     }

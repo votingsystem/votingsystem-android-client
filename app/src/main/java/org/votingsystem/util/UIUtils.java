@@ -55,11 +55,12 @@ import org.bouncycastle2.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.FieldEventDto;
 import org.votingsystem.fragment.MessageDialogFragment;
@@ -102,20 +103,20 @@ public class UIUtils  {
     private static DateFormat sShortTimeFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
 
-    public static void launchMessageActivity(ResponseVS responseVS) {
-        Intent intent = new Intent(AppVS.getInstance(), MessageActivity.class);
+    public static void launchMessageActivity(ResponseDto responseDto) {
+        Intent intent = new Intent(App.getInstance(), MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        AppVS.getInstance().startActivity(intent);
+        intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        App.getInstance().startActivity(intent);
     }
 
     public static void launchMessageActivity(Integer statusCode, String message, String caption) {
-        ResponseVS responseVS = new ResponseVS(statusCode);
-        responseVS.setCaption(caption).setNotificationMessage(message);
-        Intent intent = new Intent(AppVS.getInstance(), MessageActivity.class);
+        ResponseDto responseDto = new ResponseDto(statusCode);
+        responseDto.setCaption(caption).setNotificationMessage(message);
+        Intent intent = new Intent(App.getInstance(), MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
-        AppVS.getInstance().startActivity(intent);
+        intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        App.getInstance().startActivity(intent);
     }
 
     public static void showSignersInfoDialog(Set<UserDto> signers, FragmentManager fragmentManager,
@@ -131,7 +132,7 @@ public class UIUtils  {
                     DateUtils.getDayWeekDateStr(certificate.getNotBefore(), "HH:mm"),
                     DateUtils.getDayWeekDateStr(certificate.getNotAfter(), "HH:mm")) + "<br/>");
         }
-        MessageDialogFragment.showDialog(ResponseVS.SC_OK, context.getString(
+        MessageDialogFragment.showDialog(ResponseDto.SC_OK, context.getString(
                 R.string.signers_info_lbl), signersInfo.toString(), fragmentManager);
     }
 
@@ -155,7 +156,7 @@ public class UIUtils  {
                         "no cert matches found, validating with timestamp server cert");
                 certificateHolder = new X509CertificateHolder(timeStampServerCert.getEncoded());
                 timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
-                        ContextVS.PROVIDER).build(certificateHolder));
+                        Constants.PROVIDER).build(certificateHolder));
             } else certificateHolder = matches.iterator().next();
             LOGD(TAG + ".showTimeStampInfoDialog", "serial number: '" +
                     certificateHolder.getSerialNumber() + "'");
@@ -165,11 +166,11 @@ public class UIUtils  {
                     tsInfo.getSerialNumber().toString(),
                     certificate.getSubjectDN(),
                     timeStampToken.getSID().getSerialNumber().toString());
-            MessageDialogFragment.showDialog(ResponseVS.SC_OK, context.getString(
+            MessageDialogFragment.showDialog(ResponseDto.SC_OK, context.getString(
                     R.string.timestamp_info_lbl), certificateInfo, fragmentManager);
         } catch (Exception ex) {
             ex.printStackTrace();
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, context.getString(
+            MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, context.getString(
                     R.string.error_lbl), context.getString(R.string.timestamp_error_lbl),
                     fragmentManager);
         }
@@ -442,7 +443,7 @@ public class UIUtils  {
 
     public static void launchEmbeddedFragment(String className, Context context) {
         Intent intent = new Intent(context, FragmentContainerActivity.class);
-        intent.putExtra(ContextVS.FRAGMENT_KEY, className);
+        intent.putExtra(Constants.FRAGMENT_KEY, className);
         context.startActivity(intent);
     }
 
@@ -486,7 +487,7 @@ public class UIUtils  {
     }
 
     public static void showConnectionRequiredDialog(final ActivityBase activityBase) {
-        if (!AppVS.getInstance().isWithSocketConnection()) {
+        if (!App.getInstance().isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     activityBase.getString(R.string.connection_required_caption),
                     activityBase.getString(R.string.connection_required_msg),
@@ -536,9 +537,9 @@ public class UIUtils  {
         linearLayout.setVisibility(View.VISIBLE);
     }
 
-    public static AlertDialog.Builder getMessageDialogBuilder(ResponseVS responseVS,
+    public static AlertDialog.Builder getMessageDialogBuilder(ResponseDto responseDto,
             Context context) {
-        return getMessageDialogBuilder(responseVS.getCaption(), responseVS.getMessage(), context);
+        return getMessageDialogBuilder(responseDto.getCaption(), responseDto.getMessage(), context);
     }
 
     public static void showPasswordRequiredDialog(final Activity activity) {

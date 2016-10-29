@@ -20,18 +20,18 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.CurrencyContentProvider;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -88,12 +88,12 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
         currency = CurrencyContentProvider.getCurrency(cursor);
         switch (item.getItemId()) {
             case R.id.check:
-                new GetDataTask().execute(AppVS.getInstance().getCurrencyServer()
-                        .getCurrencyStateServiceURL(currency.getHashCertVS()));
+                new GetDataTask().execute(App.getInstance().getCurrencyServer()
+                        .getCurrencyStateServiceURL(currency.getRevocationHash()));
                 return true;
             case R.id.details:
                 Intent intent = new Intent(this, CurrencyActivity.class);
-                intent.putExtra(ContextVS.CURRENCY_KEY, currency);
+                intent.putExtra(Constants.CURRENCY_KEY, currency);
                 startActivity(intent);
                 return true;
             case R.id.delete:
@@ -180,7 +180,7 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
         }
     }
 
-    public class GetDataTask extends AsyncTask<String, Void, ResponseVS> {
+    public class GetDataTask extends AsyncTask<String, Void, ResponseDto> {
 
         public final String TAG = GetDataTask.class.getSimpleName();
 
@@ -191,25 +191,25 @@ public class CurrencyConsumedGridActivity extends AppCompatActivity implements a
                     getString(R.string.loading_data_msg), getSupportFragmentManager());
         }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
+        @Override protected ResponseDto doInBackground(String... urls) {
             try {
-                CurrencyStateDto currencyStateDto = HttpHelper.getInstance().getData(CurrencyStateDto.class,
+                CurrencyStateDto currencyStateDto = HttpConnection.getInstance().getData(CurrencyStateDto.class,
                         urls[0], MediaType.JSON);
                 currency.setState(currencyStateDto.getState());
                 getContentResolver().update(CurrencyContentProvider.getURI(currency.getLocalId()),
                         CurrencyContentProvider.getContentValues(currency), null, null);
-                return ResponseVS.OK();
+                return ResponseDto.OK();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                return ResponseVS.EXCEPTION(ex, AppVS.getInstance());
+                return ResponseDto.EXCEPTION(ex, App.getInstance());
             }
         }
 
         // This is called each time you call publishProgress()
         protected void onProgressUpdate(Integer... progress) { }
 
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
-            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseVS.getStatusCode());
+        @Override  protected void onPostExecute(ResponseDto responseDto) {
+            LOGD(TAG + "GetDataTask.onPostExecute() ", " - statusCode: " + responseDto.getStatusCode());
             ProgressDialogFragment.hide(getSupportFragmentManager());
         }
     }

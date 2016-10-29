@@ -18,7 +18,7 @@ import org.bouncycastle2.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle2.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle2.openssl.PEMReader;
 import org.bouncycastle2.operator.OutputEncryptor;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -61,7 +61,7 @@ public class Encryptor {
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator("".getBytes(), publicKey));
         OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(
-                ContextVS.PROVIDER).build();
+                Constants.PROVIDER).build();
         CMSEnvelopedData ed = edGen.generate( new CMSProcessableByteArray(bytesToEncrypt), encryptor);
         return PEMUtils.getPEMEncoded(ed.getContentInfo());
     }
@@ -71,7 +71,7 @@ public class Encryptor {
         edGen.addRecipientInfoGenerator(new BcRSAKeyTransRecipientInfoGenerator(
                 new JcaX509CertificateHolder(receiverCert)));
         OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(
-                ContextVS.PROVIDER).build();
+                Constants.PROVIDER).build();
         CMSEnvelopedData ed = edGen.generate( new CMSProcessableByteArray(bytesToEncrypt), encryptor);
         return PEMUtils.getPEMEncoded(ed.getContentInfo());
     }
@@ -91,7 +91,7 @@ public class Encryptor {
         if (it.hasNext()) {
             RecipientInformation   recipient = (RecipientInformation)it.next();
             CMSTypedStream recData = recipient.getContentStream(
-                    new JceKeyTransEnvelopedRecipient(privateKey).setProvider(ContextVS.ANDROID_PROVIDER));
+                    new JceKeyTransEnvelopedRecipient(privateKey).setProvider(Constants.ANDROID_PROVIDER));
             InputStream           dataStream = recData.getContentStream();
             ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
             byte[] buf = new byte[4096];
@@ -111,8 +111,8 @@ public class Encryptor {
             UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] salt = KeyGeneratorVS.INSTANCE.getSalt();
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ContextVS.
-                SYMETRIC_ENCRYPTION_ITERATION_COUNT, ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, Constants.
+                SYMETRIC_ENCRYPTION_ITERATION_COUNT, Constants.SYMETRIC_ENCRYPTION_KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secret);
@@ -127,8 +127,8 @@ public class Encryptor {
             InvalidAlgorithmParameterException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.getSalt(), ContextVS.
-                SYMETRIC_ENCRYPTION_ITERATION_COUNT, ContextVS.SYMETRIC_ENCRYPTION_KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.getSalt(), Constants.
+                SYMETRIC_ENCRYPTION_ITERATION_COUNT, Constants.SYMETRIC_ENCRYPTION_KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(bundle.getIV()));
         return cipher.doFinal(bundle.getCipherText());

@@ -10,7 +10,7 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.model.CurrencyBatch;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.crypto.CertUtils;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ public class CurrencyBatchDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private TypeVS operation = TypeVS.CURRENCY_SEND;
+    private OperationType operation = OperationType.CURRENCY_SEND;
     private Set<String> currencySet;
     private String leftOverCSR;
     private String currencyChangeCSR;
@@ -61,7 +61,7 @@ public class CurrencyBatchDto implements Serializable {
 
     @JsonIgnore
     public void checkCurrencyData(Currency currency) throws ExceptionVS {
-        String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
+        String currencyData = "Currency with hash '" + currency.getRevocationHash() + "' ";
         if(getOperation() != currency.getOperation()) throw new ValidationExceptionVS(
                 currencyData + "expected operation " + getOperation() + " found " + currency.getOperation());
         if(!getSubject().equals(currency.getSubject())) throw new ValidationExceptionVS(
@@ -101,11 +101,11 @@ public class CurrencyBatchDto implements Serializable {
         return receipt;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

@@ -26,19 +26,19 @@ import android.widget.FrameLayout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.service.WebSocketService;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.crypto.CertUtils;
 
 import java.lang.reflect.Field;
@@ -60,7 +60,7 @@ public class BrowserActivity extends AppCompatActivity {
 
     private String viewerURL;
     private String jsCommand;
-    private AppVS appVS = null;
+    private App app = null;
     private String broadCastId = BrowserActivity.class.getSimpleName();
     private WebView webView;
     private FrameLayout webViewPlaceholder;
@@ -72,19 +72,19 @@ public class BrowserActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        TypeVS typeVS = (TypeVS) intent.getSerializableExtra(ContextVS.TYPEVS_KEY);
-        if(typeVS == null && responseVS != null) typeVS = responseVS.getTypeVS();
-        if(responseVS.getOperation() != null) {
-            if(ContentType.JSON == responseVS.getContentType()) {
-                invokeOperationCallback(responseVS.getMessage(),
-                        responseVS.getOperation().getCallerCallback());
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+        OperationType operationType = (OperationType) intent.getSerializableExtra(Constants.TYPEVS_KEY);
+        if(operationType == null && responseDto != null) operationType = responseDto.getOperationType();
+        if(responseDto.getOperation() != null) {
+            if(ContentType.JSON == responseDto.getContentType()) {
+                invokeOperationCallback(responseDto.getMessage(),
+                        responseDto.getOperation().getCallerCallback());
             } else {
-                invokeOperationCallback(responseVS.getStatusCode(),
-                        responseVS.getNotificationMessage(), responseVS.getOperation().getCallerCallback());
+                invokeOperationCallback(responseDto.getStatusCode(),
+                        responseDto.getNotificationMessage(), responseDto.getOperation().getCallerCallback());
             }
-        } else MessageDialogFragment.showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                responseVS.getNotificationMessage(), getSupportFragmentManager());
+        } else MessageDialogFragment.showDialog(responseDto.getStatusCode(), responseDto.getCaption(),
+                responseDto.getNotificationMessage(), getSupportFragmentManager());
         }
     };
 
@@ -92,12 +92,12 @@ public class BrowserActivity extends AppCompatActivity {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.browservs);
-        appVS = (AppVS) getApplicationContext();
-        viewerURL = getIntent().getStringExtra(ContextVS.URL_KEY);
-        jsCommand = getIntent().getStringExtra(ContextVS.JS_COMMAND_KEY);
-        doubleBackEnabled = getIntent().getBooleanExtra(ContextVS.DOUBLE_BACK_KEY, true);
+        app = (App) getApplicationContext();
+        viewerURL = getIntent().getStringExtra(Constants.URL_KEY);
+        jsCommand = getIntent().getStringExtra(Constants.JS_COMMAND_KEY);
+        doubleBackEnabled = getIntent().getBooleanExtra(Constants.DOUBLE_BACK_KEY, true);
         if(savedInstanceState != null) {
-            operation = (OperationDto) savedInstanceState.getSerializable(ContextVS.OPERATION_KEY);
+            operation = (OperationDto) savedInstanceState.getSerializable(Constants.OPERATION_KEY);
         }
         /*if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -148,7 +148,7 @@ public class BrowserActivity extends AppCompatActivity {
                         f.setAccessible(true);
                         X509Certificate x509Certificate = (X509Certificate) f.get(serverCertificate);
                         PKIXCertPathValidatorResult result = CertUtils.verifyCertificate(
-                                x509Certificate, appVS.getSSLServerCert());
+                                x509Certificate, app.getSSLServerCert());
                         LOGD(TAG, "SSL site - trusted cert: " +
                                 result.getTrustAnchor().getTrustedCert().getSubjectX500Principal());
                         handler.proceed();
@@ -190,7 +190,7 @@ public class BrowserActivity extends AppCompatActivity {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
-        outState.putSerializable(ContextVS.OPERATION_KEY, operation);
+        outState.putSerializable(Constants.OPERATION_KEY, operation);
     }
 
     @Override
@@ -272,11 +272,11 @@ public class BrowserActivity extends AppCompatActivity {
         invokeOperationCallback(resultMap, callerCallback);
     }
 
-    private void sendMessageToWebSocketService(TypeVS messageTypeVS, String message) {
-        LOGD(TAG + ".sendMessageToWebSocketService", "messageTypeVS: " + messageTypeVS.toString());
-        Intent startIntent = new Intent(appVS, WebSocketService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, messageTypeVS);
-        startIntent.putExtra(ContextVS.MESSAGE_KEY, message);
+    private void sendMessageToWebSocketService(OperationType messageOperationType, String message) {
+        LOGD(TAG + ".sendMessageToWebSocketService", "messageOperationType: " + messageOperationType.toString());
+        Intent startIntent = new Intent(app, WebSocketService.class);
+        startIntent.putExtra(Constants.TYPEVS_KEY, messageOperationType);
+        startIntent.putExtra(Constants.MESSAGE_KEY, message);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -317,7 +317,7 @@ public class BrowserActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
+                new IntentFilter(Constants.WEB_SOCKET_BROADCAST_ID));
     }
 
     @Override public void onPause() {

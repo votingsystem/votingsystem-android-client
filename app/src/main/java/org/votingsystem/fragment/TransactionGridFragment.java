@@ -29,16 +29,16 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.TransactionPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.service.PaymentService;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
 import java.io.IOException;
@@ -54,7 +54,7 @@ public class TransactionGridFragment extends Fragment
     private View rootView;
     private GridView gridView;
     private TransactionListAdapter adapter = null;
-    private AppVS appVS = null;
+    private App app = null;
     private Long offset = new Long(0);
     private Integer firstVisiblePosition = null;
     private String broadCastId = TransactionGridFragment.class.getName();
@@ -76,8 +76,8 @@ public class TransactionGridFragment extends Fragment
         LOGD(TAG + ".launchUpdateUserInfoService", "");
         try {
             Intent startIntent = new Intent(getActivity(), PaymentService.class);
-            startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_ACCOUNTS_INFO);
-            startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+            startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.CURRENCY_ACCOUNTS_INFO);
+            startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
             setProgressDialogVisible(true);
             getActivity().startService(startIntent);
         } catch(Exception ex) {
@@ -87,7 +87,7 @@ public class TransactionGridFragment extends Fragment
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appVS = (AppVS) getActivity().getApplicationContext();
+        app = (App) getActivity().getApplicationContext();
         LOGD(TAG +  ".onCreate", "args: " + getArguments() + " - loaderId: " + loaderId);
         setHasOptionsMenu(true);
     };
@@ -120,9 +120,9 @@ public class TransactionGridFragment extends Fragment
         //Prepare the loader. Either re-connect with an existing one or start a new one.
         getLoaderManager().initLoader(loaderId, null, this);
         if(savedInstanceState != null) {
-            Parcelable gridState = savedInstanceState.getParcelable(ContextVS.LIST_STATE_KEY);
+            Parcelable gridState = savedInstanceState.getParcelable(Constants.LIST_STATE_KEY);
             gridView.onRestoreInstanceState(gridState);
-            offset = savedInstanceState.getLong(ContextVS.OFFSET_KEY);
+            offset = savedInstanceState.getLong(Constants.OFFSET_KEY);
         }
     }
 
@@ -152,7 +152,7 @@ public class TransactionGridFragment extends Fragment
         menu.clear();
         menuInflater.inflate(R.menu.currency_accounts, menu);
         List<String> transactionWeekList = TransactionContentProvider.getTransactionWeekList (
-                (AppVS)getActivity().getApplicationContext());
+                (App)getActivity().getApplicationContext());
         for(final String weekLbl: transactionWeekList) {
             MenuItem item = menu.add (weekLbl);
             item.setOnMenuItemClickListener (new MenuItem.OnMenuItemClickListener(){
@@ -177,7 +177,7 @@ public class TransactionGridFragment extends Fragment
         LOGD(TAG +  ".onListItemClick", "position: " + position + " - id: " + id);
         //Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(), TransactionPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
+        intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
@@ -186,7 +186,7 @@ public class TransactionGridFragment extends Fragment
         String selection = TransactionContentProvider.WEEK_LAPSE_COL + " =? ";
         CursorLoader loader = new CursorLoader(getActivity(),
                 TransactionContentProvider.CONTENT_URI, null, selection,
-                new String[]{appVS.getCurrentWeekLapseId()}, null);
+                new String[]{app.getCurrentWeekLapseId()}, null);
         return loader;
     }
 
@@ -262,9 +262,9 @@ public class TransactionGridFragment extends Fragment
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(ContextVS.OFFSET_KEY, offset);
+        outState.putLong(Constants.OFFSET_KEY, offset);
         Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
+        outState.putParcelable(Constants.LIST_STATE_KEY, gridState);
         LOGD(TAG +  ".onSaveInstanceState", "outState: " + outState);
     }
 

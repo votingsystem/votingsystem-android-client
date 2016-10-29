@@ -10,7 +10,7 @@ import org.votingsystem.dto.SocketMessageDto;
  */
 public class WebSocketSession<T> {
 
-    private TypeVS typeVS;
+    private OperationType operationType;
     private T data;
     private SocketMessageDto lastMessage;
     private AESParamsDto aesParams;;
@@ -20,7 +20,7 @@ public class WebSocketSession<T> {
     private String UUID;
 
     public WebSocketSession(SocketMessageDto socketMsg) {
-        this.typeVS = socketMsg.getOperation();
+        this.operationType = socketMsg.getOperation();
         this.lastMessage = socketMsg;
         this.UUID = socketMsg.getUUID();
     }
@@ -45,12 +45,12 @@ public class WebSocketSession<T> {
         this.device = device;
     }
 
-    public TypeVS getTypeVS() {
-        return typeVS;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public String getUUID() {

@@ -2,8 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -12,7 +11,7 @@ import org.votingsystem.util.TypeVS;
 public class MessageDto {
 
     private Integer statusCode;
-    private TypeVS operation;
+    private OperationType operation;
     private String message;
     private String cmsMessagePEM;
     private String URL;
@@ -34,11 +33,11 @@ public class MessageDto {
     }
 
     public static MessageDto OK(String message, String URL) {
-        return new MessageDto(ResponseVS.SC_OK, message, URL);
+        return new MessageDto(ResponseDto.SC_OK, message, URL);
     }
 
     public static MessageDto REQUEST_REPEATED(String message, String URL) {
-        return new MessageDto(ResponseVS.SC_ERROR_REQUEST_REPEATED, message, URL);
+        return new MessageDto(ResponseDto.SC_ERROR_REQUEST_REPEATED, message, URL);
     }
 
     public Integer getStatusCode() {
@@ -66,11 +65,11 @@ public class MessageDto {
         this.cmsMessagePEM = cmsMessagePEM;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

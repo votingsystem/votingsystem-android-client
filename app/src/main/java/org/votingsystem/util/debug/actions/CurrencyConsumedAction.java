@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.CurrencyConsumedGridActivity;
 import org.votingsystem.util.debug.DebugAction;
 
@@ -18,7 +18,7 @@ public class CurrencyConsumedAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override protected Void doInBackground(Context... contexts) {
                 LOGD(TAG, "doInBackground");
-                Intent intent = new Intent(AppVS.getInstance(), CurrencyConsumedGridActivity.class);
+                Intent intent = new Intent(App.getInstance(), CurrencyConsumedGridActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
                 return null;

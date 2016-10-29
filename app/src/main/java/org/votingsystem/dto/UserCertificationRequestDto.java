@@ -3,7 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.util.crypto.Encryptor;
 
 import java.util.UUID;
@@ -28,7 +28,7 @@ public class UserCertificationRequestDto implements java.io.Serializable {
         this.csrRequest = csrRequest;
         this.plainToken = UUID.randomUUID().toString().getBytes();
         this.token = Encryptor.encryptToCMS(this.plainToken,
-                AppVS.getInstance().getCurrencyServer().getCertificate());
+                App.getInstance().getCurrencyServer().getCertificate());
     }
 
     public byte[] getCsrRequest() {

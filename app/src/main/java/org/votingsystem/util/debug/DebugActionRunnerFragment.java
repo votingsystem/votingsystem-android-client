@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.util.debug.actions.BrowserVSAction;
 import org.votingsystem.util.debug.actions.CurrencyConsumedAction;
@@ -40,13 +40,13 @@ public class DebugActionRunnerFragment extends Fragment {
         mLogArea = (TextView) rootView.findViewById(R.id.logArea);
         ViewGroup tests = (ViewGroup) rootView.findViewById(R.id.debug_action_list);
         tests.addView(createTestAction(new ForceSyncNowAction(
-                (AppVS) getActivity().getApplicationContext())));
+                (App) getActivity().getApplicationContext())));
         tests.addView(createTestAction(new PatternLockAction()));
         tests.addView(createTestAction(new PrefsAction()));
         tests.addView(createTestAction(new DeleteDBAction()));
         tests.addView(createTestAction(new CurrencyConsumedAction()));
         tests.addView(createTestAction(new BrowserVSAction()));
-        tests.addView(createTestAction(new NFCActivityAction((AppVS) getActivity().getApplicationContext())));
+        tests.addView(createTestAction(new NFCActivityAction((App) getActivity().getApplicationContext())));
         setHasOptionsMenu(true);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
                 getString(R.string.debug_tests));

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.crypto.CertUtils;
 
 import java.io.Serializable;
@@ -25,7 +25,7 @@ public class VoteDto implements Serializable {
 
     public enum State {OK, CANCELLED, ERROR}
 
-    private TypeVS operation;
+    private OperationType operation;
     private Long id;
     private Long cancelerId;
     private Long eventVSId;
@@ -34,8 +34,8 @@ public class VoteDto implements Serializable {
     private String hashAccessRequestBase64;
     private String hashAccessRequestHex;
     private String originHashCertVote;
-    private String hashCertVSBase64;
-    private String hashCertVoteHex;
+    private String revocationHashBase64;
+    private String revocationHashHex;
     private String cmsMessageURL;
     private String cancelationCmsMessageURL;
     private String eventURL;
@@ -109,20 +109,20 @@ public class VoteDto implements Serializable {
         this.hashAccessRequestHex = hashAccessRequestHex;
     }
 
-    public String getHashCertVSBase64() {
-        return hashCertVSBase64;
+    public String getRevocationHashBase64() {
+        return revocationHashBase64;
     }
 
-    public void setHashCertVSBase64(String hashCertVSBase64) {
-        this.hashCertVSBase64 = hashCertVSBase64;
+    public void setRevocationHashBase64(String revocationHashBase64) {
+        this.revocationHashBase64 = revocationHashBase64;
     }
 
-    public String getHashCertVoteHex() {
-        return hashCertVoteHex;
+    public String getRevocationHashHex() {
+        return revocationHashHex;
     }
 
-    public void setHashCertVoteHex(String hashCertVoteHex) {
-        this.hashCertVoteHex = hashCertVoteHex;
+    public void setRevocationHashHex(String revocationHashHex) {
+        this.revocationHashHex = revocationHashHex;
     }
 
     public String getCmsMessageURL() {
@@ -234,12 +234,12 @@ public class VoteDto implements Serializable {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
         VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class,
-                x509Certificate, ContextVS.VOTE_OID);
+                x509Certificate, Constants.VOTE_OID);
         this.accessControlEventVSId = certExtensionDto.getEventId();
         this.accessControlURL = certExtensionDto.getAccessControlURL();
-        this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
+        this.revocationHashBase64 = certExtensionDto.getRevocationHash();
         this.representativeURL = CertUtils.getCertExtensionData(x509Certificate,
-                ContextVS.REPRESENTATIVE_VOTE_OID);
+                Constants.REPRESENTATIVE_VOTE_OID);
         return this;
     }
 
@@ -247,11 +247,11 @@ public class VoteDto implements Serializable {
         this.representativeURL = representativeURL;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

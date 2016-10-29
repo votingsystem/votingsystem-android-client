@@ -9,11 +9,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.fragment.TransactionFragment;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -30,14 +30,14 @@ public class TransactionPagerActivity extends AppCompatActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        AppVS appVS = (AppVS) getApplicationContext();
+        App app = (App) getApplicationContext();
         setContentView(R.layout.pager_activity);
         UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
+        int cursorPosition = getIntent().getIntExtra(Constants.CURSOR_POSITION_KEY, -1);
         String selection = TransactionContentProvider.WEEK_LAPSE_COL + " =? ";
         cursor = getContentResolver().query(TransactionContentProvider.CONTENT_URI, null, selection,
-                new String[]{appVS.getCurrentWeekLapseId()}, null);
+                new String[]{app.getCurrentWeekLapseId()}, null);
         TransactionPagerAdapter pagerAdapter = new TransactionPagerAdapter(
                 getSupportFragmentManager(), cursor.getCount());
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);

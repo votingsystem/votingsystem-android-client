@@ -17,8 +17,8 @@ import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.dto.ResponseDto;
 
 import java.util.UUID;
 
@@ -40,7 +40,7 @@ public class ContactFragment extends Fragment {
     public static Fragment newInstance(Long contactId) {
         ContactFragment fragment = new ContactFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.CURSOR_POSITION_KEY, contactId);
+        args.putLong(Constants.CURSOR_POSITION_KEY, contactId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,7 +48,7 @@ public class ContactFragment extends Fragment {
     public static Fragment newInstance(UserDto user) {
         ContactFragment fragment = new ContactFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ContextVS.USER_KEY, user);
+        args.putSerializable(Constants.USER_KEY, user);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,11 +61,11 @@ public class ContactFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.contact, container, false);
         toggle_contact_button = (Button) rootView.findViewById(R.id.toggle_contact_button);
         TextView user_name_text = (TextView) rootView.findViewById(R.id.user_name_text);
-        Long contactId =  getArguments().getLong(ContextVS.CURSOR_POSITION_KEY, -1);
+        Long contactId =  getArguments().getLong(Constants.CURSOR_POSITION_KEY, -1);
         if(contactId > 0) {
             user = UserContentProvider.loadUser(contactId, getActivity());
         } else {
-            user =  (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
+            user =  (UserDto) getArguments().getSerializable(Constants.USER_KEY);
             UserDto contactDB = UserContentProvider.loadUser(user, getActivity());
             if(contactDB != null) user = contactDB;
         }
@@ -110,11 +110,11 @@ public class ContactFragment extends Fragment {
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         String message = null;
-        if(data != null) message = data.getStringExtra(ContextVS.MESSAGE_KEY);
+        if(data != null) message = data.getStringExtra(Constants.MESSAGE_KEY);
         if(Activity.RESULT_OK == requestCode) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.operation_ok_msg),
+            MessageDialogFragment.showDialog(ResponseDto.SC_OK, getString(R.string.operation_ok_msg),
                     message, getFragmentManager());
-        } else if(message != null) MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+        } else if(message != null) MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                     getString(R.string.operation_error_msg), message, getFragmentManager());
     }
 
@@ -129,16 +129,16 @@ public class ContactFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.send_message:
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
-                resultIntent.putExtra(ContextVS.FRAGMENT_KEY, MessageFormFragment.class.getName());
-                resultIntent.putExtra(ContextVS.USER_KEY, user);
+                resultIntent.putExtra(Constants.FRAGMENT_KEY, MessageFormFragment.class.getName());
+                resultIntent.putExtra(Constants.USER_KEY, user);
                 resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(resultIntent);
                 return true;
             case R.id.send_money:
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, TransactionFormFragment.class.getName());
-                intent.putExtra(ContextVS.TYPEVS_KEY, TransactionFormFragment.Type.TRANSACTION_FORM);
-                intent.putExtra(ContextVS.USER_KEY, user);
+                intent.putExtra(Constants.FRAGMENT_KEY, TransactionFormFragment.class.getName());
+                intent.putExtra(Constants.TYPEVS_KEY, TransactionFormFragment.Type.TRANSACTION_FORM);
+                intent.putExtra(Constants.USER_KEY, user);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
                 return true;

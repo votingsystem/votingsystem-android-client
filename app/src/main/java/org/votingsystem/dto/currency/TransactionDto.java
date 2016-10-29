@@ -7,7 +7,7 @@ import android.util.Base64;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationDto;
@@ -20,7 +20,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,7 +43,7 @@ public class TransactionDto implements Serializable {
     public enum Type { CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE, FROM_BANK, FROM_USER,
         CURRENCY_PERIOD_INIT, TRANSACTION_INFO;}
 
-    private TypeVS operation;
+    private OperationType operation;
     private Long id;
     private Long localId;
     private Long userId;
@@ -93,7 +93,7 @@ public class TransactionDto implements Serializable {
     public static TransactionDto PAYMENT_REQUEST(String toUser, UserDto.Type userToType,
                                                  BigDecimal amount, String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionDto dto = new TransactionDto();
-        dto.setOperation(TypeVS.TRANSACTION_INFO);
+        dto.setOperation(OperationType.TRANSACTION_INFO);
         dto.setUserToType(userToType);
         dto.setToUserName(toUser);
         dto.setAmount(amount);
@@ -109,7 +109,7 @@ public class TransactionDto implements Serializable {
     public static TransactionDto CURRENCY_REQUEST(BigDecimal amount, String currencyCode,
                                                   TagVSDto tagVS, boolean timeLimited) {
         TransactionDto dto = new TransactionDto();
-        dto.setOperation(TypeVS.CURRENCY_REQUEST);
+        dto.setOperation(OperationType.CURRENCY_REQUEST);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setTagVS(tagVS);
@@ -320,11 +320,11 @@ public class TransactionDto implements Serializable {
         this.receipt = receipt;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 
@@ -471,19 +471,19 @@ public class TransactionDto implements Serializable {
     public static List<String> getPaymentMethods(List<Type> paymentOptions) {
         //preserve the same order
         List<String> result = new ArrayList<>();
-        if(paymentOptions.contains(Type.FROM_USER)) result.add(AppVS.getInstance()
+        if(paymentOptions.contains(Type.FROM_USER)) result.add(App.getInstance()
                 .getString(R.string.signed_transaction_lbl));
-        if(paymentOptions.contains(Type.CURRENCY_SEND)) result.add(AppVS.getInstance()
+        if(paymentOptions.contains(Type.CURRENCY_SEND)) result.add(App.getInstance()
                 .getString(R.string.currency_send_lbl));
-        if(paymentOptions.contains(Type.CURRENCY_CHANGE)) result.add(AppVS.getInstance()
+        if(paymentOptions.contains(Type.CURRENCY_CHANGE)) result.add(App.getInstance()
                 .getString(R.string.currency_change_lbl));
         return result;
     }
 
     public static Type getByDescription(String description) throws ValidationExceptionVS {
-        if(AppVS.getInstance().getString(R.string.signed_transaction_lbl).equals(description)) return Type.FROM_USER;
-        if(AppVS.getInstance().getString(R.string.currency_send_lbl).equals(description)) return Type.CURRENCY_SEND;
-        if(AppVS.getInstance().getString(R.string.currency_change_lbl).equals(description)) return Type.CURRENCY_CHANGE;
+        if(App.getInstance().getString(R.string.signed_transaction_lbl).equals(description)) return Type.FROM_USER;
+        if(App.getInstance().getString(R.string.currency_send_lbl).equals(description)) return Type.CURRENCY_SEND;
+        if(App.getInstance().getString(R.string.currency_change_lbl).equals(description)) return Type.CURRENCY_CHANGE;
         throw new ValidationExceptionVS("type not found for description: " + description);
     }
 
@@ -518,8 +518,8 @@ public class TransactionDto implements Serializable {
 
     private String validateCurrencyChangeReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
         CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
-        if(TypeVS.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
-                TypeVS.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
+        if(OperationType.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
+                OperationType.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
         if(type == TransactionDto.Type.TRANSACTION_INFO) {
             if(!paymentOptions.contains(Type.CURRENCY_CHANGE)) throw new ValidationExceptionVS(
                     "unexpected type: " + receiptDto.getOperation());
@@ -530,21 +530,21 @@ public class TransactionDto implements Serializable {
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
         if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
-        String action = isIncome?AppVS.getInstance().getString(R.string.income_lbl):
-                AppVS.getInstance().getString(R.string.expense_lbl);
-        String result = AppVS.getInstance().getString(R.string.currency_change_receipt_ok_msg,
+        String action = isIncome? App.getInstance().getString(R.string.income_lbl):
+                App.getInstance().getString(R.string.expense_lbl);
+        String result = App.getInstance().getString(R.string.currency_change_receipt_ok_msg,
                 action, receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
                 MsgUtils.getTagVSMessage(receiptDto.getTag()));
         if(receiptDto.timeLimited()) {
-            result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
+            result = result + " - " + App.getInstance().getString(R.string.time_remaining_lbl);
         }
         return result;
     }
 
     private String validateCurrencySendReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
         CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
-        if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
-                TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
+        if(OperationType.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
+                OperationType.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
         if(type == TransactionDto.Type.TRANSACTION_INFO) {
             if(!paymentOptions.contains(TransactionDto.Type.CURRENCY_SEND)) throw new ValidationExceptionVS(
                     "unexpected type: " + receiptDto.getOperation());
@@ -558,13 +558,13 @@ public class TransactionDto implements Serializable {
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
         if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
-        String action = isIncome?AppVS.getInstance().getString(R.string.income_lbl):
-                AppVS.getInstance().getString(R.string.expense_lbl);
-        String result = AppVS.getInstance().getString(R.string.currency_send_receipt_ok_msg,
+        String action = isIncome? App.getInstance().getString(R.string.income_lbl):
+                App.getInstance().getString(R.string.expense_lbl);
+        String result = App.getInstance().getString(R.string.currency_send_receipt_ok_msg,
                 action, receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
                 MsgUtils.getTagVSMessage(receiptDto.getTag()));
         if(receiptDto.timeLimited()) {
-            result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
+            result = result + " - " + App.getInstance().getString(R.string.time_remaining_lbl);
         }
         return result;
     }
@@ -591,13 +591,13 @@ public class TransactionDto implements Serializable {
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());
-        String action = isIncome?AppVS.getInstance().getString(R.string.income_lbl):
-                AppVS.getInstance().getString(R.string.expense_lbl);
-        String result = AppVS.getInstance().getString(R.string.from_user_receipt_ok_msg,
+        String action = isIncome? App.getInstance().getString(R.string.income_lbl):
+                App.getInstance().getString(R.string.expense_lbl);
+        String result = App.getInstance().getString(R.string.from_user_receipt_ok_msg,
                 action, receiptDto.getAmount() + " " + receiptDto.getCurrencyCode(),
                 MsgUtils.getTagVSMessage(receiptDto.getTagName()));
         if(receiptDto.isTimeLimited()) {
-            result = result + " - " + AppVS.getInstance().getString(R.string.time_remaining_lbl);
+            result = result + " - " + App.getInstance().getString(R.string.time_remaining_lbl);
         }
         return result;
     }
@@ -676,7 +676,7 @@ public class TransactionDto implements Serializable {
         }
         UserDto toUser = new UserDto();
         toUser.setName(transactionDto.getFromUserName());
-        if(operation.getOperation() == TypeVS.FROM_USER) {
+        if(operation.getOperation() == OperationType.FROM_USER) {
             if(transactionDto.getToUserIBAN().size() != 1) throw new ExceptionVS("FROM_USER must have " +
                     "'one' receptor and it has '" + transactionDto.getToUserIBAN().size() + "'");
             toUser.setIBAN(transactionDto.getToUserIBAN().iterator().next());
@@ -691,7 +691,7 @@ public class TransactionDto implements Serializable {
 
     @JsonIgnore public TransactionDto getTransactionFromUser() {
         TransactionDto dto = new TransactionDto();
-        dto.setOperation(TypeVS.FROM_USER);
+        dto.setOperation(OperationType.FROM_USER);
         dto.setSubject(subject);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);

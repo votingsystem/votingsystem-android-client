@@ -29,11 +29,11 @@ import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.Currency;
 import org.votingsystem.service.PaymentService;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.Wallet;
@@ -41,8 +41,8 @@ import org.votingsystem.util.Wallet;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static org.votingsystem.util.ContextVS.CALLER_KEY;
-import static org.votingsystem.util.ContextVS.TYPEVS_KEY;
+import static org.votingsystem.util.Constants.CALLER_KEY;
+import static org.votingsystem.util.Constants.TYPEVS_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -67,12 +67,12 @@ public class PaymentFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
             setProgressDialogVisible(false);
-            String caption = ResponseVS.SC_OK == responseVS.getStatusCode()? getString(
+            String caption = ResponseDto.SC_OK == responseDto.getStatusCode()? getString(
                     R.string.payment_ok_caption):getString(R.string.error_lbl);
             getActivity().finish();
-            UIUtils.launchMessageActivity(ResponseVS.SC_ERROR, responseVS.getMessage(), caption);
+            UIUtils.launchMessageActivity(ResponseDto.SC_ERROR, responseDto.getMessage(), caption);
         }
     };
 
@@ -81,8 +81,8 @@ public class PaymentFragment extends Fragment {
         Intent startIntent = new Intent(getActivity(), PaymentService.class);
         try {
             transactionDto.setType(transactionType);
-            transactionDto.setOperation(TypeVS.valueOf(transactionType.toString()));
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionDto);
+            transactionDto.setOperation(OperationType.valueOf(transactionType.toString()));
+            startIntent.putExtra(Constants.TRANSACTION_KEY, transactionDto);
             startIntent.putExtra(CALLER_KEY, broadCastId);
             startIntent.putExtra(TYPEVS_KEY, transactionDto.getOperation());
             getActivity().startService(startIntent);
@@ -109,7 +109,7 @@ public class PaymentFragment extends Fragment {
         tagvs= (TextView)rootView.findViewById(R.id.tagvs);
         payment_method_spinner = (Spinner)rootView.findViewById(R.id.payment_method_spinner);
         try {
-            transactionDto = (TransactionDto) getArguments().getSerializable(ContextVS.TRANSACTION_KEY);
+            transactionDto = (TransactionDto) getArguments().getSerializable(Constants.TRANSACTION_KEY);
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
                     R.layout.payment_spinner_item,
                     TransactionDto.getPaymentMethods(transactionDto.getPaymentOptions()));
@@ -186,8 +186,8 @@ public class PaymentFragment extends Fragment {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             Intent intent = new Intent(getActivity(),
                                                     FragmentContainerActivity.class);
-                                            intent.putExtra(ContextVS.REFRESH_KEY, true);
-                                            intent.putExtra(ContextVS.FRAGMENT_KEY,
+                                            intent.putExtra(Constants.REFRESH_KEY, true);
+                                            intent.putExtra(Constants.FRAGMENT_KEY,
                                                     CurrencyAccountsFragment.class.getName());
                                             startActivity(intent);
                                         }
@@ -227,8 +227,8 @@ public class PaymentFragment extends Fragment {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             Intent intent = new Intent(getActivity(),
                                                     FragmentContainerActivity.class);
-                                            intent.putExtra(ContextVS.REFRESH_KEY, true);
-                                            intent.putExtra(ContextVS.FRAGMENT_KEY,
+                                            intent.putExtra(Constants.REFRESH_KEY, true);
+                                            intent.putExtra(Constants.FRAGMENT_KEY,
                                                     CurrencyAccountsFragment.class.getName());
                                             startActivity(intent);
                                         }
@@ -247,13 +247,13 @@ public class PaymentFragment extends Fragment {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             Intent intent = new Intent(getActivity(),
                                                     CurrencyRequesActivity.class);
-                                            intent.putExtra(ContextVS.MAX_VALUE_KEY,
+                                            intent.putExtra(Constants.MAX_VALUE_KEY,
                                                     availableForTagVS);
-                                            intent.putExtra(ContextVS.DEFAULT_VALUE_KEY,
+                                            intent.putExtra(Constants.DEFAULT_VALUE_KEY,
                                                     amountToRequest);
-                                            intent.putExtra(ContextVS.CURRENCY_KEY,
+                                            intent.putExtra(Constants.CURRENCY_KEY,
                                                     transactionDto.getCurrencyCode());
-                                            intent.putExtra(ContextVS.MESSAGE_KEY,
+                                            intent.putExtra(Constants.MESSAGE_KEY,
                                                     getString(R.string.cash_for_payment_dialog_msg,
                                                     transactionDto.getCurrencyCode(),
                                                     amountToRequest.toString(),
@@ -283,10 +283,10 @@ public class PaymentFragment extends Fragment {
         switch (requestCode) {
             case RC_OPEN_WALLET:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
                     try {
                         Set<Currency> currencySet = Wallet.getCurrencySet(
-                                new String(responseVS.getMessageBytes()).toCharArray());
+                                new String(responseDto.getMessageBytes()).toCharArray());
                         submitForm();
                     } catch(Exception ex) { ex.printStackTrace(); }
                 }

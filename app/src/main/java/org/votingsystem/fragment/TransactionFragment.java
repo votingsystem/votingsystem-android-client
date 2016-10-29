@@ -22,16 +22,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.contentprovider.TransactionContentProvider;
 import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -51,23 +51,23 @@ public class TransactionFragment extends Fragment {
     private Button receipt;
     private CMSSignedMessage cmsMessage;
     private String broadCastId = null;
-    private AppVS appVS;
+    private App app;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(responseVS != null) {
-            switch(responseVS.getTypeVS()) {
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+        if(responseDto != null) {
+            switch(responseDto.getOperationType()) {
                 case RECEIPT:
-                    byte[] receiptBytes = (byte[]) responseVS.getData();
+                    byte[] receiptBytes = (byte[]) responseDto.getData();
                     try {
                         selectedTransaction.setCMSMessage(new CMSSignedMessage(receiptBytes));
                     } catch (Exception e) { e.printStackTrace();  }
                     try {
                         selectedTransaction.setCMSMessage(new CMSSignedMessage(receiptBytes));
                     } catch (Exception e) { e.printStackTrace(); }
-                    TransactionContentProvider.updateTransaction(appVS, selectedTransaction);
+                    TransactionContentProvider.updateTransaction(app, selectedTransaction);
                     break;
             }
         }
@@ -77,7 +77,7 @@ public class TransactionFragment extends Fragment {
     public static Fragment newInstance(int cursorPosition) {
         TransactionFragment fragment = new TransactionFragment();
         Bundle args = new Bundle();
-        args.putInt(ContextVS.CURSOR_POSITION_KEY, cursorPosition);
+        args.putInt(Constants.CURSOR_POSITION_KEY, cursorPosition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,12 +85,12 @@ public class TransactionFragment extends Fragment {
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int cursorPosition =  getArguments().getInt(ContextVS.CURSOR_POSITION_KEY);
-        appVS = (AppVS) getActivity().getApplicationContext();
+        int cursorPosition =  getArguments().getInt(Constants.CURSOR_POSITION_KEY);
+        app = (App) getActivity().getApplicationContext();
         String selection = TransactionContentProvider.WEEK_LAPSE_COL + "= ? ";
         Cursor cursor = getActivity().getContentResolver().query(
                 TransactionContentProvider.CONTENT_URI, null, selection,
-                new String[]{appVS.getCurrentWeekLapseId()}, null);
+                new String[]{app.getCurrentWeekLapseId()}, null);
         cursor.moveToPosition(cursorPosition);
         Long transactionId = cursor.getLong(cursor.getColumnIndex(
                 TransactionContentProvider.ID_COL));
@@ -123,7 +123,7 @@ public class TransactionFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             selectedTransaction = (TransactionDto) savedInstanceState.getSerializable(
-                    ContextVS.TRANSACTION_KEY);
+                    Constants.TRANSACTION_KEY);
         }
         if(selectedTransaction != null) initTransactionScreen(selectedTransaction);
     }
@@ -156,8 +156,8 @@ public class TransactionFragment extends Fragment {
         receipt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.TRANSACTION_KEY, transaction);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, ReceiptFragment.class.getName());
+                intent.putExtra(Constants.TRANSACTION_KEY, transaction);
+                intent.putExtra(Constants.FRAGMENT_KEY, ReceiptFragment.class.getName());
                 startActivity(intent);
             }
         });
@@ -185,7 +185,7 @@ public class TransactionFragment extends Fragment {
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if(selectedTransaction != null) outState.putSerializable(
-                ContextVS.TRANSACTION_KEY, selectedTransaction);
+                Constants.TRANSACTION_KEY, selectedTransaction);
     }
 
     @Override public void onResume() {

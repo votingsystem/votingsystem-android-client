@@ -29,10 +29,10 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.ui.DNIePasswordDialog;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.CertificationRequest;
 
@@ -46,8 +46,8 @@ import java.util.Arrays;
 import es.gob.jmulticard.jse.provider.DnieProvider;
 import es.gob.jmulticard.ui.passwordcallback.DNIeDialogManager;
 
-import static org.votingsystem.util.ContextVS.PROVIDER;
-import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
+import static org.votingsystem.util.Constants.PROVIDER;
+import static org.votingsystem.util.Constants.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -76,7 +76,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 
 	final Runnable newRead = new Runnable() {
 		public void run() {
-			((TextView)findViewById(R.id.msg)).setText(R.string.process_msg_lectura);
+			((TextView)findViewById(R.id.msg)).setText(R.string.process_msg_reading);
 			((ImageView)findViewById(R.id.result_img)).setImageResource(R.drawable.dni30_peq);
 		}
 	};
@@ -101,16 +101,16 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 		myNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		myNfcAdapter.setNdefPushMessage(null, this);
 		myNfcAdapter.setNdefPushMessageCallback(null, this);
-        textToSign = getIntent().getExtras().getString(ContextVS.MESSAGE_CONTENT_KEY);
-        toUser = getIntent().getExtras().getString(ContextVS.USER_KEY);
+        textToSign = getIntent().getExtras().getString(Constants.MESSAGE_CONTENT_KEY);
+        toUser = getIntent().getExtras().getString(Constants.USER_KEY);
 		if(toUser == null) toUser = getString(R.string.voting_system_lbl);
-		activityMode = getIntent().getExtras().getInt(ContextVS.MODE_KEY, -1);
-		String message = getIntent().getExtras().getString(ContextVS.MESSAGE_KEY);
-		requestCsr = getIntent().getExtras().getBoolean(ContextVS.CSR_KEY, false);
+		activityMode = getIntent().getExtras().getInt(Constants.MODE_KEY, -1);
+		String message = getIntent().getExtras().getString(Constants.MESSAGE_KEY);
+		requestCsr = getIntent().getExtras().getBoolean(Constants.CSR_KEY, false);
 		if(message != null) {
 			((TextView)findViewById(R.id.topMsg)).setText(message);
 		} else findViewById(R.id.topMsg).setVisibility(View.GONE);
-        accessModePassw = (char[]) getIntent().getExtras().getSerializable(ContextVS.PASSWORD_KEY);
+        accessModePassw = (char[]) getIntent().getExtras().getSerializable(Constants.PASSWORD_KEY);
 		dnieCAN = PrefUtils.getDNIeCAN();
     }
 
@@ -146,7 +146,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 		@Override public void run() {
 			char[] password = null;
 			if(accessModePassw != null) password = PrefUtils.getProtectedPassword(accessModePassw);
-			ResponseVS responseVS = null;
+			ResponseDto responseDto = null;
 			try  {
 				DnieProvider p = new DnieProvider();
 				p.setProviderTag(tagFromIntent);
@@ -163,7 +163,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				X509Certificate userCert = (X509Certificate) ksUserDNIe.getCertificate(CERT_SIGN);
 
 				if(MODE_PASSWORD_REQUEST == activityMode) {
-					responseVS = ResponseVS.OK().setMessageBytes(new String(passwordDialog.getPassword()).getBytes());
+					responseDto = ResponseDto.OK().setMessageBytes(new String(passwordDialog.getPassword()).getBytes());
 				} else {
 					UserDto appUser = null;
 					if(MODE_UPDATE_USER_DATA == activityMode) {
@@ -196,10 +196,10 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 							contentToSign);
 					CMSSignedData cmsSignedData = DNIeContentSigner.signData(privateKey, userCert,
 							cerStore, contentToSign, timeStampToken);
-					responseVS = new ResponseVS(ResponseVS.SC_OK, new CMSSignedMessage(cmsSignedData));
+					responseDto = new ResponseDto(ResponseDto.SC_OK, new CMSSignedMessage(cmsSignedData));
 					if(MODE_UPDATE_USER_DATA == activityMode) {
 						PrefUtils.putAppUser(appUser);
-						responseVS.setMessageBytes(new String(passwordDialog.getPassword()).getBytes());
+						responseDto.setMessageBytes(new String(passwordDialog.getPassword()).getBytes());
 					}
 					if(accessModePassw != null && password == null) {
 						CryptoDeviceAccessMode accessMode = PrefUtils.getCryptoDeviceAccessMode();
@@ -209,9 +209,9 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
 				}
 				myHandler.post(askForRead);
 				ProgressDialogFragment.hide(getSupportFragmentManager());
-				if(responseVS != null) {
+				if(responseDto != null) {
 					Intent resultIntent = new Intent();
-					resultIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+					resultIntent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
 					setResult(Activity.RESULT_OK, resultIntent);
 					finish();
 				}

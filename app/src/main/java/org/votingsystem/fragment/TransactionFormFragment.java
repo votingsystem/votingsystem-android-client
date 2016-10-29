@@ -20,14 +20,14 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.Utils;
 
 import java.math.BigDecimal;
@@ -60,8 +60,8 @@ public class TransactionFormFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            TagVSDto tagVS = (TagVSDto) intent.getSerializableExtra(ContextVS.TAG_KEY);
+            final ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+            TagVSDto tagVS = (TagVSDto) intent.getSerializableExtra(Constants.TAG_KEY);
             if(tagVS != null) setTagVS(tagVS);
         }
     };
@@ -70,8 +70,8 @@ public class TransactionFormFragment extends Fragment {
                ViewGroup container, Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
-        formType = (Type) getArguments().getSerializable(ContextVS.TYPEVS_KEY);
-        toUser = (UserDto) getArguments().getSerializable(ContextVS.USER_KEY);
+        formType = (Type) getArguments().getSerializable(Constants.TYPEVS_KEY);
+        toUser = (UserDto) getArguments().getSerializable(Constants.USER_KEY);
         View rootView = inflater.inflate(R.layout.transaction_form_fragment, container, false);
         rootView.findViewById(R.id.request_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -126,7 +126,7 @@ public class TransactionFormFragment extends Fragment {
         }
 
         if(savedInstanceState != null)
-            setTagVS((TagVSDto) savedInstanceState.getSerializable(ContextVS.TAG_KEY));
+            setTagVS((TagVSDto) savedInstanceState.getSerializable(Constants.TAG_KEY));
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         return rootView;
     }
@@ -193,22 +193,22 @@ public class TransactionFormFragment extends Fragment {
                 transactionDto.setDateCreated(new Date());
                 transactionDto.setUUID(UUID.randomUUID().toString());
                 Intent resultIntent = new Intent(getActivity(), FragmentContainerActivity.class);
-                resultIntent.putExtra(ContextVS.FRAGMENT_KEY, PaymentFragment.class.getName());
-                resultIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionDto);
+                resultIntent.putExtra(Constants.FRAGMENT_KEY, PaymentFragment.class.getName());
+                resultIntent.putExtra(Constants.TRANSACTION_KEY, transactionDto);
                 resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(resultIntent);
                 break;
             case QR_FORM:
                 TransactionDto dto = TransactionDto.PAYMENT_REQUEST(
-                        AppVS.getInstance().getUser().getFullName(), UserDto.Type.USER,
+                        App.getInstance().getUser().getFullName(), UserDto.Type.USER,
                         new BigDecimal(amount_text.getText().toString()),
                         currencySpinner.getSelectedItem().toString(),
-                        AppVS.getInstance().getConnectedDevice().getIBAN(), subject.getText().toString(),
+                        App.getInstance().getConnectedDevice().getIBAN(), subject.getText().toString(),
                         tagVS.getName());
                 dto.setPaymentOptions(paymentOptions);
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.TRANSACTION_KEY, dto);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, QRFragment.class.getName());
+                intent.putExtra(Constants.TRANSACTION_KEY, dto);
+                intent.putExtra(Constants.FRAGMENT_KEY, QRFragment.class.getName());
                 startActivity(intent);
                 break;
         }
@@ -216,7 +216,7 @@ public class TransactionFormFragment extends Fragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.TAG_KEY, tagVS);
+        outState.putSerializable(Constants.TAG_KEY, tagVS);
     }
 
     @Override public void onResume() {

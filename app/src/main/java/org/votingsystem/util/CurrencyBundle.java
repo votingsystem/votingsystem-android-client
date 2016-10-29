@@ -1,7 +1,7 @@
 package org.votingsystem.util;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.TagVSDto;
@@ -99,9 +99,9 @@ public class CurrencyBundle {
                 transactionDto.getUUID());
     }
     
-    public CurrencyBatchDto getCurrencyBatchDto(TypeVS operation, String subject,
-            String toUserIBAN, BigDecimal batchAmount, String currencyCode, String tag, 
-            Boolean timeLimited, String uuid) throws Exception {
+    public CurrencyBatchDto getCurrencyBatchDto(OperationType operation, String subject,
+                                                String toUserIBAN, BigDecimal batchAmount, String currencyCode, String tag,
+                                                Boolean timeLimited, String uuid) throws Exception {
         if(!currencyCode.equals(this.currencyCode)) throw new ValidationExceptionVS(
                 "Bundle with currencyCode: " + this.currencyCode + " can't handle currencyCode: " + currencyCode);
         if(!tag.equals(this.tagVS)) throw new ValidationExceptionVS(
@@ -174,11 +174,11 @@ public class CurrencyBundle {
                 currencySet.add(lastCurrencyAdded);
                 bundleAccumulated = bundleAccumulated.add(lastCurrencyAdded.getAmount());
             }
-        } else throw new ValidationExceptionVS(AppVS.getInstance().getString(R.string.tagAmountErrorMsg,
+        } else throw new ValidationExceptionVS(App.getInstance().getString(R.string.tagAmountErrorMsg,
                 batchAmount + " " + currencyCode, tag, totalAmount  + " " + currencyCode ));
         if(bundleAccumulated.compareTo(batchAmount) > 0) {
             BigDecimal leftOverAmount = bundleAccumulated.subtract(batchAmount);
-            dto.setLeftOverCurrency(new Currency(AppVS.getInstance().getCurrencyServerURL(),
+            dto.setLeftOverCurrency(new Currency(App.getInstance().getCurrencyServerURL(),
                     leftOverAmount, lastCurrencyAdded.getCurrencyCode(),
                     lastCurrencyAdded.isTimeLimited(), lastCurrencyAdded.getTag()));
         }

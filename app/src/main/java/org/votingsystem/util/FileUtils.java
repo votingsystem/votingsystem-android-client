@@ -36,7 +36,7 @@ public class FileUtils {
     
     public static byte[] getBytesFromInputStream(InputStream input) throws IOException {
     	ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf =new byte[1024];
+        byte[] buf =new byte[4096];
         int len;
         while((len = input.read(buf)) > 0){
             output.write(buf,0,len);

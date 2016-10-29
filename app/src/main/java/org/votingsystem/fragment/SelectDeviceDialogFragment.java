@@ -18,16 +18,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.Utils;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
 
     public static final String TAG = SelectDeviceDialogFragment.class.getSimpleName();
 
-    private AppVS appVS;
+    private App app;
     private SimpleAdapter simpleAdapter;
     private String dialogCaller;
     private Set<DeviceDto> deviceSetDto;
@@ -56,14 +56,14 @@ public class SelectDeviceDialogFragment extends DialogFragment {
     public static void showDialog(String dialogCaller, FragmentManager manager, String tag) {
         SelectDeviceDialogFragment dialogFragment = new SelectDeviceDialogFragment();
         Bundle args = new Bundle();
-        args.putString(ContextVS.CALLER_KEY, dialogCaller);
+        args.putString(Constants.CALLER_KEY, dialogCaller);
         dialogFragment.setArguments(args);
         dialogFragment.show(manager, tag);
     }
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-        appVS = (AppVS) getActivity().getApplicationContext();
-        dialogCaller = getArguments().getString(ContextVS.CALLER_KEY);
+        app = (App) getActivity().getApplicationContext();
+        dialogCaller = getArguments().getString(Constants.CALLER_KEY);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.select_device_dialog, null);
         ListView tag_list_view = (ListView) view.findViewById(R.id.tag_list_view);
@@ -75,16 +75,16 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         tag_list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position,long id) {
                 Intent intent = new Intent(dialogCaller);
-                ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK, TypeVS.DEVICE_SELECT);
+                ResponseDto responseDto = new ResponseDto(ResponseDto.SC_OK, OperationType.DEVICE_SELECT);
                 DeviceDto selectedDeviceDto = null;
                 for(DeviceDto deviceDto : deviceSetDto) {
                     if(connectedDeviceList.get(position).equals(deviceDto.getDeviceName()))
                         selectedDeviceDto = deviceDto;
                 }
                 try {
-                    responseVS.setMessage(JSON.writeValueAsString(selectedDeviceDto));
+                    responseDto.setMessage(JSON.writeValueAsString(selectedDeviceDto));
                 } catch (IOException e) { e.printStackTrace(); }
-                intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+                intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                 dialog.dismiss();
             }
@@ -99,19 +99,19 @@ public class SelectDeviceDialogFragment extends DialogFragment {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ContextVS.CALLER_KEY, dialogCaller);
+        outState.putString(Constants.CALLER_KEY, dialogCaller);
         try {
-            outState.putSerializable(ContextVS.DTO_KEY, JSON.writeValueAsString(deviceSetDto));
+            outState.putSerializable(Constants.DTO_KEY, JSON.writeValueAsString(deviceSetDto));
         } catch (IOException e) { e.printStackTrace(); }
-        outState.putSerializable(ContextVS.FORM_DATA_KEY, (Serializable) connectedDeviceList);
+        outState.putSerializable(Constants.FORM_DATA_KEY, (Serializable) connectedDeviceList);
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null && savedInstanceState.containsKey(ContextVS.FORM_DATA_KEY)) {
-            dialogCaller = savedInstanceState.getString(ContextVS.CALLER_KEY);
-            deviceSetDto = (Set<DeviceDto>) savedInstanceState.getSerializable(ContextVS.DTO_KEY);
-            connectedDeviceList = (List<String>) savedInstanceState.getSerializable(ContextVS.FORM_DATA_KEY);
+        if(savedInstanceState != null && savedInstanceState.containsKey(Constants.FORM_DATA_KEY)) {
+            dialogCaller = savedInstanceState.getString(Constants.CALLER_KEY);
+            deviceSetDto = (Set<DeviceDto>) savedInstanceState.getSerializable(Constants.DTO_KEY);
+            connectedDeviceList = (List<String>) savedInstanceState.getSerializable(Constants.FORM_DATA_KEY);
             if(connectedDeviceList.size() > 0) {
                 msg_text.setText(getString(R.string.select_connected_device_msg));
             }
@@ -119,8 +119,8 @@ public class SelectDeviceDialogFragment extends DialogFragment {
             simpleAdapter.notifyDataSetChanged();
         } else {
             deviceLoader = new DeviceLoader();
-            String targetURL = ((AppVS)getActivity().getApplicationContext()).getCurrencyServer().
-                    getDeviceConnectedServiceURL(appVS.getUser().getNIF());
+            String targetURL = ((App)getActivity().getApplicationContext()).getCurrencyServer().
+                    getDeviceConnectedServiceURL(app.getUser().getNIF());
             deviceLoader.execute(targetURL);
         }
     }
@@ -149,7 +149,7 @@ public class SelectDeviceDialogFragment extends DialogFragment {
         @Override protected List<String> doInBackground(String... params) {
             connectedDeviceList.clear();
             try {
-                UserDto userDto = HttpHelper.getInstance().getData(UserDto.class, params[0], MediaType.JSON);
+                UserDto userDto = HttpConnection.getInstance().getData(UserDto.class, params[0], MediaType.JSON);
                 for(DeviceDto deviceDto : userDto.getConnectedDevices()) {
                     if(!Utils.getDeviceName().toLowerCase().equals(
                             deviceDto.getDeviceName().toLowerCase()))

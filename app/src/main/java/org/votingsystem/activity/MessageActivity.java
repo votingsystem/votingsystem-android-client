@@ -7,8 +7,8 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.dto.ResponseDto;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -25,11 +25,11 @@ public class MessageActivity extends AppCompatActivity {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.message_activity);
         /*((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(
-                AppVS.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
-        ResponseVS responseVS = getIntent().getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        ((TextView) findViewById(R.id.caption_text)).setText(responseVS.getCaption());
+                App.SIGN_AND_SEND_SERVICE_NOTIFICATION_ID);*/
+        ResponseDto responseDto = getIntent().getParcelableExtra(Constants.RESPONSEVS_KEY);
+        ((TextView) findViewById(R.id.caption_text)).setText(responseDto.getCaption());
         ((TextView) findViewById(R.id.message_text)).setText(Html.fromHtml(
-                responseVS.getNotificationMessage()));
+                responseDto.getNotificationMessage()));
         ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 

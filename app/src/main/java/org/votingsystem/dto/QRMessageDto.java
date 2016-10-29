@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
 import java.security.KeyFactory;
@@ -51,19 +51,19 @@ public class QRMessageDto<T> implements Serializable {
     public static final String MSG_KEY                = "msg";
 
 
-    @JsonIgnore private TypeVS typeVS;
-    @JsonIgnore private TypeVS sessionType;
+    @JsonIgnore private OperationType operationType;
+    @JsonIgnore private OperationType sessionType;
     @JsonIgnore private T data;
-    @JsonIgnore private String origingHashCertVS;
+    @JsonIgnore private String origingRevocationHash;
     @JsonIgnore private Currency currency;
     @JsonIgnore private DeviceDto device;
     @JsonIgnore private AESParamsDto aesParams;;
-    private TypeVS operation;
+    private OperationType operation;
     private String operationCode;
     private Long deviceId;
     private Long itemId;
     private Date dateCreated;
-    private String hashCertVS;
+    private String revocationHash;
     private String sessionId;
     private String currencyChangeCert;
     private String publicKeyBase64;
@@ -73,15 +73,15 @@ public class QRMessageDto<T> implements Serializable {
 
     public QRMessageDto() {}
 
-    public QRMessageDto(String sessionId, TypeVS typeVS) {
+    public QRMessageDto(String sessionId, OperationType operationType) {
         this.sessionId = sessionId;
-        this.typeVS = typeVS;
+        this.operationType = operationType;
         dateCreated = new Date();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }
     
-    public QRMessageDto(DeviceDto deviceDto, TypeVS typeVS){
-        this.typeVS = typeVS;
+    public QRMessageDto(DeviceDto deviceDto, OperationType operationType){
+        this.operationType = operationType;
         this.deviceId = deviceDto.getId();
         this.dateCreated = new Date();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
@@ -97,28 +97,28 @@ public class QRMessageDto<T> implements Serializable {
             int operationCode = Integer.valueOf(msg.split(OPERATION_KEY + "=")[1].split(";")[0]);
             switch (operationCode) {
                 case INIT_REMOTE_SIGNED_SESSION:
-                    qrMessageDto.setOperation(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+                    qrMessageDto.setOperation(OperationType.INIT_REMOTE_SIGNED_SESSION);
                     break;
                 case MESSAGE_INFO:
-                    qrMessageDto.setOperation(TypeVS.MESSAGE_INFO);
+                    qrMessageDto.setOperation(OperationType.MESSAGE_INFO);
                     break;
                 case CURRENCY_SEND:
-                    qrMessageDto.setOperation(TypeVS.CURRENCY_SEND);
+                    qrMessageDto.setOperation(OperationType.CURRENCY_SEND);
                     break;
                 case USER_INFO:
-                    qrMessageDto.setOperation(TypeVS.USER_INFO);
+                    qrMessageDto.setOperation(OperationType.USER_INFO);
                     break;
                 case VOTE:
-                    qrMessageDto.setOperation(TypeVS.SEND_VOTE);
+                    qrMessageDto.setOperation(OperationType.SEND_VOTE);
                     break;
                 case OPERATION_PROCESS:
-                    qrMessageDto.setOperation(TypeVS.OPERATION_PROCESS);
+                    qrMessageDto.setOperation(OperationType.OPERATION_PROCESS);
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    qrMessageDto.setOperation(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
+                    qrMessageDto.setOperation(OperationType.ANONYMOUS_REPRESENTATIVE_SELECTION);
                     break;
                 case GET_AES_PARAMS:
-                    qrMessageDto.setOperation(TypeVS.GET_AES_PARAMS);
+                    qrMessageDto.setOperation(OperationType.GET_AES_PARAMS);
                     break;
                 default:
                     LOGD(TAG, "unknown operation code: " + operationCode);
@@ -128,10 +128,10 @@ public class QRMessageDto<T> implements Serializable {
             int systemCode = Integer.valueOf(msg.split(SERVER_KEY + "=")[1].split(";")[0]);
             switch (systemCode) {
                 case CURRENCY_SYSTEM:
-                    qrMessageDto.setSessionType(TypeVS.CURRENCY_SYSTEM);
+                    qrMessageDto.setSessionType(OperationType.CURRENCY_SYSTEM);
                     break;
                 case VOTING_SYSTEM:
-                    qrMessageDto.setSessionType(TypeVS.VOTING_SYSTEM);
+                    qrMessageDto.setSessionType(OperationType.VOTING_SYSTEM);
                     break;
                 default:
                     LOGD(TAG, "unknown system code: " + systemCode);
@@ -166,7 +166,7 @@ public class QRMessageDto<T> implements Serializable {
         this.device = device;
     }
 
-    public static String toQRCode(TypeVS operation, String operationCode, String deviceId) {
+    public static String toQRCode(OperationType operation, String operationCode, String deviceId) {
         StringBuilder result = new StringBuilder();
         if(deviceId != null) result.append(DEVICE_ID_KEY + "=" + deviceId + ";");
         if(operation != null) result.append(OPERATION_KEY + "=" + operation + ";");
@@ -182,8 +182,8 @@ public class QRMessageDto<T> implements Serializable {
     }
 
     public QRMessageDto createRequest() throws NoSuchAlgorithmException {
-        this.origingHashCertVS = java.util.UUID.randomUUID().toString();
-        this.hashCertVS = StringUtils.getHashBase64(origingHashCertVS, ContextVS.DATA_DIGEST_ALGORITHM);
+        this.origingRevocationHash = java.util.UUID.randomUUID().toString();
+        this.revocationHash = StringUtils.getHashBase64(origingRevocationHash, Constants.DATA_DIGEST_ALGORITHM);
         return this;
     }
 
@@ -212,12 +212,12 @@ public class QRMessageDto<T> implements Serializable {
         this.data = data;
     }
 
-    public TypeVS getTypeVS() {
-        return typeVS;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public Date getDateCreated() {
@@ -228,20 +228,20 @@ public class QRMessageDto<T> implements Serializable {
         this.dateCreated = dateCreated;
     }
 
-    public String getOrigingHashCertVS() {
-        return origingHashCertVS;
+    public String getOrigingRevocationHash() {
+        return origingRevocationHash;
     }
 
-    public void setOrigingHashCertVS(String origingHashCertVS) {
-        this.origingHashCertVS = origingHashCertVS;
+    public void setOrigingRevocationHash(String origingRevocationHash) {
+        this.origingRevocationHash = origingRevocationHash;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public String getUrl() {
@@ -277,11 +277,11 @@ public class QRMessageDto<T> implements Serializable {
         return this;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public QRMessageDto setOperation(TypeVS operation) {
+    public QRMessageDto setOperation(OperationType operation) {
         this.operation = operation;
         return this;
     }
@@ -311,12 +311,12 @@ public class QRMessageDto<T> implements Serializable {
         this.itemId = itemId;
     }
 
-    public TypeVS getSessionType() {
-        if(sessionType == null) return TypeVS.CURRENCY_SYSTEM;
+    public OperationType getSessionType() {
+        if(sessionType == null) return OperationType.CURRENCY_SYSTEM;
         return sessionType;
     }
 
-    public void setSessionType(TypeVS sessionType) {
+    public void setSessionType(OperationType sessionType) {
         this.sessionType = sessionType;
     }
 

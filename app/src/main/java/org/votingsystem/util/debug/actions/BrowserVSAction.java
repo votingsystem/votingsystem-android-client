@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.BrowserActivity;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.debug.DebugAction;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -26,10 +26,10 @@ public class BrowserVSAction implements DebugAction {
             @Override protected Void doInBackground(Context... contexts) {
                 String targetURL = "https://192.168.1.5/CurrencyServer/";
                 LOGD(TAG, "doInBackground - targetURL: " + targetURL);
-                Intent intent = new Intent(AppVS.getInstance(), BrowserActivity.class);
+                Intent intent = new Intent(App.getInstance(), BrowserActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(ContextVS.URL_KEY, targetURL);
-                AppVS.getInstance().startActivity(intent);
+                intent.putExtra(Constants.URL_KEY, targetURL);
+                App.getInstance().startActivity(intent);
                 return null;
             }
         }.execute(context);

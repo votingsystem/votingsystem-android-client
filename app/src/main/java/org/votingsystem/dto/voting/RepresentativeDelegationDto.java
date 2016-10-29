@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertificationRequest;
 
 import java.io.IOException;
@@ -32,9 +32,9 @@ public class RepresentativeDelegationDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private TypeVS operation;
-    private String originHashCertVS;
-    private String hashCertVSBase64;
+    private OperationType operation;
+    private String originRevocationHash;
+    private String revocationHashBase64;
     private String originHashAnonymousDelegation;
     private String hashAnonymousDelegation;
     private String anonymousDelegationRequestBase64ContentDigest;
@@ -70,8 +70,8 @@ public class RepresentativeDelegationDto implements Serializable {
         this.dateTo = dateTo;
     }
 
-    public String getOriginHashCertVS() {
-        return originHashCertVS;
+    public String getOriginRevocationHash() {
+        return originRevocationHash;
     }
 
     @JsonIgnore
@@ -118,7 +118,7 @@ public class RepresentativeDelegationDto implements Serializable {
     }
 
     @JsonIgnore
-    public RepresentativeDelegationDto getRequest(TypeVS operation) {
+    public RepresentativeDelegationDto getRequest(OperationType operation) {
         RepresentativeDelegationDto requestDto = new RepresentativeDelegationDto();
         requestDto.setOperation(operation);
         requestDto.setWeeksOperationActive(weeksOperationActive);
@@ -131,7 +131,7 @@ public class RepresentativeDelegationDto implements Serializable {
 
     @JsonIgnore
     public RepresentativeDelegationDto getAnonymousCancelationRequest() {
-        RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
+        RepresentativeDelegationDto cancelationDto = getRequest(OperationType.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
         cancelationDto.setOriginHashAnonymousDelegation(originHashAnonymousDelegation);
         cancelationDto.setHashAnonymousDelegation(hashAnonymousDelegation);
         return cancelationDto;
@@ -139,9 +139,9 @@ public class RepresentativeDelegationDto implements Serializable {
 
     @JsonIgnore
     public RepresentativeDelegationDto getAnonymousRepresentationDocumentCancelationRequest() {
-        RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
-        cancelationDto.setOriginHashCertVS(originHashCertVS);
-        cancelationDto.setHashCertVSBase64(hashCertVSBase64);
+        RepresentativeDelegationDto cancelationDto = getRequest(OperationType.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
+        cancelationDto.setOriginRevocationHash(originRevocationHash);
+        cancelationDto.setRevocationHashBase64(revocationHashBase64);
         return cancelationDto;
     }
 
@@ -149,35 +149,35 @@ public class RepresentativeDelegationDto implements Serializable {
     @JsonIgnore
     public RepresentativeDelegationDto getAnonymousCertRequest() throws NoSuchAlgorithmException, IOException,
             NoSuchProviderException, InvalidKeyException, SignatureException {
-        originHashCertVS = java.util.UUID.randomUUID().toString();
-        hashCertVSBase64 = StringUtils.getHashBase64(originHashCertVS, ContextVS.DATA_DIGEST_ALGORITHM);
+        originRevocationHash = java.util.UUID.randomUUID().toString();
+        revocationHashBase64 = StringUtils.getHashBase64(originRevocationHash, Constants.DATA_DIGEST_ALGORITHM);
         originHashAnonymousDelegation = java.util.UUID.randomUUID().toString();
-        hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.DATA_DIGEST_ALGORITHM);
+        hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, Constants.DATA_DIGEST_ALGORITHM);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
         certificationRequest = CertificationRequest.getAnonymousDelegationRequest(
-                ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER, serverURL, hashCertVSBase64,
+                Constants.SIGNATURE_ALGORITHM, Constants.PROVIDER, serverURL, revocationHashBase64,
                 weeksOperationActive, dateFrom, dateTo);
-        RepresentativeDelegationDto requestDto = getRequest(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST);
+        RepresentativeDelegationDto requestDto = getRequest(OperationType.ANONYMOUS_SELECTION_CERT_REQUEST);
         requestDto.setHashAnonymousDelegation(hashAnonymousDelegation);
         return requestDto;
     }
 
     @JsonIgnore
     public RepresentativeDelegationDto getDelegation(){
-        RepresentativeDelegationDto delegationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
+        RepresentativeDelegationDto delegationDto = getRequest(OperationType.ANONYMOUS_REPRESENTATIVE_SELECTION);
         delegationDto.setRepresentative(representative);
         delegationDto.getRepresentative().setDescription(null);
         delegationDto.getRepresentative().setCertCollection(null);
-        delegationDto.setHashCertVSBase64(hashCertVSBase64);
+        delegationDto.setRevocationHashBase64(revocationHashBase64);
         return delegationDto;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 
@@ -189,16 +189,16 @@ public class RepresentativeDelegationDto implements Serializable {
         this.serverURL = serverURL;
     }
 
-    public void setOriginHashCertVS(String originHashCertVS) {
-        this.originHashCertVS = originHashCertVS;
+    public void setOriginRevocationHash(String originRevocationHash) {
+        this.originRevocationHash = originRevocationHash;
     }
 
-    public String getHashCertVSBase64() {
-        return hashCertVSBase64;
+    public String getRevocationHashBase64() {
+        return revocationHashBase64;
     }
 
-    public void setHashCertVSBase64(String hashCertVSBase64) {
-        this.hashCertVSBase64 = hashCertVSBase64;
+    public void setRevocationHashBase64(String revocationHashBase64) {
+        this.revocationHashBase64 = revocationHashBase64;
     }
 
     public String getUUID() {

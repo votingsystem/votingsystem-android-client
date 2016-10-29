@@ -3,9 +3,9 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
@@ -18,44 +18,44 @@ public class VoteCancelerDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String originHashCertVote;
-    private String hashCertVSBase64;
+    private String originRevocationHash;
+    private String revocationHashBase64;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
-    private TypeVS operation = TypeVS.CANCEL_VOTE;
+    private OperationType operation = OperationType.CANCEL_VOTE;
     private String UUID;
 
 
     public VoteCancelerDto() {}
 
     public void validate() throws ValidationExceptionVS, NoSuchAlgorithmException {
-        if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
+        if(operation == null || OperationType.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
                 "ERROR - expected operation 'CANCEL_VOTE' - found: " + operation);
-        if(originHashCertVote == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashCertVote'");
-        if(hashCertVSBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashCertVSBase64'");
+        if(originRevocationHash == null) throw new ValidationExceptionVS("ERROR - missing param 'originRevocationHash'");
+        if(revocationHashBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'revocationHashBase64'");
         if(hashAccessRequestBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashAccessRequestBase64'");
         if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
         if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
         if(!hashAccessRequestBase64.equals(StringUtils.getHashBase64(originHashAccessRequest,
-                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
-        if(!hashCertVSBase64.equals(StringUtils.getHashBase64(originHashCertVote,
-                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
+                Constants.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
+        if(!revocationHashBase64.equals(StringUtils.getHashBase64(originRevocationHash,
+                Constants.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
     }
 
-    public String getOriginHashCertVote() {
-        return originHashCertVote;
+    public String getOriginRevocationHash() {
+        return originRevocationHash;
     }
 
-    public void setOriginHashCertVote(String originHashCertVote) {
-        this.originHashCertVote = originHashCertVote;
+    public void setOriginRevocationHash(String originRevocationHash) {
+        this.originRevocationHash = originRevocationHash;
     }
 
-    public String getHashCertVSBase64() {
-        return hashCertVSBase64;
+    public String getRevocationHashBase64() {
+        return revocationHashBase64;
     }
 
-    public void setHashCertVSBase64(String hashCertVSBase64) {
-        this.hashCertVSBase64 = hashCertVSBase64;
+    public void setRevocationHashBase64(String revocationHashBase64) {
+        this.revocationHashBase64 = revocationHashBase64;
     }
 
     public String getOriginHashAccessRequest() {
@@ -74,11 +74,11 @@ public class VoteCancelerDto implements Serializable {
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

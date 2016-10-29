@@ -13,7 +13,7 @@ import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.fragment.RepresentativeFragment;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -34,7 +34,7 @@ public class RepresentativePagerActivity extends AppCompatActivity {
         UIUtils.setSupportActionBar(this);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        int cursorPosition = getIntent().getIntExtra(ContextVS.CURSOR_POSITION_KEY, -1);
+        int cursorPosition = getIntent().getIntExtra(Constants.CURSOR_POSITION_KEY, -1);
         LOGD(TAG + ".onCreate", "cursorPosition: " + cursorPosition +
                 " - savedInstanceState: " + savedInstanceState);
         RepresentativePagerAdapter pagerAdapter = new RepresentativePagerAdapter(

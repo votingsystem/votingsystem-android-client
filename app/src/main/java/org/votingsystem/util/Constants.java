@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ContextVS {
+public class Constants {
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 

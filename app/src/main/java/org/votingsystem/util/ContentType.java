@@ -52,21 +52,21 @@ public enum ContentType {
 
     private String name;
     private String extension;
-    private TypeVS typeVS;
+    private OperationType operationType;
 
     private ContentType(String name, String extension) {
         this.name = name;
         this.extension = "." + extension;
     }
 
-    private ContentType(String name, String extension, TypeVS typeVS) {
+    private ContentType(String name, String extension, OperationType operationType) {
         this.name = name;
         this.extension = "." + extension;
     }
 
 
-    public TypeVS getTypeVS() {
-        return typeVS;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
     public String getName() {

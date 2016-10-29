@@ -29,12 +29,12 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.service.BootStrapService;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.util.BuildConfig;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.RootUtil;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.WebSocketSession;
@@ -61,23 +61,23 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.votingsystem.util.ContextVS.ALGORITHM_RNG;
-import static org.votingsystem.util.ContextVS.ANDROID_PROVIDER;
-import static org.votingsystem.util.ContextVS.KEY_SIZE;
-import static org.votingsystem.util.ContextVS.PROVIDER;
-import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
-import static org.votingsystem.util.ContextVS.SIG_NAME;
-import static org.votingsystem.util.ContextVS.USER_CERT_ALIAS;
-import static org.votingsystem.util.ContextVS.USER_KEY;
+import static org.votingsystem.util.Constants.ALGORITHM_RNG;
+import static org.votingsystem.util.Constants.ANDROID_PROVIDER;
+import static org.votingsystem.util.Constants.KEY_SIZE;
+import static org.votingsystem.util.Constants.PROVIDER;
+import static org.votingsystem.util.Constants.SIGNATURE_ALGORITHM;
+import static org.votingsystem.util.Constants.SIG_NAME;
+import static org.votingsystem.util.Constants.USER_CERT_ALIAS;
+import static org.votingsystem.util.Constants.USER_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AppVS extends MultiDexApplication implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class App extends MultiDexApplication implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static final String TAG = AppVS.class.getSimpleName();
+    public static final String TAG = App.class.getSimpleName();
 
     private boolean withSocketConnection;
     private static final Map<String, ActorDto> serverMap = new HashMap<>();
@@ -99,9 +99,9 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private List<Integer> historyList;
     private int defaultMainView = R.id.currency_accounts;
 
-    private static AppVS INSTANCE;
+    private static App INSTANCE;
 
-    public static AppVS getInstance() {
+    public static App getInstance() {
         return INSTANCE;
     }
 
@@ -113,8 +113,8 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             PrefUtils.init();
             Properties props = new Properties();
             props.load(getAssets().open("VotingSystem.properties"));
-            currencyServerURL = props.getProperty(ContextVS.CURRENCY_SERVER_URL_KEY);
-            accessControlURL = props.getProperty(ContextVS.ACCESS_CONTROL_URL_KEY);
+            currencyServerURL = props.getProperty(Constants.CURRENCY_SERVER_URL_KEY);
+            accessControlURL = props.getProperty(Constants.ACCESS_CONTROL_URL_KEY);
             LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL +
                     " - currencyServerURL: " + currencyServerURL);
             /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
@@ -123,13 +123,13 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
             finish();}*/
             if(accessControl == null || currencyServer == null) {
                 Intent startIntent = new Intent(this, BootStrapService.class);
-                startIntent.putExtra(ContextVS.ACCESS_CONTROL_URL_KEY, accessControlURL);
-                startIntent.putExtra(ContextVS.CURRENCY_SERVER_URL_KEY, currencyServerURL);
+                startIntent.putExtra(Constants.ACCESS_CONTROL_URL_KEY, accessControlURL);
+                startIntent.putExtra(Constants.CURRENCY_SERVER_URL_KEY, currencyServerURL);
                 startService(startIntent);
             }
             PrefUtils.registerPreferenceChangeListener(this);
             user = PrefUtils.getAppUser();
-            HttpHelper.init(null);
+            HttpConnection.init(null);
             if(!BuildConfig.ALLOW_ROOTED_PHONES && RootUtil.isDeviceRooted()) {
                 isRootedPhone = true;
             }
@@ -153,7 +153,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     public void finish() {
         LOGD(TAG, "finish");
         stopService(new Intent(getApplicationContext(), WebSocketService.class));
-        HttpHelper.getInstance().shutdown();
+        HttpConnection.getInstance().shutdown();
         UIUtils.killApp(true);
     }
 
@@ -259,7 +259,7 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
     private <T> T getActorDtoFromURL(Class<T> type, String serverURL) {
         T targetServer = null;
         try {
-            targetServer = HttpHelper.getInstance().getData(type,
+            targetServer = HttpConnection.getInstance().getData(type,
                     ActorDto.getServerInfoURL(serverURL), MediaType.JSON);
             setServer((ActorDto) targetServer);
         } catch(Exception ex) {
@@ -338,31 +338,31 @@ public class AppVS extends MultiDexApplication implements SharedPreferences.OnSh
         return currencyServer;
     }
 
-    public void showNotification(ResponseVS responseVS){
+    public void showNotification(ResponseDto responseDto){
         final NotificationManager mgr = (NotificationManager)this.getSystemService(NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Intent clickIntent = new Intent(this, MessageActivity.class);
-        clickIntent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+        clickIntent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 notificationId.getAndIncrement(), clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
-                .setAutoCancel(true).setContentTitle(responseVS.getCaption())
-                .setContentText(responseVS.getNotificationMessage()).setSound(soundUri);
-        if(responseVS.getStatusCode() == ResponseVS.SC_ERROR)
+                .setAutoCancel(true).setContentTitle(responseDto.getCaption())
+                .setContentText(responseDto.getNotificationMessage()).setSound(soundUri);
+        if(responseDto.getStatusCode() == ResponseDto.SC_ERROR)
             builder.setSmallIcon(R.drawable.cancel_22);
-        else if(responseVS.getStatusCode() == ResponseVS.SC_OK)
+        else if(responseDto.getStatusCode() == ResponseDto.SC_OK)
             builder.setSmallIcon(R.drawable.fa_check_32);
         else builder.setSmallIcon(R.drawable.mail_mark_unread_32);
         mgr.notify(notificationId.getAndIncrement(), builder.build());
     }
 
-    public void broadcastResponse(ResponseVS responseVS) {
-        LOGD(TAG + ".broadcastResponse", "statusCode: " + responseVS.getStatusCode() +
-                " - type: " + responseVS.getTypeVS() + " - serviceCaller: " +
-                responseVS.getServiceCaller());
-        Intent intent = new Intent(responseVS.getServiceCaller());
-        intent.putExtra(ContextVS.RESPONSEVS_KEY, responseVS);
+    public void broadcastResponse(ResponseDto responseDto) {
+        LOGD(TAG + ".broadcastResponse", "statusCode: " + responseDto.getStatusCode() +
+                " - type: " + responseDto.getOperationType() + " - serviceCaller: " +
+                responseDto.getServiceCaller());
+        Intent intent = new Intent(responseDto.getServiceCaller());
+        intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

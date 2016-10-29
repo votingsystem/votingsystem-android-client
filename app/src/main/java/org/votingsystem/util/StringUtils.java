@@ -69,7 +69,7 @@ public class StringUtils {
     	if(string == null) return null;
     	String result = null;
         try {
-        	result = URLDecoder.decode(string, ContextVS.UTF_8.name());
+        	result = URLDecoder.decode(string, Constants.UTF_8.name());
 		} catch (UnsupportedEncodingException ex) {
 			Log.e(TAG, ex.getMessage(), ex);
 		}
@@ -138,7 +138,7 @@ public class StringUtils {
     public static String toHex(String base64Str) throws UnsupportedEncodingException {
         if (base64Str == null) return null;
         byte[] hexBytes = Hex.encode(base64Str.getBytes());
-        return new String(hexBytes, ContextVS.UTF_8);
+        return new String(hexBytes, Constants.UTF_8);
     }
 
     public static String getCurrencySymbol(String currencyCode) {

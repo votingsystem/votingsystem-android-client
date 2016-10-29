@@ -14,12 +14,12 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 
 import java.io.IOException;
 
@@ -151,13 +151,13 @@ public class MessageContentProvider extends ContentProvider {
         String decryptedMsg = JSON.writeValueAsString(socketMsg);
         Uri result = contentResolver.insert(CONTENT_URI, getContentValues(socketMsg.getOperation(),
                 decryptedMsg, State.NOT_READED));
-        ResponseVS responseVS = new ResponseVS().setTypeVS(TypeVS.MESSAGEVS)
-                .setServiceCaller(ContextVS.WEB_SOCKET_BROADCAST_ID);
-        AppVS.getInstance().broadcastResponse(responseVS);
+        ResponseDto responseDto = new ResponseDto().setOperationType(OperationType.MESSAGEVS)
+                .setServiceCaller(Constants.WEB_SOCKET_BROADCAST_ID);
+        App.getInstance().broadcastResponse(responseDto);
         return result;
     }
 
-    public static ContentValues getContentValues(TypeVS operation, String socketMsg, State state)
+    public static ContentValues getContentValues(OperationType operation, String socketMsg, State state)
             throws IOException {
         ContentValues values = new ContentValues();
         values.put(STATE_COL, state.toString());
@@ -186,7 +186,7 @@ public class MessageContentProvider extends ContentProvider {
         //        STATE_COL + "=?", new String[]{State.NOT_READED.toString()});
         String selection = STATE_COL + "=? ";
         String[] selectionArgs = new String[]{State.NOT_READED.toString()};
-        Cursor countCursor = AppVS.getInstance().getContentResolver().query(CONTENT_URI,
+        Cursor countCursor = App.getInstance().getContentResolver().query(CONTENT_URI,
                 new String[] {"count(*) AS count"},
                 selection,
                 selectionArgs,

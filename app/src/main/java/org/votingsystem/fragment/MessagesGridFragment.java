@@ -30,11 +30,11 @@ import org.votingsystem.activity.MessagesPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.MessageContentProvider;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyBundle;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 import java.util.Date;
 
@@ -85,7 +85,7 @@ public class MessagesGridFragment extends Fragment implements
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(),MessagesPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
+        intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
@@ -107,7 +107,7 @@ public class MessagesGridFragment extends Fragment implements
         return true;
     }
 
-    private void filterMessageList(TypeVS messageType) {
+    private void filterMessageList(OperationType messageType) {
         String selection = null;
         String[] selectionArgs = null;
         if(messageType != null) {
@@ -180,11 +180,11 @@ public class MessagesGridFragment extends Fragment implements
                         MessageContentProvider.deleteById(messageId, getActivity());
                         return;
                     }
-                    TypeVS typeVS =  TypeVS.valueOf(cursor.getString(cursor.getColumnIndex(
+                    OperationType operationType =  OperationType.valueOf(cursor.getString(cursor.getColumnIndex(
                             MessageContentProvider.TYPE_COL)));
                     Integer logoId = null;
                     String messageSubject = null;
-                    switch(typeVS) {
+                    switch(operationType) {
                         case MESSAGEVS:
                             logoId = R.drawable.fa_comment_32;
                             messageSubject = socketMessage.getFrom();
@@ -226,8 +226,8 @@ public class MessagesGridFragment extends Fragment implements
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
+        outState.putParcelable(Constants.LIST_STATE_KEY, gridState);
+        outState.putInt(Constants.ITEM_ID_KEY, menuItemSelected);
     }
 
     @Override public void onPause() {

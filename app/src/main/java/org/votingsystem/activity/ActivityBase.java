@@ -18,7 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
 import org.votingsystem.fragment.EventVSGridFragment;
@@ -33,11 +33,11 @@ import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.BuildConfig;
 import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.MsgUtils;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.debug.DebugActionRunnerFragment;
 
@@ -57,7 +57,7 @@ public class ActivityBase extends ActivityConnected
 
     private WeakReference<Fragment> currentFragment;
 
-    private AppVS appVS = null;
+    private App app = null;
     private NavigationView navigationView;
     private Menu menu;
     private MenuItem messagesMenuItem;
@@ -69,14 +69,14 @@ public class ActivityBase extends ActivityConnected
 
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            if(responseVS != null) {
-                if(ResponseVS.SC_ERROR == responseVS.getStatusCode()) {
-                    MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                            getString(R.string.error_lbl), responseVS.getMessage(),
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+            if(responseDto != null) {
+                if(ResponseDto.SC_ERROR == responseDto.getStatusCode()) {
+                    MessageDialogFragment.showDialog(responseDto.getStatusCode(),
+                            getString(R.string.error_lbl), responseDto.getMessage(),
                             getSupportFragmentManager());
                 } else {
-                    if(TypeVS.MESSAGEVS == responseVS.getTypeVS()) {
+                    if(OperationType.MESSAGEVS == responseDto.getOperationType()) {
                         if(messagesMenuItem != null)
                                 messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
 
@@ -91,7 +91,7 @@ public class ActivityBase extends ActivityConnected
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
         Toolbar toolbar = UIUtils.setSupportActionBar(this);
-        appVS = (AppVS) getApplicationContext();
+        app = (App) getApplicationContext();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -103,7 +103,7 @@ public class ActivityBase extends ActivityConnected
         messagesMenuItem = navigationView.getMenu().findItem(R.id.messages);
         navigationView.setNavigationItemSelectedListener(this);
 
-        int selectedFragmentMenuId = getIntent().getIntExtra(ContextVS.FRAGMENT_KEY, -1);
+        int selectedFragmentMenuId = getIntent().getIntExtra(Constants.FRAGMENT_KEY, -1);
         if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
         if(savedInstanceState == null) {
             selectedContentFragment(R.id.fa_qrcode);
@@ -114,7 +114,7 @@ public class ActivityBase extends ActivityConnected
     }
 
     public void changeConnectionStatus() {
-        if(appVS.isWithSocketConnection() && menu != null) {
+        if(app.isWithSocketConnection() && menu != null) {
             if(menu.findItem(R.id.connect) != null)
                 menu.findItem(R.id.connect).setIcon(R.drawable.fa_bolt_16_ffff00);
         } else {
@@ -124,7 +124,7 @@ public class ActivityBase extends ActivityConnected
     }
 
     private void showConnectionStatusDialog() {
-        if(appVS.isWithSocketConnection()) {
+        if(app.isWithSocketConnection()) {
             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                     getString(R.string.msg_lbl), getString(R.string.disconnect_from_service_quesion_msg), this);
             builder.setPositiveButton(getString(R.string.disconnect_lbl),
@@ -140,8 +140,8 @@ public class ActivityBase extends ActivityConnected
 
     public void closeWebSocketConnection() {
         LOGD(TAG + ".toggleWebSocketServiceConnection", "closeWebSocketConnection");
-        Intent startIntent = new Intent(AppVS.getInstance(), WebSocketService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_CLOSE);
+        Intent startIntent = new Intent(App.getInstance(), WebSocketService.class);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.WEB_SOCKET_CLOSE);
         startService(startIntent);
     }
 
@@ -165,8 +165,8 @@ public class ActivityBase extends ActivityConnected
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if(!AppVS.getInstance().isHistoryEmpty()) {
-                selectedContentFragment(AppVS.getInstance().getHistoryItem());
+            if(!App.getInstance().isHistoryEmpty()) {
+                selectedContentFragment(App.getInstance().getHistoryItem());
             } else super.onBackPressed();
         }
     }
@@ -198,19 +198,19 @@ public class ActivityBase extends ActivityConnected
             case R.id.menu_debug:
                 if (BuildConfig.DEBUG) {
                     intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
-                    intent.putExtra(ContextVS.FRAGMENT_KEY, DebugActionRunnerFragment.class.getName());
+                    intent.putExtra(Constants.FRAGMENT_KEY, DebugActionRunnerFragment.class.getName());
                     startActivity(intent);
                 }
                 return true;
             case R.id.connect:
-                if(appVS.isWithSocketConnection()) {
+                if(app.isWithSocketConnection()) {
                     showConnectionStatusDialog();
                 } else {
                     ConnectionUtils.initConnection(ActivityBase.this);
                 }
                 return true;
             case R.id.close_app:
-                appVS.finish();
+                app.finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -219,7 +219,7 @@ public class ActivityBase extends ActivityConnected
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        AppVS.getInstance().addHistoryItem(item.getItemId());
+        App.getInstance().addHistoryItem(item.getItemId());
         return selectedContentFragment(item.getItemId());
     }
 
@@ -284,7 +284,7 @@ public class ActivityBase extends ActivityConnected
 
     @Override protected void onResume() {
         super.onResume();
-        if(AppVS.getInstance().isRootedPhone()) {
+        if(App.getInstance().isRootedPhone()) {
             DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -296,7 +296,7 @@ public class ActivityBase extends ActivityConnected
             return;
         }
         if(!PrefUtils.isDNIeEnabled()) {
-            AppVS.getInstance().setToken(UUID.randomUUID().toString().toCharArray());
+            App.getInstance().setToken(UUID.randomUUID().toString().toCharArray());
             startActivity(new Intent(getBaseContext(), UserDataFormActivity.class));
             return;
         }

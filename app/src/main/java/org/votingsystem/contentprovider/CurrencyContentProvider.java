@@ -190,7 +190,7 @@ public class CurrencyContentProvider extends ContentProvider {
     public static ContentValues getContentValues(Currency currency) throws Exception {
         ContentValues values = new ContentValues();
         values.put(CurrencyContentProvider.SERIALIZED_OBJECT_COL, ObjectUtils.serializeObject(currency));
-        values.put(CurrencyContentProvider.HASH_COL, currency.getHashCertVS());
+        values.put(CurrencyContentProvider.HASH_COL, currency.getRevocationHash());
         values.put(CurrencyContentProvider.STATE_COL, currency.getState().toString());
         if(currency.getLocalId() < 0) {
             values.put(CurrencyContentProvider.TIMESTAMP_CREATED_COL, System.currentTimeMillis());

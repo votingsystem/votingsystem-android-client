@@ -531,18 +531,18 @@
     <string name="str_logo_desc">DNI electrónico</string>
     <string name="result_ok_description">La operación se ha completado correctamente</string>
     <string name="op_dgtinit">Aproxime DNIe al dispositivo</string>
-    <string name="process_msg_lectura">Leyendo DNIe...</string>
+    <string name="process_msg_reading">Leyendo DNIe...</string>    <string name="enter_password_retry_msg">le quedan %1$s intentos</string>
     <string name="navigation_drawer_open">desplegar menu</string>
     <string name="navigation_drawer_close">cerrar menu</string>
     <string name="enter_password_msg">introduzca la contraseña</string>
     <string name="enter_id_card_password_msg">introduzca la contraseña de su tarjeta</string>
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
-    <string name="enter_password_retry_msg">le quedan %1$s intentos</string>
+
     <string name="pref_title_dnie">Datos del usuario</string>
-    <string name="pref_description_dnie">para poder usar su DNI el teléfono debe disponer de NFC</string>
+    <string name="pref_description_dnie">para poder usar su DNI el tDNIe version 3.0eléfono debe disponer de NFC</string>
     <string name="can_dialog_caption">introduzca el CAN de su DNIe</string>
     <string name="dnie_connection_error_msg">problemas de conexión con su DNIe, por favor, vuelva a intentarlo</string>
-    <string name="dnie_sign_progress_caption">DNIe version 3.0</string>
+    <string name="dnie_sign_progress_caption"></string>
     <string name="dnie_sign_connecting_msg">estableciendo conexión ...</string>
     <string name="vote_selected_msg">voto: %1$s</string>
     <string name="double_back_advice">Pulse 2 veces seguidas ATRAS para salir</string>

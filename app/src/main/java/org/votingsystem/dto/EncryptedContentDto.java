@@ -5,11 +5,11 @@ import android.util.Base64;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Currency;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -23,9 +23,9 @@ public class EncryptedContentDto implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    private TypeVS operation;
+    private OperationType operation;
     private String operationCode;
-    private TypeVS step;
+    private OperationType step;
     private Integer statusCode;
     private String subject;
     private String locale = Locale.getDefault().getLanguage().toLowerCase();
@@ -35,7 +35,7 @@ public class EncryptedContentDto implements Serializable {
     private Long deviceFromId;
     private String toUser;
     private String deviceToName;
-    private String hashCertVS;
+    private String revocationHash;
     private String cmsMessage;
     private AESParamsDto aesParams;
     private String x509CertificatePEM;
@@ -47,7 +47,7 @@ public class EncryptedContentDto implements Serializable {
 
     public EncryptedContentDto() { }
 
-    public EncryptedContentDto(TypeVS operation, Integer statusCode, String message, String URL) {
+    public EncryptedContentDto(OperationType operation, Integer statusCode, String message, String URL) {
         this.operation = operation;
         this.statusCode = statusCode;
         this.message = message;
@@ -60,9 +60,9 @@ public class EncryptedContentDto implements Serializable {
         encryptedContentDto.setOperation(qrMessage.getOperation());
         encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
         encryptedContentDto.setOperationCode(qrMessage.getOperationCode());
-        encryptedContentDto.setHashCertVS(qrMessage.getHashCertVS());
+        encryptedContentDto.setRevocationHash(qrMessage.getRevocationHash());
         encryptedContentDto.setX509CertificatePEM(
-                new String(PEMUtils.getPEMEncoded(AppVS.getInstance().getX509UserCert())));
+                new String(PEMUtils.getPEMEncoded(App.getInstance().getX509UserCert())));
         encryptedContentDto.setUUID(qrMessage.getUUID());
         return encryptedContentDto;
     }
@@ -70,9 +70,9 @@ public class EncryptedContentDto implements Serializable {
     public static EncryptedContentDto getCurrencyWalletChangeRequest(
             Collection<Currency> currencyList) throws Exception {
         EncryptedContentDto encryptedContentDto = new EncryptedContentDto();
-        encryptedContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
+        encryptedContentDto.setOperation(OperationType.CURRENCY_WALLET_CHANGE);
         encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
-        encryptedContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+        encryptedContentDto.setDeviceFromId(App.getInstance().getConnectedDevice().getId());
         encryptedContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
         encryptedContentDto.setTimeLimited(true);
         return encryptedContentDto;
@@ -81,20 +81,20 @@ public class EncryptedContentDto implements Serializable {
     public static EncryptedContentDto getMessageVSToDevice(
             UserDto user, String toUser, String message) throws Exception {
         EncryptedContentDto encryptedContentDto = new EncryptedContentDto();
-        encryptedContentDto.setOperation(TypeVS.MESSAGEVS);
+        encryptedContentDto.setOperation(OperationType.MESSAGEVS);
         encryptedContentDto.setFrom(user.getFullName());
         encryptedContentDto.setDeviceFromName(Utils.getDeviceName());
-        encryptedContentDto.setDeviceFromId(AppVS.getInstance().getConnectedDevice().getId());
+        encryptedContentDto.setDeviceFromId(App.getInstance().getConnectedDevice().getId());
         encryptedContentDto.setToUser(toUser);
         encryptedContentDto.setMessage(message);
         return encryptedContentDto;
     }
 
-    public TypeVS getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 
@@ -200,20 +200,20 @@ public class EncryptedContentDto implements Serializable {
         this.deviceToName = deviceToName;
     }
 
-    public TypeVS getStep() {
+    public OperationType getStep() {
         return step;
     }
 
-    public void setStep(TypeVS step) {
+    public void setStep(OperationType step) {
         this.step = step;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public String getX509CertificatePEM() {

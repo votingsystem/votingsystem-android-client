@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.CurrencyServerDto;
 
@@ -33,7 +33,7 @@ public class CurrencyAccountsPagerFragment extends Fragment {
                                        Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "onCreateView");
         super.onCreate(savedInstanceState);
-        AppVS.getInstance().getActor(CurrencyServerDto.class, AppVS.getInstance().getCurrencyServerURL());
+        App.getInstance().getActor(CurrencyServerDto.class, App.getInstance().getCurrencyServerURL());
         View rootView = inflater.inflate(R.layout.currency_accounts_main, container, false);
         ViewPager mViewPager = (ViewPager) rootView.findViewById(R.id.pager);
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

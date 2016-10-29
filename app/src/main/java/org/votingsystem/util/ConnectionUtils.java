@@ -3,11 +3,12 @@ package org.votingsystem.util;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.service.WebSocketService;
@@ -27,10 +28,10 @@ public class ConnectionUtils {
 
     private static SocketMessageDto initSessionMessageDto;
 
-    public static void initUnathenticatedConnection(AppCompatActivity activity, TypeVS sessionType) {
+    public static void initUnathenticatedConnection(AppCompatActivity activity, OperationType sessionType) {
         Intent startIntent = new Intent(activity, WebSocketService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.WEB_SOCKET_INIT);
-        startIntent.putExtra(ContextVS.SESSION_KEY, sessionType);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.WEB_SOCKET_INIT);
+        startIntent.putExtra(Constants.SESSION_KEY, sessionType);
         activity.startService(startIntent);
     }
 
@@ -48,15 +49,15 @@ public class ConnectionUtils {
                         AppCompatActivity activity) {
         LOGD(TAG, " --- onActivityResult --- requestCode: " + requestCode);
         if(data == null) return;
-        ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
         switch (requestCode) {
             case RC_INIT_CONNECTION_REQUEST:
-                if(responseVS != null && responseVS.getCMS() != null) {
+                if(responseDto != null && responseDto.getCMS() != null) {
                     try {
                         initSessionMessageDto = SocketMessageDto.INIT_SIGNED_SESSION_REQUEST();
-                        initSessionMessageDto.setCMS(responseVS.getCMS());
+                        initSessionMessageDto.setCMS(responseDto.getCMS());
                         Intent startIntent = new Intent(activity, WebSocketService.class);
-                        startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));
+                        startIntent.putExtra(Constants.MESSAGE_KEY, JSON.writeValueAsString(initSessionMessageDto));
                         activity.startService(startIntent);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -64,8 +65,8 @@ public class ConnectionUtils {
                 }
                 break;
             case RC_PASSWORD_REQUEST:
-                if(ResponseVS.SC_OK == responseVS.getStatusCode())
-                    launchNFC_IDCard(activity, new String(responseVS.getMessageBytes()).toCharArray());
+                if(ResponseDto.SC_OK == responseDto.getStatusCode())
+                    launchNFC_IDCard(activity, new String(responseDto.getMessageBytes()).toCharArray());
                 break;
         }
     }
@@ -74,16 +75,16 @@ public class ConnectionUtils {
         try {
             Intent intent = new Intent(activity, ID_CardNFCReaderActivity.class);
             MessageDto initSessionDto = MessageDto.REQUEST(PrefUtils.getDeviceId(),
-                    HttpHelper.getInstance().getSessionId(
-                    StringUtils.getDomain(AppVS.getInstance().getCurrencyServerURL())));
-            intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionDto));
-            intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
+                    HttpConnection.getInstance().getSessionId(
+                    StringUtils.getDomain(App.getInstance().getCurrencyServerURL())));
+            intent.putExtra(Constants.MESSAGE_CONTENT_KEY, JSON.writeValueAsString(initSessionDto));
+            intent.putExtra(Constants.MESSAGE_SUBJECT_KEY,
                     activity.getString(R.string.init_authenticated_session_msg_subject));
             if(accessModePassw != null)
-                intent.putExtra(ContextVS.PASSWORD_KEY, new String(accessModePassw).toCharArray());
+                intent.putExtra(Constants.PASSWORD_KEY, new String(accessModePassw).toCharArray());
             activity.startActivityForResult(intent, RC_INIT_CONNECTION_REQUEST);
         } catch (Exception ex) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, activity.getString(R.string.error_lbl),
+            MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, activity.getString(R.string.error_lbl),
                     ex.getMessage(), activity.getSupportFragmentManager());
         }
     }

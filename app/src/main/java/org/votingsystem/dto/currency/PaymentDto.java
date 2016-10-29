@@ -7,28 +7,28 @@ public class PaymentDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String originHashCertVS;
-    private String hashCertVS;
+    private String originRevocationHash;
+    private String revocationHash;
     private String UUID;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
 
-    public String getOriginHashCertVS() {
-        return originHashCertVS;
+    public String getOriginRevocationHash() {
+        return originRevocationHash;
     }
 
-    public void setOriginHashCertVS(String originHashCertVS) {
-        this.originHashCertVS = originHashCertVS;
+    public void setOriginRevocationHash(String originRevocationHash) {
+        this.originRevocationHash = originRevocationHash;
     }
 
-    public String getHashCertVS() {
-        return hashCertVS;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public String getUUID() {

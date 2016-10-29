@@ -28,10 +28,10 @@ import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
 import org.votingsystem.fragment.SelectTagVSDialogFragment;
 import org.votingsystem.service.PaymentService;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
@@ -67,19 +67,19 @@ public class CurrencyRequesActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            final ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-            TagVSDto tagVS = (TagVSDto) intent.getSerializableExtra(ContextVS.TAG_KEY);
+            final ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+            TagVSDto tagVS = (TagVSDto) intent.getSerializableExtra(Constants.TAG_KEY);
             if(tagVS != null) setTagVS(tagVS);
-            if(responseVS != null){
-                switch(responseVS.getTypeVS()) {
+            if(responseDto != null){
+                switch(responseDto.getOperationType()) {
                     case CURRENCY_REQUEST:
                         AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                                responseVS.getCaption(), responseVS.getNotificationMessage(),
+                                responseDto.getCaption(), responseDto.getNotificationMessage(),
                                 CurrencyRequesActivity.this);
                         builder.setPositiveButton(getString(R.string.accept_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                                    if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                                         CurrencyRequesActivity.this.setResult(Activity.RESULT_OK, null);
                                         finish();
                                     }
@@ -98,9 +98,9 @@ public class CurrencyRequesActivity extends AppCompatActivity {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.currency_request_activity);
         UIUtils.setSupportActionBar(this);
-        maxValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.MAX_VALUE_KEY);
-        defaultValue = (BigDecimal) getIntent().getSerializableExtra(ContextVS.DEFAULT_VALUE_KEY);
-        currencyCode = getIntent().getStringExtra(ContextVS.CURRENCY_KEY);
+        maxValue = (BigDecimal) getIntent().getSerializableExtra(Constants.MAX_VALUE_KEY);
+        defaultValue = (BigDecimal) getIntent().getSerializableExtra(Constants.DEFAULT_VALUE_KEY);
+        currencyCode = getIntent().getStringExtra(Constants.CURRENCY_KEY);
         tag_text = (TextView)findViewById(R.id.tag_text);
         tag_info = (LinearLayout)findViewById(R.id.tag_info);
         msgTextView = (TextView)findViewById(R.id.msg);
@@ -132,13 +132,13 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         });
 
         if(savedInstanceState != null) {
-            setTagVS((TagVSDto) savedInstanceState.getSerializable(ContextVS.TAG_KEY));
+            setTagVS((TagVSDto) savedInstanceState.getSerializable(Constants.TAG_KEY));
         }
-        if(getIntent().getStringExtra(ContextVS.MESSAGE_KEY) == null) {
+        if(getIntent().getStringExtra(Constants.MESSAGE_KEY) == null) {
             msgTextView.setVisibility(View.GONE);
         } else {
             msgTextView.setVisibility(View.VISIBLE);
-            msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(ContextVS.MESSAGE_KEY)));
+            msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(Constants.MESSAGE_KEY)));
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.request_cash_lbl));
@@ -148,7 +148,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         if(TextUtils.isEmpty(amount.getText().toString())) return true;
         BigDecimal selectedAmount = new BigDecimal(amount.getText().toString());
         if(selectedAmount.compareTo(maxValue) > 0) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+            MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, getString(R.string.error_lbl),
                     getString(R.string.available_exceded_error_msg), getSupportFragmentManager());
         } else {
             if(selectedAmount.compareTo(new BigDecimal(0)) > 0) {
@@ -182,11 +182,11 @@ public class CurrencyRequesActivity extends AppCompatActivity {
 
     private void sendCurrencyRequest(char[] pin) {
         Intent startIntent = new Intent(this, PaymentService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_REQUEST);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.PIN_KEY, pin);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.CURRENCY_REQUEST);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.PIN_KEY, pin);
         try {
-            startIntent.putExtra(ContextVS.TRANSACTION_KEY, transactionDto);
+            startIntent.putExtra(Constants.TRANSACTION_KEY, transactionDto);
         } catch (Exception ex) { ex.printStackTrace();}
         setProgressDialogVisible(true, getString(R.string.currency_request_msg_subject),
                 MsgUtils.getCurrencyRequestMessage(transactionDto, this));
@@ -198,8 +198,8 @@ public class CurrencyRequesActivity extends AppCompatActivity {
         switch (requestCode) {
             case RC_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    sendCurrencyRequest(new String(responseVS.getMessageBytes()).toCharArray());
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    sendCurrencyRequest(new String(responseDto.getMessageBytes()).toCharArray());
                 }
                 break;
         }
@@ -229,7 +229,7 @@ public class CurrencyRequesActivity extends AppCompatActivity {
 
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ContextVS.TAG_KEY, tagVS);
+        outState.putSerializable(Constants.TAG_KEY, tagVS);
     }
 
 }

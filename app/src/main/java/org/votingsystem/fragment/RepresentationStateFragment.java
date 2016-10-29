@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
@@ -31,13 +31,13 @@ import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.service.RepresentativeService;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.util.crypto.CMSUtils;
@@ -67,16 +67,16 @@ public class RepresentationStateFragment extends Fragment implements
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
             setProgressDialogVisible(false);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                switch(responseVS.getTypeVS()) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                switch(responseDto.getOperationType()) {
                     case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                        MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+                        MessageDialogFragment.showDialog(responseDto, getFragmentManager());
                         break;
                 }
-            } else if(ResponseVS.SC_OK != responseVS.getStatusCode()) MessageDialogFragment.showDialog(
-                    responseVS, getFragmentManager());
+            } else if(ResponseDto.SC_OK != responseDto.getStatusCode()) MessageDialogFragment.showDialog(
+                    responseDto, getFragmentManager());
         }
     };
 
@@ -95,7 +95,7 @@ public class RepresentationStateFragment extends Fragment implements
     private void setRepresentationView(RepresentationStateDto representation) {
         this.representation = representation;
         if(representation == null) {
-            if(AppVS.getInstance().getUser() != null) launchRepresentativeService(TypeVS.STATE);
+            if(App.getInstance().getUser() != null) launchRepresentativeService(OperationType.STATE);
             rootView.setVisibility(View.GONE);
             return;
         } else {
@@ -155,11 +155,11 @@ public class RepresentationStateFragment extends Fragment implements
         }
     }
 
-    public void launchRepresentativeService(TypeVS operationType) {
+    public void launchRepresentativeService(OperationType operationType) {
         LOGD(TAG + ".launchRepresentativeService", "operation:" + operationType.toString());
         Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, operationType);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.TYPEVS_KEY, operationType);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
         setProgressDialogVisible(true);
         getActivity().startService(startIntent);
     }
@@ -197,7 +197,7 @@ public class RepresentationStateFragment extends Fragment implements
                 getFragmentManager().popBackStackImmediate();
                 return true;
             case R.id.check_representation_state:
-                launchRepresentativeService(TypeVS.STATE);
+                launchRepresentativeService(OperationType.STATE);
                 return true;
             case R.id.cancel_anonymouys_representation:
                 builder = UIUtils.getMessageDialogBuilder(
@@ -214,7 +214,7 @@ public class RepresentationStateFragment extends Fragment implements
                 return true;
             case R.id.representative_list:
                 Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(ContextVS.FRAGMENT_KEY, RepresentativeGridFragment.class.getName());
+                intent.putExtra(Constants.FRAGMENT_KEY, RepresentativeGridFragment.class.getName());
                 startActivity(intent);
                 return true;
             default:
@@ -227,10 +227,10 @@ public class RepresentationStateFragment extends Fragment implements
         switch (requestCode) {
             case RC_PASSW:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
                     RepresentativeDelegationDto delegation = PrefUtils.getAnonymousDelegation();
                     if(delegation == null) {
-                        MessageDialogFragment.showDialog(ResponseVS.SC_ERROR, getString(R.string.error_lbl),
+                        MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, getString(R.string.error_lbl),
                                 getString(R.string.missing_anonymous_delegation_cancellation_data),
                                 getFragmentManager());
                     } else {
@@ -238,15 +238,15 @@ public class RepresentationStateFragment extends Fragment implements
                             RepresentativeDelegationDto request =
                                     delegation.getAnonymousCancelationRequest();
                             Intent intent = new Intent(getActivity(), ID_CardNFCReaderActivity.class);
-                            intent.putExtra(ContextVS.PASSWORD_KEY, new
-                                    String(responseVS.getMessageBytes()).toCharArray());
-                            intent.putExtra(ContextVS.USER_KEY,
-                                    AppVS.getInstance().getAccessControl().getName());
-                            intent.putExtra(ContextVS.MESSAGE_KEY,
+                            intent.putExtra(Constants.PASSWORD_KEY, new
+                                    String(responseDto.getMessageBytes()).toCharArray());
+                            intent.putExtra(Constants.USER_KEY,
+                                    App.getInstance().getAccessControl().getName());
+                            intent.putExtra(Constants.MESSAGE_KEY,
                                     getString(R.string.anonymous_delegation_cancellation_lbl));
-                            intent.putExtra(ContextVS.MESSAGE_CONTENT_KEY,
+                            intent.putExtra(Constants.MESSAGE_CONTENT_KEY,
                                     JSON.writeValueAsString(request));
-                            intent.putExtra(ContextVS.MESSAGE_SUBJECT_KEY,
+                            intent.putExtra(Constants.MESSAGE_SUBJECT_KEY,
                                     getString(R.string.anonymous_delegation_cancellation_lbl));
                             startActivityForResult(intent, RC_SIGN_REQUEST);
                         } catch (Exception ex) { ex.printStackTrace(); }
@@ -255,8 +255,8 @@ public class RepresentationStateFragment extends Fragment implements
                 break;
             case RC_SIGN_REQUEST:
                 if(Activity.RESULT_OK == resultCode) {
-                    ResponseVS responseVS = data.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-                    new AnonymousDelegationCancellationTask(responseVS.getCMS()).execute();
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
+                    new AnonymousDelegationCancellationTask(responseDto.getCMS()).execute();
                 }
                 break;
         }
@@ -271,7 +271,7 @@ public class RepresentationStateFragment extends Fragment implements
         }
     }
 
-    public class AnonymousDelegationCancellationTask extends AsyncTask<String, String, ResponseVS> {
+    public class AnonymousDelegationCancellationTask extends AsyncTask<String, String, ResponseDto> {
 
         private CMSSignedMessage cmsSignedMessage;
 
@@ -282,8 +282,8 @@ public class RepresentationStateFragment extends Fragment implements
         @Override protected void onPreExecute() { setProgressDialogVisible(true,
                 getString(R.string.cancel_anonymouys_representation_lbl), getString(R.string.wait_msg)); }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
-            ResponseVS responseVS = null;
+        @Override protected ResponseDto doInBackground(String... urls) {
+            ResponseDto responseDto = null;
             RepresentativeDelegationDto delegation = PrefUtils.getAnonymousDelegation();
             RepresentativeDelegationDto cancelationRequest =
                     delegation.getAnonymousRepresentationDocumentCancelationRequest();
@@ -294,36 +294,36 @@ public class RepresentationStateFragment extends Fragment implements
                 CMSSignedMessage anonymousCMSMessage = delegation.getCertificationRequest().signData(
                         contentToSign, timeStampToken);
                 Map<String, Object> mapToSend = new HashMap<>();
-                mapToSend.put(ContextVS.CMS_FILE_NAME, cmsSignedMessage.toPEM());
-                mapToSend.put(ContextVS.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());
-                responseVS =  HttpHelper.getInstance().sendObjectMap(mapToSend,
-                        AppVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    CMSSignedMessage delegationReceipt = responseVS.getCMS();
+                mapToSend.put(Constants.CMS_FILE_NAME, cmsSignedMessage.toPEM());
+                mapToSend.put(Constants.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());
+                responseDto =  HttpConnection.getInstance().sendObjectMap(mapToSend,
+                        App.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
+                if (ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                    CMSSignedMessage delegationReceipt = responseDto.getCMS();
                     Collection matches = delegationReceipt.checkSignerCert(
-                            AppVS.getInstance().getAccessControl().getCertificate());
+                            App.getInstance().getAccessControl().getCertificate());
                     if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-                    responseVS.setCMS(delegationReceipt);
+                    responseDto.setCMS(delegationReceipt);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                responseVS = ResponseVS.EXCEPTION(ex, getActivity());
+                responseDto = ResponseDto.EXCEPTION(ex, getActivity());
             } finally {
-                return responseVS;
+                return responseDto;
             }
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(ResponseVS responseVS) {
+        @Override protected void onPostExecute(ResponseDto responseDto) {
             setProgressDialogVisible(false, null, null);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 PrefUtils.putAnonymousDelegation(null);
-                responseVS.setCaption(getString(R.string.cancel_anonymouys_representation_lbl)).
+                responseDto.setCaption(getString(R.string.cancel_anonymouys_representation_lbl)).
                         setNotificationMessage(getString(R.string.cancel_anonymous_representation_ok_msg));
-                launchRepresentativeService(TypeVS.STATE);
+                launchRepresentativeService(OperationType.STATE);
             }
-            MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            MessageDialogFragment.showDialog(responseDto, getFragmentManager());
         }
     }
 }

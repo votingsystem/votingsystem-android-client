@@ -3,7 +3,7 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -29,7 +29,7 @@ public class EventVSDto implements Serializable {
 
     private Long id;
     private Long eventId;
-    private TypeVS typeVS = TypeVS.VOTING_EVENT;
+    private OperationType operationType = OperationType.VOTING_EVENT;
     private Cardinality cardinality;
     private String content;
     private String subject;
@@ -53,12 +53,12 @@ public class EventVSDto implements Serializable {
 
     public EventVSDto() {}
 
-    public TypeVS getTypeVS() {
-        return typeVS;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public String getContent () {

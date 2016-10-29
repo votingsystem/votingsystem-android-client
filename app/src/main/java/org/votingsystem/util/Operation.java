@@ -11,7 +11,7 @@ public class Operation<T> implements Serializable {
     public enum State {PENDING, ERROR, FINISHED}
 
     private Long localId;
-    private TypeVS typeVS;
+    private OperationType operationType;
     private State state;
     private int statusCode;
     private String message;
@@ -21,8 +21,8 @@ public class Operation<T> implements Serializable {
 
     public Operation() {}
 
-    public Operation(TypeVS typeVS, T data, State state) {
-        this.typeVS = typeVS;
+    public Operation(OperationType operationType, T data, State state) {
+        this.operationType = operationType;
         this.data = data;
         this.state = state;
     }
@@ -43,12 +43,12 @@ public class Operation<T> implements Serializable {
         this.data = data;
     }
 
-    public TypeVS getTypeVS() {
-        return typeVS;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public void setTypeVS(TypeVS typeVS) {
-        this.typeVS = typeVS;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public State getState() {

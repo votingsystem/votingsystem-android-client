@@ -15,7 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -27,13 +27,13 @@ import org.votingsystem.model.Currency;
 import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ConnectionUtils;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 
@@ -50,23 +50,23 @@ public class CurrencyActivity extends AppCompatActivity {
 	public static final String TAG = CurrencyActivity.class.getSimpleName();
 
     private WeakReference<CurrencyFragment> currencyRef;
-    private AppVS appVS;
+    private App app;
     private Currency currency;
     private String broadCastId = CurrencyActivity.class.getSimpleName();
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-            ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
             SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(
-                    ContextVS.WEBSOCKET_MSG_KEY);
+                    Constants.WEBSOCKET_MSG_KEY);
             if(socketMsg != null){
                 setProgressDialogVisible(false, null, null);
                 switch(socketMsg.getOperation()) {
                     case MSG_TO_DEVICE:
                         break;
                     case CURRENCY_WALLET_CHANGE:
-                        if(ResponseVS.SC_OK == socketMsg.getStatusCode()) {
+                        if(ResponseDto.SC_OK == socketMsg.getStatusCode()) {
                             AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
                                     getString(R.string.send_to_wallet),
                                     getString(R.string.item_sended_ok_msg),
@@ -74,7 +74,7 @@ public class CurrencyActivity extends AppCompatActivity {
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             Intent intent = new Intent(CurrencyActivity.this, ActivityBase.class);
-                                            intent.putExtra(ContextVS.FRAGMENT_KEY, R.id.wallet);
+                                            intent.putExtra(Constants.FRAGMENT_KEY, R.id.wallet);
                                             startActivity(intent);
                                         }
                                     });
@@ -88,17 +88,17 @@ public class CurrencyActivity extends AppCompatActivity {
                 }
             } else {
                 setProgressDialogVisible(false, null, null);
-                switch(responseVS.getTypeVS()) {
+                switch(responseDto.getOperationType()) {
                     case DEVICE_SELECT:
                         try {
-                            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                                DeviceDto targetDevice = (DeviceDto) responseVS.getMessage(DeviceDto.class);
+                            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                                DeviceDto targetDevice = (DeviceDto) responseDto.getMessage(DeviceDto.class);
                                 SocketMessageDto socketMessage = SocketMessageDto.getCurrencyWalletChangeRequest(
                                         targetDevice, Arrays.asList(currency));
                                 Intent startIntent = new Intent(CurrencyActivity.this, WebSocketService.class);
-                                startIntent.putExtra(ContextVS.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
-                                startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-                                startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.CURRENCY_WALLET_CHANGE);
+                                startIntent.putExtra(Constants.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
+                                startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
+                                startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.CURRENCY_WALLET_CHANGE);
                                 setProgressDialogVisible(true, getString(R.string.send_to_wallet),
                                         getString(R.string.connecting_lbl));
                                 startService(startIntent);
@@ -109,8 +109,8 @@ public class CurrencyActivity extends AppCompatActivity {
                             }
                         } catch(Exception ex) {ex.printStackTrace();}
                         break;
-                    default: MessageDialogFragment.showDialog(responseVS.getStatusCode(),
-                            responseVS.getCaption(), responseVS.getNotificationMessage(),
+                    default: MessageDialogFragment.showDialog(responseDto.getStatusCode(),
+                            responseDto.getCaption(), responseDto.getNotificationMessage(),
                             getSupportFragmentManager());
                 }
             }
@@ -120,8 +120,8 @@ public class CurrencyActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
     	super.onCreate(savedInstanceState);
-        appVS = (AppVS) getApplicationContext();
-        currency = (Currency) getIntent().getSerializableExtra(ContextVS.CURRENCY_KEY);
+        app = (App) getApplicationContext();
+        currency = (Currency) getIntent().getSerializableExtra(Constants.CURRENCY_KEY);
         setContentView(R.layout.fragment_container_activity);
         UIUtils.setSupportActionBar(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -154,11 +154,11 @@ public class CurrencyActivity extends AppCompatActivity {
                     break;
                 case R.id.show_timestamp_info:
                     UIUtils.showTimeStampInfoDialog(currency.getReceipt().getSigner().
-                                    getTimeStampToken(), appVS.getTimeStampCert(),
+                                    getTimeStampToken(), app.getTimeStampCert(),
                             getSupportFragmentManager(), this);
                     break;
                 case R.id.send_to_wallet:
-                    if(!appVS.isWithSocketConnection()) {
+                    if(!app.isWithSocketConnection()) {
                         DialogButton positiveButton = new DialogButton(getString(R.string.connect_lbl),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -198,7 +198,7 @@ public class CurrencyActivity extends AppCompatActivity {
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
-        LOGD(TAG + ".onCreateOptionsMenu", " selected model type:" + currency.getTypeVS());
+        LOGD(TAG + ".onCreateOptionsMenu", " selected model type:" + currency.getOperationType());
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.currency_fragment, menu);
         try {
@@ -225,36 +225,36 @@ public class CurrencyActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                broadcastReceiver, new IntentFilter(ContextVS.WEB_SOCKET_BROADCAST_ID));
+                broadcastReceiver, new IntentFilter(Constants.WEB_SOCKET_BROADCAST_ID));
     }
 
-    public class CurrencyFetcher extends AsyncTask<String, String, ResponseVS> {
+    public class CurrencyFetcher extends AsyncTask<String, String, ResponseDto> {
 
         public CurrencyFetcher() { }
 
         @Override protected void onPreExecute() { setProgressDialogVisible(true,
                 getString(R.string.loading_data_msg), getString(R.string.loading_info_msg)); }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
+        @Override protected ResponseDto doInBackground(String... urls) {
             String currencyURL = urls[0];
-            return HttpHelper.getInstance().getData(currencyURL, null);
+            return HttpConnection.getInstance().getData(currencyURL, null);
         }
 
         @Override protected void onProgressUpdate(String... progress) { }
 
-        @Override protected void onPostExecute(ResponseVS responseVS) {
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        @Override protected void onPostExecute(ResponseDto responseDto) {
+            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
                 try {
-                    currency.setReceiptBytes(responseVS.getMessageBytes());
+                    currency.setReceiptBytes(responseDto.getMessageBytes());
                     if(currencyRef.get() != null) currencyRef.get().initCurrencyScreen(currency);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+                    MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                             getString(R.string.exception_lbl), ex.getMessage(), getSupportFragmentManager());
                 }
             } else {
-                MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
-                        getString(R.string.error_lbl), responseVS.getMessage(),
+                MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
+                        getString(R.string.error_lbl), responseDto.getMessage(),
                         getSupportFragmentManager());
             }
             setProgressDialogVisible(false, null, null);

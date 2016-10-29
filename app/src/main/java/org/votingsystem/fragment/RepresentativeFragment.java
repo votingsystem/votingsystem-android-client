@@ -22,17 +22,17 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.activity.RepresentativeDelegationActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.UserContentProvider;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.service.RepresentativeService;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.ResponseVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
@@ -56,9 +56,9 @@ public class RepresentativeFragment extends Fragment {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
         LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseVS responseVS = intent.getParcelableExtra(ContextVS.RESPONSEVS_KEY);
-        if(TypeVS.ITEM_REQUEST == responseVS.getTypeVS()) {
-            printRepresentativeData((UserDto) intent.getSerializableExtra(ContextVS.USER_KEY));
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
+        if(OperationType.ITEM_REQUEST == responseDto.getOperationType()) {
+            printRepresentativeData((UserDto) intent.getSerializableExtra(Constants.USER_KEY));
             setProgressDialogVisible(false);
         }
         }
@@ -67,7 +67,7 @@ public class RepresentativeFragment extends Fragment {
     public static Fragment newInstance(Long representativeId) {
         RepresentativeFragment fragment = new RepresentativeFragment();
         Bundle args = new Bundle();
-        args.putLong(ContextVS.ITEM_ID_KEY, representativeId);
+        args.putLong(Constants.ITEM_ID_KEY, representativeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -77,7 +77,7 @@ public class RepresentativeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState +
                 " - arguments: " + getArguments());
-        representativeId =  getArguments().getLong(ContextVS.ITEM_ID_KEY);
+        representativeId =  getArguments().getLong(Constants.ITEM_ID_KEY);
         broadCastId = RepresentativeFragment.class.getSimpleName() + "_" + representativeId;
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(
                 broadcastReceiver, new IntentFilter(broadCastId));
@@ -87,7 +87,7 @@ public class RepresentativeFragment extends Fragment {
         selectButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), RepresentativeDelegationActivity.class);
-                intent.putExtra(ContextVS.USER_KEY, representative);
+                intent.putExtra(Constants.USER_KEY, representative);
                 startActivityForResult(intent, REPRESENTATIVE_DELEGATION);
             }
         });
@@ -108,20 +108,20 @@ public class RepresentativeFragment extends Fragment {
     private void requestRepresentativeData(Long representativeId) {
         setProgressDialogVisible(true);
         Intent startIntent = new Intent(getActivity(), RepresentativeService.class);
-        startIntent.putExtra(ContextVS.ITEM_ID_KEY, representativeId);
-        startIntent.putExtra(ContextVS.CALLER_KEY, broadCastId);
-        startIntent.putExtra(ContextVS.TYPEVS_KEY, TypeVS.ITEM_REQUEST);
+        startIntent.putExtra(Constants.ITEM_ID_KEY, representativeId);
+        startIntent.putExtra(Constants.CALLER_KEY, broadCastId);
+        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.ITEM_REQUEST);
         getActivity().startService(startIntent);
     }
 
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         String message = null;
-        if(data != null) message = data.getStringExtra(ContextVS.MESSAGE_KEY);
+        if(data != null) message = data.getStringExtra(Constants.MESSAGE_KEY);
         if(Activity.RESULT_OK == requestCode) {
-            MessageDialogFragment.showDialog(ResponseVS.SC_OK, getString(R.string.operation_ok_msg),
+            MessageDialogFragment.showDialog(ResponseDto.SC_OK, getString(R.string.operation_ok_msg),
                     message, getFragmentManager());
-        } else if(message != null) MessageDialogFragment.showDialog(ResponseVS.SC_ERROR,
+        } else if(message != null) MessageDialogFragment.showDialog(ResponseDto.SC_ERROR,
                     getString(R.string.operation_error_msg), message, getFragmentManager());
     }
 
@@ -169,7 +169,7 @@ public class RepresentativeFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
     }
 
-    public class ImageDownloaderTask extends AsyncTask<String, Void, ResponseVS> {
+    public class ImageDownloaderTask extends AsyncTask<String, Void, ResponseDto> {
 
         Long representativeId;
 
@@ -179,21 +179,21 @@ public class RepresentativeFragment extends Fragment {
 
         @Override protected void onPreExecute() { }
 
-        @Override protected ResponseVS doInBackground(String... urls) {
-            return  HttpHelper.getInstance().getData(
-                    ((AppVS) getActivity().getApplicationContext()).getAccessControl().
+        @Override protected ResponseDto doInBackground(String... urls) {
+            return  HttpConnection.getInstance().getData(
+                    ((App) getActivity().getApplicationContext()).getAccessControl().
                     getRepresentativeImageURL(representativeId), null);
         }
 
-        @Override  protected void onPostExecute(ResponseVS responseVS) {
+        @Override  protected void onPostExecute(ResponseDto responseDto) {
             LOGD(TAG + "ImageDownloaderTask.onPostExecute() ", "statusCode: " +
-                    responseVS.getStatusCode());
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                UIUtils.setImage(representative_image, responseVS.getMessageBytes(), getActivity());
-                representative.setImageBytes(responseVS.getMessageBytes());
+                    responseDto.getStatusCode());
+            if (ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                UIUtils.setImage(representative_image, responseDto.getMessageBytes(), getActivity());
+                representative.setImageBytes(responseDto.getMessageBytes());
                 getActivity().getContentResolver().insert(UserContentProvider.CONTENT_URI,
                         UserContentProvider.getContentValues(representative));
-            } else MessageDialogFragment.showDialog(responseVS, getFragmentManager());
+            } else MessageDialogFragment.showDialog(responseDto, getFragmentManager());
         }
 
     }

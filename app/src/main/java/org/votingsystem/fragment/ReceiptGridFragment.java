@@ -29,11 +29,11 @@ import org.votingsystem.activity.ReceiptPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
 import org.votingsystem.dto.voting.VoteDto;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.ReceiptWrapper;
-import org.votingsystem.util.TypeVS;
 
 import java.util.Date;
 
@@ -82,7 +82,7 @@ public class ReceiptGridFragment extends Fragment implements
         LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
         Intent intent = new Intent(getActivity(),ReceiptPagerActivity.class);
-        intent.putExtra(ContextVS.CURSOR_POSITION_KEY, position);
+        intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
 
@@ -109,7 +109,7 @@ public class ReceiptGridFragment extends Fragment implements
         super.onCreateOptionsMenu(menu, menuInflater);
     }
 
-    private void filterReceiptList(TypeVS receiptType) {
+    private void filterReceiptList(OperationType receiptType) {
         String selection = null;
         String[] selectionArgs = null;
         if(receiptType != null) {
@@ -166,9 +166,9 @@ public class ReceiptGridFragment extends Fragment implements
                 getActivity().getContentResolver().delete(itemUri, null, null);*/
                 ReceiptWrapper receiptWrapper = (ReceiptWrapper) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
-                if(receiptWrapper.getTypeVS() == null) {
+                if(receiptWrapper.getOperationType() == null) {
                     LOGD(TAG + ".bindView", "receiptWrapper id: " + receiptWrapper.getLocalId() +
-                            " has null TypeVS");
+                            " has null OperationType");
                     return;
                 }
                 String stateStr = cursor.getString(cursor.getColumnIndex(
@@ -196,8 +196,8 @@ public class ReceiptGridFragment extends Fragment implements
     @Override public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Parcelable gridState = gridView.onSaveInstanceState();
-        outState.putParcelable(ContextVS.LIST_STATE_KEY, gridState);
-        outState.putInt(ContextVS.ITEM_ID_KEY, menuItemSelected);
+        outState.putParcelable(Constants.LIST_STATE_KEY, gridState);
+        outState.putInt(Constants.ITEM_ID_KEY, menuItemSelected);
     }
 
 }

@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -217,9 +217,9 @@ public class TransactionContentProvider extends ContentProvider {
         }
     }
 
-    public static List<String> getTransactionWeekList(AppVS appVS) {
+    public static List<String> getTransactionWeekList(App app) {
         List<String> result = new ArrayList<String>();
-        Cursor cursor = appVS.getContentResolver().query(
+        Cursor cursor = app.getContentResolver().query(
                 TransactionContentProvider.CONTENT_URI, null, null, null, null);
         if(cursor.getCount() == 0) return result;
         cursor.moveToFirst(); //ORDER -> ID_COL DESC
@@ -246,7 +246,7 @@ public class TransactionContentProvider extends ContentProvider {
         Calendar iteratorCalendar = (Calendar) lastTransactionCalendar.clone();
         while(iteratorCalendar.before(lastTransactionCalendar)) {
             TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
-            String periodLbl = appVS.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
+            String periodLbl = app.getString(R.string.week_lapse_lbl, DateUtils.getDayWeekDateStr(
                     timePeriod.getDateFrom(), "HH:mm"), DateUtils.getDayWeekDateStr(timePeriod.getDateTo(), "HH:mm"));
             result.add(periodLbl);
             LOGD(TAG + ".getTransactionWeekList() ", "periodLbl: " + periodLbl);

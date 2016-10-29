@@ -23,24 +23,24 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.votingsystem.AppVS;
+import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.fragment.EventVSFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.HttpConnection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.dto.ResponseDto;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.votingsystem.util.ContextVS.FRAGMENT_KEY;
+import static org.votingsystem.util.Constants.FRAGMENT_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
@@ -57,7 +57,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
     private SearchView searchView;
     private EventVSDto.State eventState;
     private String queryStr;
-    private ResponseVS responseVS;
+    private ResponseDto responseDto;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
@@ -73,7 +73,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
         search_query = (TextView) findViewById(R.id.search_query);
         num_results = (TextView) findViewById(R.id.num_results);
         eventState = (EventVSDto.State) getIntent().getExtras()
-                .getSerializable(ContextVS.EVENT_STATE_KEY);
+                .getSerializable(Constants.EVENT_STATE_KEY);
         findViewById(R.id.search_query_Container).setVisibility(View.VISIBLE);
 
         if (getIntent().hasExtra(SearchManager.QUERY)) {
@@ -84,12 +84,12 @@ public class EventVSSearchActivity extends AppCompatActivity {
             }
         }
         if(savedInstanceState != null) {
-            responseVS = savedInstanceState.getParcelable(ContextVS.RESPONSEVS_KEY);
-            if(responseVS != null) {
+            responseDto = savedInstanceState.getParcelable(Constants.RESPONSEVS_KEY);
+            if(responseDto != null) {
                 ResultListDto<EventVSDto> resultListDto = null;
                 try {
                     resultListDto = (ResultListDto<EventVSDto>)
-                            responseVS.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});
+                            responseDto.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});
                     eventVSList = resultListDto.getResultList();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -155,7 +155,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(ContextVS.RESPONSEVS_KEY, responseVS);
+        outState.putParcelable(Constants.RESPONSEVS_KEY, responseDto);
     }
 
 
@@ -178,16 +178,16 @@ public class EventVSSearchActivity extends AppCompatActivity {
 
         @Override protected Void doInBackground(String... urls) {
             LOGD(TAG + ".doInBackground", "doInBackground");
-            if(AppVS.getInstance().getAccessControl() == null) {
+            if(App.getInstance().getAccessControl() == null) {
                 LOGD(TAG + ".doInBackground", "missing connection with Access Control");
                 return null;
             }
-            String serviceURL = AppVS.getInstance().getAccessControl().getSearchServiceURL(null, null, queryStr,
+            String serviceURL = App.getInstance().getAccessControl().getSearchServiceURL(null, null, queryStr,
                     EventVSDto.Type.ELECTION, eventState);
-            responseVS = HttpHelper.getInstance().getData(serviceURL, ContentType.JSON);
+            responseDto = HttpConnection.getInstance().getData(serviceURL, ContentType.JSON);
             try {
                 ResultListDto<EventVSDto> resultListDto = (ResultListDto<EventVSDto>)
-                        responseVS.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});
+                        responseDto.getMessage(new TypeReference<ResultListDto<EventVSDto>>() {});
                 eventVSList = resultListDto.getResultList();
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -242,7 +242,7 @@ public class EventVSSearchActivity extends AppCompatActivity {
         try {
             Intent intent = new Intent(this, FragmentContainerActivity.class);
             intent.putExtra(FRAGMENT_KEY, EventVSFragment.class.getName());
-            intent.putExtra(ContextVS.EVENTVS_KEY, JSON.writeValueAsString(eventVS));
+            intent.putExtra(Constants.EVENTVS_KEY, JSON.writeValueAsString(eventVS));
             startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();

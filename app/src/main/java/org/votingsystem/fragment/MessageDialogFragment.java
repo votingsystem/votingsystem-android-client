@@ -15,8 +15,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.ResponseVS;
+import org.votingsystem.util.Constants;
+import org.votingsystem.dto.ResponseDto;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -44,7 +44,7 @@ public class MessageDialogFragment extends DialogFragment {
 
     public static void showDialog(String caption, String message, FragmentManager fragmentManager) {
         hide(fragmentManager);
-        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseVS.SC_OK,
+        MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseDto.SC_OK,
                 caption, message);
         if(fragmentManager == null) {
             LOGD(TAG, "fragmentManager null");
@@ -55,9 +55,9 @@ public class MessageDialogFragment extends DialogFragment {
         ft.commitAllowingStateLoss();
     }
 
-    public static void showDialog(ResponseVS responseVS,  FragmentManager fragmentManager) {
-        showDialog(responseVS.getStatusCode(), responseVS.getCaption(),
-                responseVS.getNotificationMessage(), fragmentManager);
+    public static void showDialog(ResponseDto responseDto, FragmentManager fragmentManager) {
+        showDialog(responseDto.getStatusCode(), responseDto.getCaption(),
+                responseDto.getNotificationMessage(), fragmentManager);
     }
 
     public static void hide(FragmentManager fragmentManager) {
@@ -72,9 +72,9 @@ public class MessageDialogFragment extends DialogFragment {
                     String message){
         MessageDialogFragment fragment = new MessageDialogFragment();
         Bundle args = new Bundle();
-        if(statusCode != null) args.putInt(ContextVS.RESPONSE_STATUS_KEY, statusCode);
-        args.putString(ContextVS.CAPTION_KEY, caption);
-        args.putString(ContextVS.MESSAGE_KEY, message);
+        if(statusCode != null) args.putInt(Constants.RESPONSE_STATUS_KEY, statusCode);
+        args.putString(Constants.CAPTION_KEY, caption);
+        args.putString(Constants.MESSAGE_KEY, message);
         fragment.setArguments(args);
         return fragment;
     }
@@ -82,9 +82,9 @@ public class MessageDialogFragment extends DialogFragment {
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.message_dialog, null);
-        int statusCode = getArguments().getInt(ContextVS.RESPONSE_STATUS_KEY, -1);
-        String caption = getArguments().getString(ContextVS.CAPTION_KEY);
-        String message = getArguments().getString(ContextVS.MESSAGE_KEY);
+        int statusCode = getArguments().getInt(Constants.RESPONSE_STATUS_KEY, -1);
+        String caption = getArguments().getString(Constants.CAPTION_KEY);
+        String message = getArguments().getString(Constants.MESSAGE_KEY);
         AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setPositiveButton(
             getString(R.string.accept_lbl),  new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
@@ -103,7 +103,7 @@ public class MessageDialogFragment extends DialogFragment {
         AlertDialog dialog = builder.create();
         dialog.setView(view);
         if(statusCode > 0) {
-            if(ResponseVS.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
+            if(ResponseDto.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
             else dialog.setIcon(R.drawable.fa_times_32);
         }
         this.setCancelable(false);

@@ -2,7 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.OperationType;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class ResultListDto<T> {
     private Long totalCount;
     private Object State;
     private String message;
-    private TypeVS type;
+    private OperationType type;
 
     public ResultListDto() { }
 
@@ -23,7 +23,7 @@ public class ResultListDto<T> {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
     }
 
-    public ResultListDto(List<T> resultList, TypeVS type) {
+    public ResultListDto(List<T> resultList, OperationType type) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
         this.type = type;
     }
@@ -97,11 +97,11 @@ public class ResultListDto<T> {
         this.message = message;
     }
 
-    public TypeVS getType() {
+    public OperationType getType() {
         return type;
     }
 
-    public void setType(TypeVS type) {
+    public void setType(OperationType type) {
         this.type = type;
     }
 }
