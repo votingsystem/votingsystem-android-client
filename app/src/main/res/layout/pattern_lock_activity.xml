@@ -9,7 +9,7 @@
     android:layout_height="match_parent"
     tools:context="org.votingsystem.activity.PatternLockActivity">
 
-    <include layout="@layout/toolbar_vs" />
+    <include layout="@layout/app_toolbar" />
 
     <TextView
         android:id="@+id/msg"

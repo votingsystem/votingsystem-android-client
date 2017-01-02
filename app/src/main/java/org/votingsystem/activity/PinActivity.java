@@ -17,30 +17,29 @@ import android.widget.TextView;
 
 import org.votingsystem.android.R;
 import org.votingsystem.dto.CryptoDeviceAccessMode;
-import org.votingsystem.service.WebSocketService;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.UIUtils;
+import org.votingsystem.xml.XMLUtils;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class PinActivity extends AppCompatActivity  {
+public class PinActivity extends AppCompatActivity {
 
     private static final String TAG = PinActivity.class.getSimpleName();
 
     private enum PinChangeStep {PIN_REQUEST, NEW_PIN_REQUEST, NEW_PIN_CONFIRM}
 
-    public static final int RC_PATERN_PASSWORD  = 0;
-    public static final int RC_IDCARD_PASSWORD  = 1;
+    public static final int RC_IDCARD_PASSWORD = 0;
 
-
-    public static final int MODE_VALIDATE_INPUT  = 0;
+    //we are here because we want to validate a signature request
+    public static final int MODE_VALIDATE_INPUT = 0;
+    //we are here because we want to set/change the password
     public static final int MODE_CHANGE_PASSWORD = 1;
     private int requestMode;
 
@@ -50,10 +49,8 @@ public class PinActivity extends AppCompatActivity  {
     private boolean withPasswordConfirm;
     private String newPin;
     private String firstPin;
-    private String msgUUID;
-    private OperationType operation;
     private CryptoDeviceAccessMode passwAccessMode;
-    private char[] dniePassword;
+    private char[] smartCardPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,15 +60,20 @@ public class PinActivity extends AppCompatActivity  {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         pinText = (EditText) findViewById(R.id.pin);
         msgTextView = (TextView) findViewById(R.id.msg);
-        operation = (OperationType) getIntent().getSerializableExtra(Constants.OPERATION_KEY);
-        msgUUID = getIntent().getStringExtra(Constants.UUID_KEY);
         String operationCode = getIntent().getStringExtra(Constants.OPERATION_CODE_KEY);
-        if(operationCode != null) {
+
+        if(PrefUtils.getDNIeCAN() == null) {
+            Intent intent = new Intent(this, UserDataFormActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
+        if (operationCode != null) {
             TextView operationCodeText = (TextView) findViewById(R.id.operation_code);
             operationCodeText.setText(operationCode);
             operationCodeText.setVisibility(View.VISIBLE);
         }
-        if(getIntent().getStringExtra(Constants.MESSAGE_KEY) != null) {
+        if (getIntent().getStringExtra(Constants.MESSAGE_KEY) != null) {
             msgTextView.setText(Html.fromHtml(getIntent().getStringExtra(Constants.MESSAGE_KEY)));
         }
         withPasswordConfirm = getIntent().getBooleanExtra(Constants.PASSWORD_CONFIRM_KEY, false);
@@ -80,15 +82,7 @@ public class PinActivity extends AppCompatActivity  {
         switch (requestMode) {
             case MODE_CHANGE_PASSWORD:
                 getSupportActionBar().setTitle(R.string.change_password_lbl);
-                if(passwAccessMode == null) {
-                    processPassword(null);
-                } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PATTER_LOCK) {
-                    Intent intent = new Intent(this, PatternLockActivity.class);
-                    intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.enter_actual_passw_msg));
-                    startActivityForResult(intent, RC_PATERN_PASSWORD);
-                } else {
-                    msgTextView.setText(getString(R.string.enter_actual_passw_msg));
-                }
+                processPassword(null);
                 break;
             case MODE_VALIDATE_INPUT:
                 getSupportActionBar().setTitle(R.string.pin_lbl);
@@ -98,12 +92,13 @@ public class PinActivity extends AppCompatActivity  {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     String pin = pinText.getText().toString();
-                    if(pin != null && pin.length() == 4) {
-                        if(processPassword(pin)) {
+                    if (pin != null && pin.length() == 4) {
+                        if (processPassword(pin)) {
                             //this is to make soft keyboard allways visible when input needed
                             new Handler().post(new Runnable() {
-                                @Override public void run() {
-                                    ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE))
+                                @Override
+                                public void run() {
+                                    ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
                                             .showSoftInput(pinText, InputMethodManager.SHOW_FORCED);
                                 }
                             });
@@ -120,41 +115,27 @@ public class PinActivity extends AppCompatActivity  {
     private boolean processPassword(final String passw) {
         switch (requestMode) {
             case MODE_CHANGE_PASSWORD:
-                switch(pinChangeStep) {
+                switch (pinChangeStep) {
                     case PIN_REQUEST:
-                        if(passwAccessMode == null) {
-                            msgTextView.setText(getString(R.string.enter_new_passw_to_app_msg));
-                        } else if(passwAccessMode.getMode() == CryptoDeviceAccessMode.Mode.PATTER_LOCK) {
-                            dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray());
-                        } else {
-                            dniePassword = PrefUtils.getProtectedPassword(passw.toCharArray());
-                            msgTextView.setText(getString(R.string.enter_new_passw_msg));
-                            pinText.setText("");
-                        }
-                        pinChangeStep =  PinChangeStep.NEW_PIN_REQUEST;
+                        msgTextView.setText(getString(R.string.enter_new_passw_to_app_msg));
+                        pinChangeStep = PinChangeStep.NEW_PIN_REQUEST;
                         return true;
                     case NEW_PIN_REQUEST:
                         newPin = passw;
-                        pinChangeStep =  PinChangeStep.NEW_PIN_CONFIRM;
+                        pinChangeStep = PinChangeStep.NEW_PIN_CONFIRM;
                         msgTextView.setText(getString(R.string.confirm_new_passw_msg));
                         pinText.setText("");
                         return true;
                     case NEW_PIN_CONFIRM:
-                        if(passw.equals(newPin)) {
-                            if(dniePassword != null) {
-                                PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PIN,
-                                        passw.toCharArray(), dniePassword);
-                            } else if(PrefUtils.isDNIeEnabled()) {
-                                Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
-                                intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.enter_password_msg));
-                                intent.putExtra(Constants.MODE_KEY, ID_CardNFCReaderActivity.MODE_PASSWORD_REQUEST);
-                                startActivityForResult(intent, RC_IDCARD_PASSWORD);
-                                return false;
-                            }
-                            showResultDialog();
+                        if (passw.equals(newPin)) {
+                            Intent intent = new Intent(this, ID_CardNFCReaderActivity.class);
+                            intent.putExtra(Constants.MESSAGE_KEY, getString(R.string.enter_password_msg));
+                            intent.putExtra(Constants.MODE_KEY, ID_CardNFCReaderActivity.MODE_REQUEST_PASSWORD);
+                            intent.putExtra(Constants.MESSAGE_CONTENT_KEY, XMLUtils.dummyString().getBytes());
+                            startActivityForResult(intent, RC_IDCARD_PASSWORD);
                             return false;
                         } else {
-                            pinChangeStep =  PinChangeStep.NEW_PIN_REQUEST;
+                            pinChangeStep = PinChangeStep.NEW_PIN_REQUEST;
                             msgTextView.setText(getString(R.string.new_password_error_msg));
                             pinText.setText("");
                             return true;
@@ -162,8 +143,8 @@ public class PinActivity extends AppCompatActivity  {
                 }
                 break;
             case MODE_VALIDATE_INPUT:
-                if(withPasswordConfirm) {
-                    if(firstPin == null) {
+                if (withPasswordConfirm) {
+                    if (firstPin == null) {
                         firstPin = passw;
                         msgTextView.setText(getString(R.string.repeat_password));
                         pinText.setText("");
@@ -177,43 +158,28 @@ public class PinActivity extends AppCompatActivity  {
                         }
                     }
                 }
-                if(!passwAccessMode.validateHash(passw, this)) {
+                if (!passwAccessMode.validateHash(passw, this)) {
                     pinText.setText("");
                     return true;
                 }
                 break;
         }
-        if(operation == OperationType.WEB_SOCKET_REQUEST) {
-            Intent startIntent = new Intent(this, WebSocketService.class);
-            startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.PIN);
-            startIntent.putExtra(Constants.UUID_KEY, msgUUID);
-            startService(startIntent);
-        }
         finishOK(passw);
         return false;
     }
 
-    private void showResultDialog() {
-        DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        finishOK(newPin);
-                    }
-                });
-        UIUtils.showMessageDialog(getString(R.string.change_password_lbl), getString(
-                R.string.new_password_ok_msg), positiveButton, null, this);
-    }
-
     private void finishOK(String passw) {
         Intent resultIntent = new Intent();
+
         ResponseDto responseDto = ResponseDto.OK().setMessageBytes(passw.getBytes());
-        resultIntent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        resultIntent.putExtra(Constants.RESPONSE_KEY, responseDto);
         resultIntent.putExtra(Constants.MODE_KEY, CryptoDeviceAccessMode.Mode.PIN);
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -224,39 +190,27 @@ public class PinActivity extends AppCompatActivity  {
         }
     }
 
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         switch (requestCode) {
-            case RC_PATERN_PASSWORD:
-                if(Activity.RESULT_OK == resultCode)  {
-                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
-                    processPassword(new String(responseDto.getMessageBytes()));
-                } else if(ResponseDto.SC_ERROR == resultCode) {
-                    setResult(Activity.RESULT_CANCELED);
-                    finish();
-                } else {
+            case RC_IDCARD_PASSWORD:
+                if (Activity.RESULT_OK == resultCode) {
+                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSE_KEY);
+                    this.smartCardPassword = responseDto.getMessage().toCharArray();
+                    PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PIN,
+                            newPin.toCharArray(), smartCardPassword);
                     DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    setResult(Activity.RESULT_CANCELED);
-                                    finish();
+                                    finishOK(newPin);
                                 }
                             });
-                    UIUtils.showMessageDialog(getString(R.string.error_lbl),
-                            getString(R.string.missing_actual_passw_error_msg), positiveButton,
-                            null, this);
-                }
-                break;
-            case RC_IDCARD_PASSWORD:
-                if(Activity.RESULT_OK == resultCode)  {
-                    ResponseDto responseDto = data.getParcelableExtra(Constants.RESPONSEVS_KEY);
-                    this.dniePassword  = new String(responseDto.getMessageBytes()).toCharArray();
-                    PrefUtils.putProtectedPassword(CryptoDeviceAccessMode.Mode.PIN,
-                            newPin.toCharArray(), dniePassword);
-                    showResultDialog();
+                    UIUtils.showMessageDialog(getString(R.string.change_password_lbl), getString(
+                            R.string.new_password_ok_msg), positiveButton, null, this);
                 } else {
-                    pinChangeStep =  PinChangeStep.NEW_PIN_REQUEST;
+                    pinChangeStep = PinChangeStep.NEW_PIN_REQUEST;
                     msgTextView.setText(getString(R.string.new_password_error_msg));
                     pinText.setText("");
                 }

@@ -2,9 +2,6 @@ package org.votingsystem.dto;
 
 import android.util.Base64;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -20,17 +17,17 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class AESParamsDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private String key;
     private String iv;
-    @JsonIgnore private Key aesKey;
-    @JsonIgnore private transient IvParameterSpec ivParam;
+    private Key aesKey;
+    private transient IvParameterSpec ivParam;
 
-    public AESParamsDto() { }
+    public AESParamsDto() {
+    }
 
     public AESParamsDto(Key aesKey, IvParameterSpec ivParam) {
         this.aesKey = aesKey;
@@ -48,32 +45,35 @@ public class AESParamsDto implements Serializable {
         return result;
     }
 
-    @JsonIgnore public Key getAesKey() {
-        if(aesKey == null && key != null) {
+    public Key getAesKey() {
+        if (aesKey == null && key != null) {
             byte[] decodeKeyBytes = Base64.decode(key.getBytes(), Base64.NO_WRAP);
             aesKey = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
         }
         return aesKey;
     }
 
-    @JsonIgnore public IvParameterSpec getIvParam() {
-        if(ivParam == null && iv != null) ivParam = new IvParameterSpec(Base64.decode(iv.getBytes(), Base64.NO_WRAP));
+    public IvParameterSpec getIvParam() {
+        if (ivParam == null && iv != null)
+            ivParam = new IvParameterSpec(Base64.decode(iv.getBytes(), Base64.NO_WRAP));
         return ivParam;
     }
 
     public String getKey() {
-        if(key == null && aesKey != null) key = Base64.encodeToString(aesKey.getEncoded(), Base64.NO_WRAP);
+        if (key == null && aesKey != null)
+            key = Base64.encodeToString(aesKey.getEncoded(), Base64.NO_WRAP);
         return key;
     }
 
     public String getIv() {
-        if(iv == null && ivParam != null) iv = Base64.encodeToString(ivParam.getIV(), Base64.NO_WRAP);
+        if (iv == null && ivParam != null)
+            iv = Base64.encodeToString(ivParam.getIV(), Base64.NO_WRAP);
         return iv;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
-        if(ivParam != null) s.writeObject(ivParam.getIV());
+        if (ivParam != null) s.writeObject(ivParam.getIV());
         else s.writeObject(null);
 
     }
@@ -81,7 +81,7 @@ public class AESParamsDto implements Serializable {
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
         s.defaultReadObject();
         byte[] ivParamBytes = (byte[]) s.readObject();
-        if(ivParamBytes != null) ivParam = new IvParameterSpec(ivParamBytes);
+        if (ivParamBytes != null) ivParam = new IvParameterSpec(ivParamBytes);
     }
 
 }

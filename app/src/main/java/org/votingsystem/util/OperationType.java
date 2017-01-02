@@ -1,82 +1,86 @@
 package org.votingsystem.util;
 
+import org.votingsystem.dto.voting.ElectionDto;
+
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public enum OperationType {
 
-    CURRENCY_SYSTEM,
-    VOTING_SYSTEM,
+    GET_METADATA("/api/metadata"),
+    GET_QR("/api/qr"),
+    GET_QR_INFO("/api/qr/info"),
+    ADMIN_OPERATION_PROCESS("/api/operation/process"),
 
-    ACCESS_REQUEST,
-    ITEM_REQUEST,
-    ITEMS_REQUEST,
-    VOTING_EVENT,
+    METADATA("/api/metadata"),
+    //TimeStamp server
+    TIMESTAMP_REQUEST("/api/timestamp"),
+    TIMESTAMP_REQUEST_DISCRETE("/api/timestamp/discrete"),
 
-    EDIT_REPRESENTATIVE,
-    REPRESENTATIVE_REVOKE,
-    NEW_REPRESENTATIVE,
-    REPRESENTATIVE,
-    REPRESENTATIVE_ACCREDITATIONS_REQUEST,
-    REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-    ANONYMOUS_REPRESENTATIVE_SELECTION,
-    ANONYMOUS_SELECTION_CERT_REQUEST,
-    ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION,
+    //voting service provider
+    FETCH_ELECTION("/api/election/uuid/{UUID}"),
+    FETCH_ELECTIONS("/api/election/list?state={state}&max={size}&offset={offset}"),
+    SEND_VOTE("/api/vote"),
+    PUBLISH_ELECTION("/api/election/save"),
+    ELECTIONS_STATS("/api/election/uuid/{electionUUID}/stats"),
+    ELECTIONS_SEARCH("/api/election/search?max={pageSize}&offset={offset}&state={state}&searchText={searchText}"),
+    VOTE_REPOSITORY("/api/vote/repository"),
+    ANON_VOTE_CERT_REQUEST("/election/validateIdentity"),
+    CANCEL_VOTE(null),
+    //id provider
+    AUTHENTICATE_CITIZEN("/api/authenticateCitizen"),
+    VALIDATE_CITIZEN_AUTHENTICATION("/api/authenticateCitizen/validate"),
 
-    PIN,
-    EVENT_CANCELLATION,
-    BACKUP_REQUEST,
-    SEND_VOTE,
-    CANCEL_VOTE,
-    PUBLISH_EVENT,
+    //id provider
+    //Service that generates the QR code with the operation details
+    INIT_AUTHENTICATION("/api/auth/initAuthentication"),
+    VALIDATE_IDENTITY("/api/auth/validate"),
+    ELECTION_INIT_AUTHENTICATION("/api/election/initAuthentication"),
 
-    BROWSER_URL,
-    CURRENCY,
-    CURRENCY_CANCEL,
-    CURRENCY_CHECK,
-    FROM_USER,
-    CURRENCY_GROUP_NEW,
-    CURRENCY_PERIOD_INIT,
-    CURRENCY_REQUEST,
-    CURRENCY_CHANGE,
-    CURRENCY_WALLET_CHANGE,
-    CURRENCY_SEND,
-    CURRENCY_ACCOUNTS_INFO,
-    DEVICE_SELECT,
-    TRANSACTION_INFO,
-    TRANSACTION_RESPONSE,
-    CURRENCY_BATCH,
+    PROCESS_URL(null);
 
-    FROM_BANK,
-    STATE,
+    private String url;
 
-    MESSAGE_INFO,
-    MESSAGE_INFO_RESPONSE,
-    USER_INFO,
+    OperationType(String url) {
+        this.url = url;
+    }
 
-    DELIVERY_WITHOUT_PAYMENT,
-    DELIVERY_WITH_PAYMENT,
-    REQUEST_FORM,
+    public String getUrl(String entityId) {
+        return entityId + url;
+    }
 
-    MESSAGEVS,
-    MSG_TO_DEVICE,
-    MESSAGEVS_FROM_VS,
-    GET_AES_PARAMS,
-    SEND_AES_PARAMS,
+    /********************************************************************************
+     *** voting-service urls
+     ********************************************************************************/
+    public static String getElectionURL(String systenEntityId, String electionUUID) {
+        return FETCH_ELECTION.getUrl(systenEntityId).replace("{UUID}", electionUUID);
+    }
 
-    OPERATION_PROCESS,
-    OPERATION_RESULT,
+    public static String getSearchServiceURL(String systenEntityId, Integer offset,
+                                             Integer pageSize, String searchText, ElectionDto.State state) {
+        if (pageSize == null) pageSize = Constants.ELECTIONS_PAGE_SIZE;
+        if (offset == null) pageSize = 0;
+        return ELECTIONS_SEARCH.getUrl(systenEntityId).replace("{pageSize}", pageSize.toString())
+                .replace("{offset}", offset.toString())
+                .replace("{state}", state.name())
+                .replace("{searchText}", searchText);
+    }
 
-    REPRESENTATIVE_STATE,
+    public static String getElectionsURL(String systenEntityId, ElectionDto.State state,
+                                         Integer pageSize, Long offset) {
+        return FETCH_ELECTIONS.getUrl(systenEntityId)
+                .replace("{state}", state.name())
+                .replace("{size}", pageSize.toString())
+                .replace("{offset}", offset.toString());
+    }
 
-    LISTEN_TRANSACTIONS,
-    INIT_SESSION,
-    INIT_SIGNED_SESSION,
-    INIT_REMOTE_SIGNED_SESSION,
-    WEB_SOCKET_INIT,
-    WEB_SOCKET_CLOSE,
-    WEB_SOCKET_BAN_SESSION,
-    WEB_SOCKET_REQUEST,
-    RECEIPT;
+    //"/api/eventElection/id/{id}/stats"
+    public static String getVoteStatsURL(String systenEntityId, String electionUUID) {
+        return ELECTIONS_STATS.getUrl(systenEntityId).replace("{electionUUID}", electionUUID);
+    }
+
+    public static String getVoteRepositoryURL(String systenEntityId) {
+        return VOTE_REPOSITORY.getUrl(systenEntityId);
+    }
 
 }

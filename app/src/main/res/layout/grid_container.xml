@@ -22,9 +22,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:textColor="@color/grey_dark"
         android:gravity="center_vertical|center_horizontal"
-        android:text="@string/empty_search_lbl"/>
+        android:textColor="@color/grey_dark"
+        android:textSize="23sp"/>
 
     <FrameLayout android:id="@+id/gridContainer"
         android:layout_width="fill_parent"

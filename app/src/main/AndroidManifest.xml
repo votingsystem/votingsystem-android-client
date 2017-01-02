@@ -5,7 +5,6 @@
    	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.NFC"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-feature android:name="android.hardware.nfc" android:required="true" />
@@ -13,7 +12,7 @@
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="22" />
 
     <application android:name="org.votingsystem.App" android:allowBackup="true"
-        android:icon="@drawable/mail_mark_unread_48" android:label="@string/app_name">
+        android:icon="@drawable/mail_mark_unread_48" android:label= "@string/app_name">
 
         <activity android:name="org.votingsystem.activity.ActivityBase"
             android:label="@string/app_name" android:theme="@style/ThemeVS">
@@ -27,18 +26,11 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/browswevs_lbl" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.CurrencyRequesActivity" android:noHistory="true"
-            android:label="@string/cash_request_dialog_caption" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.ConfirmImageActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.CurrencyActivity" android:theme="@style/ThemeVS"/>
-
         <activity android:name="org.votingsystem.activity.PinActivity"
             android:windowSoftInputMode="stateVisible"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.EventVSSearchActivity" android:theme="@style/ThemeVS">
+        <activity android:name="org.votingsystem.activity.ElectionSearchActivity" android:theme="@style/ThemeVS">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -49,19 +41,7 @@
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>
 
-        <activity android:name="org.votingsystem.activity.ContactsActivity"
-            android:label="@string/contacts_lbl" android:theme="@style/ThemeVS">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
-        </activity>
-
-        <activity android:name="org.votingsystem.activity.ContactPagerActivity"
-            android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.EventVSPagerActivity" android:label="@string/app_name"
+        <activity android:name="org.votingsystem.activity.ElectionPagerActivity" android:label="@string/app_name"
             android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.FragmentContainerActivity"
@@ -74,23 +54,10 @@
         <activity android:name="org.votingsystem.activity.UserDataFormActivity"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
 
-        <activity android:name="org.votingsystem.activity.RepresentativeDelegationActivity"
-            android:label="@string/representative_delegation_lbl" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.RepresentativePagerActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.MessagesPagerActivity" android:theme="@style/ThemeVS"/>
-
         <activity android:name="org.votingsystem.activity.ReceiptPagerActivity" android:theme="@style/ThemeVS"/>
 
         <activity android:name="org.votingsystem.activity.SettingsActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.OperationSignerActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.TransactionPagerActivity" android:theme="@style/ThemeVS"/>
-
-        <activity android:name="org.votingsystem.activity.CurrencyConsumedGridActivity" android:theme="@style/ThemeVS"/>
-
+        
         <activity android:name="org.votingsystem.activity.PatternLockActivity"
             android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait" android:theme="@style/ThemeVS"/>
@@ -99,13 +66,13 @@
             android:windowSoftInputMode="stateHidden"
             android:label = "nfcIntentActivityLbl"
             android:screenOrientation="portrait"
-            android:noHistory="true" android:launchMode="singleTask" android:theme="@style/ThemeVS">
-            <!--<intent-filter>
+            android:launchMode="singleTask" android:theme="@style/ThemeVS">
+            <!--android:noHistory="true" android:launchMode="singleTask" android:theme="@style/ThemeVS">
+            <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="android.nfc.action.TAG_DISCOVERED"
-                android:resource="@xml/filter_nfc"/>-->
+            <meta-data android:name="android.nfc.action.TAG_DISCOVERED" android:resource="@xml/filter_nfc"/>-->
         </activity>
 
 
@@ -116,35 +83,16 @@
 
         <!-- The attribute "android:exported" must be set to "false" to restrict this content
             provider to its own app. Otherwise, all apps could access it. -->
-        <provider android:name="org.votingsystem.contentprovider.UserContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.user"/>
-
-        <provider android:name="org.votingsystem.contentprovider.EventVSContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.eventvs"/>
+        <provider android:name="org.votingsystem.contentprovider.ElectionContentProvider"
+            android:exported="false" android:authorities="votingsystem.org.election"/>
 
         <provider android:name="org.votingsystem.contentprovider.ReceiptContentProvider"
             android:exported="false" android:authorities="votingsystem.org.receipt"/>
 
-        <provider android:name="org.votingsystem.contentprovider.MessageContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.messagevs"/>
-
-        <provider android:name="org.votingsystem.contentprovider.TransactionContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.transaction"/>
-
-        <provider android:name="org.votingsystem.contentprovider.CurrencyContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.currency"/>
-
-        <provider android:name="org.votingsystem.contentprovider.OperationContentProvider"
-            android:exported="false" android:authorities="votingsystem.org.operation"/>
-
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service are only available to this app. -->
-        <service android:name="org.votingsystem.service.BootStrapService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.EventVSService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.RepresentativeService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.PaymentService"  android:exported="false"/>
+        <service android:name="org.votingsystem.service.ElectionService"  android:exported="false"/>
         <service android:name="org.votingsystem.service.VoteService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.WebSocketService"  android:exported="false"/>
 
     </application>
 </manifest>

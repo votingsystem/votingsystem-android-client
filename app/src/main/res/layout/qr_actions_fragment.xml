@@ -3,15 +3,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
-    <Button android:id="@+id/gen_qr_btn"
-        android:textSize="25dp"
-        android:layout_margin="25dp"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/qr_create_lbl" />
-
     <Button android:id="@+id/read_qr_btn"
         android:textSize="25dp"
         android:layout_margin="15dp"

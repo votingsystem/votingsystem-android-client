@@ -33,7 +33,7 @@ public class QRUtils {
         int smallerDimension = width < height ? width : height;
         smallerDimension = smallerDimension * 7 / 8;
 
-        Map<EncodeHintType,Object> hints = new EnumMap<EncodeHintType,Object>(EncodeHintType.class);
+        Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         BitMatrix result = null;
         try {

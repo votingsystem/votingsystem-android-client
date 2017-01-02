@@ -1,12 +1,13 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CertRequestDto {
+public class CertRequestDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private String nif;
     private String email;
@@ -15,8 +16,8 @@ public class CertRequestDto {
     private String givenName;
     private String surname;
 
-
-    public CertRequestDto() {}
+    public CertRequestDto() {
+    }
 
     public CertRequestDto(String deviceId, String phone, String givenName, String surname,
                           String nif, String email) {

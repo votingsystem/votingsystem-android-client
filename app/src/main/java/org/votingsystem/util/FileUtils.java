@@ -21,11 +21,11 @@ import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ */
 public class FileUtils {
 
     public static final String TAG = FileUtils.class.getSimpleName();
-	
+
     public static byte[] getBytesFromFile(File file) throws IOException {
         byte[] b = new byte[(int) file.length()];
         FileInputStream fs = new FileInputStream(file);
@@ -33,36 +33,36 @@ public class FileUtils {
         fs.close();
         return b;
     }
-    
+
     public static byte[] getBytesFromInputStream(InputStream input) throws IOException {
-    	ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf =new byte[4096];
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
         int len;
-        while((len = input.read(buf)) > 0){
-            output.write(buf,0,len);
+        while ((len = input.read(buf)) > 0) {
+            output.write(buf, 0, len);
         }
         output.close();
         input.close();
         return output.toByteArray();
     }
 
-   public static File copyFileToFile(File inputFile, File outputFile) throws Exception {
-       FileInputStream fs = new FileInputStream(inputFile);
-       return copyStreamToFile(fs, outputFile);
+    public static File copyFileToFile(File inputFile, File outputFile) throws Exception {
+        FileInputStream fs = new FileInputStream(inputFile);
+        return copyStreamToFile(fs, outputFile);
     }
 
     public static File copyStreamToFile(InputStream input, File outputFile) throws Exception {
         OutputStream output = new FileOutputStream(outputFile);
-        byte[] buf =new byte[1024];
+        byte[] buf = new byte[1024];
         int len;
-        while((len = input.read(buf)) > 0){
-            output.write(buf,0,len);
+        while ((len = input.read(buf)) > 0) {
+            output.write(buf, 0, len);
         }
         output.close();
         input.close();
         return outputFile;
     }
-	
+
     public static void copy(File src, File dst) throws IOException {
         InputStream in = new FileInputStream(src);
         OutputStream out = new FileOutputStream(dst);
@@ -72,19 +72,18 @@ public class FileUtils {
         in.close();
         out.close();
     }
-     
-    public static String getStringFromFile (File file) throws FileNotFoundException, IOException {
+
+    public static String getStringFromFile(File file) throws FileNotFoundException, IOException {
         FileInputStream stream = new FileInputStream(file);
         try {
             FileChannel fc = stream.getChannel();
             MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             /* Instead of using default, pass in a decoder. */
             return Charset.defaultCharset().decode(bb).toString();
-        }
-        finally {
+        } finally {
             stream.close();
         }
-     }
+    }
 
     public static void save(String content, String filePath, String fileExtension) {
         if (!(fileExtension == null || fileExtension.equals("")))
@@ -103,7 +102,7 @@ public class FileUtils {
         FileOutputStream fout = null;
         try {
             fout = context.openFileOutput(filename, Context.MODE_PRIVATE);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return fout;
@@ -115,7 +114,7 @@ public class FileUtils {
             //File sdCard = Environment.getExternalStorageDirectory();
             file = new File(context.getFilesDir(), filename);
             LOGD(TAG + ".getFile", "file.getAbsolutePath(): " + file.getAbsolutePath());
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return file;
@@ -127,13 +126,13 @@ public class FileUtils {
         File root = new File(path);
         File[] list = root.listFiles();
         if (list == null) return result;
-        for (File f : list ) {
+        for (File f : list) {
             if (f.isDirectory()) {
                 //Log.d(TAG + ".searchFiles", "path: " + f.getAbsoluteFile());
                 result.addAll(searchFiles(f.getAbsolutePath(), fileName));
             } else {
                 //Log.d(TAG + ".searchFiles", "file: " + f.getAbsoluteFile());
-                if(f.getName().contains(fileName)) {
+                if (f.getName().contains(fileName)) {
                     result.add(f);
                 }
             }

@@ -1,6 +1,5 @@
 package org.votingsystem.activity;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,25 +23,17 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.votingsystem.App;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.OperationDto;
-import org.votingsystem.dto.voting.RepresentationStateDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.fragment.ProgressDialogFragment;
-import org.votingsystem.service.WebSocketService;
+import org.votingsystem.http.ContentType;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.ContentType;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.util.crypto.CertUtils;
 
 import java.lang.reflect.Field;
-import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,12 +42,12 @@ import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
- *
+ * <p>
  * http://www.devahead.com/blog/2012/01/preserving-the-state-of-an-android-webview-on-screen-orientation-change/
  */
 public class BrowserActivity extends AppCompatActivity {
-	
-	public static final String TAG = BrowserActivity.class.getSimpleName();
+
+    public static final String TAG = BrowserActivity.class.getSimpleName();
 
     private String viewerURL;
     private String jsCommand;
@@ -70,33 +61,36 @@ public class BrowserActivity extends AppCompatActivity {
     private boolean showBrowserAdvice = true;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-        LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
-        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
-        OperationType operationType = (OperationType) intent.getSerializableExtra(Constants.TYPEVS_KEY);
-        if(operationType == null && responseDto != null) operationType = responseDto.getOperationType();
-        if(responseDto.getOperation() != null) {
-            if(ContentType.JSON == responseDto.getContentType()) {
-                invokeOperationCallback(responseDto.getMessage(),
-                        responseDto.getOperation().getCallerCallback());
-            } else {
-                invokeOperationCallback(responseDto.getStatusCode(),
-                        responseDto.getNotificationMessage(), responseDto.getOperation().getCallerCallback());
-            }
-        } else MessageDialogFragment.showDialog(responseDto.getStatusCode(), responseDto.getCaption(),
-                responseDto.getNotificationMessage(), getSupportFragmentManager());
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LOGD(TAG + ".broadcastReceiver", "extras:" + intent.getExtras());
+            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSE_KEY);
+            OperationType operationType = (OperationType) intent.getSerializableExtra(Constants.OPERATION_TYPE);
+            if (operationType == null && responseDto != null)
+            if (responseDto.getOperation() != null) {
+                if (ContentType.JSON == responseDto.getContentType()) {
+                    invokeOperationCallback(responseDto.getMessage(),
+                            responseDto.getOperation().getCallerCallback());
+                } else {
+                    invokeOperationCallback(responseDto.getStatusCode(),
+                            responseDto.getNotificationMessage(), responseDto.getOperation().getCallerCallback());
+                }
+            } else
+                MessageDialogFragment.showDialog(responseDto.getStatusCode(), responseDto.getCaption(),
+                        responseDto.getNotificationMessage(), getSupportFragmentManager());
         }
     };
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
-    	super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.browservs);
         app = (App) getApplicationContext();
         viewerURL = getIntent().getStringExtra(Constants.URL_KEY);
         jsCommand = getIntent().getStringExtra(Constants.JS_COMMAND_KEY);
         doubleBackEnabled = getIntent().getBooleanExtra(Constants.DOUBLE_BACK_KEY, true);
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             operation = (OperationDto) savedInstanceState.getSerializable(Constants.OPERATION_KEY);
         }
         /*if(getResources().getBoolean(R.bool.portrait_only)){
@@ -106,7 +100,7 @@ public class BrowserActivity extends AppCompatActivity {
     }
 
     protected void initUI() {
-        webViewPlaceholder = ((FrameLayout)findViewById(R.id.webViewPlaceholder));
+        webViewPlaceholder = ((FrameLayout) findViewById(R.id.webViewPlaceholder));
         if (webView == null) {
             setProgressDialogVisible(true);
             webView = new WebView(this);
@@ -130,6 +124,7 @@ public class BrowserActivity extends AppCompatActivity {
                     if (jsCommand != null) webView.loadUrl(jsCommand);
                     setProgressDialogVisible(false);
                 }
+
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
                     if (url.startsWith("mailto:")) {
@@ -140,19 +135,19 @@ public class BrowserActivity extends AppCompatActivity {
                     } else view.loadUrl(url);
                     return true;
                 }
+
                 @Override
-                public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
+                public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                     SslCertificate serverCertificate = error.getCertificate();
                     try {
                         Field f = serverCertificate.getClass().getDeclaredField("mX509Certificate");
                         f.setAccessible(true);
                         X509Certificate x509Certificate = (X509Certificate) f.get(serverCertificate);
-                        PKIXCertPathValidatorResult result = CertUtils.verifyCertificate(
-                                x509Certificate, app.getSSLServerCert());
-                        LOGD(TAG, "SSL site - trusted cert: " +
-                                result.getTrustAnchor().getTrustedCert().getSubjectX500Principal());
+                        if (!Constants.IS_DEBUG_SESSION)
+                            throw new Exception("server with untrusted cert: " +
+                                    x509Certificate.getSubjectDN());
                         handler.proceed();
-                    }catch (Exception ex) {
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -169,8 +164,8 @@ public class BrowserActivity extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_CC, cc);
         intent.setType("message/rfc822");*/
-        if(subject == null) subject = "";
-        if(body == null) body = "";
+        if (subject == null) subject = "";
+        if (body == null) body = "";
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Uri data = Uri.parse("mailto:?subject=" + subject + "&to=" + address + "&body=" + body);
         intent.setData(data);
@@ -187,7 +182,8 @@ public class BrowserActivity extends AppCompatActivity {
         initUI();
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
         outState.putSerializable(Constants.OPERATION_KEY, operation);
@@ -200,19 +196,20 @@ public class BrowserActivity extends AppCompatActivity {
     }
 
     private void setProgressDialogVisible(boolean isVisible) {
-        if(isVisible){
+        if (isVisible) {
             ProgressDialogFragment.showDialog(getString(R.string.loading_data_msg),
                     getString(R.string.wait_msg), getSupportFragmentManager());
         } else ProgressDialogFragment.hide(getSupportFragmentManager());
     }
 
-    @JavascriptInterface public void setMessage (String appMessage) {
+    @JavascriptInterface
+    public void setMessage(String appMessage) {
         LOGD(TAG + ".setMessage", "appMessage: " + appMessage);
         try {
-            final String decodedStr = Base64.encodeToString(appMessage.getBytes(),
-                    Base64.NO_WRAP | Base64.URL_SAFE);
+            final String decodedStr = Base64.encodeToString(appMessage.getBytes(), Base64.NO_WRAP);
             webView.post(new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     webView.loadUrl("javascript:clientTool.unescapedMsg(unescape('" + decodedStr + "'))");
                 }
             });
@@ -224,66 +221,46 @@ public class BrowserActivity extends AppCompatActivity {
     @JavascriptInterface
     public void unescapedMsg(String jsonStr) {
         try {
-            operation = JSON.readValue(jsonStr, OperationDto.class);
-            switch(operation.getOperation()) {
-                case BROWSER_URL:
-                    if(operation.getEmail() != null) {
-                        launchEmailClient(operation.getEmail() , operation.getSubject(),
+            operation = null;
+            //operation = JSON.readValue(jsonStr, OperationDto.class);
+            switch (operation.getOperation()) {
+                case PROCESS_URL:
+                    if (operation.getEmail() != null) {
+                        launchEmailClient(operation.getEmail(), operation.getSubject(),
                                 operation.getMessage(), null);
                     }
-                    break;
-                case REPRESENTATIVE_STATE:
-                    RepresentationStateDto representationState = PrefUtils.getRepresentationState();
-                    invokeOperationCallback(representationState, operation.getCallerCallback());
                     break;
                 default:
                     LOGD(TAG, "unknown operation: " + operation.getOperation());
             }
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
-    public void invokeOperationCallback(Object dto, String callerCallback) {
-        try {
-            String dtoStr = JSON.getMapper().writeValueAsString(dto);
-            invokeOperationCallback(dtoStr, callerCallback);
-        } catch (JsonProcessingException e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void invokeOperationCallback(String dtoStr, String callerCallback) {
         try {
-            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"),
-                    Base64.NO_WRAP | Base64.URL_SAFE));
+            String base64EncodedMsg = new String(Base64.encode(dtoStr.getBytes("UTF8"), Base64.NO_WRAP));
             final String jsCommand = "javascript:setClientToolMessage('" + callerCallback + "','" +
                     base64EncodedMsg + "')";
             LOGD(TAG, "jsCommand: " + jsCommand);
             webView.post(new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     webView.loadUrl(jsCommand);
                 }
             });
         } catch (Exception ex) {
-            ex.printStackTrace(); }
+            ex.printStackTrace();
+        }
     }
 
     public void invokeOperationCallback(int statusCode, String message, String callerCallback) {
         Map resultMap = new HashMap();
         resultMap.put("statusCode", statusCode);
         resultMap.put("message", message);
-        invokeOperationCallback(resultMap, callerCallback);
-    }
-
-    private void sendMessageToWebSocketService(OperationType messageOperationType, String message) {
-        LOGD(TAG + ".sendMessageToWebSocketService", "messageOperationType: " + messageOperationType.toString());
-        Intent startIntent = new Intent(app, WebSocketService.class);
-        startIntent.putExtra(Constants.TYPEVS_KEY, messageOperationType);
-        startIntent.putExtra(Constants.MESSAGE_KEY, message);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                setProgressDialogVisible(true);
-            }
-        });
-        startService(startIntent);
+        String dtoStr = "{\"statusCode\":\"" + statusCode + "\",\"message\":\"" + message + "\"}";
+        invokeOperationCallback(dtoStr, callerCallback);
     }
 
     @Override
@@ -295,7 +272,7 @@ public class BrowserActivity extends AppCompatActivity {
             return;
         } else webView.loadUrl("javascript:try { vs.back() } catch(e) { window.history.back() }");
         this.doubleBackToExitPressedOnce = true;
-        if(showBrowserAdvice) {
+        if (showBrowserAdvice) {
             Snackbar.make(webViewPlaceholder, getString(R.string.double_back_advice), Snackbar.LENGTH_LONG)
                     .setAction(getString(R.string.understood_lbl), new View.OnClickListener() {
                         @Override
@@ -312,7 +289,8 @@ public class BrowserActivity extends AppCompatActivity {
         }, 500);
     }
 
-    @Override public void onResume() {
+    @Override
+    public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(broadCastId));
@@ -320,7 +298,8 @@ public class BrowserActivity extends AppCompatActivity {
                 new IntentFilter(Constants.WEB_SOCKET_BROADCAST_ID));
     }
 
-    @Override public void onPause() {
+    @Override
+    public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }

@@ -28,7 +28,7 @@ public class ObjectUtils {
             oos.writeObject(serializable);
             oos.close();
             base64EncodedSerializedObject = Base64.encode(baos.toByteArray(), Base64.NO_WRAP);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return base64EncodedSerializedObject;
@@ -42,11 +42,11 @@ public class ObjectUtils {
     public static Serializable deSerializeObject(byte[] base64SerializedObject) {
         Serializable deserializedObject = null;
         try {
-            byte [] data = Base64.decode(base64SerializedObject, Base64.NO_WRAP);
+            byte[] data = Base64.decode(base64SerializedObject, Base64.NO_WRAP);
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-            deserializedObject  = (Serializable) ois.readObject();
+            deserializedObject = (Serializable) ois.readObject();
             ois.close();
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return deserializedObject;

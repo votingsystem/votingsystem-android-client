@@ -26,8 +26,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
-
-    public static final int RC_USER_DATA          = 0;
+    public static final int RC_USER_DATA = 0;
     public static final int RC_SELECT_ACCESS_MODE = 1;
 
     private WeakReference<SettingsFragment> settingsRef;
@@ -40,7 +39,8 @@ public class SettingsActivity extends PreferenceActivity {
                 .replace(android.R.id.content, settingsRef.get()).commit();
     }
 
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         settingsRef.get().onActivityResult(requestCode, resultCode, data);
     }
@@ -50,13 +50,15 @@ public class SettingsActivity extends PreferenceActivity {
         private Preference dnieButton;
         private Preference cryptoAccessButton;
 
-        @Override public void onCreate(Bundle savedInstanceState) {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.settings);
             setHasOptionsMenu(true);
-            dnieButton =  findPreference("dnieButton");
+            dnieButton = findPreference("dnieButton");
             dnieButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override public boolean onPreferenceClick(Preference arg0) {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
                     Intent intent = new Intent(getActivity(), UserDataFormActivity.class);
                     getActivity().startActivityForResult(intent, RC_USER_DATA);
                     return true;
@@ -65,14 +67,16 @@ public class SettingsActivity extends PreferenceActivity {
             //PreferenceScreen preference_screen = getPreferenceScreen();
             Preference aboutButton = findPreference("aboutAppButton");
             aboutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override public boolean onPreferenceClick(Preference arg0) {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
                     HelpUtils.showAbout(getActivity());
                     return true;
                 }
             });
             cryptoAccessButton = findPreference("cryptoAccessButton");
             cryptoAccessButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override public boolean onPreferenceClick(Preference arg0) {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
                     Intent intent = new Intent(getActivity(), CryptoDeviceAccessModeSelectorActivity.class);
                     getActivity().startActivityForResult(intent, RC_SELECT_ACCESS_MODE);
                     return true;
@@ -81,12 +85,14 @@ public class SettingsActivity extends PreferenceActivity {
             updateView();
         }
 
-        @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                           Bundle savedInstanceState) {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.settings_activity, container, false);
             Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar_vs);
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
+                @Override
+                public void onClick(View v) {
                     getActivity().onBackPressed();
                 }
             });
@@ -96,7 +102,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         private void updateView() {
             CryptoDeviceAccessMode passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
-            if(passwAccessMode != null) {
+            if (passwAccessMode != null) {
                 switch (passwAccessMode.getMode()) {
                     case PATTER_LOCK:
                         cryptoAccessButton.setSummary(getString(R.string.pattern_lock_lbl));
@@ -104,14 +110,18 @@ public class SettingsActivity extends PreferenceActivity {
                     case PIN:
                         cryptoAccessButton.setSummary(getString(R.string.pin_lbl));
                         break;
+                    case DNIE_PASSW:
+                        cryptoAccessButton.setSummary(getString(R.string.id_card_passw_lbl));
+                        break;
                 }
-            }
-            if(PrefUtils.isDNIeEnabled()) {
+            } else cryptoAccessButton.setSummary(getString(R.string.id_card_passw_lbl));
+            if (PrefUtils.isDNIeEnabled()) {
                 dnieButton.setSummary("CAN: " + PrefUtils.getDNIeCAN());
             }
         }
 
-        @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
             LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
             updateView();
         }

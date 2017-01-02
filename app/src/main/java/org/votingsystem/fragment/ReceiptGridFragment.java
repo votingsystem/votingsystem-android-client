@@ -28,19 +28,19 @@ import android.widget.TextView;
 import org.votingsystem.activity.ReceiptPagerActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.contentprovider.ReceiptContentProvider;
+import org.votingsystem.crypto.ReceiptContainer;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.util.ReceiptWrapper;
 
 import java.util.Date;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
 public class ReceiptGridFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener{
+        LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
     public static final String TAG = ReceiptGridFragment.class.getSimpleName();
 
@@ -53,16 +53,18 @@ public class ReceiptGridFragment extends Fragment implements
 
     CharSequence[] gridItemMenuOptions;
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                   Bundle savedInstanceState) {
-        LOGD(TAG +  ".onCreateView", "savedInstanceState: " + savedInstanceState);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        LOGD(TAG + ".onCreateView", "savedInstanceState: " + savedInstanceState);
         rootView = inflater.inflate(R.layout.receipt_grid, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        gridItemMenuOptions = new CharSequence[] {getString(R.string.delete_lbl)};
-        adapter = new ReceiptGridAdapter(getActivity(), null,false);
+        gridItemMenuOptions = new CharSequence[]{getString(R.string.delete_lbl)};
+        adapter = new ReceiptGridAdapter(getActivity(), null, false);
         gridView.setAdapter(adapter);
         gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
                 return onLongListItemClick(v, pos, id);
             }
         });
@@ -74,14 +76,14 @@ public class ReceiptGridFragment extends Fragment implements
         gridView.setOnScrollListener(this);
         getLoaderManager().initLoader(loaderId, null, this);
         setHasOptionsMenu(true);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.receipts_lbl));
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.receipts_lbl));
         return rootView;
     }
 
     private void onListItemClick(AdapterView<?> parent, View v, int position, long id) {
-        LOGD(TAG +  ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
+        LOGD(TAG + ".onListItemClick", "Clicked item - position:" + position + " -id: " + id);
         Cursor cursor = ((Cursor) gridView.getAdapter().getItem(position));
-        Intent intent = new Intent(getActivity(),ReceiptPagerActivity.class);
+        Intent intent = new Intent(getActivity(), ReceiptPagerActivity.class);
         intent.putExtra(Constants.CURSOR_POSITION_KEY, position);
         startActivity(intent);
     }
@@ -90,7 +92,8 @@ public class ReceiptGridFragment extends Fragment implements
         LOGD(TAG + ".onLongListItemClick", "id: " + id);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setItems(gridItemMenuOptions, new DialogInterface.OnClickListener() {
-            @Override public void onClick(DialogInterface dialog, int position) {
+            @Override
+            public void onClick(DialogInterface dialog, int position) {
                 //gridItemMenuOptions[position]
                 Cursor cursor = adapter.getCursor();
                 cursor.moveToPosition(position);
@@ -104,7 +107,8 @@ public class ReceiptGridFragment extends Fragment implements
         return true;
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menu.clear();
         super.onCreateOptionsMenu(menu, menuInflater);
     }
@@ -112,7 +116,7 @@ public class ReceiptGridFragment extends Fragment implements
     private void filterReceiptList(OperationType receiptType) {
         String selection = null;
         String[] selectionArgs = null;
-        if(receiptType != null) {
+        if (receiptType != null) {
             selection = ReceiptContentProvider.TYPE_COL + "=? ";
             selectionArgs = new String[]{receiptType.toString()};
         }
@@ -121,27 +125,34 @@ public class ReceiptGridFragment extends Fragment implements
         getLoaderManager().getLoader(loaderId).deliverResult(cursor);
     }
 
-    @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(), ReceiptContentProvider.CONTENT_URI, null, null, null, null);
     }
 
-    @Override public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         LOGD(TAG + ".onLoadFinished", " - cursor.getCount(): " + cursor.getCount());
-        ((CursorAdapter)gridView.getAdapter()).swapCursor(cursor);
-        if(cursor.getCount() == 0) {
+        ((CursorAdapter) gridView.getAdapter()).swapCursor(cursor);
+        if (cursor.getCount() == 0) {
             rootView.findViewById(android.R.id.empty).setVisibility(View.VISIBLE);
         } else rootView.findViewById(android.R.id.empty).setVisibility(View.GONE);
     }
 
-    @Override public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
         LOGD(TAG + ".onLoaderReset", "");
-        ((CursorAdapter)gridView.getAdapter()).swapCursor(null);
+        ((CursorAdapter) gridView.getAdapter()).swapCursor(null);
     }
 
-    @Override public void onScrollStateChanged(AbsListView absListView, int i) { }
+    @Override
+    public void onScrollStateChanged(AbsListView absListView, int i) {
+    }
 
-    @Override public void onScroll(AbsListView view, int firstVisibleItem,
-           int visibleItemCount, int totalItemCount) { }
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem,
+                         int visibleItemCount, int totalItemCount) {
+    }
 
     public class ReceiptGridAdapter extends CursorAdapter {
 
@@ -149,25 +160,27 @@ public class ReceiptGridFragment extends Fragment implements
 
         public ReceiptGridAdapter(Context context, Cursor c, boolean autoRequery) {
             super(context, c, autoRequery);
-            inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
-        @Override public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
             return inflater.inflate(R.layout.receipt_card, viewGroup, false);
         }
 
-        @Override public void bindView(View view, Context context, Cursor cursor) {
-            if(cursor != null) {
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            if (cursor != null) {
                 byte[] serializedReceiptContainer = cursor.getBlob(cursor.getColumnIndex(
                         ReceiptContentProvider.SERIALIZED_OBJECT_COL));
                 /*Uri itemUri = ReceiptContentProvider.getReceiptURI(cursor.getLong(
                         cursor.getColumnIndex(ReceiptContentProvider.ID_COL)));
                 LOGD(TAG + ".bindView", "deleting item with errors: " + itemUri);
                 getActivity().getContentResolver().delete(itemUri, null, null);*/
-                ReceiptWrapper receiptWrapper = (ReceiptWrapper) ObjectUtils.
+                ReceiptContainer receiptContainer = (ReceiptContainer) ObjectUtils.
                         deSerializeObject(serializedReceiptContainer);
-                if(receiptWrapper.getOperationType() == null) {
-                    LOGD(TAG + ".bindView", "receiptWrapper id: " + receiptWrapper.getLocalId() +
+                if (receiptContainer.getOperationType() == null) {
+                    LOGD(TAG + ".bindView", "receiptContainer id: " + receiptContainer.getLocalId() +
                             " has null OperationType");
                     return;
                 }
@@ -176,16 +189,16 @@ public class ReceiptGridFragment extends Fragment implements
                 Long createdMillis = cursor.getLong(cursor.getColumnIndex(
                         ReceiptContentProvider.TIMESTAMP_CREATED_COL));
                 String dateInfoStr = DateUtils.getDayWeekDateStr(new Date(createdMillis), "HH:mm");
-                ReceiptWrapper.State state =  ReceiptWrapper.State.valueOf(stateStr);
+                ReceiptContainer.State state = ReceiptContainer.State.valueOf(stateStr);
                 TextView dateInfo = (TextView) view.findViewById(R.id.receipt_date_info);
                 TextView receiptState = (TextView) view.findViewById(R.id.receipt_state);
                 ((TextView) view.findViewById(R.id.receipt_subject)).setText(
-                        receiptWrapper.getCardSubject(context));
+                        receiptContainer.getCardSubject(context));
                 ((ImageView) view.findViewById(R.id.receipt_icon)).setImageResource(
-                        receiptWrapper.getLogoId());
-                if(dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
+                        receiptContainer.getLogoId());
+                if (dateInfoStr != null) dateInfo.setText(Html.fromHtml(dateInfoStr));
                 else dateInfo.setVisibility(View.GONE);
-                if(state == ReceiptWrapper.State.CANCELLED) {
+                if (state == ReceiptContainer.State.CANCELLED) {
                     receiptState.setText(getString(R.string.vote_canceled_receipt_lbl));
                     receiptState.setVisibility(View.VISIBLE);
                 } else receiptState.setVisibility(View.GONE);
@@ -193,7 +206,8 @@ public class ReceiptGridFragment extends Fragment implements
         }
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Parcelable gridState = gridView.onSaveInstanceState();
         outState.putParcelable(Constants.LIST_STATE_KEY, gridState);

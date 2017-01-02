@@ -26,7 +26,8 @@ public class ReceiptPagerActivity extends AppCompatActivity {
 
     private Cursor cursor = null;
 
-    @Override public void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "savedInstanceState: " + savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pager_activity);
@@ -38,20 +39,23 @@ public class ReceiptPagerActivity extends AppCompatActivity {
         ReceiptPagerAdapter pagerAdapter = new ReceiptPagerAdapter(getSupportFragmentManager());
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
-        cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI,null, null, null, null);
+        cursor = getContentResolver().query(ReceiptContentProvider.CONTENT_URI, null, null, null, null);
         cursor.moveToPosition(cursorPosition);
         mViewPager.setCurrentItem(cursorPosition);
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
     }
 
-    @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         LOGD(TAG + ".onOptionsItemSelected", " - item: " + item.getTitle());
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -72,13 +76,15 @@ public class ReceiptPagerActivity extends AppCompatActivity {
                     null, null, null, null);
         }
 
-        @Override public Fragment getItem(int i) {
+        @Override
+        public Fragment getItem(int i) {
             LOGD(TAG + ".ReceiptPagerAdapter.getItem", " - item: " + i);
             cursor.moveToPosition(i);
             return ReceiptFragment.newInstance(cursor.getPosition());
         }
 
-        @Override public int getCount() {
+        @Override
+        public int getCount() {
             return cursor.getCount();
         }
 

@@ -9,7 +9,7 @@ public class ActivityResult {
     private int resultCode;
     private Intent data;
 
-    public ActivityResult(int requestCode, int resultCode, Intent data){
+    public ActivityResult(int requestCode, int resultCode, Intent data) {
         this.requestCode = requestCode;
         this.resultCode = resultCode;
         this.data = data;

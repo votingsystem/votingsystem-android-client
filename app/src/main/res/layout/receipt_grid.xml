@@ -23,13 +23,14 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:textColor="@color/grey_dark"
+        android:textSize="23sp"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/empty_search_lbl"/>
 
     <GridView android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:columnWidth="260dp"
+        android:columnWidth="150dp"
         android:numColumns="auto_fit"
         android:verticalSpacing="7dp"
         android:horizontalSpacing="7dp"

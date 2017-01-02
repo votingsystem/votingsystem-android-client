@@ -1,46 +1,37 @@
 package org.votingsystem;
 
+import android.app.Application;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Looper;
-import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
-import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.cms.CMSGenerator;
-import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.contentprovider.CurrencyContentProvider;
-import org.votingsystem.dto.ActorDto;
+import org.votingsystem.crypto.Encryptor;
+import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.currency.CurrencyServerDto;
-import org.votingsystem.dto.voting.AccessControlDto;
-import org.votingsystem.dto.voting.ControlCenterDto;
-import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.Currency;
-import org.votingsystem.service.BootStrapService;
-import org.votingsystem.service.WebSocketService;
-import org.votingsystem.util.BuildConfig;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.HttpConnection;
-import org.votingsystem.util.MediaType;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.util.RootUtil;
+import org.votingsystem.dto.metadata.MetadataDto;
+import org.votingsystem.dto.metadata.SystemEntityDto;
+import org.votingsystem.dto.metadata.TrustedEntitiesDto;
+import org.votingsystem.dto.voting.ElectionDto;
+import org.votingsystem.http.ContentType;
+import org.votingsystem.http.HttpConn;
+import org.votingsystem.http.SystemEntityType;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
+import org.votingsystem.util.PrefUtils;
+import org.votingsystem.util.RootUtils;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.WebSocketSession;
-import org.votingsystem.util.crypto.CMSUtils;
-import org.votingsystem.util.crypto.Encryptor;
-import org.votingsystem.util.crypto.KeyGeneratorVS;
+import org.votingsystem.xades.SignatureValidator;
+import org.votingsystem.xades.XmlSignature;
+import org.votingsystem.xml.XmlReader;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -51,53 +42,37 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.votingsystem.util.Constants.ALGORITHM_RNG;
-import static org.votingsystem.util.Constants.ANDROID_PROVIDER;
 import static org.votingsystem.util.Constants.KEY_SIZE;
 import static org.votingsystem.util.Constants.PROVIDER;
-import static org.votingsystem.util.Constants.SIGNATURE_ALGORITHM;
 import static org.votingsystem.util.Constants.SIG_NAME;
 import static org.votingsystem.util.Constants.USER_CERT_ALIAS;
-import static org.votingsystem.util.Constants.USER_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
-import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class App extends MultiDexApplication implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class App extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = App.class.getSimpleName();
 
-    private boolean withSocketConnection;
-    private static final Map<String, ActorDto> serverMap = new HashMap<>();
-    private static final Map<String, WebSocketSession> sessionsMap = new HashMap<>();
+    private static final Map<String, MetadataDto> systemEntityMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
-    private AccessControlDto accessControl;
-    private String accessControlURL;
-    private ControlCenterDto controlCenter;
-    private CurrencyServerDto currencyServer;
-    private String currencyServerURL;
-    private UserDto user;
     private DeviceDto connectedDevice;
-    private X509Certificate sslServerCert;
-    private Map<String, X509Certificate> certsMap = new HashMap<>();
-    private Set<EventVSDto.State> eventsStateLoaded = new HashSet<>();
+    private Set<ElectionDto.State> electionStateLoaded = new HashSet<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
     private boolean isRootedPhone = false;
-    private char[] token;
     private List<Integer> historyList;
-    private int defaultMainView = R.id.currency_accounts;
+    private int defaultMainView = R.id.elections;
+    private SystemEntityDto votingServiceProvider;
+    private SystemEntityDto idProvider;
 
     private static App INSTANCE;
 
@@ -105,72 +80,39 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
         return INSTANCE;
     }
 
-    @Override public void onCreate() {
+    public void putSystemEntity(MetadataDto systemEntity) {
+        systemEntityMap.put(systemEntity.getEntity().getId(), systemEntity);
+    }
+
+    @Override
+    public void onCreate() {
         super.onCreate();
         try {
             INSTANCE = this;
-            KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-            PrefUtils.init();
-            Properties props = new Properties();
-            props.load(getAssets().open("VotingSystem.properties"));
-            currencyServerURL = props.getProperty(Constants.CURRENCY_SERVER_URL_KEY);
-            accessControlURL = props.getProperty(Constants.ACCESS_CONTROL_URL_KEY);
-            LOGD(TAG + ".onCreate", "accessControlURL: " + accessControlURL +
-                    " - currencyServerURL: " + currencyServerURL);
+            KeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             /*if (!PrefUtils.isEulaAccepted(this)) {//Check if the EULA has been accepted; if not, show it.
             Intent intent = new Intent(this, WelcomeActivity.class);
             startActivity(intent);
             finish();}*/
-            if(accessControl == null || currencyServer == null) {
-                Intent startIntent = new Intent(this, BootStrapService.class);
-                startIntent.putExtra(Constants.ACCESS_CONTROL_URL_KEY, accessControlURL);
-                startIntent.putExtra(Constants.CURRENCY_SERVER_URL_KEY, currencyServerURL);
-                startService(startIntent);
-            }
             PrefUtils.registerPreferenceChangeListener(this);
-            user = PrefUtils.getAppUser();
-            HttpConnection.init(null);
-            if(!BuildConfig.ALLOW_ROOTED_PHONES && RootUtil.isDeviceRooted()) {
+            if (!Constants.ALLOW_ROOTED_PHONES && RootUtils.isDeviceRooted()) {
                 isRootedPhone = true;
             }
             historyList = new ArrayList();
             historyList.add(defaultMainView);
-        } catch(Exception ex) { ex.printStackTrace(); }
-	}
-
-    public X509Certificate getSSLServerCert() {
-        return sslServerCert;
-    }
-
-    public  String getAccessControlURL() {
-        return  accessControlURL;
-    }
-
-    public  String getCurrencyServerURL() {
-        return  currencyServerURL;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void finish() {
         LOGD(TAG, "finish");
-        stopService(new Intent(getApplicationContext(), WebSocketService.class));
-        HttpConnection.getInstance().shutdown();
+        HttpConn.getInstance().shutdown();
         UIUtils.killApp(true);
     }
 
-    public void setServer(ActorDto actorDto) {
-        if(actorDto instanceof CurrencyServerDto) currencyServer = (CurrencyServerDto) actorDto;
-        else if(actorDto instanceof AccessControlDto) accessControl = (AccessControlDto) actorDto;
-        if(serverMap.get(actorDto.getServerURL()) == null) {
-            serverMap.put(actorDto.getServerURL(), actorDto);
-        } else LOGD(TAG + ".setServer", "server with URL '" + actorDto.getServerURL() +
-                "' already in context");
-    }
-
-    public ActorDto getServer(String serverURL) {
-        return serverMap.get(serverURL);
-    }
-
-    @Override public void onTerminate() {
+    @Override
+    public void onTerminate() {
         super.onTerminate();
         PrefUtils.unregisterPreferenceChangeListener(this);
     }
@@ -179,50 +121,11 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
         return notificationId.get();
     }
 
-    public void putCert(String serverURL, X509Certificate cert) {
-        LOGD(TAG + ".putCert", "serverURL: " + serverURL);
-        certsMap.put(serverURL, cert);
-    }
-
-    public X509Certificate getTimeStampCert() throws Exception {
-        if(accessControl != null) return accessControl.getTimeStampCert();
-        if(currencyServer != null) return currencyServer.getTimeStampCert();
-        return null;
-    }
-
-    public UserDto getUser() {
-        return user;
-    }
-
-    public AccessControlDto getAccessControl() {
-        if(accessControl == null) {
-            accessControl = getActor(AccessControlDto.class, accessControlURL);
-        }
-        return accessControl;
-    }
-
-    public String getTimeStampServiceURL() {
-        if(accessControl != null) return accessControl.getTimeStampServiceURL();
-        if(currencyServer != null) return currencyServer.getTimeStampServiceURL();
-        return null;
-    }
-
-    public void setAccessControl(AccessControlDto accessControl) {
-        LOGD(TAG + ".setAccessControl", "serverURL: " + accessControl.getServerURL());
-        this.accessControl = accessControl;
-        serverMap.put(accessControl.getServerURL(), accessControl);
-    }
-
-    public String getCurrentWeekLapseId() {
-        Calendar currentLapseCalendar = DateUtils.getMonday(Calendar.getInstance());
-        return DateUtils.getPath(currentLapseCalendar.getTime());
-    }
-
     public KeyStore.PrivateKeyEntry getUserPrivateKey() throws KeyStoreException, CertificateException,
             NoSuchAlgorithmException, IOException, UnrecoverableEntryException {
         KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
-        KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry(
+        KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(
                 USER_CERT_ALIAS, null);
         return keyEntry;
     }
@@ -240,31 +143,29 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
         return Encryptor.decryptCMS(encryptedPEM, privateKey);
     }
 
-    public <T> T getActor(final Class<T> type, final String serverURL) {
-        T targetServer = (T) getServer(serverURL);
-        if(targetServer == null) {
-            if(Looper.getMainLooper().getThread() != Thread.currentThread()) { //not in main thread,
-                //if invoked from main thread -> android.os.NetworkOnMainThreadException
-                targetServer = getActorDtoFromURL(type, serverURL);
-            } else {
-                LOGD(TAG + ".getActor", "FROM MAIN THREAD - CREATING NEW THREAD - " + serverURL);
-                new Thread(new Runnable() {
-                    @Override public void run() {  getActorDtoFromURL(type, serverURL);  }
-                }).start();
+    public MetadataDto getSystemEntity(final String systemEntityId, boolean forceHTTPLoad) {
+        MetadataDto result = systemEntityMap.get(systemEntityId);
+        if(result == null && forceHTTPLoad) {
+            try {
+                result = getSystemEntityFromURL(OperationType.METADATA.getUrl(systemEntityId));
+            }catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
-        return (T) targetServer;
+        return result;
     }
 
-    private <T> T getActorDtoFromURL(Class<T> type, String serverURL) {
-        T targetServer = null;
-        try {
-            targetServer = HttpConnection.getInstance().getData(type,
-                    ActorDto.getServerInfoURL(serverURL), MediaType.JSON);
-            setServer((ActorDto) targetServer);
-        } catch(Exception ex) {
-            LOGE(TAG + ".getActorDtoFromURL", "ERROR fetching: " + serverURL);
-        } finally { return targetServer; }
+    private MetadataDto getSystemEntityFromURL(String entityURL) throws Exception {
+        /*if(Looper.getMainLooper().getThread() != Thread.currentThread()) { //not in main thread,
+            //if invoked from main thread -> android.os.NetworkOnMainThreadException
+        } else {  }*/
+        ResponseDto responseDto = HttpConn.getInstance().doGetRequest(entityURL, ContentType.XML);
+        Set<XmlSignature> signatures = new SignatureValidator(responseDto.getMessageBytes()).validate();
+        X509Certificate systemEntityCert = signatures.iterator().next().getSigningCertificate();
+        MetadataDto systemEntity = XmlReader.readMetadata(responseDto.getMessageBytes());
+        systemEntity.setSigningCertificate(systemEntityCert);
+        putSystemEntity(systemEntity);
+        return systemEntity;
     }
 
     public void putQRMessage(QRMessageDto messageDto) {
@@ -279,79 +180,20 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
         return qrMessagesMap.remove(uuid);
     }
 
-    public void putWSSession(String UUID, WebSocketSession session) {
-        sessionsMap.put(UUID, session.setUUID(UUID));
-    }
-
-    public WebSocketSession getWSSession(String UUID) {
-        return sessionsMap.get(UUID);
-    }
-
-    public WebSocketSession getWSSession(Long deviceID) {
-        for(WebSocketSession socketSession : sessionsMap.values()) {
-            if(socketSession.getDevice() != null && socketSession.getDevice().
-                    getId().equals(deviceID)) {
-                return socketSession;
-            }
-        }
-        return null;
-    }
-
-    public WebSocketSession getWSSessionByIV(String iv) {
-        for(WebSocketSession socketSession : sessionsMap.values()) {
-            if(socketSession.getAesParams() != null &&
-                    socketSession.getAesParams().getIv().startsWith(iv)) {
-                return socketSession;
-            }
-        }
-        return null;
-    }
-
-    //method with http connections, if invoked from main thread -> android.os.NetworkOnMainThreadException
-    public CMSSignedMessage signMessage(byte[] contentToSign) throws Exception {
-        LOGD(TAG + ".signMessage", "signMessage - user NIF: " +  getUser().getNIF());
-        KeyStore.PrivateKeyEntry keyEntry = getUserPrivateKey();
-        CMSGenerator cmsGenerator = new CMSGenerator(keyEntry.getPrivateKey(),
-                Arrays.asList(keyEntry.getCertificateChain()[0]),
-                SIGNATURE_ALGORITHM, ANDROID_PROVIDER);
-        TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(
-                SIGNATURE_ALGORITHM, contentToSign);
-        return cmsGenerator.signData(contentToSign, timeStampToken);
-    }
-
-    public void setControlCenter(ControlCenterDto controlCenter) {
-        this.controlCenter = controlCenter;
-    }
-
-    public ControlCenterDto getControlCenter() {
-        return controlCenter;
-    }
-
-    public void setCurrencyServerDto(CurrencyServerDto currencyServer) {
-        serverMap.put(currencyServer.getServerURL(), currencyServer);
-        this.currencyServer = currencyServer;
-    }
-
-    public CurrencyServerDto getCurrencyServer() {
-        if(currencyServer == null) currencyServer = getActor(
-                CurrencyServerDto.class, currencyServerURL);
-        return currencyServer;
-    }
-
-    public void showNotification(ResponseDto responseDto){
-        final NotificationManager mgr = (NotificationManager)this.getSystemService(NOTIFICATION_SERVICE);
+    public void showNotification(ResponseDto responseDto) {
+        final NotificationManager mgr = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Intent clickIntent = new Intent(this, MessageActivity.class);
-        clickIntent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        clickIntent.putExtra(Constants.RESPONSE_KEY, responseDto);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 notificationId.getAndIncrement(), clickIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentIntent(pendingIntent).setWhen(System.currentTimeMillis())
                 .setAutoCancel(true).setContentTitle(responseDto.getCaption())
                 .setContentText(responseDto.getNotificationMessage()).setSound(soundUri);
-        if(responseDto.getStatusCode() == ResponseDto.SC_ERROR)
+        if (responseDto.getStatusCode() == ResponseDto.SC_ERROR)
             builder.setSmallIcon(R.drawable.cancel_22);
-        else if(responseDto.getStatusCode() == ResponseDto.SC_OK)
+        else if (responseDto.getStatusCode() == ResponseDto.SC_OK)
             builder.setSmallIcon(R.drawable.fa_check_32);
         else builder.setSmallIcon(R.drawable.mail_mark_unread_32);
         mgr.notify(notificationId.getAndIncrement(), builder.build());
@@ -362,21 +204,12 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
                 " - type: " + responseDto.getOperationType() + " - serviceCaller: " +
                 responseDto.getServiceCaller());
         Intent intent = new Intent(responseDto.getServiceCaller());
-        intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        intent.putExtra(Constants.RESPONSE_KEY, responseDto);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-    }
-
-    public void updateCurrencyDB(Currency currency) throws Exception {
-        Uri uri = getContentResolver().insert(CurrencyContentProvider.CONTENT_URI,
-                CurrencyContentProvider.getContentValues(currency));
-        LOGD(TAG + ".updateCurrencyDB", "uri: " + uri + " - state: " + currency.getState());
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(USER_KEY.equals(key)) {
-            user = PrefUtils.getAppUser();
-        }
     }
 
     public DeviceDto getConnectedDevice() {
@@ -387,28 +220,12 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
         this.connectedDevice = connectedDevice;
     }
 
-    public boolean isWithSocketConnection() {
-        return withSocketConnection;
+    public boolean isElectionStateLoaded(ElectionDto.State eventsState) {
+        return electionStateLoaded.contains(eventsState);
     }
 
-    public void setWithSocketConnection(boolean withSocketConnection) {
-        this.withSocketConnection = withSocketConnection;
-    }
-
-    public  boolean isEventsStateLoaded(EventVSDto.State eventsState) {
-        return eventsStateLoaded.contains(eventsState);
-    }
-
-    public void addEventsStateLoaded(EventVSDto.State eventsState) {
-        this.eventsStateLoaded.add(eventsState);
-    }
-
-    public char[] getToken() {
-        return token;
-    }
-
-    public void setToken(char[] token) {
-        this.token = token;
+    public void addElectiontateLoaded(ElectionDto.State eventsState) {
+        this.electionStateLoaded.add(eventsState);
     }
 
     public boolean isRootedPhone() {
@@ -420,12 +237,43 @@ public class App extends MultiDexApplication implements SharedPreferences.OnShar
     }
 
     public Integer getHistoryItem() {
-        if(historyList.isEmpty()) return null;
-        else if(historyList.size() == 1) return historyList.remove(0);
+        if (historyList.isEmpty()) return null;
+        else if (historyList.size() == 1) return historyList.remove(0);
         else return historyList.remove(historyList.size() - 2);
     }
 
     public void addHistoryItem(Integer item) {
         historyList.add(item);
     }
+
+    public SystemEntityDto getVotingServiceProvider() {
+        return votingServiceProvider;
+    }
+
+    public List<TrustedEntitiesDto.EntityDto> getTrustedEntityList(
+            String entityId, SystemEntityType entityType) {
+        List<TrustedEntitiesDto.EntityDto> result = new ArrayList<>();
+        MetadataDto metadata = systemEntityMap.get(entityId);
+        if(metadata != null) {
+            for(TrustedEntitiesDto.EntityDto trustedEntity: metadata.getTrustedEntities().getEntities()) {
+                if(trustedEntity.getType() == entityType)
+                    result.add(trustedEntity);
+            }
+        }
+        return result;
+    }
+
+
+    public void setVotingServiceProvider(SystemEntityDto votingServiceProvider) {
+        this.votingServiceProvider = votingServiceProvider;
+    }
+
+    public SystemEntityDto getIdProvider() {
+        return idProvider;
+    }
+
+    public void setIdProvider(SystemEntityDto idProvider) {
+        this.idProvider = idProvider;
+    }
+
 }

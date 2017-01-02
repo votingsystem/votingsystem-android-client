@@ -5,45 +5,42 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.votingsystem.android.R;
-import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.util.ContentType;
-import org.votingsystem.util.JSON;
+import org.votingsystem.http.ContentType;
+import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.OperationType;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ */
 public class ResponseDto<T> implements Parcelable {
 
     private static final long serialVersionUID = 1L;
 
     public static final String TAG = ResponseDto.class.getSimpleName();
 
-    public static final int SC_OK                       = 200;
+    public static final int SC_OK = 200;
     public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
-    public static final int SC_REQUEST_TIMEOUT          = 408;
-    public static final int SC_ERROR_REQUEST            = 400;
-    public static final int SC_FORBIDDEN                = 403;
-    public static final int SC_NOT_FOUND                = 404;
-    public static final int SC_ERROR_REQUEST_REPEATED   = 409;
-    public static final int SC_EXCEPTION                = 490;
-    public static final int SC_ERROR                    = 500;
-    public static final int SC_CONNECTION_TIMEOUT       = 522;
-    public static final int SC_ERROR_TIMESTAMP          = 570;
-    public static final int SC_PROCESSING               = 700;
-    public static final int SC_TERMINATED               = 710;
-    public static final int SC_WS_CONNECTION_INIT_OK    = 800;
-    public static final int SC_WS_MESSAGE_SEND_OK       = 801;
-    public static final int SC_WS_MESSAGE_ENCRYPTED     = 810;
+    public static final int SC_REQUEST_TIMEOUT = 408;
+    public static final int SC_ERROR_REQUEST = 400;
+    public static final int SC_FORBIDDEN = 403;
+    public static final int SC_NOT_FOUND = 404;
+    public static final int SC_ERROR_REQUEST_REPEATED = 409;
+    public static final int SC_EXCEPTION = 490;
+    public static final int SC_ERROR = 500;
+    public static final int SC_CONNECTION_TIMEOUT = 522;
+    public static final int SC_ERROR_TIMESTAMP = 570;
+    public static final int SC_PROCESSING = 700;
+    public static final int SC_TERMINATED = 710;
+    public static final int SC_WS_CONNECTION_INIT_OK = 800;
+    public static final int SC_WS_MESSAGE_SEND_OK = 801;
+    public static final int SC_WS_MESSAGE_ENCRYPTED = 810;
     public static final int SC_WS_CONNECTION_INIT_ERROR = 840;
-    public static final int SC_WS_CONNECTION_NOT_FOUND  = 841;
-    public static final int SC_WS_CONNECTION_CLOSED     = 842;
-    public static final int SC_CANCELED                 = 0;
-    public static final int SC_INITIALIZED              = 1;
-    public static final int SC_PAUSED                   = 10;
+    public static final int SC_WS_CONNECTION_NOT_FOUND = 841;
+    public static final int SC_WS_CONNECTION_CLOSED = 842;
+    public static final int SC_CANCELED = 0;
+    public static final int SC_INITIALIZED = 1;
+    public static final int SC_PAUSED = 10;
 
     private int statusCode;
     private OperationDto operation;
@@ -53,15 +50,13 @@ public class ResponseDto<T> implements Parcelable {
     private String serviceCaller;
     private T data;
     private OperationType operationType;
-    private CMSSignedMessage cmsMessage;
-    private byte[] cmsPEMMessageBytes;
     private ContentType contentType = ContentType.TEXT;
-    private byte[] messageBytes;
+    private byte[]  messageBytes;
     private Uri uri;
+    private String base64Data;
 
-
-
-    public ResponseDto() {  }
+    public ResponseDto() {
+    }
 
     public ResponseDto(Parcel source) {
         // Must read values in the same order as they were placed in
@@ -71,17 +66,13 @@ public class ResponseDto<T> implements Parcelable {
         notificationMessage = source.readString();
         message = source.readString();
         String operationStr = source.readString();
-        if(operationStr != null) {
-            try {
-                operation = JSON.readValue(operationStr, OperationDto.class);
-            } catch (Exception ex) { ex.printStackTrace();}
+        if (operationStr != null) {
+            operation = (OperationDto) ObjectUtils.deSerializeObject(operationStr.getBytes());
         }
         operationType = (OperationType) source.readSerializable();
         contentType = (ContentType) source.readSerializable();
         messageBytes = new byte[source.readInt()];
         source.readByteArray(messageBytes);
-        cmsPEMMessageBytes = new byte[source.readInt()];
-        source.readByteArray(cmsPEMMessageBytes);
         uri = source.readParcelable(Uri.class.getClassLoader());
     }
 
@@ -94,16 +85,6 @@ public class ResponseDto<T> implements Parcelable {
         this.operationType = operationType;
     }
 
-    public ResponseDto(int statusCode, String serviceCaller, String caption, String message,
-                       OperationType operationType, CMSSignedMessage cmsMessage) {
-        this.statusCode = statusCode;
-        this.serviceCaller = serviceCaller;
-        this.caption = caption;
-        this.message = message;
-        this.operationType = operationType;
-        this.cmsMessage = cmsMessage;
-    }
-
     public ResponseDto(int statusCode, OperationType operationType) {
         this.statusCode = statusCode;
         this.operationType = operationType;
@@ -114,11 +95,6 @@ public class ResponseDto<T> implements Parcelable {
         this.statusCode = statusCode;
         this.message = message;
         this.messageBytes = messageBytes;
-    }
-
-    public ResponseDto(int statusCode, CMSSignedMessage cmsMessage) {
-        this.statusCode = statusCode;
-        this.cmsMessage = cmsMessage;
     }
 
     public ResponseDto(int statusCode, String message) {
@@ -146,6 +122,7 @@ public class ResponseDto<T> implements Parcelable {
     public ResponseDto(int statusCode) {
         this.statusCode = statusCode;
     }
+
     public ResponseDto(OperationType operationType, T data) {
         this.operationType = operationType;
         this.data = data;
@@ -169,7 +146,8 @@ public class ResponseDto<T> implements Parcelable {
 
     public static ResponseDto EXCEPTION(Exception ex, Context context) {
         String message = ex.getMessage();
-        if(message == null || message.isEmpty()) message = context.getString(R.string.exception_lbl);
+        if (message == null || message.isEmpty())
+            message = context.getString(R.string.exception_lbl);
         return EXCEPTION(context.getString(R.string.exception_lbl), message);
     }
 
@@ -186,22 +164,14 @@ public class ResponseDto<T> implements Parcelable {
     }
 
     public String getMessage() {
-        if(message == null && messageBytes != null) {
+        if (message == null && messageBytes != null) {
             try {
                 message = new String(messageBytes, "UTF-8");
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
         return message;
-    }
-
-    public <S> S getMessage(Class<S> type) throws Exception {
-        return JSON.readValue(getMessage(), type);
-    }
-
-    public <T> T getMessage(TypeReference<T> type) throws Exception {
-        return JSON.readValue(getMessage(), type);
     }
 
     public ResponseDto setMessage(String message) {
@@ -236,30 +206,20 @@ public class ResponseDto<T> implements Parcelable {
         return this;
     }
 
-	public byte[] getMessageBytes() {
-		return messageBytes;
-	}
-
-	public ResponseDto setMessageBytes(byte[] messageBytes) {
-		this.messageBytes = messageBytes;
-        return this;
-	}
-
-    public CMSSignedMessage getCMS() {
-        if(cmsMessage == null && (cmsPEMMessageBytes != null || messageBytes != null)) {
-            try {
-                byte[] cmsBytes = (cmsPEMMessageBytes != null)? cmsPEMMessageBytes :messageBytes;
-                cmsMessage = CMSSignedMessage.FROM_PEM(cmsBytes);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
+    public byte[] getMessageBytes() {
+        try {
+            if (messageBytes == null && message != null)
+                messageBytes = message.getBytes("UTF-8");
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        return cmsMessage;
+        return messageBytes;
     }
 
-	public void setCMS(CMSSignedMessage cmsMessage) {
-		this.cmsMessage = cmsMessage;
-	}
+    public ResponseDto setMessageBytes(byte[] messageBytes) {
+        this.messageBytes = messageBytes;
+        return this;
+    }
 
     public ContentType getContentType() {
         return contentType;
@@ -270,7 +230,7 @@ public class ResponseDto<T> implements Parcelable {
     }
 
     public String getCaption() {
-        if(caption == null && operation != null) return operation.getSubject();
+        if (caption == null && operation != null) return operation.getSubject();
         else return caption;
     }
 
@@ -305,48 +265,38 @@ public class ResponseDto<T> implements Parcelable {
     public static final Creator<ResponseDto> CREATOR =
             new Creator<ResponseDto>() {
 
-        @Override public ResponseDto createFromParcel(Parcel source) {
-            return new ResponseDto(source);
-        }
+                @Override
+                public ResponseDto createFromParcel(Parcel source) {
+                    return new ResponseDto(source);
+                }
 
-        @Override public ResponseDto[] newArray(int size) {
-            return new ResponseDto[size];
-        }
+                @Override
+                public ResponseDto[] newArray(int size) {
+                    return new ResponseDto[size];
+                }
 
-    };
+            };
 
-    @Override public int describeContents() {
+    @Override
+    public int describeContents() {
         return 0;
     }
 
-    @Override public void writeToParcel(Parcel parcel, int flags) {
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(statusCode);
         parcel.writeString(serviceCaller);
         parcel.writeString(caption);
         parcel.writeString(notificationMessage);
         parcel.writeString(message);
-        if(operation != null) {
-            try {
-                parcel.writeString(JSON.writeValueAsString(operation));
-            } catch (Exception ex) { ex.printStackTrace();}
+        if (operation != null) {
+            parcel.writeString(new String(ObjectUtils.serializeObject(operation)));
         } else parcel.writeString(null);
         parcel.writeSerializable(operationType);
         parcel.writeSerializable(contentType);
-        if(messageBytes != null) {
+        if (messageBytes != null) {
             parcel.writeInt(messageBytes.length);
             parcel.writeByteArray(messageBytes);
-        } else {
-            parcel.writeInt(0);
-            parcel.writeByteArray(new byte[0]);
-        }
-        if(cmsMessage != null) {
-            try {
-                byte[] cmsMessageBytes = cmsMessage.toPEM();
-                parcel.writeInt(cmsMessageBytes.length);
-                parcel.writeByteArray(cmsMessageBytes);
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
         } else {
             parcel.writeInt(0);
             parcel.writeByteArray(new byte[0]);
@@ -355,7 +305,7 @@ public class ResponseDto<T> implements Parcelable {
     }
 
     public String getNotificationMessage() {
-        if(notificationMessage == null) notificationMessage = getMessage();
+        if (notificationMessage == null) notificationMessage = getMessage();
         return notificationMessage;
     }
 
@@ -372,9 +322,17 @@ public class ResponseDto<T> implements Parcelable {
         this.operation = operation;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return this.getClass().getSimpleName() + " - statusCode: " + statusCode +
                 " - operationType:" + operationType;
     }
 
+    public String getBase64Data() {
+        return base64Data;
+    }
+
+    public void setBase64Data(String base64Data) {
+        this.base64Data = base64Data;
+    }
 }

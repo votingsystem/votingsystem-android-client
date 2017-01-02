@@ -29,9 +29,9 @@
         <item android:id="@+id/check_receipt"
             android:orderInCategory="6"
             android:title="@string/check_vote_lbl"/>
-        <item android:id="@+id/cancel_vote"
+        <!--item android:id="@+id/cancel_vote"
             android:orderInCategory="7"
-            android:title="@string/cancel_vote_lbl"/>
+            android:title="@string/cancel_vote_lbl"/-->
     </group>
 
 </menu>

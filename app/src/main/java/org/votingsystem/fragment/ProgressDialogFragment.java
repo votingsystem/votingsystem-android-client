@@ -32,9 +32,9 @@ public class ProgressDialogFragment extends DialogFragment {
     private String dialogTag = null;
 
     public static ProgressDialogFragment showDialog(String caption, String progressMessage,
-            FragmentManager fragmentManager) {
+                                                    FragmentManager fragmentManager) {
         ProgressDialogFragment dialog = new ProgressDialogFragment();
-        if(fragmentManager == null) {
+        if (fragmentManager == null) {
             LOGD(TAG, "fragmentManager null");
             return dialog;
         }
@@ -49,9 +49,9 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     public static ProgressDialogFragment showDialog(String caption, String progressMessage,
-                            String dialogTag, FragmentManager fragmentManager) {
+                                                    String dialogTag, FragmentManager fragmentManager) {
         ProgressDialogFragment dialog = new ProgressDialogFragment();
-        if(fragmentManager == null) {
+        if (fragmentManager == null) {
             LOGD(TAG, "fragmentManager null");
             return dialog;
         }
@@ -67,37 +67,41 @@ public class ProgressDialogFragment extends DialogFragment {
     }
 
     public static void hide(String dialogTag, FragmentManager fragmentManager) {
-        if(fragmentManager == null) {
+        if (fragmentManager == null) {
             LOGD(TAG, "fragmentManager null");
             return;
         }
-        if(fragmentManager != null && fragmentManager.findFragmentByTag(
+        if (fragmentManager != null && fragmentManager.findFragmentByTag(
                 ProgressDialogFragment.TAG + dialogTag) != null) {
             ((ProgressDialogFragment) fragmentManager.
                     findFragmentByTag(ProgressDialogFragment.TAG + dialogTag)).dismiss();
-        } else LOGD(TAG +  ".hide", TAG + " not found");
+        } else LOGD(TAG + ".hide", TAG + " not found");
     }
 
     public static void hide(FragmentManager fragmentManager) {
         try {
-            if(fragmentManager == null) {
+            if (fragmentManager == null) {
                 LOGD(TAG, "fragmentManager null");
                 return;
             }
             List<Fragment> fragmentList = fragmentManager.getFragments();
-            if(fragmentList != null) {
-                for(Fragment fragment : fragmentList) {
-                    if(fragment instanceof ProgressDialogFragment) ((ProgressDialogFragment)fragment).dismiss();
+            if (fragmentList != null) {
+                for (Fragment fragment : fragmentList) {
+                    if (fragment instanceof ProgressDialogFragment)
+                        ((ProgressDialogFragment) fragment).dismiss();
                 }
             }
-        } catch (Exception ex) { ex.printStackTrace();}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
-    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         progressMessage = getArguments().getString(Constants.MESSAGE_KEY);
         caption = getArguments().getString(Constants.CAPTION_KEY);
         dialogTag = getArguments().getString(Constants.TAG_KEY);
-        if(dialogTag == null) dialogTag = ProgressDialogFragment.TAG;
+        if (dialogTag == null) dialogTag = ProgressDialogFragment.TAG;
         else dialogTag = ProgressDialogFragment.TAG + dialogTag;
         View view = getActivity().getLayoutInflater().inflate(R.layout.progress_dialog, null);
         progress_text = (TextView) view.findViewById(R.id.progress_text);
@@ -106,7 +110,8 @@ public class ProgressDialogFragment extends DialogFragment {
         this.setCancelable(false);
         Dialog dialog = new AlertDialog.Builder(getActivity()).setView(view).create();
         dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     ((ProgressDialogFragment) getFragmentManager().
                             findFragmentByTag(dialogTag)).dismiss();
@@ -122,7 +127,8 @@ public class ProgressDialogFragment extends DialogFragment {
         progress_text.setText(progressMessage);
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Constants.MESSAGE_KEY, progressMessage);
         outState.putString(Constants.CAPTION_KEY, caption);

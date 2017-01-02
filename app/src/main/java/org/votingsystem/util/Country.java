@@ -35,7 +35,7 @@ public enum Country {
     SK("Slovensko", "Slovakia", 23),
     FI("Suomi/Finland", "Finland", 24),
     SE("Sverige", "Sweden", 25),
-    UK("United Kingdom", "United Kingdom", 26) ;
+    UK("United Kingdom", "United Kingdom", 26);
 
 
     private String name;
@@ -83,7 +83,7 @@ public enum Country {
 
     public static List<String> getListValues() {
         List<String> result = new ArrayList<>();
-        for(Country country: Country.values()) {
+        for (Country country : Country.values()) {
             result.add(country.getName() + " (" + country.toString() + ")");
         }
         return result;

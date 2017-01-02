@@ -1,14 +1,15 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.votingsystem.util.OperationType;
+
+import java.io.Serializable;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageDto {
+public class MessageDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private Integer statusCode;
     private OperationType operation;
@@ -19,7 +20,8 @@ public class MessageDto {
     private String httpSessionId;
     private String UUID;
 
-    public MessageDto() {}
+    public MessageDto() {
+    }
 
     public MessageDto(String deviceId, String httpSessionId) {
         this.deviceId = deviceId;

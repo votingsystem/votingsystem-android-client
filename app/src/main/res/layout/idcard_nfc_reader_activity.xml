@@ -24,12 +24,24 @@
 			android:layout_height="fill_parent"
 			android:orientation="vertical"
 			android:layout_gravity="bottom">
+
+			<TextView
+				android:id="@+id/qrCodeMsg"
+				android:visibility="gone"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_marginTop="10dip"
+				android:layout_gravity="center"
+				android:textColor="@color/white_vs"
+				android:textSize="25sp"
+				android:textStyle="bold"/>
+
 			<TextView
 				android:id="@+id/topMsg"
 				android:visibility="visible"
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
-				android:layout_margin="10dip"
+				android:layout_margin="5dip"
 				android:layout_gravity="center"
 				android:textColor="#fba131"
 				android:textSize="22sp"
@@ -40,7 +52,7 @@
 				android:visibility="visible"
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
-				android:layout_margin="10dip"
+				android:layout_margin="5dip"
 				android:layout_gravity="center"
 				android:text="@string/op_dgtinit"
 				android:textColor="#FFFFFF"

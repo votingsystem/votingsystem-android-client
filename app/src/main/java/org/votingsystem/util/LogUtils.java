@@ -5,13 +5,13 @@ import android.util.Log;
 public class LogUtils {
 
     public static void LOGD(final String tag, String message) {
-        if (BuildConfig.DEBUG) {
+        if (Constants.IS_DEBUG_SESSION) {
             Log.d(tag, message);
         }
     }
 
     public static void LOGD(final String tag, String message, Throwable cause) {
-        if (BuildConfig.DEBUG) {
+        if (Constants.IS_DEBUG_SESSION) {
             Log.d(tag, message, cause);
         }
     }

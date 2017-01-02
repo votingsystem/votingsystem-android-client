@@ -2,7 +2,6 @@ package org.votingsystem.util;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
 import org.bouncycastle2.util.encoders.Hex;
@@ -19,31 +18,29 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Random;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ */
 public class StringUtils {
-	
-	public static final String TAG = StringUtils.class.getSimpleName();
+
+    public static final String TAG = StringUtils.class.getSimpleName();
 
 
     public static String getStringFromInputStream(InputStream input) throws IOException {
-    	ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buf =new byte[4096];
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
         int len;
-        while((len = input.read(buf)) > 0){
-            output.write(buf,0,len);
+        while ((len = input.read(buf)) > 0) {
+            output.write(buf, 0, len);
         }
         output.close();
         input.close();
         return new String(output.toByteArray());
     }
-    
+
     public static String randomLowerString(long seed, int size) {
         StringBuffer tmp = new StringBuffer();
         Random random = new Random(seed);
@@ -58,25 +55,25 @@ public class StringUtils {
     }
 
     public static String truncate(String string, int length) {
-        if(string == null) return null;
+        if (string == null) return null;
         else {
-            if(string.length() <= length) return string;
-            else return  string.substring(0, length) + "...";
+            if (string.length() <= length) return string;
+            else return string.substring(0, length) + "...";
         }
     }
 
     public static String decodeString(String string) {
-    	if(string == null) return null;
-    	String result = null;
+        if (string == null) return null;
+        String result = null;
         try {
-        	result = URLDecoder.decode(string, Constants.UTF_8.name());
-		} catch (UnsupportedEncodingException ex) {
-			Log.e(TAG, ex.getMessage(), ex);
-		}
-    	return result;
+            result = URLDecoder.decode(string, Constants.UTF_8.name());
+        } catch (UnsupportedEncodingException ex) {
+            Log.e(TAG, ex.getMessage(), ex);
+        }
+        return result;
     }
 
-    public static String normalize (String string) {
+    public static String normalize(String string) {
         StringBuilder sb = new StringBuilder(string.length());
         string = Normalizer.normalize(string, Normalizer.Form.NFD);
         for (char c : string.toCharArray()) {
@@ -85,25 +82,25 @@ public class StringUtils {
         return sb.toString();
     }
 
-	public static String getNormalized(String string) {
-            if(string == null) return null;
-            else return normalize(string).replaceAll(" ", "_").replaceAll("[\\/:.]", "");
-	}
+    public static String getNormalized(String string) {
+        if (string == null) return null;
+        else return normalize(string).replaceAll(" ", "_").replaceAll("[\\/:.]", "");
+    }
 
     public static String getDomain(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String domain = uri.getHost();
-        return  domain.startsWith("www.") ? domain.substring(4) : domain;
+        return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 
     public static String checkURL(String url) {
-        if(url == null) return null;
+        if (url == null) return null;
         url = url.trim();
         String result = null;
-        if(url.startsWith("http://") || url.startsWith("https://")) result = url;
+        if (url.startsWith("http://") || url.startsWith("https://")) result = url;
         else result = "http://" + url;
-        while(result.endsWith("/")) {
-            result = result.substring(0, result.length() -1);
+        while (result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
         }
         return result;
     }
@@ -128,13 +125,6 @@ public class StringUtils {
         return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
-    public static String getHashBase64 (String originStr, String digestAlgorithm)
-            throws NoSuchAlgorithmException {
-        MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
-        byte[] resultDigest =  sha.digest(originStr.getBytes());
-        return Base64.encodeToString(resultDigest, Base64.NO_WRAP);
-    }
-
     public static String toHex(String base64Str) throws UnsupportedEncodingException {
         if (base64Str == null) return null;
         byte[] hexBytes = Hex.encode(base64Str.getBytes());
@@ -143,8 +133,10 @@ public class StringUtils {
 
     public static String getCurrencySymbol(String currencyCode) {
         switch (currencyCode) {
-            case "EUR": return "€";
-            case "USD": return "$";
+            case "EUR":
+                return "€";
+            case "USD":
+                return "$";
             case "CNY":
             case "JPY":
                 return "¥";

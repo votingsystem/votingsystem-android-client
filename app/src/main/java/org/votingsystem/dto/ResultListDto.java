@@ -1,45 +1,49 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.votingsystem.util.OperationType;
 
-import java.util.List;
+import java.io.Serializable;
+import java.util.Set;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ResultListDto<T> {
+public class ResultListDto<T> implements Serializable {
 
-    private List<T> resultList;
+    public static final long serialVersionUID = 1L;
+
+    private Set<T> resultList;
     private Integer offset;
+    private Integer statusCode;
     private Integer max;
     private Long totalCount;
     private Object State;
     private String message;
+    private String base64Data;
     private OperationType type;
 
-    public ResultListDto() { }
+    public ResultListDto() {
+    }
 
-    public ResultListDto(List<T> resultList) {
+    public ResultListDto(Set<T> resultList) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
     }
 
-    public ResultListDto(List<T> resultList, OperationType type) {
+    public ResultListDto(Set<T> resultList, OperationType type) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
         this.type = type;
     }
 
-    public ResultListDto(List<T> resultList, Integer offset, Integer max, Long totalCount) {
+    public ResultListDto(Set<T> resultList, Integer offset, Integer max, Long totalCount) {
         this.resultList = resultList;
         this.offset = offset;
         this.max = max;
         this.totalCount = totalCount;
     }
 
-    public ResultListDto(List<T> resultList, Integer offset, Integer max, Integer totalCount) {
+    public ResultListDto(Set<T> resultList, Integer offset, Integer max, Integer totalCount) {
         this(resultList, offset, max, Long.valueOf(totalCount));
     }
 
-    public static <T> ResultListDto GROUP(List<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
+    public static <T> ResultListDto GROUP(Set<T> groupList, Object state, Integer offset,
+                                          Integer max, Long totalCount) {
         ResultListDto<T> result = new ResultListDto<T>();
         result.setResultList(groupList);
         result.setState(state);
@@ -49,11 +53,11 @@ public class ResultListDto<T> {
         return result;
     }
 
-    public List<T> getResultList() {
+    public Set<T> getResultList() {
         return resultList;
     }
 
-    public void setResultList(List<T> resultList) {
+    public void setResultList(Set<T> resultList) {
         this.resultList = resultList;
     }
 
@@ -103,5 +107,21 @@ public class ResultListDto<T> {
 
     public void setType(OperationType type) {
         this.type = type;
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getBase64Data() {
+        return base64Data;
+    }
+
+    public void setBase64Data(String base64Data) {
+        this.base64Data = base64Data;
     }
 }

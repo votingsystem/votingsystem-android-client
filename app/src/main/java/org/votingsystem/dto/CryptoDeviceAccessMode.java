@@ -4,10 +4,10 @@ import android.support.v7.app.AppCompatActivity;
 
 import org.votingsystem.android.R;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ExceptionBase;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.HashUtils;
 import org.votingsystem.util.PrefUtils;
-import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.UIUtils;
 
 import java.io.Serializable;
@@ -19,7 +19,7 @@ public class CryptoDeviceAccessMode implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum Mode{PIN, PATTER_LOCK}
+    public enum Mode {PIN, PATTER_LOCK, DNIE_PASSW}
 
     private Mode mode;
     private String hashBase64;
@@ -27,48 +27,41 @@ public class CryptoDeviceAccessMode implements Serializable {
     public CryptoDeviceAccessMode(Mode mode, char[] passw) {
         try {
             this.mode = mode;
-            this.hashBase64 = StringUtils.getHashBase64(new String(passw), Constants.DATA_DIGEST_ALGORITHM);
-        } catch (Exception ex) { ex.printStackTrace();}
+            if (passw != null)
+                this.hashBase64 = HashUtils.getHashBase64(new String(passw).getBytes(),
+                        Constants.DATA_DIGEST_ALGORITHM);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public Mode getMode() {
         return mode;
     }
 
-    public void setMode(Mode mode) {
-        this.mode = mode;
-    }
-
-    public String getHashBase64() {
-        return hashBase64;
-    }
-
-    public void setHashBase64(String hashBase64) {
-        this.hashBase64 = hashBase64;
-    }
-
     public boolean validateHash(String passw, AppCompatActivity activity) {
         int numRetries = -1;
         try {
-            String passwHash = StringUtils.getHashBase64(passw, Constants.DATA_DIGEST_ALGORITHM);
-            if(!hashBase64.equals(passwHash)) {
+            String passwHash = HashUtils.getHashBase64(passw.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
+            if (!hashBase64.equals(passwHash)) {
                 numRetries = PrefUtils.incrementPasswordRetries();
-                throw new ExceptionVS(activity.getString(R.string.password_error_msg) + ", " +
+                throw new ExceptionBase(activity.getString(R.string.password_error_msg) + ", " +
                         activity.getString(R.string.enter_password_retry_msg,
-                                (Constants.NUM_MAX_PASSW_RETRIES - numRetries)));
+                                Integer.valueOf(Constants.NUM_MAX_PASSW_RETRIES - numRetries).toString()));
             }
             PrefUtils.resetPasswordRetries();
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
-            if((Constants.NUM_MAX_PASSW_RETRIES - numRetries) == 0) {
+            if ((Constants.NUM_MAX_PASSW_RETRIES - numRetries) == 0) {
                 UIUtils.launchMessageActivity(ResponseDto.ERROR(activity.getString(
                         R.string.retries_exceeded_caption), null).setNotificationMessage(
-                            activity.getString(R.string.retries_exceeded_msg)));
+                        activity.getString(R.string.retries_exceeded_msg)));
                 activity.setResult(ResponseDto.SC_ERROR);
                 activity.finish();
-            } else MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, activity.getString(R.string.error_lbl),
-                    ex.getMessage(), activity.getSupportFragmentManager());
+            } else
+                MessageDialogFragment.showDialog(ResponseDto.SC_ERROR, activity.getString(R.string.error_lbl),
+                        ex.getMessage(), activity.getSupportFragmentManager());
             return false;
         }
     }

@@ -1,12 +1,16 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CertExtensionDto {
+public class CertExtensionDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private String deviceId;
     private String deviceName;
@@ -16,7 +20,6 @@ public class CertExtensionDto {
     private String givenname;
     private String surname;
     private DeviceDto.Type deviceType;
-
 
 
     public CertExtensionDto() {}
@@ -73,27 +76,44 @@ public class CertExtensionDto {
         return nif;
     }
 
-    public CertExtensionDto setNif(String nif) {
+    public void setNif(String nif) {
         this.nif = nif;
-        return this;
     }
 
     public String getGivenname() {
         return givenname;
     }
 
-    public CertExtensionDto setGivenname(String givenname) {
+    public void setGivenname(String givenname) {
         this.givenname = givenname;
-        return this;
     }
 
     public String getSurname() {
         return surname;
     }
 
-    public CertExtensionDto setSurname(String surname) {
+    public void setSurname(String surname) {
         this.surname = surname;
-        return this;
+    }
+
+    public String getPrincipal() {
+        return "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenname + ", SURNAME=" + surname;
+    }
+
+    public static CertExtensionDto fromJson(String jsonStr) throws JSONException {
+        CertExtensionDto result = new CertExtensionDto();
+        JSONObject reader = new JSONObject(jsonStr);
+        result.setDeviceId(reader.getString("deviceId"));
+        result.setDeviceName(reader.getString("deviceName"));
+        result.setEmail(reader.getString("email"));
+        result.setMobilePhone(reader.getString("mobilePhone"));
+        result.setNif(reader.getString("nif"));
+        result.setGivenname(reader.getString("givenname"));
+        result.setSurname(reader.getString("surname"));
+        String deviceType = reader.getString("deviceType");
+        if(deviceType != null)
+            result.setDeviceType(DeviceDto.Type.valueOf(deviceType));
+        return result;
     }
 
 }

@@ -2,12 +2,7 @@ package org.votingsystem.dto;
 
 import android.net.Uri;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.util.JSON;
+import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.util.OperationType;
 
 import java.io.Serializable;
@@ -15,13 +10,12 @@ import java.io.Serializable;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationDto implements Serializable {
 
-	public static final String TAG = OperationDto.class.getSimpleName();
+    public static final String TAG = OperationDto.class.getSimpleName();
 
     private static final long serialVersionUID = 1L;
-    
+
     private OperationType operation;
     private Integer statusCode;
     private String caption;
@@ -30,23 +24,22 @@ public class OperationDto implements Serializable {
     private String serviceURL;
     private String serverURL;
     private String receiverName;
-    private EventVSDto eventVS;
+    private ElectionDto election;
     private Uri uriData;
     private String toUser;
-    private String jsonStr;
     private String subject;
     private String UUID;
 
 
-    @JsonProperty("objectId") private String callerCallback;
+    private String callerCallback;
 
-
-    public OperationDto() {}
+    public OperationDto() {
+    }
 
     public OperationDto(int statusCode) {
         this.statusCode = statusCode;
     }
-    
+
     public OperationDto(OperationType operationType) {
         this.operation = operationType;
     }
@@ -56,12 +49,12 @@ public class OperationDto implements Serializable {
         this.uriData = uriData;
     }
 
-    
+
     public OperationDto(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
-    
+
     public OperationDto(int statusCode, String message, OperationType operation) {
         this.statusCode = statusCode;
         this.message = message;
@@ -93,12 +86,12 @@ public class OperationDto implements Serializable {
         this.message = message;
     }
 
-    public EventVSDto getEventVS() {
-        return eventVS;
+    public ElectionDto getElection() {
+        return election;
     }
 
-    public void setEventVS(EventVSDto eventVS) {
-        this.eventVS = eventVS;
+    public void setElection(ElectionDto election) {
+        this.election = election;
     }
 
     public String getReceiverName() {
@@ -157,31 +150,12 @@ public class OperationDto implements Serializable {
         this.toUser = toUser;
     }
 
-
     public String getSubject() {
         return subject;
     }
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public <T> T getSignedContent(Class<T> type) throws Exception {
-        if(jsonStr == null) return null;
-        return JSON.readValue(JSON.writeValueAsString(jsonStr), type);
-    }
-
-    public <T> T getSignedContent(TypeReference<T> type) throws Exception {
-        if(jsonStr == null) return null;
-        return JSON.readValue(JSON.writeValueAsString(jsonStr), type);
-    }
-
-    public String getJsonStr() {
-        return jsonStr;
-    }
-
-    public void setJsonStr(String jsonStr) {
-        this.jsonStr = jsonStr;
     }
 
     public OperationType getOperation() {

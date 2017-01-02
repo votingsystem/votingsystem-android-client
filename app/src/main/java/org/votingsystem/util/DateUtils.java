@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import org.votingsystem.android.R;
 
@@ -16,7 +15,7 @@ import java.util.TimeZone;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ */
 public class DateUtils {
 
     private static final int SECOND = 1000;
@@ -24,11 +23,14 @@ public class DateUtils {
     private static final int HOUR = 60 * MINUTE;
     private static final int DAY = 24 * HOUR;
 
+    //https://developer.android.com/reference/java/text/SimpleDateFormat.html
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS ZZZZ");
+    private static final DateFormat shortDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZ");
+    private static final DateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ");
 
-    private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private static final DateFormat isoDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+
     static {
         isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -39,7 +41,6 @@ public class DateUtils {
             // if timestamp given in seconds, convert to millis
             time *= 1000;
         }
-
         long now = Calendar.getInstance().getTimeInMillis();
         if (time > now || time <= 0) {
             return null;
@@ -62,6 +63,7 @@ public class DateUtils {
             return diff / DAY + " days ago";
         }
     }
+
     private static final SimpleDateFormat[] ACCEPTED_TIMESTAMP_FORMATS = {
             new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US),
             new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy", Locale.US),
@@ -72,38 +74,6 @@ public class DateUtils {
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss Z", Locale.US)
     };
 
-    private static final SimpleDateFormat VALID_IFMODIFIEDSINCE_FORMAT =
-            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
-
-    public static Date parseTimestamp(String timestamp) {
-        for (SimpleDateFormat format : ACCEPTED_TIMESTAMP_FORMATS) {
-            format.setTimeZone(TimeZone.getTimeZone("GMT"));
-            try {
-                return format.parse(timestamp);
-            } catch (ParseException ex) {
-                continue;
-            }
-        }
-
-        // All attempts to parse have failed
-        return null;
-    }
-
-    public static boolean isValidFormatForIfModifiedSinceHeader(String timestamp) {
-        try {
-            return VALID_IFMODIFIEDSINCE_FORMAT.parse(timestamp)!=null;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    public static long timestampToMillis(String timestamp, long defaultValue) {
-        if (TextUtils.isEmpty(timestamp)) {
-            return defaultValue;
-        }
-        Date d = parseTimestamp(timestamp);
-        return d == null ? defaultValue : d.getTime();
-    }
 
     public static String formatShortDate(Context context, Date date) {
         StringBuilder sb = new StringBuilder();
@@ -121,7 +91,6 @@ public class DateUtils {
         }
         return format.format(time);
     }
-
 
     /**
      * Returns "Today", "Tomorrow", "Yesterday", or a short date format.
@@ -152,43 +121,80 @@ public class DateUtils {
         return initDate.getTime() - lapsedDate.getTime() < timeRange;
     }
 
-    public static int getDayOfMonthFromDate (Date date) {
+    public static int getDayOfMonthFromDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    public static int getMonthFromDate (Date date) {
+    public static int getMonthFromDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.MONTH);
     }
 
-    public static int getYearFromDate (Date date) {
+    public static int getYearFromDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.YEAR);
     }
 
-    public static Date getDateFromString (String dateString) throws ParseException {
-        if(dateString.endsWith("Z")) return isoDateFormat.parse(dateString);
-        else return dateFormat.parse(dateString);
+    public static Date getDate(String dateStr) {
+        try {
+            if (dateStr.endsWith("Z")) return isoDateFormat.parse(dateStr);
+            else return dateFormat.parse(dateStr);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
-    public static Date getDateFromString (String dateString, String format) throws ParseException {
-        DateFormat formatter = new SimpleDateFormat(format);
-        return formatter.parse(dateString);
+    public static Date getXmlDate(String dateStr) {
+        try {
+            return xmlDateFormat.parse(dateStr);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
-    public static String getISODateStr (Date date) {
+    public static String getXmlDateStr(Date date) {
+        try {
+            return xmlDateFormat.format(date).replace("GMT", "");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getUTCDateStr(Date date) {
+        try {
+            return shortDateFormat.format(date);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Date getDate(String dateStr, String format) throws ParseException {
+        try {
+            DateFormat formatter = new SimpleDateFormat(format);
+            return formatter.parse(dateStr);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getISODateStr(Date date) {
         return isoDateFormat.format(date);
     }
 
-    public static String getDateStr (Date date) {
+    public static String getDateStr(Date date) {
         return dateFormat.format(date);
     }
 
-    public static String getDateStr (Date date, String format) {
+    public static String getDateStr(Date date, String format) {
         SimpleDateFormat formatter = new SimpleDateFormat(format);
         return formatter.format(date);
     }
@@ -198,7 +204,7 @@ public class DateUtils {
         long elapsedTime = milliseconds / 1000;
         String minutes = String.format(format, (elapsedTime % 3600) / 60);
         String hours = String.format(format, elapsedTime / 3600);
-        String time =  hours + ":" + minutes;
+        String time = hours + ":" + minutes;
         return time;
     }
 
@@ -208,7 +214,7 @@ public class DateUtils {
         String seconds = String.format(format, elapsedTime % 60);
         String minutes = String.format(format, (elapsedTime % 3600) / 60);
         String hours = String.format(format, elapsedTime / 3600);
-        String time =  hours + ":" + minutes + ":" + seconds;
+        String time = hours + ":" + minutes + ":" + seconds;
         return time;
     }
 
@@ -218,27 +224,14 @@ public class DateUtils {
         return today;
     }
 
-    public static Calendar addDays(Date date, int days){
+    public static Calendar addDays(Date date, int days) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.add(Calendar.DATE, days); //minus number would decrement the days
         return cal;
     }
 
-    public static Calendar getEventVSElectionDateBeginCalendar(
-            int year, int monthOfYear,int dayOfMonth) {
-        Calendar electionCalendar = Calendar.getInstance();
-        electionCalendar.set(Calendar.YEAR, year);
-        electionCalendar.set(Calendar.MONTH, monthOfYear);
-        electionCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        electionCalendar.set(Calendar.HOUR_OF_DAY, 0);
-        electionCalendar.set(Calendar.MINUTE, 0);
-        electionCalendar.set(Calendar.SECOND, 0);
-        electionCalendar.set(Calendar.MILLISECOND, 0);
-        return electionCalendar;
-    }
-    
-    public static String getDayHourElapsedTime (Date date1, Date date2, Context context) {
+    public static String getDayHourElapsedTime(Date date1, Date date2, Context context) {
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(date1);
@@ -246,56 +239,41 @@ public class DateUtils {
         return getDayHourElapsedTime(cal1, cal2, context);
     }
 
-    public static String getDayWeekDateStr (Date date, String hourFormat) {
-        if(hourFormat == null) hourFormat = "HH:mm";
+    public static String getDayWeekDateStr(Date date, String hourFormat) {
+        if (hourFormat == null) hourFormat = "HH:mm";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
+        if (Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
             return getDateStr(date, "dd MMM yyyy' '" + hourFormat);
         else return getDateStr(date, "EEE dd MMM' '" + hourFormat);
     }
 
-    public static String getDayWeekDateSimpleStr (Date date) {
+    public static String getDayWeekDateSimpleStr(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
+        if (Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
             return getDateStr(date, "dd MMM yyyy");
         else return getDateStr(date, "EEE dd MMM");
     }
 
-    public static Date getDayWeekDate (String dateStr) throws ParseException {
+    public static Date getDayWeekDate(String dateStr) throws ParseException {
         try {
-            return getDateFromString (dateStr, "dd MMM yyyy' 'HH:mm");
+            return getDate(dateStr, "dd MMM yyyy' 'HH:mm");
         } catch (Exception ex) {
             Calendar resultCalendar = Calendar.getInstance();
-            resultCalendar.setTime(getDateFromString (dateStr, "EEE dd MMM' 'HH:mm"));
+            resultCalendar.setTime(getDate(dateStr, "EEE dd MMM' 'HH:mm"));
             resultCalendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));
             return resultCalendar.getTime();
         }
     }
 
-    public static String getPath (Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
-        return formatter.format(date);
-    }
-
-    public static Date getDateFromPath (String dateStr) {
-        SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd/");
-        try {
-            return formatter.parse(dateStr);
-        } catch (ParseException e) {
-            e.printStackTrace();e.printStackTrace();
-        }
-        return null;
-    }
-
     public static String getElapsedTimeStr(Date end) {
-    	Float hours = (end.getTime() - Calendar.getInstance().getTime().getTime())/(60*60*1000F);
-    	return Integer.valueOf(hours.intValue()).toString();
+        Float hours = (end.getTime() - Calendar.getInstance().getTime().getTime()) / (60 * 60 * 1000F);
+        return Integer.valueOf(hours.intValue()).toString();
     }
-    
-    public static String getYearDayHourMinuteSecondElapsedTime (Calendar cal1, Calendar cal2,
-            Context context) {
+
+    public static String getYearDayHourMinuteSecondElapsedTime(Calendar cal1, Calendar cal2,
+                                                               Context context) {
         long l1 = cal1.getTimeInMillis();
         long l2 = cal2.getTimeInMillis();
         long diff = l2 - l1;
@@ -330,16 +308,16 @@ public class DateUtils {
         return result.toString();
     }
 
-    public static String getYearDayHourMinuteSecondElapsedTime (Date date1, Date date2,
-        Context context) {
+    public static String getYearDayHourMinuteSecondElapsedTime(Date date1, Date date2,
+                                                               Context context) {
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(date1);
         cal2.setTime(date2);
         return getYearDayHourMinuteSecondElapsedTime(cal1, cal2, context);
     }
-    
-    public static String getDayHourElapsedTime (Calendar cal1, Calendar cal2, Context context) {
+
+    public static String getDayHourElapsedTime(Calendar cal1, Calendar cal2, Context context) {
         long l1 = cal1.getTimeInMillis();
         long l2 = cal2.getTimeInMillis();
         long diff = l2 - l1;
@@ -356,8 +334,10 @@ public class DateUtils {
         diff = diff % hourInMillis;
 
         StringBuilder result = new StringBuilder();
-        if (elapsedDays > 0) result.append(elapsedDays + " " + context.getString(R.string.days_lbl));
-        if (elapsedHours > 0) result.append(elapsedHours + ", " + context.getString(R.string.hours_lbl));
+        if (elapsedDays > 0)
+            result.append(elapsedDays + " " + context.getString(R.string.days_lbl));
+        if (elapsedHours > 0)
+            result.append(elapsedHours + ", " + context.getString(R.string.hours_lbl));
         return result.toString();
     }
 
@@ -370,18 +350,6 @@ public class DateUtils {
         result.set(Calendar.SECOND, 0);
         result.set(Calendar.MILLISECOND, 0);
         return result;
-    }
-
-
-    public static TimePeriod getCurrentWeekPeriod() {
-        return getWeekPeriod(Calendar.getInstance());
-    }
-
-    public static TimePeriod getWeekPeriod(Calendar selectedDate) {
-        Calendar weekFromCalendar = getMonday(selectedDate);
-        Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
-        weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
-        return new TimePeriod(weekFromCalendar.getTime(), weekToCalendar.getTime());
     }
 
 }

@@ -1,6 +1,5 @@
 package org.votingsystem.activity;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,42 +13,32 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import org.votingsystem.App;
 import org.votingsystem.android.R;
-import org.votingsystem.fragment.CurrencyAccountsPagerFragment;
-import org.votingsystem.fragment.EventVSGridFragment;
+import org.votingsystem.debug.DebugActionRunnerFragment;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.fragment.ElectionGridFragment;
 import org.votingsystem.fragment.MessageDialogFragment;
-import org.votingsystem.fragment.MessagesGridFragment;
 import org.votingsystem.fragment.QRActionsFragment;
 import org.votingsystem.fragment.ReceiptGridFragment;
-import org.votingsystem.fragment.RepresentationStateFragment;
-import org.votingsystem.fragment.WalletFragment;
-import org.votingsystem.service.WebSocketService;
 import org.votingsystem.ui.DialogButton;
 import org.votingsystem.util.ActivityResult;
-import org.votingsystem.util.BuildConfig;
-import org.votingsystem.util.ConnectionUtils;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.MsgUtils;
-import org.votingsystem.util.PrefUtils;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.util.UIUtils;
-import org.votingsystem.util.debug.DebugActionRunnerFragment;
 
 import java.lang.ref.WeakReference;
-import java.util.UUID;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ActivityBase extends ActivityConnected
+public class ActivityBase extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String TAG = ActivityBase.class.getSimpleName();
@@ -60,29 +49,29 @@ public class ActivityBase extends ActivityConnected
     private App app = null;
     private NavigationView navigationView;
     private Menu menu;
-    private MenuItem messagesMenuItem;
     private Integer menuType;
     private ActivityResult activityResult;
 
-    private String broadCastId = ActivityBase.class.getSimpleName();
+    public static final String BROADCAST_ID = ActivityBase.class.getSimpleName();
+    public static final String CHILD_FRAGMENT = "CHILD_FRAGMENT";
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
-        @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSEVS_KEY);
-            if(responseDto != null) {
-                if(ResponseDto.SC_ERROR == responseDto.getStatusCode()) {
-                    MessageDialogFragment.showDialog(responseDto.getStatusCode(),
-                            getString(R.string.error_lbl), responseDto.getMessage(),
-                            getSupportFragmentManager());
-                } else {
-                    if(OperationType.MESSAGEVS == responseDto.getOperationType()) {
-                        if(messagesMenuItem != null)
-                                messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
-
-                    }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
+        ResponseDto responseDto = intent.getParcelableExtra(Constants.RESPONSE_KEY);
+        if (responseDto != null) {
+            if (ResponseDto.SC_ERROR == responseDto.getStatusCode()) {
+                MessageDialogFragment.showDialog(responseDto.getStatusCode(),
+                        getString(R.string.error_lbl), responseDto.getMessage(),
+                        getSupportFragmentManager());
+            } else if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+                if(responseDto.getServiceCaller() == CHILD_FRAGMENT) {
+                    selectedContentFragment(Integer.valueOf(responseDto.getMessage()));
                 }
             }
+        }
         }
     };
 
@@ -100,55 +89,22 @@ public class ActivityBase extends ActivityConnected
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        messagesMenuItem = navigationView.getMenu().findItem(R.id.messages);
         navigationView.setNavigationItemSelectedListener(this);
 
         int selectedFragmentMenuId = getIntent().getIntExtra(Constants.FRAGMENT_KEY, -1);
-        if(selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
-        if(savedInstanceState == null) {
+        if (selectedFragmentMenuId > 0) selectedContentFragment(selectedFragmentMenuId);
+        if (savedInstanceState == null) {
             selectedContentFragment(R.id.fa_qrcode);
-            setMenu(R.menu.drawer_currency);
+            setMenu(R.menu.drawer_voting);
         } else {
             setMenu(savedInstanceState.getInt(MENU_KEY));
         }
     }
 
-    public void changeConnectionStatus() {
-        if(app.isWithSocketConnection() && menu != null) {
-            if(menu.findItem(R.id.connect) != null)
-                menu.findItem(R.id.connect).setIcon(R.drawable.fa_bolt_16_ffff00);
-        } else {
-            if(menu != null && menu.findItem(R.id.connect) != null)
-                menu.findItem(R.id.connect).setIcon(R.drawable.fa_plug_16_ffffff);
-        }
-    }
-
-    private void showConnectionStatusDialog() {
-        if(app.isWithSocketConnection()) {
-            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                    getString(R.string.msg_lbl), getString(R.string.disconnect_from_service_quesion_msg), this);
-            builder.setPositiveButton(getString(R.string.disconnect_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            closeWebSocketConnection();
-                            dialog.dismiss();
-                        }
-                    });
-            UIUtils.showMessageDialog(builder);
-        }
-    }
-
-    public void closeWebSocketConnection() {
-        LOGD(TAG + ".toggleWebSocketServiceConnection", "closeWebSocketConnection");
-        Intent startIntent = new Intent(App.getInstance(), WebSocketService.class);
-        startIntent.putExtra(Constants.TYPEVS_KEY, OperationType.WEB_SOCKET_CLOSE);
-        startService(startIntent);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(currentFragment != null && currentFragment.get() != null) {
+        if (currentFragment != null && currentFragment.get() != null) {
             currentFragment.get().onActivityResult(requestCode, resultCode, data);
         } else this.activityResult = new ActivityResult(requestCode, resultCode, data);
     }
@@ -165,25 +121,20 @@ public class ActivityBase extends ActivityConnected
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if(!App.getInstance().isHistoryEmpty()) {
-                selectedContentFragment(App.getInstance().getHistoryItem());
+            if (!app.isHistoryEmpty()) {
+                selectedContentFragment(app.getHistoryItem());
             } else super.onBackPressed();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!BuildConfig.DEBUG) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        if (!Constants.IS_DEBUG_SESSION) {
             MenuItem debugMenuItem = menu.findItem(R.id.menu_debug);
-            if(debugMenuItem != null) debugMenuItem.setVisible(false);
-        }
-        if(menuType != null &&
-                (menuType == R.menu.drawer_currency || menuType == R.menu.drawer_voting)) {
-            MenuItem connectMenuItem = menu.findItem(R.id.connect);
-            if(connectMenuItem != null) connectMenuItem.setVisible(false);
+            if (debugMenuItem != null) debugMenuItem.setVisible(false);
         }
         this.menu = menu;
-        changeConnectionStatus();
         return true;
     }
 
@@ -196,17 +147,10 @@ public class ActivityBase extends ActivityConnected
         Intent intent = null;
         switch (id) {
             case R.id.menu_debug:
-                if (BuildConfig.DEBUG) {
+                if (Constants.IS_DEBUG_SESSION) {
                     intent = new Intent(getBaseContext(), FragmentContainerActivity.class);
                     intent.putExtra(Constants.FRAGMENT_KEY, DebugActionRunnerFragment.class.getName());
                     startActivity(intent);
-                }
-                return true;
-            case R.id.connect:
-                if(app.isWithSocketConnection()) {
-                    showConnectionStatusDialog();
-                } else {
-                    ConnectionUtils.initConnection(ActivityBase.this);
                 }
                 return true;
             case R.id.close_app:
@@ -219,7 +163,7 @@ public class ActivityBase extends ActivityConnected
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        App.getInstance().addHistoryItem(item.getItemId());
+        app.addHistoryItem(item.getItemId());
         return selectedContentFragment(item.getItemId());
     }
 
@@ -233,27 +177,10 @@ public class ActivityBase extends ActivityConnected
         //this is to remove actionbar spinners
         getSupportActionBar().setDisplayShowCustomEnabled(false);
         getSupportActionBar().setSubtitle(null);
-        Intent intent = null;
         switch (menuId) {
-            case R.id.polls_menu_item:
-            case R.id.polls:
-                replaceFragment(new EventVSGridFragment(), EventVSGridFragment.TAG);
+            case R.id.elections:
+                replaceFragment(new ElectionGridFragment(), ElectionGridFragment.TAG);
                 setMenu(R.menu.drawer_voting);
-                break;
-            case R.id.representatives:
-                replaceFragment(new RepresentationStateFragment(), RepresentationStateFragment.TAG);
-                break;
-            case R.id.currency_accounts:
-            case R.id.currency_menu_item:
-                replaceFragment(new CurrencyAccountsPagerFragment(), CurrencyAccountsPagerFragment.TAG);
-                setMenu(R.menu.drawer_currency);
-                break;
-            case R.id.wallet:
-                replaceFragment(new WalletFragment(), WalletFragment.TAG);
-                break;
-            case R.id.contacts:
-                intent = new Intent(this, ContactsActivity.class);
-                startActivity(intent);
                 break;
             case R.id.fa_qrcode:
                 replaceFragment(new QRActionsFragment(), QRActionsFragment.TAG);
@@ -261,11 +188,8 @@ public class ActivityBase extends ActivityConnected
             case R.id.receipts:
                 replaceFragment(new ReceiptGridFragment(), ReceiptGridFragment.TAG);
                 break;
-            case R.id.messages:
-                replaceFragment(new MessagesGridFragment(), MessagesGridFragment.TAG);
-                break;
             case R.id.settings:
-                intent = new Intent(this, SettingsActivity.class);
+                Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 break;
         }
@@ -275,16 +199,17 @@ public class ActivityBase extends ActivityConnected
     }
 
     private void replaceFragment(Fragment newFragment, String tag) {
-        if(currentFragment != null)
+        if (currentFragment != null)
             getSupportFragmentManager().beginTransaction().remove(currentFragment.get()).commit();
         currentFragment = new WeakReference<>(newFragment);
-        FragmentTransaction transaction =  getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, currentFragment.get(), tag).commit();
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
-        if(App.getInstance().isRootedPhone()) {
+        if (app.isRootedPhone()) {
             DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -295,39 +220,19 @@ public class ActivityBase extends ActivityConnected
                     R.string.non_rooted_phones_required_msg), positiveButton, null, this);
             return;
         }
-        if(!PrefUtils.isDNIeEnabled()) {
-            App.getInstance().setToken(UUID.randomUUID().toString().toCharArray());
-            startActivity(new Intent(getBaseContext(), UserDataFormActivity.class));
-            return;
-        }
-        if(PrefUtils.getCryptoDeviceAccessMode() == null) {
-            DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            startActivity(new Intent(ActivityBase.this,
-                                    CryptoDeviceAccessModeSelectorActivity.class));
-                        }
-                    });
-            UIUtils.showMessageDialog(getString(R.string.msg_lbl), getString(
-                    R.string.access_mode_passw_required_msg), positiveButton, null, this);
-            return;
-        }
-        if(messagesMenuItem != null)
-            messagesMenuItem.setTitle(MsgUtils.getMessagesDrawerItemMessage());
-        changeConnectionStatus();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(
-                broadcastReceiver, new IntentFilter(broadCastId));
+                broadcastReceiver, new IntentFilter(BROADCAST_ID));
     }
 
-    @Override public boolean isConnectionRequired() { return false;}
-
-    @Override protected void onPause() {
+    @Override
+    protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getApplicationContext()).
                 unregisterReceiver(broadcastReceiver);
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(MENU_KEY, menuType);
     }

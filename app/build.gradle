@@ -1,19 +1,8 @@
-version = '0.8.0'
+version = '0.9.0'
 
 apply plugin: 'com.android.application'
 
 android {
-    useLibrary 'org.apache.http.legacy'
-
-    lintOptions {
-        abortOnError false
-    }
-
-    dexOptions {
-        incremental true
-        javaMaxHeapSize "4g"
-        //dexInProcess = true
-    }
 
     signingConfigs {
         release {
@@ -29,7 +18,6 @@ android {
         compileSdkVersion 24
         buildToolsVersion "24.0.2"
         targetSdkVersion 24
-        multiDexEnabled  true
         sourceCompatibility = JavaVersion.VERSION_1_7
     }
 
@@ -77,6 +65,7 @@ android {
         exclude 'META-INF/ASL2.0'
     }
 
+    buildToolsVersion '25.0.0'
 }
 
 ext {
@@ -84,21 +73,18 @@ ext {
 }
 
 dependencies {
+    //see https://github.com/votingsystem/votingsystem-android-bouncycastle
     compile files('libs/bouncycastle-0.8.0-SNAPSHOT.jar')
-    compile "com.android.support:multidex:1.0.1"
-    compile ("org.apache.httpcomponents:httpmime:4.2.2") {
-        exclude module: 'httpcore'
-    }
+    compile "com.squareup.okhttp3:okhttp:3.5.0"
+    compile "com.squareup.okio:okio:1.11.0"
+    compile "net.sf.kxml:kxml2:2.3.0"
+
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile "com.android.support:cardview-v7:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
     compile "com.google.zxing:android-core:3.2.1"
     compile "com.google.zxing:core:3.2.1"
-    compile "com.fasterxml.jackson.core:jackson-core:2.7.3"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.7.3"
-    //see https://github.com/votingsystem/votingsystem-android-bouncycastle
-    //compile "org.votingsystem.android:bouncycastle:0.8.0-SNAPSHOT"
+
     compile project(":dniedroid")
-    compile "com.neovisionaries:nv-websocket-client:1.23"
 }

@@ -3,12 +3,12 @@
     <color name="red_vs">#ba0011</color>
     <color name="empty_field_form">#f00</color>
     <color name="grey_dark">#888</color>
-    <color name="wallet_summary">#005b92</color>
+    <color name="grey_light">#ccc</color>
+    <color name="dark_blue">#005b92</color>
     <color name="active_vs">#388746</color>
     <color name="green_light">#61a753</color>
     <color name="white_vs">#fefefe</color>
     <color name="bkg_screen_vs">#eeeeee</color>
     <color name="orange_vs">#fba131</color>
     <color name="body_text">#434343</color>
-    <color name="link_vs">#00b0ff</color>
 </resources>

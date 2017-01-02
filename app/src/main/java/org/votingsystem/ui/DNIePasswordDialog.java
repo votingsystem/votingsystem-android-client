@@ -46,16 +46,17 @@ public class DNIePasswordDialog implements DialogUIHandler {
 
     @SuppressLint("InflateParams")
     private char[] doShowPasswordDialog(final int retries) {
-        if(password != null) return password;
+        if (password != null)
+            return password;
 
-        final AlertDialog.Builder dialog 	= new AlertDialog.Builder(activity);
-        final LayoutInflater inflater 		= activity.getLayoutInflater();
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+        final LayoutInflater inflater = activity.getLayoutInflater();
         final StringBuilder passwordBuilder = new StringBuilder();
-        final DNIePasswordDialog instance 	= this;
+        final DNIePasswordDialog instance = this;
         dialog.setMessage(getTriesMessage(retries));
 
         synchronized (instance) {
-            activity.runOnUiThread( new Runnable() {
+            activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -130,14 +131,13 @@ public class DNIePasswordDialog implements DialogUIHandler {
     }
 
     public int doShowConfirmDialog(String message) {
-        final AlertDialog.Builder dialog 	= new AlertDialog.Builder(activity);
-        final DNIePasswordDialog instance 	= this;
-        final StringBuilder resultBuilder 	= new StringBuilder();
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+        final DNIePasswordDialog instance = this;
+        final StringBuilder resultBuilder = new StringBuilder();
         resultBuilder.append(activity.getString(R.string.confirm_sign_msg));
 
-        synchronized (instance)
-        {
-            activity.runOnUiThread( new Runnable() {
+        synchronized (instance) {
+            activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -172,8 +172,7 @@ public class DNIePasswordDialog implements DialogUIHandler {
                     }
                 }
             });
-            try
-            {
+            try {
                 instance.wait();
                 return Integer.parseInt(resultBuilder.toString());
             } catch (InterruptedException e) {

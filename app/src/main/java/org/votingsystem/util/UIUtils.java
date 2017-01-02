@@ -25,7 +25,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -38,13 +37,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -56,24 +52,19 @@ import org.bouncycastle2.cms.SignerId;
 import org.bouncycastle2.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle2.util.CollectionStore;
 import org.votingsystem.App;
-import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.MessageActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.voting.FieldEventDto;
 import org.votingsystem.fragment.MessageDialogFragment;
 import org.votingsystem.ui.DialogButton;
+import org.votingsystem.xades.XmlSignature;
 
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -83,14 +74,14 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * An assortment of UI helpers.
  */
-public class UIUtils  {
+public class UIUtils {
 
     private static final String TAG = UIUtils.class.getSimpleName();
 
     public static final int EMPTY_MESSAGE = 1;
     /**
      * Regex to search for HTML escape sequences.
-     *
+     * <p>
      * <p></p>Searches for any continuous string of characters starting with an ampersand and ending with a
      * semicolon. (Example: &amp;amp;)
      */
@@ -106,7 +97,7 @@ public class UIUtils  {
     public static void launchMessageActivity(ResponseDto responseDto) {
         Intent intent = new Intent(App.getInstance(), MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        intent.putExtra(Constants.RESPONSE_KEY, responseDto);
         App.getInstance().startActivity(intent);
     }
 
@@ -115,16 +106,16 @@ public class UIUtils  {
         responseDto.setCaption(caption).setNotificationMessage(message);
         Intent intent = new Intent(App.getInstance(), MessageActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Constants.RESPONSEVS_KEY, responseDto);
+        intent.putExtra(Constants.RESPONSE_KEY, responseDto);
         App.getInstance().startActivity(intent);
     }
 
-    public static void showSignersInfoDialog(Set<UserDto> signers, FragmentManager fragmentManager,
-                                             Context context) {
+    public static void showSignersInfoDialog(Set<XmlSignature> signatures,
+                             FragmentManager fragmentManager, Context context) {
         StringBuilder signersInfo = new StringBuilder(context.getString(R.string.num_signers_lbl,
-                signers.size()) + "<br/><br/>");
-        for(UserDto signer : signers) {
-            X509Certificate certificate = signer.getX509Certificate();
+                signatures.size()) + "<br/><br/>");
+        for (XmlSignature signature : signatures) {
+            X509Certificate certificate = signature.getSigningCertificate();
             signersInfo.append(context.getString(R.string.cert_info_formated_msg,
                     certificate.getSubjectDN().toString(),
                     certificate.getIssuerDN().toString(),
@@ -144,16 +135,15 @@ public class UIUtils  {
     public static void showTimeStampInfoDialog(TimeStampToken timeStampToken,
            X509Certificate timeStampServerCert, FragmentManager fragmentManager, Context context) {
         try {
-            TimeStampTokenInfo tsInfo= timeStampToken.getTimeStampInfo();
+            TimeStampTokenInfo tsInfo = timeStampToken.getTimeStampInfo();
             String certificateInfo = null;
             SignerId signerId = timeStampToken.getSID();
             String dateInfoStr = DateUtils.getDayWeekDateStr(tsInfo.getGenTime(), "HH:mm");
             CollectionStore store = (CollectionStore) timeStampToken.getCertificates();
             Collection<X509CertificateHolder> matches = store.getMatches(signerId);
             X509CertificateHolder certificateHolder = null;
-            if(matches.size() == 0) {
-                LOGD(TAG + ".showTimeStampInfoDialog",
-                        "no cert matches found, validating with timestamp server cert");
+            if (matches.size() == 0) {
+                LOGD(TAG, "showTimeStampInfoDialog - no cert matches found, validating with timestamp server cert");
                 certificateHolder = new X509CertificateHolder(timeStampServerCert.getEncoded());
                 timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         Constants.PROVIDER).build(certificateHolder));
@@ -280,7 +270,7 @@ public class UIUtils  {
     }
 
     public static EditText addFormField(String label, Integer type, LinearLayout mFormView, int id,
-                Context context) {
+                                        Context context) {
         TextView textView = new TextView(context);
         textView.setTextSize(context.getResources().getDimension(R.dimen.claim_field_text_size));
         textView.setText(label);
@@ -325,6 +315,7 @@ public class UIUtils  {
         final String key = String.format("feedback_notification_fired_%s", sessionId);
         sp.edit().putBoolean(key, false).commit();
     }
+
     // Shows whether a notification was fired for a particular session time block. In the
     // event that notification has not been fired yet, return false and set the bit.
     public static boolean isNotificationFiredForBlock(Context context, String blockId) {
@@ -335,9 +326,11 @@ public class UIUtils  {
         return fired;
     }
 
-    private static final int[] RES_IDS_ACTION_BAR_SIZE = { android.R.attr.actionBarSize };
+    private static final int[] RES_IDS_ACTION_BAR_SIZE = {android.R.attr.actionBarSize};
 
-    /** Calculates the Action Bar height in pixels. */
+    /**
+     * Calculates the Action Bar height in pixels.
+     */
     public static int calculateActionBarSize(Context context) {
         if (context == null) {
             return 0;
@@ -355,52 +348,8 @@ public class UIUtils  {
         return (int) size;
     }
 
-    public static Map<Integer, EditText> showDynamicFormDialog(final Set<FieldEventDto> fields,
-               final View.OnClickListener listener, Activity activity) {
-        AlertDialog.Builder builder= new AlertDialog.Builder(activity);
-        LayoutInflater inflater = activity.getLayoutInflater();
-        ScrollView mScrollView = (ScrollView) inflater.inflate(R.layout.dinamic_form,
-                (ViewGroup) activity.getCurrentFocus());
-        LinearLayout mFormView = (LinearLayout) mScrollView.findViewById(R.id.form);
-        final TextView errorMsgTextView = (TextView) mScrollView.findViewById(R.id.errorMsg);
-        errorMsgTextView.setVisibility(View.GONE);
-        final Map<Integer, EditText> fieldsMap = new HashMap<Integer, EditText>();
-        for (FieldEventDto field : fields) {
-            fieldsMap.put(field.getId().intValue(), UIUtils.addFormField(field.getContent(),
-                    InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
-                    mFormView, field.getId().intValue(), activity));
-        }
-        builder.setTitle(R.string.eventfields_dialog_caption).setView(mScrollView).
-                setPositiveButton(activity.getString(R.string.accept_lbl), null).
-                setNegativeButton(R.string.cancel_lbl, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) { }
-                });
-        final AlertDialog dialog = builder.create();
-        dialog.show();//to get positiveButton this must be called first
-        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        positiveButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View onClick) {
-                for (FieldEventDto field : fields) {
-                    EditText editText = fieldsMap.get(field.getId().intValue());
-                    String fieldValue = editText.getText().toString();
-                    if (fieldValue.isEmpty()) {
-                        errorMsgTextView.setVisibility(View.VISIBLE);
-                        return;
-                    } else field.setValue(fieldValue);
-                    LOGD(TAG + ".showDynamicFormDialog", "field id: " + field.getId() +
-                            " - text: " + fieldValue);
-                }
-                //listener.onClick();
-                dialog.dismiss();
-            }
-        });
-        //to avoid avoid dissapear on screen orientation change
-        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        return fieldsMap;
-    }
-
     public static int setColorAlpha(int color, float alpha) {
-        int alpha_int = Math.min(Math.max((int)(alpha * 255.0f), 0), 255);
+        int alpha_int = Math.min(Math.max((int) (alpha * 255.0f), 0), 255);
         return Color.argb(alpha_int, Color.red(color), Color.green(color), Color.blue(color));
     }
 
@@ -411,7 +360,7 @@ public class UIUtils  {
     }
 
     public static boolean hasActionBar(Activity activity) {
-        return (((AppCompatActivity)activity).getSupportActionBar() != null);
+        return (((AppCompatActivity) activity).getSupportActionBar() != null);
     }
 
     public static void setStartPadding(final Context context, View view, int padding) {
@@ -447,7 +396,6 @@ public class UIUtils  {
         context.startActivity(intent);
     }
 
-
     public static void setImage(ImageView imageView, byte[] imageBytes, final Context context) {
         final Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
         imageView.setImageBitmap(bmp);
@@ -464,10 +412,10 @@ public class UIUtils  {
     }
 
     public static AlertDialog.Builder getMessageDialogBuilder(String caption, String message,
-              Context context) {
+                                                              Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.message_dialog, null);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
-        TextView messageTextView = (TextView)view.findViewById(R.id.message);
+        TextView messageTextView = (TextView) view.findViewById(R.id.message);
         messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         return new AlertDialog.Builder(context).setView(view).setCancelable(false);
@@ -477,7 +425,8 @@ public class UIUtils  {
         final Dialog dialog = builder.show();
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     dialog.dismiss();
                     return true;
@@ -486,35 +435,19 @@ public class UIUtils  {
         });
     }
 
-    public static void showConnectionRequiredDialog(final ActivityBase activityBase) {
-        if (!App.getInstance().isWithSocketConnection()) {
-            AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(
-                    activityBase.getString(R.string.connection_required_caption),
-                    activityBase.getString(R.string.connection_required_msg),
-                    activityBase).setPositiveButton(activityBase.getString(R.string.connect_lbl),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            if(activityBase != null) ConnectionUtils.initConnection(activityBase);
-                            dialog.cancel();
-                        }
-                    });
-            UIUtils.showMessageDialog(builder);
-        }
-    }
-
-    //Mandatory dialog, only process y user click on dialog buttons
-    public static Dialog showMessageDialog(String caption, String message, DialogButton positiveButton,
-             DialogButton negativeButton, Context context) {
+    //Mandatory dialog, only process if user clicks on dialog buttons
+    public static Dialog showMessageDialog(String caption, String message,
+                                           DialogButton positiveButton, DialogButton negativeButton, Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.message_dialog, null);
         ((TextView) view.findViewById(R.id.caption_text)).setText(caption);
-        TextView messageTextView = (TextView)view.findViewById(R.id.message);
+        TextView messageTextView = (TextView) view.findViewById(R.id.message);
         messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         AlertDialog.Builder builder = new AlertDialog.Builder(context).setView(view)
                 .setCancelable(false);
-        if(positiveButton != null) builder.setPositiveButton(positiveButton.getLabel(),
+        if (positiveButton != null) builder.setPositiveButton(positiveButton.getLabel(),
                 positiveButton.getClickListener());
-        if(negativeButton != null) builder.setNegativeButton(negativeButton.getLabel(),
+        if (negativeButton != null) builder.setNegativeButton(negativeButton.getLabel(),
                 negativeButton.getClickListener());
         final Dialog dialog = builder.show();
         dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -529,16 +462,8 @@ public class UIUtils  {
         return dialog;
     }
 
-    public static void fillAddressInfo(LinearLayout linearLayout, Context contex) throws IOException {
-        UserDto user = PrefUtils.getAppUser();
-        ((TextView)linearLayout.findViewById(R.id.name)).setText(user.getAddress().getName());
-        ((TextView)linearLayout.findViewById(R.id.postal_code)).setText(user.getAddress().getPostalCode());
-        ((TextView)linearLayout.findViewById(R.id.city)).setText(user.getAddress().getCity());
-        linearLayout.setVisibility(View.VISIBLE);
-    }
-
     public static AlertDialog.Builder getMessageDialogBuilder(ResponseDto responseDto,
-            Context context) {
+                                                              Context context) {
         return getMessageDialogBuilder(responseDto.getCaption(), responseDto.getMessage(), context);
     }
 

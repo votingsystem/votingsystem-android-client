@@ -1,12 +1,10 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.PEMUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
@@ -16,14 +14,18 @@ import java.util.Date;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CertificateDto {
+public class CertificateDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     public enum Type {
         VOTE_ROOT, VOTE, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
-        ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
+        ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER
+    }
 
     public enum State {OK, ERROR, CANCELLED, USED, UNKNOWN}
+
+    private String x509CertificatePEM;
 
     //SerialNumber as String to avoid Javascript problem handling such big numbers
     private String serialNumber;
@@ -42,13 +44,14 @@ public class CertificateDto {
     private State state;
     private boolean isRoot;
 
-    public CertificateDto() {}
+    public CertificateDto() {
+    }
 
     public CertificateDto(X509Certificate x509Cert) throws CertificateException, NoSuchAlgorithmException,
             NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);
-        pemCert = new String(PEMUtils.getPEMEncoded (x509Cert), "UTF-8");
+        pemCert = new String(PEMUtils.getPEMEncoded(x509Cert), "UTF-8");
         subjectDN = x509Cert.getSubjectDN().toString();
         issuerDN = x509Cert.getIssuerDN().toString();
         sigAlgName = x509Cert.getSigAlgName();
@@ -56,7 +59,7 @@ public class CertificateDto {
         notAfter = x509Cert.getNotAfter();
     }
 
-    @JsonIgnore X509Certificate getX509Cert() throws Exception {
+    X509Certificate getX509Cert() throws Exception {
         return PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes()).iterator().next();
     }
 

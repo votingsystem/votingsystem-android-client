@@ -18,32 +18,30 @@
     <string name="pending_lbl">%1$s horas para abrir</string>
     <string name="option_selected_msg">seleccionada opción \'%1$s\'</string>
     <string name="voting_system_lbl">sistema de votación</string>
-    <string name="access_control_lbl">control de acceso</string>
     <string name="subject_lbl">asunto</string>
     <string name="menuSync">sincronizar</string>
     <string name="processing_lbl">procesando</string>
     <string name="initializing_app_lbl">preparando aplicación</string>
     <string name="publishing_document_msg">publicando documento...</string>
 
+    <string name="election_lbl">Votación</string>
     <string name="loading_info_msg">cargando información, por favor espere</string>
     <string name="pdf_signed_by_lbl">firmado electrónicamente por</string>
     <string name="BACKUP_REQUEST">solicitud de copia de seguridad</string>
     <string name="EVENT_CANCELLATION">cancelar evento</string>
     <string name="operationNotFoundErrorMsg">operación desconocida</string>
-    <string name="eventVSDataWithErrors">errores en datos del evento</string>
     <string name="statusCodeNotFoundErrorMsg">falta código de estado</string>
     <string name="errorEmail">debe proporcionar una dirección de correo válida</string>
-    <string name="eventVsCancellationDataErrorMsg">error en los datos de cancelación de evento</string>
     <string name="receiverNotFoundErrorMsg">falta el name de destinatario del documento firmado</string>
     <string name="panel_principal_lbl">panel principal</string>
     <string name="search_hint">buscar</string>
-    <string name="guardar_recibo_voto_label">guardar recibo</string>
+    <string name="save_receipt_lbl">guardar recibo</string>
     <string name="remove_receipt_lbl">borrar recibo</string>
     <string name="remove_receipt_msg">¿seguro que desea borrar recibo?</string>
     <string name="user_data_lbl">datos del usuario</string>
     <string name="search_msg">realizando búsqueda</string>
     <string name="search_invoke">búsquedas</string>
-    <string name="empty_search_lbl">consulta sin resultados</string>
+    <string name="empty_search_lbl">sin elementos</string>
     <string name="password_mismatch">las contraseñas no coinciden, inténtelo de nuevo</string>
     <string name="repeat_password">vuelva a introducir la contraseña</string>
     <string name="givenname_missing_msg">introduzca el nombre</string>
@@ -57,7 +55,6 @@
     <string name="exception_lbl">excepción</string>
     <string name="cancel_back_msg">pulsar \'atrás\' para cancelar</string>
     <string name="connecting_caption">conectando...</string>
-    <string name="getting_representatives_lbl">obteniendo representantes...</string>
     <string name="cert_state_msg">comprobando el estado de la solicitud de certificado</string>
     <string name="cert_downloaded_msg">el certificado de usuario está disponible</string>
     <string name="request_msg_subject">[solicitud acceso - %1$s]</string>
@@ -66,15 +63,12 @@
     <string name="open_cancel_vote_receipt_lbl">abrir recibo de cancelación</string>
     <string name="password_error_msg">¿seguro que la contraseña es correcta?</string>
     <string name="sign_send_msg">firmar y enviar</string>
-    <string name="select_representative_button">seleccionar como representante</string>
     <string name="voted_lbl">seleccionada opción</string>
     <string name="cancel_vote_lbl">anular voto</string>
     <string name="open_recepit_lbl">abrir recibo</string>
     <string name="cancel_vote_msg">si continua anulará su voto</string>
-    <string name="save_receipt_lbl">guardar recibo</string>
     <string name="app_name_lbl">aplicación de votación</string>
     <string name="eventsVS_label">eventos</string>
-    <string name="eventVS_label">evento</string>
     <string name="solicitud_csr">solicitud csr</string>
     <string name="enviarVoto">enviar Voto</string>
     <string name="receipt_error_msg">error validando recibo de voto</string>
@@ -94,13 +88,11 @@
         <a href="%1$s">Pulse aquí</a> para acceder a la solicitud que le impide volver a votar sobre este asunto]]></string>
     <string name="go_app_button">ir a la aplicación</string>
     <string name="documents_lbl">documentos</string>
-    <string name="request_user_cert_error_msg">error comprobando el estado de la solicitud, ¿se ha personado
-        en las instalaciones de la policía para verificar su identidad?</string>
+    <string name="identity_provider_lbl">Proveedor de indentidad</string>
     <string name="cancel_lbl">cancelar</string>
     <string name="continue_lbl">continuar</string>
     <string name="request_lbl">solicitar</string>
     <string name="nif_lbl">introduzca su nif</string>
-    <string name="representative_nif_lbl">introduzca el nif del representante que desee editar</string>
     <string name="password_lbl">contraseña</string>
     <string name="idcard_password_lbl">contraseña del dni</string>
     <string name="dialogo_password_text_entry">introducir contraseña</string>
@@ -136,12 +128,9 @@
     <string name="info_lbl">información</string>
     <string name="voting_info_lbl">datos sobre la votación</string>
     <string name="eventfields_dialog_caption">campos de la reclamación</string>
-    <string name="check_representative_lbl">comprobar mi representante</string>
     <string name="editor_empty_error_lbl">debe rellenar el campo del editor</string>
     <string name="signature_msg_subject">[firma]-</string>
-    <string name="representative_lbl">representante</string>
     <string name="num_representations_lbl">%1$s representaciones</string>
-    <string name="representative_data_lbl">datos del representante</string>
     <string name="rss_service_lbl">servicio de subscripciones</string>
     <string name="signed_document_msg">documento firmado y enviado</string>
     <string name="signature_error_notification_msg">error firmando documento</string>
@@ -158,7 +147,7 @@
     <string name="delete_receipt_lbl">borrar recibo</string>
     <string name="open_receipt_lbl">ver recibo</string>
     <string name="signers_part_lbl">datos de los certificados firmantes:</string>
-    <string name="num_signers_lbl"><![CDATA[<b>documento con %1$s firmantes</b>]]></string>
+    <string name="num_signers_lbl"><![CDATA[<b>documento con %1$d firmantes</b>]]></string>
     <string name="signers_info_lbl">firmantes del recibo</string>
     <string name="timestamp_info_lbl">datos del sello de tiempo</string>
     <string name="date_saved_lbl">guardado</string>
@@ -180,8 +169,6 @@
     <string name="subject_error_lbl">debe rellenar el campo asunto</string>
     <string name="date_begin_lbl">fecha inicio</string>
     <string name="date_init_after_finish_error_lbl">la fecha de inicio no puede ser posterior a la fecha de finalización</string>
-    <string name="select_control_center_lbl">seleccione un centro de control</string>
-    <string name="control_center_missing_error_lbl">debe seleccionar un centro de control</string>
     <string name="empty_field_error_lbl">el contenido del campo no puede ir vacío</string>
     <string name="add_vote_option_lbl">añadir opción de votación</string>
     <string name="add_vote_option_msg">introduzca el texto que aparecerá como opción en la votación</string>
@@ -191,98 +178,17 @@
     <string name="vote_options_lbl">opciones de la votación</string>
     <string name="payment_options_lbl">opciones de pago</string>
     <string name="option_repeated_msg">ya ha introducido una opción con el valor \'%1$s\'</string>
+    <string name="election_publish_msg">Publicar votación</string>
     <string name="election_published_ok_msg">la votación se ha publicado corréctamente</string>
-    <string name="representative_image_lbl">imagen del representante</string>
     <string name="cancel_anonymouys_representation_lbl">cancelar representación anónima</string>
-    <string name="representative_list_lbl">lista de representantes</string>
     <string name="receipt_list_lbl">lista de recibos</string>
-    <string name="options_for_representatives_lbl">opciones para representantes</string>
-    <string name="missing_representative_img_error_msg">debe proporcionar una imagen que identifique al representante</string>
-    <string name="select_img_lbl">seleccione una imagen</string>
-    <string name="select_representative_image_lbl">seleccione una imagen asociada al representante</string>
     <string name="confirm_selection_msg">confirme la selección</string>
-    <string name="representative_delegation_lbl">delegar en representante</string>
-    <string name="anonymous_delegation_lbl">delegar de forma anónima</string>
-    <string name="anonymous_transaction_lbl">pago anónimo</string>
-    <string name="anonymous_delegation_caption">delegación anónima</string>
-    <string name="public_delegation_lbl">delegar de forma pública</string>
-    <string name="anonymous_delegation_time_msg">indique el número de semanas que estará activa la delegación, el máximo es 52 (un año)</string>
-    <string name="public_delegation_confirm_msg"><![CDATA[va a delegar de forma pública en <b>\'%1$s\'</b>]]></string>
-    <string name="anonymous_delegation_confirm_msg"><![CDATA[va a delegar de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas,
-        <br/>por su seguridad la operación será efectiva a partir del <b>\'%3$s\'</b> y terminará el
-        <b>\'%4$s\'</b>]]></string>
-    <string name="anonymous_delegation_msg"><![CDATA[ha delegado de forma anónima en <b>\'%1$s\'</b> durante <b>\'%2$s\'</b> semanas]]></string>
-    <string name="currency_request_formatted"><![CDATA[importe de la operación: <b>%1$s %2$ss</b>
-        <br/>url de servidor: <a href=\'%3$s\'>%3$s</a>]]></string>
     <string name="receipt_vote_subtitle">voto</string>
-    <string name="anonimous_representative_request_lbl">delegación anónima de representante</string>
-    <string name="currency_drop_down_lbl">finanzas</string>
-    <string name="currency_list_lbl">últimos movimientos</string>
-    <string name="cash_lbl">efectivo</string>
-    <string name="save_currency_lbl">guardar moneda</string>
-    <string name="delete_currency_lbl">borrar moneda</string>
-    <string name="share_currency_lbl">compartir moneda</string>
-    <string name="currency_user_info_lbl">información del usuario</string>
-    <string name="request_cash_lbl">retirar efectivo</string>
     <string name="update_signers_info_lbl">actualizar datos</string>
-    <string name="currency_user_info_request_msg_subject">solicitud de información de cuentas</string>
-    <string name="account_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s]]></string>
-    <string name="currency_cash_amount_info_lbl"><![CDATA[<b>\'%1$s\'</b> %2$s en efectivo en su móvil]]></string>
-    <string name="currency_last_request_info_lbl"><![CDATA[última actualización <u><b>%1$s</b></u>]]></string>
-    <string name="time_remaining_info_lbl">tienes que gastar \'%1$s\' antes del domingo a las 24:00 horas</string>
-    <string name="time_remaining_tagvs_info_lbl">antes del domingo a las 24:00 horas</string>
-    <string name="time_remaining_lbl">si no lo gastas antes del domingo a las 24:00 horas el importe pasará al sistema</string>
-    <string name="cash_request_dialog_caption">retirar efectivo</string>
-    <string name="cash_send_dialog_caption">realizar pago</string>
-    <string name="cash_dialog_msg"><![CDATA[seleccione un importe inferior a <br/><b>%1$s</b> %2$s]]></string>
-    <string name="cash_for_payment_dialog_msg"><![CDATA[para completar la operación necesita retirar
-     <b>%2$s %1$s</b><br/> su límite es de <b>%3$s %1$s</b>]]></string>
-    <string name="min_withdrawal_msg">el importe debe ser mayor que cero</string>
-    <string name="min_payment_option_msg">debe seleccionar al menos una opción de pago</string>
-    <string name="currency_request_msg_subject">retirada de efectivo</string>
-    <string name="currency_request_passw_msg"><![CDATA[Obtener <b>\'%1$s\'</b> %2$s en efectivo]]></string>
-    <string name="transaction_send_passw_msg"><![CDATA[va a realizar un pago de <b>%1$s %2$s</b>. a
-        <b>\'%3$s\'</b> bajo el concepto <b>\'%4$s\'</b>]]></string>
-    <string name="currency_request_ok_caption">retirada de dinero con éxito</string>
-    <string name="currency_request_error_caption">error retirando dinero</string>
-    <string name="currency_request_ok_msg"><![CDATA[ha retirado <b>%1$s %2$s</b>]]></string>
-    <string name="insufficient_cash_for_tagvs_caption">disponible insuficiente para \'%1$s\'</string>
-    <string name="insufficient_cash_caption">no dispone de saldo suficiente</string>
-    <string name="insufficient_cash_msg"><![CDATA[importe solicitado <b>%2$s %1$s</b><br/>
-    disponible <b>%3$s %1$s</b>]]></string>
-    <string name="insufficient_anonymous_cash_msg"><![CDATA[importe solicitado <b>%2$s %1$s</b><br/>
-        disponible en efectivo <b>%3$s %1$s</b><br/> no dispone efectivo suficiente para hacer
-        una transacción anónima,<br/> ¿desea retirar <b>efectivo</b> de su cuenta para completar la operación?]]></string>
-    <string name="insufficient_anonymous_money_msg"><![CDATA[no puede completar la transacción anónima,
-        dispone de <b>\'%2$s\' %1$s</b> en efectivo, necesita retirar <b>\'%3$s\' %1$s</b> en efectivo<br/>
-        y en su cuenta sólo dispone de <b>\'%4$s\' %1$s</b>]]></string>
-    <string name="currency_send_ok_caption">pago realizado con éxito</string>
-    <string name="currency_send_ok_msg"><![CDATA[ha realizado un pago de <b>\'%1$s\' %2$s</b> bajo el
-    concepto de <b>\'%3$s\'</b> a <b>\'%4$s\'</b>]]></string>
-    <string name="currency_send_error_caption">error realizando pago</string>
-    <string name="currency_send_error_msg"><![CDATA[problemas realizando el pago, \'%1$s\']]></string>
-    <string name="week_lapse_lbl">%1$s y %2$s</string>
-    <string name="week_lbl">semana</string>
-    <string name="transaction_lbl">transacción</string>
-    <string name="transactionsvs_lbl">transacciones</string>
-    <string name="transaction_formatted"><![CDATA[fecha: %1$s<br/><b>Cantidad:</b> %2$s %3$s]]></string>
-    <string name="transaction_from_user_lbl"><![CDATA[usuario <b>emisor</b>:<br/><b>nif:</b> %1$s<br/>
-    <b>nombre:</b> %2$s]]></string>
-    <string name="transaction_to_user_lbl"><![CDATA[<b>receptor</b>:<br/><b>nif:</b> %1$s <br/>
-        <b>nombre:</b> %2$s]]></string>
-    <string name="transaction_receipt">recibo</string>
-    <string name="wallet_lbl">monedero</string>
     <string name="cert_info_lbl">datos del certificado</string>
-    <string name="currency_cert_caption">certificado de la moneda</string>
-    <string name="cancel_currency_lbl">cancelar moneda</string>
-    <string name="currency_data_info_lbl">válido desde %1$s hasta %2$s</string>
     <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
-    <string name="currency_expended_send_error_msg">el efectivo ya habían sido consumidos</string>
-    <string name="currency_repeated_error_msg">en la operación se han mezclado billetes usados, por favor, vuelva a intentarlo</string>
-    <string name="currency_repeated_wallet_error_msg">ha intentado añadir al monedero un billete de %1$s que ya estaba guardado</string>
     <string name="browswevs_lbl">sistema de votación</string>
     <string name="test_lbl">test</string>
-    <string name="admin_currency_menu_item">administración de efectivo</string>
     <string name="connecting_lbl">conectando...</string>
     <string name="phone_lbl">teléfono móvil</string>
     <string name="mail_lbl">correo electrónico</string>
@@ -298,16 +204,15 @@
     <string name="decrypt_cert_notfound_msg">imposible descifrar desde este dispositivo</string>
     <string name="connecting_to_service_msg">conectando a servicio</string>
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
-    <string name="anonymous_transaction_msg">deseo que el pago sea anónimo</string>
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
         <b>votingsystem, 2015. </b>version %s<br><br>
         <a href="https://192.168.1.5/termsOfService.html">condiciones del  servicio</a><br><br>
         <a href="https://192.168.1.5/privacyPolicy.html">política de privacidad</a>
     ]]></string>
-    <string name="can_dialog_body"><![CDATA[
-        <a href="https://192.168.1.5/CurrencyServer/docs/dnieCAN.xhtml">¿qué es el CAN del DNIe?</a>
-    ]]></string>
+    <string name="can_question_msg">¿qué es el CAN del DNIe?</string>
+    <string name="can_info_msg">El CAN (Card Access Number) es un número de 6 dígitos que aparece
+        en el anverso del documento físico de su DNIe</string>
     <string name="about_licenses">open source licenses</string>
     <string name="about_eula">end user license agreement</string>
     <string name="title_about">acerca de</string>
@@ -330,7 +235,6 @@
     <string name="disconnect_lbl">desconectar</string>
     <string name="sign_document_lbl">firma de documento</string>
     <string name="signing_document_lbl">firmando documento</string>
-    <string name="currency_accounts_updated">cuentas actualizadas</string>
     <string name="time_limited_checkbox_msg">gastar antes del domingo a las 24:00</string>
     <string name="add_tag_lbl">añadir etiqueta</string>
     <string name="selected_tag_lbl">para emplear en \'%1$s\'</string>
@@ -340,23 +244,18 @@
     <string name="change_lbl">cambiar</string>
     <string name="wildtag_lbl">gastos libres</string>
     <string name="for_lbl">para</string>
-    <string name="currency_request_msg">retirando \'%1$s\' %2$s para \'%3$s\'</string>
-    <string name="currency_accounts_lbl">cuentas</string>
-    <string name="enter_wallet_password_msg">introduzca la contraseña de su monedero</string>
-    <string name="unlocking_wallet_msg">desbloqueando monedero</string>
     <string name="lapse_info">válido hasta: %1$s</string>
     <string name="cancelled_lbl">cancelado</string>
     <string name="expended_lbl">consumido</string>
     <string name="rejected_lbl">rechazado</string>
-    <string name="currency_lbl">moneda</string>
     <string name="in_lbl">en</string>
-    <string name="eventvs_election_active">votaciones abiertas</string>
-    <string name="eventvs_election_closed">votaciones cerradas</string>
-    <string name="eventvs_election_pending">votaciones pendientes</string>
-    <string name="eventvs_election_search_msg">resultado de la búsqueda de \'%1$s\' en \'%2$s\'</string>
+    <string name="election_active">votaciones abiertas</string>
+    <string name="election_closed">votaciones cerradas</string>
+    <string name="election_pending">votaciones pendientes</string>
+    <string name="election_search_msg">resultado de la búsqueda de \'%1$s\' en \'%2$s\'</string>
     <string name="search_result">resultado de la búsqueda</string>
     <string name="waiting_for_access_control_connection">esperando conexión con Control de Acceso</string>
-    <string name="num_matches">\'%1$s\' coincidencias</string>
+    <string name="num_matches">\'%1$d\' coincidencias</string>
     <string name="date_election_lbl">fecha de la consulta</string>
     <string name="vote_info_formatted"><![CDATA[fecha de la firma: <b>%1$s</b><br/><br/> opción seleccionada: <b>%2$s</b>]]></string>
     <string name="access_request_info_formatted"><![CDATA[fecha de la firma: <b>\'%1$s\'</b><br/>
@@ -368,24 +267,13 @@
     <string name="vote_error_msg">voto con inválido</string>
     <string name="votvs_value_msg">opción seleccionada \'%1$s\'</string>
     <string name="timestamp_error_lbl">error comprobando sello de tiempo</string>
-    <string name="representative_new_msg">dando de alta representante</string>
     <string name="nif_with_errors_msg">el nif \'%1$s\' tiene errores</string>
-    <string name="representatives_lbl">representantes</string>
     <string name="representation_last_checked_msg">última actualización: \'%1$s\'</string>
-    <string name="without_representative_msg">no tiene activa ninguna representación</string>
     <string name="with_anonymous_representation_msg">tiene activa una \'representación anónima\' que termina el \'%1$s\'</string>
-    <string name="representative_msg">está dado de alta como representante</string>
     <string name="fetching_receipt_lbl">obteniendo recibo</string>
-    <string name="anonymous_representative_selection_formatted"><![CDATA[delegación anónima de representante
-        de <b>\'%1$s\' semanas de duración</b><br/><br/>Fecha de comienzo:  <b>\'%2$s\'</b><br/>
-        Fecha de finalización:  <b>\'%3$s\'</b>]]></string>
-    <string name="anonymous_representative_request_formatted"><![CDATA[
-        duración de la delegación: \'%1$s\' semanas<br/><br/>activa desde: \'%2$s\'
-        <br/>activa hasta: \'%3$s\'
-        <br/>url de servidor: <a href=\'%4$s\'>%4$s</a>]]></string>
+
     <string name="anonymous_delegation_cancellation_lbl">cancelación de representación anónima</string>
     <string name="missing_anonymous_delegation_cancellation_data">no dispone de la información necesaria para cancelar la representación anónima</string>
-    <string name="user_representative_lbl">su representante</string>
     <string name="cancel_anonymouys_representation_msg">una vez se haya revocado la delegación podrá volver a elegir otro representante</string>
     <string name="cancel_anonymous_representation_ok_msg">ya puede delegar su voto en el representante de su elección</string>
     <string name="fetching_user_accounts_info_msg">obteniendo información de las cuentas del usuario</string>
@@ -395,33 +283,21 @@
     <string name="app_needed_caption">instalar aplicación</string>
     <string name="app_needed_msg">para poder acceder a esta funcionalidad necesita instalar el lector de código de barras de \'ZXing Team\'</string>
     <string name="qr_code_lbl">código QR</string>
-    <string name="qr_transaction_request_msg">solicitando \'%1$s\' para \'%2$s\'</string>
-    <string name="transaction_qr_msg">esperando ingreso</string>
     <string name="qr_connection_required_msg">para poder operar con códigos QR necesita estar conectado</string>
     <string name="qr_create_lbl">crear QR</string>
     <string name="qr_read_lbl">leer QR</string>
-    <string name="currency_prompt">moneda</string>
     <string name="operation_prompt">tipo de operación</string>
-    <string name="currency_ticket_request_operation">solicitar efectivo</string>
-    <string name="transaction_operation">solicitar ingreso en cuenta</string>
     <string name="operation_lbl">operación</string>
-    <string name="delete_transaction_lbl">borrar transacción</string>
     <string name="movements_lbl">movimientos</string>
     <string name="movement_lbl">movimiento</string>
     <string name="about_msg">información sobre la aplicación</string>
     <string name="change_password_lbl">establecer contraseña</string>
-    <string name="new_password_ok_msg">a partir de ahora deberá firmar y utilizar el monedero con su nueva contraseña</string>
+    <string name="new_password_ok_msg">A partir de ahora deberá firmar con esta nueva contraseña. Si lo desea, puede cambiarla en \'ajustes\'</string>
     <string name="new_password_error_msg">los valores no coinciden comience de nuevo. Introduzca la nueva contraseña</string>
-    <string name="open_wallet_lbl">abrir monedero</string>
     <string name="lapse_lbl">caduca: %1$s</string>
-    <string name="tag_info"><![CDATA[<b>%1$s %2$s</b> para <b>%3$s</b>]]></string>
-    <string name="tag_info_time_limited"><![CDATA[tienes que gastar <b>%1$s %2$s</b> antes de que acabe la semana]]></string>
-    <string name="send_to_wallet">cambiar de monedero</string>
-    <string name="connect_device_advice_msg">¿está conectado el dispositivo al que desea enviar el efectivo?</string>
+    <string name="select_voting_service">Servicios de votación</string>
     <string name="searching_devices_lbl">buscando dispositivos</string>
-    <string name="send_to_wallet_connection_required_msg">para poder acceder al monedero destino necesita estar conectado</string>
     <string name="connection_required_msg">para poder continuar necesita identificarse</string>
-    <string name="select_connected_device_msg">seleccione el dispositivo al que desee enviar el efectivo</string>
     <string name="connect_lbl">conectar</string>
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
     <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
@@ -436,13 +312,13 @@
     <string name="device_not_found_error_msg">¿seguro que está conectado el dispositivo con el que intenta comunicarse?</string>
     <string name="usevs_connection_not_found_error_msg">el destinatario no está conectado</string>
     <string name="qr_codes_lbl">códigos QR</string>
-    <string name="address_lbl">dirección</string>
+    <string name="name_lbl">dirección</string>
     <string name="postal_code_lbl">código postal</string>
     <string name="location_lbl">localidad</string>
     <string name="province_lbl">provincia</string>
     <string name="country_lbl">país</string>
     <string name="save_lbl">guardar</string>
-    <string name="enter_address_error_lbl">introduzca la calle</string>
+    <string name="enter_name_error_lbl">introduzca la calle</string>
     <string name="enter_postal_code_error_lbl">introduzca código postal</string>
     <string name="enter_city_error_lbl">introduzca la localidad</string>
     <string name="enter_province_error_lbl">introduzca la provincia</string>
@@ -454,23 +330,13 @@
     <string name="session_expired_msg">la sesión ha expirado, por favor, vuelva a identificarse</string>
     <string name="payment_ok_caption">pago completado con éxito</string>
     <string name="available_exceded_error_msg">el importe seleccionado excede el máximo disponible</string>
-    <string name="updated_currency_with_error_msg">se han eliminado de su monedero</string>
-    <string name="currency_expended_msg">\'%1$s\' para \'%2$s\' que ya habían sido consumidos</string>
-    <string name="currency_lapsed_msg">\'%1$s\' para \'%2$s\' que ya habían caducado</string>
-    <string name="currency_unknown_msg">\'%1$s\' para \'%2$s\' que emitidos por un servidor no reconocido</string>
     <string name="messages_lbl">mensajes</string>
-    <string name="wallet_change_lbl">cambio de monedero</string>
-    <string name="save_to_wallet_lbl">guardar en monedero</string>
-    <string name="save_to_wallet_ok_msg">los \'%1$s\' se encuentran ahora en su monedero</string>
     <string name="error_fetching_device_info_lbl">error obteniendo la información de los dispositivos del usuario</string>
     <string name="library_app_name">Android Voting System Library</string>
     <string name="voting_drop_down_lbl">votaciones</string>
     <string name="claims_drop_down_lbl">reclamaciones</string>
     <string name="manifiests_drop_down_lbl">manifiestos</string>
-    <string name="representatives_drop_down_lbl">representantes</string>
     <string name="receipts_drop_down_lbl">recibos</string>
-    <string name="representatives_list_lbl">lista de representantes</string>
-    <string name="representatives_operations_lbl">operaciones</string>
 
     <string name="unknown_drop_down_lbl">sistema desconocido</string>
     <string name="vote_repeated_msg"><![CDATA[ya había enviado un voto para la convocatoria \'%1$s\' en el que
@@ -495,31 +361,16 @@
     <string name="receipt_lbl">recibo</string>
     <string name="account_input">ingreso en cuenta</string>
     <string name="account_output">retirada de efectivo</string>
-    <string name="currency_send">pago anónimo</string>
-    <string name="currency_ticket_send">pago en efectivo</string>
-    <string name="currency_request_subtitle">retirada de efectivo</string>
-    <string name="currency_cancellation">cancelación de efectivo</string>
-    <string name="anonymous_representative_selection_lbl">delegación anónima de representante</string>
     <string name="delegation_lbl">delegación</string>
     <string name="access_request_lbl">solicitud de acceso</string>
     <string name="time_limited_lbl">con límite de tiempo</string>
     <string name="active_lbl">activo</string>
     <string name="lapsed_lbl">caducado</string>
-    <string name="signed_transaction_lbl">ingreso en cuenta</string>
-    <string name="currency_send_lbl">ingreso anónimo en cuenta</string>
-    <string name="currency_change_lbl">envío anónimo</string>
-    <string name="transaction_request_confirm_msg">va a realizar un \'%1$s\' por valor de %2$s a %3$s</string>
     <string name="tagAmountErrorMsg">No dispone de dinero suficiente para hacer una transacción de \'%1$s\' con la etiqueta \'%2$s\'. Su máximo para la etiqueta \'%2$s\' es de \'%3$s\'</string>
-    <string name="currency_send_receipt_ok_msg">ha \'%1$s\' un ingreso anónimo de \'%2$s\' para \'%3$s\'</string>
-    <string name="currency_change_receipt_ok_msg">ha \'%1$s\' un intercambio anónimo de \'%2$s\' para \'%3$s\'</string>
     <string name="from_user_receipt_ok_msg">ha \'%1$s\' un ingreso de \'%2$s\' para \'%3$s\'</string>
     <string name="income_lbl">recibido</string>
     <string name="expense_lbl">realizado</string>
     <string name="check_operation">comprobar operación</string>
-    <string name="currency_send_description"><![CDATA[<html><b>ingreso anónimo</b><br/>asunto: \'%1$s\'
-        <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>
-    <string name="currency_change_description"><![CDATA[<html><b>intercambio anónimo</b><br/>asunto: \'%1$s\'
-        <br/>receptor: \'%2$s\'<br/>importe: \'%3$s\' <br/>cambio:\'%4$s\'</html>]]></string>
     <string name="details_lbl">detalles</string>
     <string name="check_lbl">comprobar</string>
     <string name="subject_missing_msg">rellene el campo asunto</string>
@@ -531,7 +382,8 @@
     <string name="str_logo_desc">DNI electrónico</string>
     <string name="result_ok_description">La operación se ha completado correctamente</string>
     <string name="op_dgtinit">Aproxime DNIe al dispositivo</string>
-    <string name="process_msg_reading">Leyendo DNIe...</string>    <string name="enter_password_retry_msg">le quedan %1$s intentos</string>
+    <string name="process_msg_reading">Leyendo DNIe...</string>
+    <string name="enter_password_retry_msg">le quedan %1$s intentos</string>
     <string name="navigation_drawer_open">desplegar menu</string>
     <string name="navigation_drawer_close">cerrar menu</string>
     <string name="enter_password_msg">introduzca la contraseña</string>
@@ -539,10 +391,10 @@
     <string name="enter_password_last_try_msg">DNIe - último intento</string>
 
     <string name="pref_title_dnie">Datos del usuario</string>
-    <string name="pref_description_dnie">para poder usar su DNI el tDNIe version 3.0eléfono debe disponer de NFC</string>
+    <string name="pref_description_dnie">para poder usar su DNI el teléfono debe disponer de NFC</string>
     <string name="can_dialog_caption">introduzca el CAN de su DNIe</string>
     <string name="dnie_connection_error_msg">problemas de conexión con su DNIe, por favor, vuelva a intentarlo</string>
-    <string name="dnie_sign_progress_caption"></string>
+    <string name="dnie_sign_progress_caption">DNIe</string>
     <string name="dnie_sign_connecting_msg">estableciendo conexión ...</string>
     <string name="vote_selected_msg">voto: %1$s</string>
     <string name="double_back_advice">Pulse 2 veces seguidas ATRAS para salir</string>
@@ -562,19 +414,12 @@
     <string name="first_run_msg">Para poder usar la aplicación debe rellenar el formulario. La aplicación le pedirá que lo firme con su DNI electrónico</string>
     <string name="user_data_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/><br/>
         <b>CAN: </b>%1$s<br/>
-        <b>Teléfono móvil: </b>%2$s<br/>
-        <b>email: </b>%3$s<br/>
-        <b>Dirección: </b>%4$s<br/>
-        <b>Código postal: </b>%5$s<br/>
-        <b>Localidad: </b>%6$s<br/>
-        <b>Provincia: </b>%7$s<br/>
-        <b>País: </b>%8$s<br/>
         ]]></string>
     <string name="crypto_device_access_mode_lbl">mecanismo de contraseña</string>
-    <string name="patternLock_switch_lbp">patrón visual</string>
+    <string name="patternLock_switch_lbl">Patrón Visual</string>
     <string name="pin_lbl">PIN</string>
+    <string name="id_card_passw_lbl">Contraseña del DNIe</string>
     <string name="forgotten_passw_lbl">¿ha olvidado la contraseña?</string>
-    <string name="access_mode_passw_required_msg">para usar la aplicación necesita introducir el mecanismo de contraseña</string>
     <string name="retries_exceeded_caption">ha superado el número máximo de intentos</string>
     <string name="retries_exceeded_msg">debe establecer de nuevo la contraseña utilizando su DNI</string>
     <string name="disconnect_from_service_quesion_msg">¿Desea desconectar del servicio?</string>
@@ -584,10 +429,17 @@
     <string name="enter_new_passw_to_app_msg">introduzca la contraseña con la que protegerá sus operaciones de firma</string>
     <string name="idcard_signing_caption">Proceso de firma con el DNI electrónico</string>
     <string name="confirm_sign_msg">¿Desea continuar con el procedimiento?</string>
-    <string name="dnie_connection_null_error_msg">por favor, compruebe su conexión a red y vuelva a intentarlo</string>
+    <string name="dnie_connection_null_error_msg">por favor, vuelva a intentarlo</string>
     <string name="user_from_csr_missmatch_msg">el usuario \'%1$s\' con nif \'%2$s\'  está intentando acceder en su nombre desde el navegador</string>
     <string name="cash_no_available_msg">no tiene disponible suficiente para retirar efectivo</string>
     <string name="account_input_from_bank">ingeso desde entidad bancaria</string>
     <string name="connection_required_caption">acceso restringido</string>
     <string name="browser_session_expired_msg">por favor, identifíquese otra vez desde el navegador</string>
+    <string name="nfc_required_msg">Para usar la aplicación necesita un teléfono con NFC habilitado</string>
+    <string name="save_dnie_passw_caption">¿Desea guardar la contraseña de su DNIe?</string>
+    <string name="save_dnie_passw_msg">Si lo desea puede guardar la contraseña de su DNIe protegida mediante
+    un \'PIN\' o un \'PATRON\' para agilizar futuras firmas</string>
+    <string name="dnie_passw_protected_msg">A partir de ahora podrá utilizar su \'%1$s\' para firmar con su DNIe. Si
+    se equivoca al introducirlo tres veces deberá firmar introduciendo la contraseña del DNIe o volver a establecer
+    el mecanismo de protección de contrasela desde  \'ajustes \'</string>
 </resources>

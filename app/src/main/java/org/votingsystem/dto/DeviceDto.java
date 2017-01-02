@@ -1,9 +1,6 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.crypto.PEMUtils;
 
 import java.io.Serializable;
 import java.security.PublicKey;
@@ -12,7 +9,6 @@ import java.security.cert.X509Certificate;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -32,10 +28,11 @@ public class DeviceDto implements Serializable {
     private String IBAN;
     private String NIF;
     private Type deviceType;
-    @JsonIgnore private X509Certificate x509Certificate;
-    @JsonIgnore private PublicKey publicKey;
+    private X509Certificate x509Certificate;
+    private PublicKey publicKey;
 
-    public DeviceDto() {}
+    public DeviceDto() {
+    }
 
     public DeviceDto(Long id) {
         this.setId(id);
@@ -149,8 +146,8 @@ public class DeviceDto implements Serializable {
         this.IBAN = IBAN;
     }
 
-    @JsonIgnore public X509Certificate getX509Certificate() throws Exception {
-        if(x509Certificate == null && x509CertificatePEM != null) x509Certificate =
+    public X509Certificate getX509Certificate() throws Exception {
+        if (x509Certificate == null && x509CertificatePEM != null) x509Certificate =
                 PEMUtils.fromPEMToX509CertCollection(x509CertificatePEM.getBytes()).iterator().next();
         return x509Certificate;
     }

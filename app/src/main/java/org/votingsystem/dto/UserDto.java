@@ -3,9 +3,6 @@ package org.votingsystem.dto;
 import android.net.Uri;
 import android.util.Base64;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle2.asn1.DERObjectIdentifier;
 import org.bouncycastle2.asn1.x500.AttributeTypeAndValue;
@@ -15,9 +12,9 @@ import org.bouncycastle2.asn1.x500.style.BCStyle;
 import org.bouncycastle2.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle2.cms.SignerInformation;
 import org.bouncycastle2.jce.X509Principal;
+import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Country;
-import org.votingsystem.util.crypto.CertUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -35,27 +32,22 @@ import static org.votingsystem.util.LogUtils.LOGD;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
     public static final String TAG = UserDto.class.getSimpleName();
 
-    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANK, CONTACT}
-
-    public enum State {ACTIVE, PENDING, SUSPENDED, CANCELLED}
-
+    public enum State {ACTIVE, PENDING, SUSPENDED, CANCELED}
 
     private Long id;
     private State state;
-    private Type type;
     private String name;
     private String reason;
     private String description;
     private Set<DeviceDto> connectedDevices;
     private DeviceDto device;
-    private Set<CertificateDto> certCollection = new HashSet<>();
+    private Set<CertificateDto> certificates = new HashSet<>();
     private String firstName;
     private String lastName;
     private String phone;
@@ -67,20 +59,17 @@ public class UserDto implements Serializable {
     private String URL;
     private String cn;
     private String deviceId;
-    private UserDto representative;//this is for groups
-    private String representativeMessageURL;
-    private String imageURL;
-    private Address address;
-    @JsonIgnore private X509Certificate x509Certificate;
-    @JsonIgnore private byte[] imageBytes;
+
+    private AddressDto address;
+    private X509Certificate x509Certificate;
+    private byte[] imageBytes;
     private transient Uri contactURI;
     private Long numRepresentations;
 
+    private TimeStampToken timeStampToken;
+    private SignerInformation signerInformation;
 
-    @JsonIgnore private TimeStampToken timeStampToken;
-    @JsonIgnore private SignerInformation signerInformation;
-
-    public UserDto() {}
+    public UserDto() { }
 
     public UserDto(String name, String phone, String email) {
         this.name = name;
@@ -88,20 +77,19 @@ public class UserDto implements Serializable {
         this.email = email;
     }
 
-    @JsonIgnore
     public static UserDto getUser(X500Name subject) {
         UserDto result = new UserDto();
-        for(RDN rdn : subject.getRDNs()) {
+        for (RDN rdn : subject.getRDNs()) {
             AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
-            if(BCStyle.SERIALNUMBER.getId().equals(attributeTypeAndValue.getType().getId())) {
+            if (BCStyle.SERIALNUMBER.getId().equals(attributeTypeAndValue.getType().getId())) {
                 result.setNIF(attributeTypeAndValue.getValue().toString());
-            } else if(BCStyle.SURNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
+            } else if (BCStyle.SURNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
                 result.setLastName(attributeTypeAndValue.getValue().toString());
-            } else if(BCStyle.GIVENNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
+            } else if (BCStyle.GIVENNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
                 result.setFirstName(attributeTypeAndValue.getValue().toString());
-            } else if(BCStyle.CN.getId().equals(attributeTypeAndValue.getType().getId())) {
+            } else if (BCStyle.CN.getId().equals(attributeTypeAndValue.getType().getId())) {
                 result.setCn(attributeTypeAndValue.getValue().toString());
-            } else if(BCStyle.C.getId().equals(attributeTypeAndValue.getType().getId())) {
+            } else if (BCStyle.C.getId().equals(attributeTypeAndValue.getType().getId())) {
                 result.setCountry(attributeTypeAndValue.getValue().toString());
             } else LOGD(TAG, "oid: " + attributeTypeAndValue.getType().getId() +
                     " - value: " + attributeTypeAndValue.getValue().toString());
@@ -109,20 +97,21 @@ public class UserDto implements Serializable {
         return result;
     }
 
-    @JsonIgnore
     public static UserDto getUser(X509Certificate x509Cert) throws CertificateEncodingException {
         X500Name x500name = new JcaX509CertificateHolder(x509Cert).getSubject();
         UserDto user = getUser(x500name);
         user.setX509Certificate(x509Cert);
         try {
-            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                    x509Cert, Constants.DEVICE_OID);
-            if(certExtensionDto != null) {
+            CertExtensionDto certExtensionDto = CertExtensionDto.fromJson(
+                    CertUtils.getCertExtensionData(x509Cert, Constants.DEVICE_OID));
+            if (certExtensionDto != null) {
                 user.setEmail(certExtensionDto.getEmail());
                 user.setPhone(certExtensionDto.getMobilePhone());
                 user.setDeviceId(certExtensionDto.getDeviceId());
             }
-        } catch(Exception ex) {ex.printStackTrace();}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return user;
     }
 
@@ -139,7 +128,6 @@ public class UserDto implements Serializable {
         return user;
     }
 
-    @JsonIgnore
     public Set<DeviceDto> getDevices() throws Exception {
         return connectedDevices;
     }
@@ -169,7 +157,7 @@ public class UserDto implements Serializable {
     }
 
     public String getFullName() {
-        return firstName + " "  + lastName;
+        return firstName + " " + lastName;
     }
 
     public String getCn() {
@@ -180,7 +168,6 @@ public class UserDto implements Serializable {
         this.cn = cn;
     }
 
-    @JsonIgnore
     public String getSignedContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return Base64.encodeToString(signerInformation.getContentDigest(), Base64.NO_WRAP);
@@ -243,23 +230,13 @@ public class UserDto implements Serializable {
         this.state = state;
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public UserDto setType(Type type) {
-        this.type = type;
-        return this;
-    }
-
-    @JsonIgnore
     public boolean checkUserFromCSR(X509Certificate x509CertificateToCheck)
             throws CertificateEncodingException {
         X500Name x500name = new JcaX509CertificateHolder(x509CertificateToCheck).getSubject();
         UserDto userToCheck = getUser(x500name);
-        if(!NIF.equals(userToCheck.getNIF())) return false;
-        if(!firstName.equals(userToCheck.getFirstName())) return false;
-        if(!lastName.equals(userToCheck.getLastName())) return false;
+        if (!NIF.equals(userToCheck.getNIF())) return false;
+        if (!firstName.equals(userToCheck.getFirstName())) return false;
+        if (!lastName.equals(userToCheck.getLastName())) return false;
         return true;
     }
 
@@ -303,13 +280,13 @@ public class UserDto implements Serializable {
         this.lastName = lastName;
     }
 
-    public Set<CertificateDto> getCertCollection() {
-        return certCollection;
+    public Set<CertificateDto> getCertificates() {
+        return certificates;
     }
 
-    public void setCertCollection(Collection<CertificateDto> certCollection) {
-        if(certCollection == null) this.certCollection = null;
-        else this.certCollection = new HashSet<>(certCollection);
+    public void setCertificates(Collection<CertificateDto> certificates) {
+        if (certificates == null) this.certificates = null;
+        else this.certificates = new HashSet<>(certificates);
     }
 
     public DeviceDto getDevice() {
@@ -318,14 +295,6 @@ public class UserDto implements Serializable {
 
     public void setDevice(DeviceDto device) {
         this.device = device;
-    }
-
-    public UserDto getRepresentative() {
-        return representative;
-    }
-
-    public void setRepresentative(UserDto representative) {
-        this.representative = representative;
     }
 
     public String getMetaInf() {
@@ -342,10 +311,10 @@ public class UserDto implements Serializable {
 
     public void setCountry(String country) {
         this.country = country;
-        if(address != null) {
+        if (address != null) {
             try {
                 address.setCountry(Country.valueOf(country));
-            }catch (Exception ex) {
+            } catch (Exception ex) {
                 LOGD(TAG, ex.getMessage());
             }
         }
@@ -391,33 +360,17 @@ public class UserDto implements Serializable {
         this.numRepresentations = numRepresentations;
     }
 
-    public String getRepresentativeMessageURL() {
-        return representativeMessageURL;
-    }
-
-    public void setRepresentativeMessageURL(String representativeMessageURL) {
-        this.representativeMessageURL = representativeMessageURL;
-    }
-
-    public String getImageURL() {
-        return imageURL;
-    }
-
-    public void setImageURL(String imageURL) {
-        this.imageURL = imageURL;
-    }
-
-    public Address getAddress() {
+    public AddressDto getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(AddressDto address) {
         this.address = address;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
-        if(contactURI != null) s.writeObject(contactURI.toString());
+        if (contactURI != null) s.writeObject(contactURI.toString());
         else s.writeObject(null);
     }
 
@@ -425,7 +378,9 @@ public class UserDto implements Serializable {
         s.defaultReadObject();
         try {
             String contactURIStr = (String) s.readObject();
-            if(contactURIStr != null) contactURI = Uri.parse(contactURIStr);
-        } catch(Exception ex) { LOGD(TAG, "readObject EXCEPTION");}
+            if (contactURIStr != null) contactURI = Uri.parse(contactURIStr);
+        } catch (Exception ex) {
+            LOGD(TAG, "readObject EXCEPTION");
+        }
     }
 }

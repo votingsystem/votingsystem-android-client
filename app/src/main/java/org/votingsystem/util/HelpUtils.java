@@ -60,9 +60,11 @@ public class HelpUtils {
 
         private static final String VERSION_UNAVAILABLE = "N/A";
 
-        public AboutDialog() { }
+        public AboutDialog() {
+        }
 
-        @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
             PackageManager pm = getActivity().getPackageManager();
             String packageName = getActivity().getPackageName();
             String versionName;
@@ -95,18 +97,18 @@ public class HelpUtils {
             LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             View view = layoutInflater.inflate(R.layout.message_dialog, null);
-            TextView messageTextView = (TextView)view.findViewById(R.id.message);
+            TextView messageTextView = (TextView) view.findViewById(R.id.message);
             ((TextView) view.findViewById(R.id.caption_text)).setText(R.string.title_about);
             messageTextView.setText(aboutBody);
             messageTextView.setMovementMethod(new LinkMovementMethod());
             return new AlertDialog.Builder(getActivity()).setView(view)
-                .setPositiveButton(R.string.accept_lbl,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            dialog.dismiss();
-                        }
-                    }
-                ).create();
+                    .setPositiveButton(R.string.accept_lbl,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    dialog.dismiss();
+                                }
+                            }
+                    ).create();
         }
     }
 

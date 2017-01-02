@@ -2,22 +2,24 @@ package org.votingsystem.dto;
 
 import android.util.Base64;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.crypto.EncryptedBundle;
 
-import org.votingsystem.util.crypto.EncryptedBundle;
+import java.io.Serializable;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class EncryptedBundleDto {
+public class EncryptedBundleDto implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private Long id;
     private String iv;
     private String salt;
     private String cipherText;
 
-    public EncryptedBundleDto() {}
+    public EncryptedBundleDto() {
+    }
 
     public EncryptedBundleDto(EncryptedBundle encryptedBundle) {
         iv = Base64.encodeToString(encryptedBundle.getIV(), Base64.NO_WRAP);

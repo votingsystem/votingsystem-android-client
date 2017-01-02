@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scroll"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
@@ -10,8 +11,6 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:orientation="vertical">
-
-
         <TextView android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -19,7 +18,11 @@
             android:padding="10dp"
             android:layout_gravity="center"
             android:textSize="21sp" />
-
+        <ImageView android:id="@+id/can_info_image"
+            android:layout_width="match_parent"
+            android:layout_height="222dp"
+            android:visibility="gone"
+            android:src="@drawable/dnie_can_info"/>
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -34,126 +37,16 @@
             </EditText>
         </android.support.design.widget.TextInputLayout>
 
-
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/phone_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/phone_lbl"
-                android:imeActionLabel="@string/phone_lbl"
-                android:imeOptions="actionNext"
-                android:nextFocusDown="@+id/request_button"
-                android:inputType="phone"
-                android:maxLines="1"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <AutoCompleteTextView
-                android:id="@+id/mail_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/mail_lbl"
-                android:imeActionLabel="@string/mail_lbl"
-                android:imeOptions="actionNext"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <AutoCompleteTextView
-                android:id="@+id/address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/address_lbl"
-                android:imeActionLabel="@string/address_lbl"
-                android:imeOptions="actionNext"
-                android:maxLines="1"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <AutoCompleteTextView
-                android:id="@+id/postal_code"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/postal_code_lbl"
-                android:imeActionLabel="@string/postal_code_lbl"
-                android:imeOptions="actionNext"
-                android:inputType="textPostalAddress"
-                android:maxLines="1"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <AutoCompleteTextView
-                android:id="@+id/location"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/location_lbl"
-                android:imeActionLabel="@string/location_lbl"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:maxLines="1"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <AutoCompleteTextView
-                android:id="@+id/province"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/province_lbl"
-                android:imeActionLabel="@string/province_lbl"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:maxLines="1"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dip"
-            android:layout_marginRight="20dip"
-            android:layout_marginTop="40dp"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="@string/country_lbl"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        <Spinner android:id="@+id/country_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:prompt="@string/country_lbl"
-            android:layout_gravity="center_horizontal"/>
-
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dip"
-            android:layout_marginBottom="40dip"
+            android:layout_marginTop="50dip"
             android:layout_gravity="center_horizontal">
-
             <Button
                 android:id="@+id/save_button"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dip"
+                android:layout_marginLeft="30dip"
                 android:layout_marginRight="30dp"
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/accept_22"

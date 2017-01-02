@@ -5,7 +5,7 @@
     android:background="@android:color/white"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar_vs" />
+    <include layout="@layout/app_toolbar" />
 
     <RadioGroup android:id="@+id/radio_group"
         android:layout_width="wrap_content"
@@ -18,15 +18,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pin_lbl"
-            android:textSize="25dp"
-            android:onClick="onRadioButtonClicked"/>
+            android:textSize="25dp"/>
         <RadioButton android:id="@+id/radio_pattern"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/patternLock_switch_lbp"
+            android:text="@string/patternLock_switch_lbl"
             android:layout_marginTop="20dp"
-            android:textSize="25dp"
-            android:onClick="onRadioButtonClicked"/>
+            android:textSize="25dp"/>
+        <RadioButton android:id="@+id/radio_dnie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/id_card_passw_lbl"
+            android:layout_marginTop="20dp"
+            android:textSize="25dp"/>
     </RadioGroup>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dip"
+        android:layout_gravity="center_horizontal">
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dip"
+            android:layout_marginRight="30dp"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/accept_22"
+            android:text="@string/save_lbl"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </LinearLayout>

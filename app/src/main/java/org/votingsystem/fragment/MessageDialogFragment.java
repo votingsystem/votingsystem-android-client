@@ -15,8 +15,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.votingsystem.android.R;
-import org.votingsystem.util.Constants;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.util.Constants;
 
 import static org.votingsystem.util.LogUtils.LOGD;
 
@@ -29,11 +29,11 @@ public class MessageDialogFragment extends DialogFragment {
 
 
     public static void showDialog(Integer statusCode, String caption, String message,
-            FragmentManager fragmentManager) {
+                                  FragmentManager fragmentManager) {
         hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(statusCode, caption,
                 message);
-        if(fragmentManager == null) {
+        if (fragmentManager == null) {
             LOGD(TAG, "fragmentManager null");
             return;
         }
@@ -46,7 +46,7 @@ public class MessageDialogFragment extends DialogFragment {
         hide(fragmentManager);
         MessageDialogFragment newFragment = MessageDialogFragment.newInstance(ResponseDto.SC_OK,
                 caption, message);
-        if(fragmentManager == null) {
+        if (fragmentManager == null) {
             LOGD(TAG, "fragmentManager null");
             return;
         }
@@ -61,7 +61,7 @@ public class MessageDialogFragment extends DialogFragment {
     }
 
     public static void hide(FragmentManager fragmentManager) {
-        if(fragmentManager != null && fragmentManager.findFragmentByTag(
+        if (fragmentManager != null && fragmentManager.findFragmentByTag(
                 MessageDialogFragment.TAG) != null) {
             ((MessageDialogFragment) fragmentManager
                     .findFragmentByTag(MessageDialogFragment.TAG)).dismiss();
@@ -69,46 +69,48 @@ public class MessageDialogFragment extends DialogFragment {
     }
 
     public static MessageDialogFragment newInstance(Integer statusCode, String caption,
-                    String message){
+                                                    String message) {
         MessageDialogFragment fragment = new MessageDialogFragment();
         Bundle args = new Bundle();
-        if(statusCode != null) args.putInt(Constants.RESPONSE_STATUS_KEY, statusCode);
+        if (statusCode != null) args.putInt(Constants.RESPONSE_STATUS_KEY, statusCode);
         args.putString(Constants.CAPTION_KEY, caption);
         args.putString(Constants.MESSAGE_KEY, message);
         fragment.setArguments(args);
         return fragment;
     }
 
-    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.message_dialog, null);
         int statusCode = getArguments().getInt(Constants.RESPONSE_STATUS_KEY, -1);
         String caption = getArguments().getString(Constants.CAPTION_KEY);
         String message = getArguments().getString(Constants.MESSAGE_KEY);
-        AlertDialog.Builder builder =  new AlertDialog.Builder(getActivity()).setPositiveButton(
-            getString(R.string.accept_lbl),  new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    MessageDialogFragment.this.dismiss();
-                }
-            });
-        TextView messageTextView = (TextView)view.findViewById(R.id.message);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setPositiveButton(
+                getString(R.string.accept_lbl), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        MessageDialogFragment.this.dismiss();
+                    }
+                });
+        TextView messageTextView = (TextView) view.findViewById(R.id.message);
         TextView captionTextView = (TextView) view.findViewById(R.id.caption_text);
-        if(caption != null) captionTextView.setText(caption);
+        if (caption != null) captionTextView.setText(caption);
         else {
             captionTextView.setVisibility(View.GONE);
             view.findViewById(R.id.separator).setVisibility(View.GONE);
         }
-        if(message != null) messageTextView.setText(Html.fromHtml(message));
+        if (message != null) messageTextView.setText(Html.fromHtml(message));
         messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
         AlertDialog dialog = builder.create();
         dialog.setView(view);
-        if(statusCode > 0) {
-            if(ResponseDto.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
+        if (statusCode > 0) {
+            if (ResponseDto.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
             else dialog.setIcon(R.drawable.fa_times_32);
         }
         this.setCancelable(false);
         dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     ((MessageDialogFragment) getFragmentManager().
                             findFragmentByTag(MessageDialogFragment.TAG)).dismiss();

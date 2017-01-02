@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:vs="http://schemas.android.com/apk/res-auto">
 
     <item android:title="@string/polls_lbl">
         <menu android:checkableBehavior="single">
             <item
-                android:id="@+id/polls"
+                android:id="@+id/elections"
                 android:icon="@drawable/poll_32"
                 android:title="@string/polls_lbl" />
-            <item
-                android:id="@+id/representatives"
-                android:icon="@drawable/system_users_32"
-                android:title="@string/representatives_lbl" />
         </menu>
     </item>
 
@@ -28,10 +25,6 @@
 
     <group android:id="@+id/voting_settings"
         android:checkableBehavior="single">
-        <item
-            android:id="@+id/currency_menu_item"
-            android:icon="@drawable/fa_money_32"
-            android:title="@string/currency_lbl" />
         <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_drawer_settings"

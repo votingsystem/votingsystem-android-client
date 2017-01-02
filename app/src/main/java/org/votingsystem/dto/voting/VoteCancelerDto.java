@@ -1,11 +1,9 @@
 package org.votingsystem.dto.voting;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.HashUtils;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.util.StringUtils;
 
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class VoteCancelerDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,20 +23,29 @@ public class VoteCancelerDto implements Serializable {
     private String UUID;
 
 
-    public VoteCancelerDto() {}
+    public VoteCancelerDto() {
+    }
 
-    public void validate() throws ValidationExceptionVS, NoSuchAlgorithmException {
-        if(operation == null || OperationType.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
-                "ERROR - expected operation 'CANCEL_VOTE' - found: " + operation);
-        if(originRevocationHash == null) throw new ValidationExceptionVS("ERROR - missing param 'originRevocationHash'");
-        if(revocationHashBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'revocationHashBase64'");
-        if(hashAccessRequestBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashAccessRequestBase64'");
-        if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-        if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-        if(!hashAccessRequestBase64.equals(StringUtils.getHashBase64(originHashAccessRequest,
-                Constants.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
-        if(!revocationHashBase64.equals(StringUtils.getHashBase64(originRevocationHash,
-                Constants.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
+    public void validate() throws ValidationException, NoSuchAlgorithmException {
+        if (operation == null || OperationType.CANCEL_VOTE != operation)
+            throw new ValidationException(
+                    "ERROR - expected operation 'CANCEL_VOTE' - found: " + operation);
+        if (originRevocationHash == null)
+            throw new ValidationException("ERROR - missing param 'originRevocationHash'");
+        if (revocationHashBase64 == null)
+            throw new ValidationException("ERROR - missing param 'revocationHashBase64'");
+        if (hashAccessRequestBase64 == null)
+            throw new ValidationException("ERROR - missing param 'hashAccessRequestBase64'");
+        if (originHashAccessRequest == null)
+            throw new ValidationException("ERROR - missing param 'originHashAccessRequest'");
+        if (originHashAccessRequest == null)
+            throw new ValidationException("ERROR - missing param 'originHashAccessRequest'");
+        if (!hashAccessRequestBase64.equals(HashUtils.getHashBase64(originHashAccessRequest.getBytes(),
+                Constants.DATA_DIGEST_ALGORITHM)))
+            throw new ValidationException("voteCancellationAccessRequestHashError");
+        if (!revocationHashBase64.equals(HashUtils.getHashBase64(originRevocationHash.getBytes(),
+                Constants.DATA_DIGEST_ALGORITHM)))
+            throw new ValidationException("voteCancellationHashCertificateError");
     }
 
     public String getOriginRevocationHash() {

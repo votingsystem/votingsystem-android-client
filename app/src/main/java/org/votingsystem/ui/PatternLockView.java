@@ -25,23 +25,22 @@ import java.util.List;
 
 /**
  * https://github.com/xyxyLiu/PatternLockView
- *
+ * <p>
  * Copyright 2016 xyxyLiu
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-public class PatternLockView  extends ViewGroup {
+public class PatternLockView extends ViewGroup {
 
     public static final int CODE_PASSWORD_CORRECT = 1;
     public static final int CODE_PASSWORD_ERROR = 2;
@@ -154,7 +153,7 @@ public class PatternLockView  extends ViewGroup {
         mNodeSize = a.getDimension(R.styleable.PatternLockView_lock_nodeSize, 0);
         mNodeAreaExpand = a.getDimension(R.styleable.PatternLockView_lock_nodeTouchExpand, 0);
         mNodeOnAnim = a.getResourceId(R.styleable.PatternLockView_lock_nodeOnAnim, 0);
-        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.rgb(227,223,223));
+        mLineColor = a.getColor(R.styleable.PatternLockView_lock_lineColor, Color.rgb(227, 223, 223));
         mLineWidth = a.getDimension(R.styleable.PatternLockView_lock_lineWidth, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
         mPadding = a.getDimension(R.styleable.PatternLockView_lock_padding, 0);
@@ -576,11 +575,11 @@ public class PatternLockView  extends ViewGroup {
         }
     }
 
-    public static class Password{
+    public static class Password {
         public List<Integer> list;
         public String string;
 
-        public Password(List<NodeView> nodeViewList){
+        public Password(List<NodeView> nodeViewList) {
             list = new ArrayList<>();
             StringBuilder passwordBuilder = new StringBuilder("[");
             for (int i = 0; i < nodeViewList.size(); i++) {

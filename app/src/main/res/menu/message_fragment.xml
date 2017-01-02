@@ -9,16 +9,4 @@
             android:title="@string/send_msg_lbl"/>
     </group>
 
-    <group android:id="@+id/currency_change_items" android:visible="false">
-        <item android:id="@+id/save_to_wallet"
-            android:orderInCategory="2"
-            android:title="@string/save_to_wallet_lbl"/>
-        <item android:id="@+id/check_wallet_message"
-            android:orderInCategory="1"
-            android:title="@string/check_lbl"/>
-        <item android:id="@+id/delete_wallet_message"
-            android:orderInCategory="1"
-            android:title="@string/delete_lbl"/>
-    </group>
-
 </menu>

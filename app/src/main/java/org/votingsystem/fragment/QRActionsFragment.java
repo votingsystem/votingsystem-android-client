@@ -1,11 +1,8 @@
 package org.votingsystem.fragment;
 
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -24,200 +21,97 @@ import com.google.zxing.integration.android.IntentResult;
 import org.votingsystem.App;
 import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
+import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
-import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.service.WebSocketService;
-import org.votingsystem.util.ActivityResult;
-import org.votingsystem.util.ConnectionUtils;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.ContentType;
-import org.votingsystem.util.HttpConnection;
-import org.votingsystem.util.JSON;
+import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.metadata.MetadataDto;
+import org.votingsystem.dto.voting.ElectionDto;
+import org.votingsystem.http.ContentType;
+import org.votingsystem.http.HttpConn;
+import org.votingsystem.ui.DialogButton;
+import org.votingsystem.util.ActivityResult;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
-import org.votingsystem.util.WebSocketSession;
-
-import java.security.NoSuchAlgorithmException;
+import org.votingsystem.xml.XmlReader;
 
 import static org.votingsystem.util.Constants.FRAGMENT_KEY;
 import static org.votingsystem.util.LogUtils.LOGD;
+import static org.votingsystem.util.LogUtils.LOGE;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class QRActionsFragment extends Fragment {
 
-	public static final String TAG = QRActionsFragment.class.getSimpleName();
-    public static final String PENDING_ACTION_KEY = "PENDING_ACTION_KEY";
+    public static final String TAG = QRActionsFragment.class.getSimpleName();
 
-    private enum Action {READ_QR, CREATE_QR, OPERATION, AUTHENTICATED_OPERATION}
+    private static int RC_SIGN_PUBLISH_DOCUMENT_RESULT = 0;
 
     private String broadCastId = QRActionsFragment.class.getSimpleName();
-    private QRMessageDto qrMessageDto;
-    private Action pendingAction;
+    private QRMessageDto qrMessage;
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            LOGD(TAG + ".broadcastReceiver", "extras: " + intent.getExtras());
-            LOGD(TAG, "broadcastReceiver - pendingAction: " + pendingAction +
-                    " - isWithSocketConnection: " + App.getInstance().isWithSocketConnection() +
-                    " - ConnectedDevice: " + App.getInstance().getConnectedDevice());
-            SocketMessageDto socketMsg = (SocketMessageDto) intent.getSerializableExtra(Constants.WEBSOCKET_MSG_KEY);
-            if(socketMsg != null){
-                setProgressDialogVisible(false, null, null);
-                if(App.getInstance().getConnectedDevice() != null && pendingAction != null) {
-                    if(pendingAction == Action.OPERATION) {
-                        processAction(pendingAction);
-                        pendingAction = null;
-                    } else if(pendingAction == Action.AUTHENTICATED_OPERATION &&
-                            App.getInstance().isWithSocketConnection()) {
-                        processAction(pendingAction);
-                        pendingAction = null;
-                    }
-                }
-            }
-        }
-    };
-
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         LOGD(TAG + ".onCreate", "onCreateView");
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.qr_actions_fragment, container, false);
         Button read_qr_btn = (Button) rootView.findViewById(R.id.read_qr_btn);
         read_qr_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                processAction(Action.READ_QR);
+                Utils.launchQRScanner(QRActionsFragment.this);
             }
         });
-        Button gen_qr_btn = (Button) rootView.findViewById(R.id.gen_qr_btn);
-        gen_qr_btn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                processAction(Action.CREATE_QR);
-            }
-        });
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_codes_lbl));
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.qr_codes_lbl));
         setHasOptionsMenu(true);
         if(savedInstanceState != null) {
-            qrMessageDto = (QRMessageDto) savedInstanceState.getSerializable(Constants.DTO_KEY);
-            pendingAction = (Action) savedInstanceState.getSerializable(PENDING_ACTION_KEY);
+            qrMessage = (QRMessageDto) savedInstanceState.getSerializable(
+                    Constants.QR_CODE_KEY);
         }
         return rootView;
     }
 
-    private void processAction(Action action) {
-        switch (action) {
-            case READ_QR:
-                Utils.launchQRScanner(this);
-                break;
-            case CREATE_QR:
-                Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                intent.putExtra(Constants.FRAGMENT_KEY, TransactionFormFragment.class.getName());
-                intent.putExtra(Constants.TYPEVS_KEY, TransactionFormFragment.Type.QR_FORM);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                break;
-            case AUTHENTICATED_OPERATION:
-            case OPERATION:
-                processQRCode(qrMessageDto);
-                break;
-        }
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(Constants.QR_CODE_KEY, qrMessage);
     }
 
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (result != null && result.getContents() != null) {
-            String qrMessage = result.getContents();
-            LOGD(TAG, "QR reader - onActivityResult - qrMessage: " + qrMessage);
-            qrMessageDto = QRMessageDto.FROM_QR_CODE(qrMessage);
-            if(qrMessageDto.getOperation() != null) {
-                processQRCode(qrMessageDto);
-            } else if(qrMessage.contains("http://") || qrMessage.contains("https://")) {
-                new SendDataTask().execute(qrMessage);
-            } else LOGD(TAG, "onActivityResult - qrMessage unprocessed");
-        }
-    }
-
-    private void processQRCode(QRMessageDto qrMessageDto) {
-        try {
-            SocketMessageDto socketMessage = null;
-            switch (qrMessageDto.getOperation()) {
-                case INIT_REMOTE_SIGNED_SESSION:
-                    if(!App.getInstance().isWithSocketConnection()) {
-                        AlertDialog.Builder builder = UIUtils.getMessageDialogBuilder(null,
-                                getString(R.string.connection_required_msg),
-                                getActivity()).setPositiveButton(getString(R.string.connect_lbl),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        pendingAction = Action.AUTHENTICATED_OPERATION;
-                                        if(getActivity() != null) ConnectionUtils.initConnection(
-                                                ((ActivityBase)getActivity()));
-                                        dialog.cancel();
-                                    }
-                                });
-                        UIUtils.showMessageDialog(builder);
-                    } else {
-                        qrMessageDto.setAesParams(AESParamsDto.CREATE());
-                        socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, true);
-                        sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
-                    }
-                    break;
-                case SEND_VOTE:
-                    new GetDataTask(OperationType.SEND_VOTE).execute(App.getInstance().
-                            getAccessControl().getEventVSURL(qrMessageDto.getItemId()));
-                    break;
-                case OPERATION_PROCESS:
-                    if(App.getInstance().getConnectedDevice() != null) {
-                        socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, false);
-                        sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
-                    } else {
-                        pendingAction = Action.OPERATION;
-                        this.qrMessageDto = qrMessageDto;
-                        ConnectionUtils.initUnathenticatedConnection((ActivityBase)getActivity(),
-                                qrMessageDto.getSessionType());
-                    }
-                    break;
-                case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                    intent.putExtra(Constants.FRAGMENT_KEY, RepresentativeFragment.class.getName());
-                    intent.putExtra(Constants.ITEM_ID_KEY, qrMessageDto.getItemId());
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    startActivity(intent);
-                    break;
-                case GET_AES_PARAMS:
-                    WebSocketSession socketSession = App.getInstance()
-                            .getWSSessionByIV(qrMessageDto.getMsg());
-                    if(socketSession == null) {
-                        MessageDialogFragment.showDialog(null, getString(R.string.error_lbl),
-                                getString(R.string.browser_session_expired_msg), getFragmentManager());
-                    } else {
-                        qrMessageDto.setOperation(OperationType.SEND_AES_PARAMS)
-                                .setAesParams(socketSession.getAesParams());
-                        socketMessage = SocketMessageDto.getQRInfoRequest(qrMessageDto, true);
-                        sendSocketMessage(socketMessage, qrMessageDto.getSessionType());
-                    }
-                    break;
-                default: LOGD(TAG, "processQRCode: " + qrMessageDto.getOperation());
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
+        if (requestCode == RC_SIGN_PUBLISH_DOCUMENT_RESULT) {
+            if (Activity.RESULT_OK == resultCode) {
+                ResponseDto signatureResponse = data.getParcelableExtra(Constants.RESPONSE_KEY);
+                new PostDataTask(signatureResponse.getMessageBytes(),
+                        OperationType.PUBLISH_ELECTION.getUrl(qrMessage.getSystemEntityId()),
+                        ContentType.XML).execute();
             }
-        } catch (Exception ex) { ex.printStackTrace(); }
+        } else {
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result != null && result.getContents() != null) {
+                String qrMessageStr = result.getContents();
+                LOGD(TAG, "onActivityResult - qrMessage: " + qrMessageStr);
+                qrMessage = QRMessageDto.FROM_QR_CODE(qrMessageStr);
+                if (qrMessage.getOperation() != null) {
+                    new GetDataTask(qrMessage.getSystemEntityId(), qrMessage.getOperation()).execute();
+                } else {
+                    new GetDataTask(qrMessage.getSystemEntityId(), qrMessage.getUUID()).execute();
+                }
+            }
+        }
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menu.clear();
         super.onCreateOptionsMenu(menu, menuInflater);
-    }
-
-    private void sendSocketMessage(SocketMessageDto socketMessage, OperationType sessionType) throws Exception {
-        Intent startIntent = new Intent(getActivity(), WebSocketService.class);
-        startIntent.putExtra(Constants.SESSION_KEY, sessionType);
-        startIntent.putExtra(Constants.MESSAGE_KEY, JSON.writeValueAsString(socketMessage));
-        getActivity().startService(startIntent);
     }
 
     private void setProgressDialogVisible(final boolean isVisible, String caption, String message) {
@@ -226,76 +120,13 @@ public class QRActionsFragment extends Fragment {
         } else ProgressDialogFragment.hide(broadCastId, getFragmentManager());
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putSerializable(Constants.DTO_KEY, qrMessageDto);
-        outState.putSerializable(PENDING_ACTION_KEY, pendingAction);
-    }
-
-    @Override public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
-    }
-
-    @Override public void onResume() {
+    @Override
+    public void onResume() {
         super.onResume();
-        ActivityResult activityResult = ((ActivityBase)getActivity()).getActivityResult();
-        if(activityResult != null) {
+        ActivityResult activityResult = ((ActivityBase) getActivity()).getActivityResult();
+        if (activityResult != null) {
             onActivityResult(activityResult.getRequestCode(),
                     activityResult.getResultCode(), activityResult.getData());
-        }
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-                broadcastReceiver, new IntentFilter(Constants.WEB_SOCKET_BROADCAST_ID));
-    }
-
-
-    public class SendDataTask extends AsyncTask<String, Void, ResponseDto> {
-
-        public final String TAG = SendDataTask.class.getSimpleName();
-
-        private QRMessageDto qrMessageDto;
-
-        public SendDataTask() { }
-
-        @Override protected void onPreExecute() {
-            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
-                    getString(R.string.loading_info_msg));
-        }
-
-        @Override protected ResponseDto doInBackground(String... urls) {
-            LOGD(TAG + ".doInBackground", "url: " + urls[0]);
-            try {
-                qrMessageDto = QRMessageDto.FROM_URL(urls[0]);
-                return  HttpConnection.getInstance().sendData(qrMessageDto.getRevocationHash().getBytes(), null, urls[0]);
-            } catch (NoSuchAlgorithmException ex) {
-                ex.printStackTrace();
-                return ResponseDto.ERROR(null, ex.getMessage());
-            }
-        }
-
-        protected void onProgressUpdate(Integer... progress) {}
-
-        @Override  protected void onPostExecute(ResponseDto responseDto) {
-            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseDto.getStatusCode());
-            setProgressDialogVisible(false, null, null);
-            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
-                try {
-                    TransactionDto dto = (TransactionDto) responseDto.getMessage(TransactionDto.class);
-                    dto.setQrMessageDto(qrMessageDto);
-                    switch (dto.getOperation()) {
-                        case TRANSACTION_INFO:
-                        case DELIVERY_WITHOUT_PAYMENT:
-                        case DELIVERY_WITH_PAYMENT:
-                        case REQUEST_FORM:
-                            Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                            intent.putExtra(Constants.FRAGMENT_KEY, PaymentFragment.class.getName());
-                            intent.putExtra(Constants.TRANSACTION_KEY, dto);
-                            startActivity(intent);
-                            break;
-                    }
-                } catch (Exception e) { e.printStackTrace();}
-            } else MessageDialogFragment.showDialog(getString(R.string.error_lbl),
-                    responseDto.getMessage(), getFragmentManager());
         }
     }
 
@@ -303,46 +134,172 @@ public class QRActionsFragment extends Fragment {
 
         public final String TAG = GetDataTask.class.getSimpleName();
 
-        private OperationType operation;
+        private String systemEntityId;
+        private String qrUUID;
+        private OperationType operationType;
+        private byte[] qrResponseData;
+        private ElectionDto electionDto;
+        private MetadataDto entityMetadata;
 
-        public GetDataTask(OperationType operation) {
-            this.operation = operation;
+        public GetDataTask(String systemEntityId, String qrUUID) {
+            this.systemEntityId = systemEntityId;
+            this.qrUUID = qrUUID;
         }
 
-        @Override protected void onPreExecute() {
+        public GetDataTask(String systemEntityId, OperationType operationType) {
+            this.systemEntityId = systemEntityId;
+            this.operationType = operationType;
+        }
+
+        @Override
+        protected void onPreExecute() {
             setProgressDialogVisible(true, getString(R.string.loading_data_msg),
                     getString(R.string.loading_info_msg));
         }
 
-        @Override protected ResponseDto doInBackground(String... urls) {
-            LOGD(TAG + ".doInBackground", "url: " + urls[0]);
+        @Override
+        protected ResponseDto doInBackground(String... urls) {
             try {
-                return HttpConnection.getInstance().getData(urls[0], ContentType.JSON);
+                entityMetadata = App.getInstance().getSystemEntity(systemEntityId, true);
+                if(operationType != null) {
+                    switch (operationType) {
+                        case FETCH_ELECTIONS:
+                            if(entityMetadata != null) {
+                                PrefUtils.addVotingServiceProvider(entityMetadata.getEntity().getId());
+                                App.getInstance().setVotingServiceProvider(entityMetadata.getEntity());
+                            }
+                            return ResponseDto.OK();
+                    }
+                }
+                ResponseDto response = HttpConn.getInstance().doPostRequest(qrUUID.getBytes(),
+                        null, OperationType.GET_QR_INFO.getUrl(systemEntityId));
+                if (ResponseDto.SC_OK == response.getStatusCode()) {
+                    try {
+                        QRResponseDto qrResponse = XmlReader.readQRResponse(response.getMessageBytes());
+                        operationType = qrResponse.getOperationType();
+                        qrResponseData = qrResponse.getData();
+                        switch (operationType) {
+                            case PUBLISH_ELECTION:
+                                break;
+                            case ANON_VOTE_CERT_REQUEST:
+                                electionDto = XmlReader.readElection(qrResponseData);
+                                App.getInstance().getSystemEntity(electionDto.getEntityId(), true);
+                                break;
+                            default:
+                                LOGE(TAG, "unknown operation: " + qrResponse.getOperationType());
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                return response;
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return ResponseDto.ERROR(null, ex.getMessage());
             }
         }
 
-        protected void onProgressUpdate(Integer... progress) {}
-
-        @Override  protected void onPostExecute(ResponseDto responseDto) {
-            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + responseDto.getStatusCode());
+        @Override
+        protected void onPostExecute(ResponseDto response) {
+            LOGD(TAG, "onPostExecute - statusCode: " + response.getStatusCode() +
+                    " - operationType: " + operationType);
             setProgressDialogVisible(false, null, null);
-            if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
-                try {
-                    switch (operation) {
-                        case SEND_VOTE:
-                            Intent intent = new Intent(getActivity(), FragmentContainerActivity.class);
-                            intent.putExtra(FRAGMENT_KEY, EventVSFragment.class.getName());
-                            intent.putExtra(Constants.EVENTVS_KEY, responseDto.getMessage());
+            try {
+                if (ResponseDto.SC_OK == response.getStatusCode()) {
+                    switch (operationType) {
+                        case FETCH_ELECTIONS: {
+                            Intent intent = new Intent(ActivityBase.BROADCAST_ID);
+                            ResponseDto responseDto = ResponseDto.OK()
+                                    .setServiceCaller(ActivityBase.CHILD_FRAGMENT)
+                                    .setMessage(Integer.valueOf(R.id.elections).toString());
+                            intent.putExtra(Constants.RESPONSE_KEY, responseDto);
+                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+                            break;
+                        }
+                        case PUBLISH_ELECTION:
+                            signXMLDocument(new String(qrResponseData),
+                                    getString(R.string.election_publish_msg),
+                                    RC_SIGN_PUBLISH_DOCUMENT_RESULT);
+                            break;
+                        case ANON_VOTE_CERT_REQUEST: {
+                            Intent intent = new Intent(QRActionsFragment.this.getActivity(),
+                                    FragmentContainerActivity.class);
+                            intent.putExtra(FRAGMENT_KEY, ElectionFragment.class.getName());
+                            intent.putExtra(Constants.ID_SERVICE_ENTITY_ID, systemEntityId);
+                            intent.putExtra(Constants.ELECTION_KEY, ObjectUtils.serializeObject(electionDto ));
                             startActivity(intent);
                             break;
+                        }
+                        default:
+                            LOGE(TAG, "unknown operation: " + operationType);
                     }
-                } catch (Exception e) { e.printStackTrace();}
-            } else MessageDialogFragment.showDialog(getString(R.string.error_lbl),
-                    responseDto.getMessage(), getFragmentManager());
+                } else {
+                    MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                            response.getMessage(), getFragmentManager());
+                }
+            } catch (Exception ex) {
+                MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                        ex.getMessage(), getFragmentManager());
+            }
         }
+    }
+
+    public class PostDataTask extends AsyncTask<String, Void, ResponseDto> {
+
+        public final String TAG = PostDataTask.class.getSimpleName();
+
+        private String systemServiceURL;
+        private byte[] requestContent;
+        private ContentType contentType;
+
+        public PostDataTask(byte[] requestContent, String systemServiceURL, ContentType contentType) {
+            this.requestContent = requestContent;
+            this.systemServiceURL = systemServiceURL;
+            this.contentType = contentType;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            setProgressDialogVisible(true, getString(R.string.loading_data_msg),
+                    getString(R.string.loading_info_msg));
+        }
+
+        @Override
+        protected ResponseDto doInBackground(String... urls) {
+            return HttpConn.getInstance().doPostRequest(requestContent, contentType, systemServiceURL);
+        }
+
+        @Override
+        protected void onPostExecute(ResponseDto response) {
+            LOGD(TAG + ".onPostExecute() ", " - statusCode: " + response.getStatusCode());
+            if (ResponseDto.SC_OK == response.getStatusCode()) {
+                setProgressDialogVisible(false, null, null);
+                DialogButton positiveButton = new DialogButton(getString(R.string.ok_lbl),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                            }
+                        });
+                UIUtils.showMessageDialog(getString(R.string.msg_lbl),
+                        response.getMessage(), positiveButton, null, getActivity());
+            } else MessageDialogFragment.showDialog(getString(R.string.error_lbl),
+                    response.getMessage(), getFragmentManager());
+        }
+    }
+
+    private void signXMLDocument(String documentToSign, String messagePrefix, int activityResultCode)
+            throws Exception {
+        MetadataDto metadataDto = App.getInstance().getSystemEntity(qrMessage.getSystemEntityId(), false);
+        String timeStampServiceURL = OperationType.TIMESTAMP_REQUEST.getUrl(
+                metadataDto.getFirstTimeStampEntityId());
+        Intent intent = new Intent(getActivity(), ID_CardNFCReaderActivity.class);
+        intent.putExtra(Constants.MESSAGE_KEY, messagePrefix + " - " +
+                getString(R.string.enter_password_msg));
+        intent.putExtra(Constants.MESSAGE_CONTENT_KEY, documentToSign.getBytes());
+        intent.putExtra(Constants.TIMESTAMP_SERVER_KEY, timeStampServiceURL);
+        if (qrMessage != null && qrMessage.getUUID() != null) {
+            intent.putExtra(Constants.QR_CODE_KEY, qrMessage.getUUID().substring(0, 4));
+        }
+        startActivityForResult(intent, activityResultCode);
     }
 
 }
