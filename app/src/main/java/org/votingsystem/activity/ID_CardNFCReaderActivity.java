@@ -52,7 +52,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
     public static final String TAG = ID_CardNFCReaderActivity.class.getSimpleName();
 
     public static final String CERT_AUTENTICATION = "CertAutenticacion";
-    public static final String CERT_SIGN = "CertFirmaDigital";
+    public static final String CERT_SIGN          = "CertFirmaDigital";
 
     public static final int MODE_REQUEST_PASSWORD = 0;
 
@@ -65,8 +65,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
     private String timeStampServiceURL;
     private NfcAdapter myNfcAdapter;
     private Tag tagFromIntent;
-
-    int activityRequestMode;
+    private int activityRequestMode;
 
     private Handler myHandler = new Handler();
 
@@ -170,8 +169,7 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
         myNfcAdapter.enableReaderMode(this, this,
                 NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK |
                         NfcAdapter.FLAG_READER_NFC_A |
-                        NfcAdapter.FLAG_READER_NFC_B,
-                options);
+                        NfcAdapter.FLAG_READER_NFC_B, options);
     }
 
     private void disableNFCReaderMode() {
@@ -208,7 +206,6 @@ public class ID_CardNFCReaderActivity extends AppCompatActivity implements NfcAd
                 LOGD(TAG, "userCert: " + userCert.toString());
                 if(activityRequestMode == MODE_REQUEST_PASSWORD) {
                     finishOk(ResponseDto.OK().setMessage(new String(passwordDialog.getPassword())));
-                    finishOk(ResponseDto.OK().setMessage("secondTestPassw"));
                     return;
                 }
 

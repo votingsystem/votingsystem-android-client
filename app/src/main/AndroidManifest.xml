@@ -92,7 +92,6 @@
         <!-- No intent filters are specified, so android:exported defaults to "false". The
             service are only available to this app. -->
         <service android:name="org.votingsystem.service.ElectionService"  android:exported="false"/>
-        <service android:name="org.votingsystem.service.VoteService"  android:exported="false"/>
 
     </application>
 </manifest>
