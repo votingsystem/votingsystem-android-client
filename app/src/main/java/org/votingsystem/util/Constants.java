@@ -51,6 +51,9 @@ public class Constants {
     public static final String WEB_SOCKET_BROADCAST_ID            = "WEB_SOCKET_BROADCAST_ID";
 
 
+    public static final String VOTINGSYSTEM_CERTIFICATE = "VOTINGSYSTEM_CERTIFICATE";
+
+
     //Intent keys
     public static final String BOOTSTRAP_DONE = "BOOTSTRAP_DONE";
     public static final String DNIE_KEY = "DNIE_KEY";

@@ -19,7 +19,6 @@ public enum OperationType {
 
     //voting service provider
     FETCH_ELECTION("/api/election/uuid/{UUID}"),
-    FETCH_ELECTIONS("/api/election/list?state={state}&max={size}&offset={offset}"),
     SEND_VOTE("/api/vote"),
     PUBLISH_ELECTION("/api/election/save"),
     ELECTIONS_STATS("/api/election/uuid/{electionUUID}/stats"),
@@ -66,13 +65,14 @@ public enum OperationType {
                 .replace("{searchText}", searchText);
     }
 
+    /*
     public static String getElectionsURL(String systenEntityId, ElectionDto.State state,
                                          Integer pageSize, Long offset) {
         return FETCH_ELECTIONS.getUrl(systenEntityId)
                 .replace("{state}", state.name())
                 .replace("{size}", pageSize.toString())
                 .replace("{offset}", offset.toString());
-    }
+    }*/
 
     //"/api/eventElection/id/{id}/stats"
     public static String getVoteStatsURL(String systenEntityId, String electionUUID) {

@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import org.votingsystem.android.R;
-import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.dto.voting.VoteDto;
 
 import java.security.cert.X509Certificate;
@@ -54,20 +53,6 @@ public class MsgUtils {
                 certificate.getSerialNumber().toString(),
                 org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotBefore(), "HH:mm"),
                 org.votingsystem.util.DateUtils.getDayWeekDateStr(certificate.getNotAfter(), "HH:mm"));
-    }
-
-    public static String getVotingStateMessage(ElectionDto.State state, Context context) {
-        switch (state) {
-            case ACTIVE:
-                return context.getString(R.string.election_active);
-            case CANCELED:
-            case TERMINATED:
-                return context.getString(R.string.election_closed);
-            case PENDING:
-                return context.getString(R.string.election_pending);
-            default:
-                return null;
-        }
     }
 
     public static String getVoteStateMsg(VoteDto.State voteState, Context context) {

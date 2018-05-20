@@ -184,7 +184,7 @@
     <string name="receipt_list_lbl">lista de recibos</string>
     <string name="confirm_selection_msg">confirme la selección</string>
     <string name="receipt_vote_subtitle">voto</string>
-    <string name="update_signers_info_lbl">actualizar datos</string>
+    <string name="show_elections_lbl">ver votaciones</string>
     <string name="cert_info_lbl">datos del certificado</string>
     <string name="cancellation_date_lbl"><b>fecha de cancelación:</b> %1$s</string>
     <string name="browswevs_lbl">sistema de votación</string>
@@ -192,7 +192,7 @@
     <string name="connecting_lbl">conectando...</string>
     <string name="phone_lbl">teléfono móvil</string>
     <string name="mail_lbl">correo electrónico</string>
-    <string name="phone_missing_msg">introduzca un número de telefono móvil</string>
+    <string name="enter_mobile_lbl">telefono móvil</string>
     <string name="mail_missing_msg">introduzca una dirección de correo electrónico válida</string>
     <string name="hint_phone">teléfono móvil</string>
     <string name="hint_email">email</string>
@@ -206,9 +206,9 @@
     <string name="messagevs_send_ok_msg">el mensaje se ha enviado corréctamente</string>
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_body"><![CDATA[
-        <b>votingsystem, 2015. </b>version %s<br><br>
-        <a href="https://192.168.1.5/termsOfService.html">condiciones del  servicio</a><br><br>
-        <a href="https://192.168.1.5/privacyPolicy.html">política de privacidad</a>
+        <b>sistema de votación, 2015. </b>version %s<br><br>
+        <a href="https://192.168.1.5/voting-service/docs/terms-of-service.html">condiciones del  servicio</a><br><br>
+        <a href="https://192.168.1.5/voting-service/docs/privacy-policy.html">política de privacidad</a>
     ]]></string>
     <string name="can_question_msg">¿qué es el CAN del DNIe?</string>
     <string name="can_info_msg">El CAN (Card Access Number) es un número de 6 dígitos que aparece
@@ -249,9 +249,6 @@
     <string name="expended_lbl">consumido</string>
     <string name="rejected_lbl">rechazado</string>
     <string name="in_lbl">en</string>
-    <string name="election_active">votaciones abiertas</string>
-    <string name="election_closed">votaciones cerradas</string>
-    <string name="election_pending">votaciones pendientes</string>
     <string name="election_search_msg">resultado de la búsqueda de \'%1$s\' en \'%2$s\'</string>
     <string name="search_result">resultado de la búsqueda</string>
     <string name="waiting_for_access_control_connection">esperando conexión con Control de Acceso</string>
@@ -296,27 +293,19 @@
     <string name="new_password_error_msg">los valores no coinciden comience de nuevo. Introduzca la nueva contraseña</string>
     <string name="lapse_lbl">caduca: %1$s</string>
     <string name="select_voting_service">Servicios de votación</string>
-    <string name="searching_devices_lbl">buscando dispositivos</string>
-    <string name="connection_required_msg">para poder continuar necesita identificarse</string>
     <string name="connect_lbl">conectar</string>
     <string name="check_target_device_lbl">compruebe el dispositivo destino</string>
     <string name="item_sended_ok_msg">el envío se ha completado corréctamente</string>
     <string name="contacts_lbl">contactos</string>
     <string name="contact_lbl">contacto</string>
-    <string name="send_money_lbl">hacer ingreso</string>
     <string name="remove_contact_lbl">borrar contacto</string>
     <string name="add_contact_lbl">añadir contacto</string>
     <string name="open_contacts_lbl">abrir agenda</string>
     <string name="contactvs_not_found_msg">no dispone de la información necesaria para enviar efectivo o mensajes cifrados a \'%1$s\', ¿desea comprobas si \'%1$s\' se encuentra dado de alta en el sistema?</string>
     <string name="missing_server_connection">no existe conexión con el servidor</string>
-    <string name="device_not_found_error_msg">¿seguro que está conectado el dispositivo con el que intenta comunicarse?</string>
     <string name="usevs_connection_not_found_error_msg">el destinatario no está conectado</string>
     <string name="qr_codes_lbl">códigos QR</string>
-    <string name="name_lbl">dirección</string>
-    <string name="postal_code_lbl">código postal</string>
-    <string name="location_lbl">localidad</string>
-    <string name="province_lbl">provincia</string>
-    <string name="country_lbl">país</string>
+    <string name="name_lbl">nombre</string>
     <string name="save_lbl">guardar</string>
     <string name="enter_name_error_lbl">introduzca la calle</string>
     <string name="enter_postal_code_error_lbl">introduzca código postal</string>
@@ -412,8 +401,13 @@
     <string name="missing_idcard_msg">Para poder operar con la aplicación debe configurar su DNI en \'ajustes\'</string>
     <string name="search_label" />
     <string name="first_run_msg">Para poder usar la aplicación debe rellenar el formulario. La aplicación le pedirá que lo firme con su DNI electrónico</string>
-    <string name="user_data_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/><br/>
+    <string name="dnie_can_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/><br/>
         <b>CAN: </b>%1$s<br/>
+        ]]></string>
+    <string name="user_data_confirm_msg"><![CDATA[<b>Compruebe que los datos son correctos:<br/><br/>
+        <b>Nombre: </b>%1$s<br/>
+        <b>Apellidos: </b>%2$s<br/>
+        <b>Teléfono móvil: </b>%3$s<br/>
         ]]></string>
     <string name="crypto_device_access_mode_lbl">mecanismo de contraseña</string>
     <string name="patternLock_switch_lbl">Patrón Visual</string>
@@ -442,4 +436,8 @@
     <string name="dnie_passw_protected_msg">A partir de ahora podrá utilizar su \'%1$s\' para firmar con su DNIe. Si
     se equivoca al introducirlo tres veces deberá firmar introduciendo la contraseña del DNIe o volver a establecer
     el mecanismo de protección de contrasela desde  \'ajustes \'</string>
+    <string name="certificates_lbl">certificados</string>
+    <string name="settings_lbl">ajustes</string>
+    <string name="cert_request_lbl">solicitar certificado</string>
+    <string name="request_cert_movile_advice_msg">Se le enviará un SMS a su teléfono para poder completar el procedimiento</string>
 </resources>

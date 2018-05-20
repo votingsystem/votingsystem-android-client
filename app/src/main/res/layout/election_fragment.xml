@@ -11,7 +11,7 @@
         android:clickable="true"
         android:gravity="center"
         android:text="@string/election_lbl"
-        android:textColor="@color/red_vs"
+        android:textColor="@color/colorPrimary"
         android:textSize="23sp" />
 
     <LinearLayout android:id="@+id/receipt_buttons"
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
             android:layout_weight="0.5"
-            android:drawableLeft="@drawable/content_save"
+            android:drawableLeft="@drawable/ic_save_24px"
             android:text="@string/save_receipt_lbl"
             android:textStyle="bold" />
     </LinearLayout>

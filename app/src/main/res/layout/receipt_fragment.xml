@@ -18,7 +18,7 @@
             <TextView android:id="@+id/receipt_subject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/grey_dark"
+                android:textColor="@color/body_text"
                 android:layout_marginBottom="15dp"
                 android:textSize="23sp"/>
             <WebView android:id="@+id/receipt_content"

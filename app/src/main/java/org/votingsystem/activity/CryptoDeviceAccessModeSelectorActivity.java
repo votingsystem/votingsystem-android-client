@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
@@ -39,6 +40,7 @@ public class CryptoDeviceAccessModeSelectorActivity extends AppCompatActivity {
         RadioButton radio_pattern = (RadioButton) findViewById(R.id.radio_pattern);
         RadioButton radio_dnie = (RadioButton) findViewById(R.id.radio_dnie);
         UIUtils.setSupportActionBar(this, getString(R.string.crypto_device_access_mode_lbl));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         passwAccessMode = PrefUtils.getCryptoDeviceAccessMode();
         Button save_button = (Button) findViewById(R.id.save_button);
         save_button.setOnClickListener(new View.OnClickListener() {
@@ -97,6 +99,18 @@ public class CryptoDeviceAccessModeSelectorActivity extends AppCompatActivity {
         LOGD(TAG, "onActivityResult - requestCode: " + requestCode + " - resultCode: " + resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        LOGD(TAG + ".onOptionsItemSelected", "item: " + item.getTitle());
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }

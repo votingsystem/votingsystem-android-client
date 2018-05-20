@@ -34,14 +34,11 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import org.bouncycastle.tsp.TimeStampToken;
@@ -259,14 +256,6 @@ public class UIUtils {
     public static boolean isTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
-    }
-
-    public static void changeSearchIcon(Menu menu, Context context) {
-        MenuItem searchViewMenuItem = menu.findItem(R.id.search_item);
-        SearchView mSearchView = (SearchView) searchViewMenuItem.getActionView();
-        int searchImgId = context.getResources().getIdentifier("android:id/search_button", null, null);
-        ImageView v = (ImageView) mSearchView.findViewById(searchImgId);
-        v.setImageResource(R.drawable.action_search);
     }
 
     public static EditText addFormField(String label, Integer type, LinearLayout mFormView, int id,

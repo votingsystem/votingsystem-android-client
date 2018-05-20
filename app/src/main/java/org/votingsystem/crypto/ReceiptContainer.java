@@ -60,9 +60,9 @@ public class ReceiptContainer implements Serializable {
     public int getLogoId() {
         switch (getOperationType()) {
             case SEND_VOTE:
-                return R.drawable.poll_32;
+                return R.drawable.ic_insert_chart_24px;
             default:
-                return R.drawable.receipt_32;
+                return R.drawable.ic_label_outline_24px;
         }
     }
 

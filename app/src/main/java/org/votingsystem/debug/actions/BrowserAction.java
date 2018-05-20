@@ -27,7 +27,7 @@ public class BrowserAction implements DebugAction {
         new AsyncTask<Context, Void, Void>() {
             @Override
             protected Void doInBackground(Context... contexts) {
-                String targetURL = "https://192.168.1.5/CurrencyServer/";
+                String targetURL = "https://voting.ddns.net/voting-service/test/android.xhtml";
                 LOGD(TAG, "doInBackground - targetURL: " + targetURL);
                 Intent intent = new Intent(App.getInstance(), BrowserActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

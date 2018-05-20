@@ -30,7 +30,6 @@ import android.widget.TextView;
 
 import org.votingsystem.App;
 import org.votingsystem.activity.BrowserActivity;
-import org.votingsystem.activity.ElectionPagerActivity;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
 import org.votingsystem.android.R;
@@ -49,7 +48,6 @@ import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.http.ContentType;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -411,18 +409,6 @@ public class ElectionFragment extends Fragment implements View.OnClickListener {
             startActivityForResult(intent, RC_REQUEST_ANON_CERT_VOTE);
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getActivity() instanceof ElectionPagerActivity) {
-            ActivityResult activityResult = ((ElectionPagerActivity) getActivity()).getActivityResult();
-            if (activityResult != null) {
-                onActivityResult(activityResult.getRequestCode(),
-                        activityResult.getResultCode(), activityResult.getData());
-            }
         }
     }
 

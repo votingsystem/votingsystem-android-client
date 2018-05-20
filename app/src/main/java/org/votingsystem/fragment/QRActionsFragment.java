@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,9 +18,9 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.votingsystem.App;
-import org.votingsystem.activity.ActivityBase;
 import org.votingsystem.activity.FragmentContainerActivity;
 import org.votingsystem.activity.ID_CardNFCReaderActivity;
+import org.votingsystem.activity.MainActivity;
 import org.votingsystem.android.R;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.QRResponseDto;
@@ -35,7 +34,6 @@ import org.votingsystem.util.ActivityResult;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.UIUtils;
 import org.votingsystem.util.Utils;
 import org.votingsystem.xml.XmlReader;
@@ -109,9 +107,10 @@ public class QRActionsFragment extends Fragment {
         }
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menu.clear();
-        super.onCreateOptionsMenu(menu, menuInflater);
+        menuInflater.inflate(R.menu.main_menu, menu);
     }
 
     private void setProgressDialogVisible(final boolean isVisible, String caption, String message) {
@@ -123,7 +122,7 @@ public class QRActionsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ActivityResult activityResult = ((ActivityBase) getActivity()).getActivityResult();
+        ActivityResult activityResult = ((MainActivity) getActivity()).getActivityResult();
         if (activityResult != null) {
             onActivityResult(activityResult.getRequestCode(),
                     activityResult.getResultCode(), activityResult.getData());
@@ -160,7 +159,8 @@ public class QRActionsFragment extends Fragment {
         @Override
         protected ResponseDto doInBackground(String... urls) {
             try {
-                entityMetadata = App.getInstance().getSystemEntity(systemEntityId, true);
+                //TODO validate entity
+                /*entityMetadata = App.getInstance().getSystemEntity(systemEntityId, true);
                 if(operationType != null) {
                     switch (operationType) {
                         case FETCH_ELECTIONS:
@@ -170,7 +170,7 @@ public class QRActionsFragment extends Fragment {
                             }
                             return ResponseDto.OK();
                     }
-                }
+                }*/
                 ResponseDto response = HttpConn.getInstance().doPostRequest(qrUUID.getBytes(),
                         null, OperationType.GET_QR_INFO.getUrl(systemEntityId));
                 if (ResponseDto.SC_OK == response.getStatusCode()) {
@@ -207,15 +207,15 @@ public class QRActionsFragment extends Fragment {
             try {
                 if (ResponseDto.SC_OK == response.getStatusCode()) {
                     switch (operationType) {
-                        case FETCH_ELECTIONS: {
-                            Intent intent = new Intent(ActivityBase.BROADCAST_ID);
+                        /*case FETCH_ELECTIONS: {
+                            Intent intent = new Intent(MainActivity.BROADCAST_ID);
                             ResponseDto responseDto = ResponseDto.OK()
-                                    .setServiceCaller(ActivityBase.CHILD_FRAGMENT)
+                                    .setServiceCaller(MainActivity.CHILD_FRAGMENT)
                                     .setMessage(Integer.valueOf(R.id.elections).toString());
                             intent.putExtra(Constants.RESPONSE_KEY, responseDto);
                             LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
                             break;
-                        }
+                        }*/
                         case PUBLISH_ELECTION:
                             signXMLDocument(new String(qrResponseData),
                                     getString(R.string.election_publish_msg),

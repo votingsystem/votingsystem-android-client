@@ -63,7 +63,7 @@ public class PinActivity extends AppCompatActivity {
         String operationCode = getIntent().getStringExtra(Constants.OPERATION_CODE_KEY);
 
         if(PrefUtils.getDNIeCAN() == null) {
-            Intent intent = new Intent(this, UserDataFormActivity.class);
+            Intent intent = new Intent(this, DNIeCANFormActivity.class);
             startActivity(intent);
             finish();
         }

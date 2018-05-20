@@ -13,10 +13,10 @@ android {
         }
     }
 
+    compileSdkVersion 27
     defaultConfig {
         minSdkVersion 19
-        compileSdkVersion 24
-        buildToolsVersion "24.0.2"
+        buildToolsVersion '27.0.3'
         targetSdkVersion 24
         sourceCompatibility = JavaVersion.VERSION_1_7
     }
@@ -42,20 +42,6 @@ android {
         }
     }
 
-
-    productFlavors {
-        dev {
-            // dev utilizes minSDKVersion = 21 to allow the Android gradle plugin to pre-dex each module
-            // and produce an APK that can be tested on Android Lollipop without time consuming dex merging processes.
-            // https://developer.android.com/tools/building/multidex.html
-            minSdkVersion 21
-        }
-        prod {
-            // The actual minSdkVersion for the application.
-            minSdkVersion 18
-        }
-    }
-
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE'
@@ -65,11 +51,10 @@ android {
         exclude 'META-INF/ASL2.0'
     }
 
-    buildToolsVersion '25.0.0'
 }
 
 ext {
-    supportLibVersion = "24.2.0"
+    supportLibVersion = "27.1.1"
 }
 
 dependencies {

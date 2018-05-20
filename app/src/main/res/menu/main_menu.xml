@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:vs="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/update_data"
+    <item android:id="@+id/show_elections"
         android:orderInCategory="1"
         vs:showAsAction="never"
-        android:title="@string/update_signers_info_lbl"/>
+        android:title="@string/show_elections_lbl"/>
 
 
     <item android:id="@+id/menu_debug"
@@ -12,10 +12,5 @@
         android:orderInCategory="19"
         vs:showAsAction="never" />
 
-    <item
-        android:id="@+id/close_app"
-        android:orderInCategory="20"
-        vs:showAsAction="never"
-        android:title="@string/close_app_lbl"/>
 
 </menu>

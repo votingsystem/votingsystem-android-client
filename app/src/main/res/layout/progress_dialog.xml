@@ -8,7 +8,7 @@
     <TextView android:id="@+id/caption_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/red_vs"
+        android:textColor="@color/colorPrimary"
         android:layout_gravity="center"
         android:text="@string/add_tag_lbl"
         android:gravity="center"
@@ -17,7 +17,7 @@
 
     <View android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:background="@color/red_vs"/>
+        android:background="@color/colorPrimary"/>
 
     <LinearLayout android:id="@+id/progressContainer"
         android:orientation="horizontal"
@@ -38,7 +38,7 @@
             android:text="@string/sending_data_lbl"
             android:layout_weight="1"
             android:layout_marginLeft="10dip"
-            android:textColor="@color/grey_dark"
+            android:textColor="@color/body_text"
             android:textSize="17sp"
             android:gravity="center_horizontal" />
     </LinearLayout>

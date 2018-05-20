@@ -12,7 +12,7 @@
         <TextView android:id="@+id/caption_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/red_vs"
+            android:textColor="@color/colorPrimary"
             android:layout_gravity="center"
             android:text="@string/add_tag_lbl"
             android:gravity="center"
@@ -23,7 +23,7 @@
 
     <View android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:background="@color/red_vs"/>
+        android:background="@color/colorPrimary"/>
 
     <TextView android:id="@+id/message_text"
         android:layout_width="fill_parent"
@@ -31,7 +31,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:layout_marginLeft="10dip"
         android:gravity="center"
-        android:textColor="@color/grey_dark"
+        android:textColor="@color/body_text"
         android:padding="10dp"
         android:textSize="20sp" />
 

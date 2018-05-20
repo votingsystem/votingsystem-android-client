@@ -44,7 +44,7 @@
             android:layout_marginLeft="30dip"
             android:layout_marginRight="30dp"
             android:layout_weight="1"
-            android:drawableLeft="@drawable/accept_22"
+            android:drawableLeft="@drawable/ic_check_24px"
             android:text="@string/save_lbl"
             android:textStyle="bold" />
     </LinearLayout>

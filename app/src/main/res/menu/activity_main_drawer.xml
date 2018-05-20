@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item android:titleCondensed="titled condensed"
+            android:id="@+id/qr_codes"
+            android:icon="@drawable/ic_fullscreen_24px"
+            android:title="@string/qr_codes_lbl" />
+        <item
+            android:id="@+id/certificates"
+            android:icon="@drawable/ic_lock_24px"
+            android:title="@string/certificates_lbl" />
+        <item
+            android:id="@+id/receipts"
+            android:icon="@drawable/ic_card_membership_24px"
+            android:title="@string/receipts_lbl" />
+    </group>
+
+    <group android:id="@+id/voting_settings" android:checkableBehavior="single">
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/settings_lbl" />
+    </group>
+</menu>

@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:vs="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/cert_request"
+        android:title="@string/cert_request_lbl"
+        vs:showAsAction="never" />
+
+</menu>

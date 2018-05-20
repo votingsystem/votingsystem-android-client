@@ -8,50 +8,36 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="Widget.VotingSystem.HeaderBar.Spinner.Base" parent="android:Widget.Holo.Light.Spinner">
-        <item name="android:background">?android:selectableItemBackground</item>
-        <item name="android:divider">@null</item>
-        <item name="android:dividerHeight">0dp</item>
-    </style>
-
-    <style name="Widget.VotingSystem.HeaderBar.Spinner" parent="Widget.VotingSystem.HeaderBar.Spinner.Base" />
-
     <style name="ThemeVS" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:popupMenuStyle">@style/ThemeVS.PopupMenu</item>
-        <item name="android:panelBackground">@color/red_vs</item>
+        <item name="android:panelBackground">@color/colorPrimary</item>
         <item name="android:actionBarWidgetTheme">@style/ThemeVS</item>
-        <item name="android:panelFullBackground">@color/red_vs</item>
+        <item name="android:panelFullBackground">@color/colorPrimary</item>
         <item name="android:itemTextAppearance">@style/popupItemTextStyle</item>
-        <item name="searchViewStyle">@style/ThemeVS.SearchView</item>
     </style>
 
-    <style name="ThemeVS.SearchView" parent="Widget.AppCompat.SearchView">
-        <item name="suggestionRowLayout">@color/red_vs</item>
-        <item name="queryBackground">@color/red_vs</item>
-        <item name="submitBackground">@color/red_vs</item>
-    </style>
 
     <style name="ItemVS">
         <item name="android:textColor">@color/white_vs</item>
     </style>
     <style name="popupItemTextStyle" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
-        <item name="android:textColor">@color/red_vs</item>
+        <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:textSize">20sp</item>
     </style>
     <style name="ThemeVS.PopupMenu" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:popupBackground">@color/red_vs</item>
+        <item name="android:popupBackground">@color/colorPrimary</item>
     </style>
 
     <style name="ToolBarVS" parent="Theme.AppCompat">
         <item name="android:itemTextAppearance">@style/ItemVS</item>
-        <item name="android:background">@color/red_vs</item>
+        <item name="android:background">@color/colorPrimary</item>
         <item name="android:titleTextStyle">@style/ToolBarVS.TitleTextStyle</item>
         <item name="android:subtitleTextStyle">@style/ToolBarVS.SubTitleTextStyle</item>
     </style>
 
     <style name="ToolBarVS.TitleTextStyle"
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/red_vs</item>
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
     <style name="ToolBarVS.SubTitleTextStyle"
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
@@ -63,4 +49,23 @@
         <item name="android:textSize">30sp</item>
         <item name="android:layout_marginTop">15dp</item>
     </style>
+
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />-->
+
 </resources>

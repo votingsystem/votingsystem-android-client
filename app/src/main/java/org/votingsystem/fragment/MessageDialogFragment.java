@@ -104,8 +104,8 @@ public class MessageDialogFragment extends DialogFragment {
         AlertDialog dialog = builder.create();
         dialog.setView(view);
         if (statusCode > 0) {
-            if (ResponseDto.SC_OK == statusCode) dialog.setIcon(R.drawable.fa_check_32);
-            else dialog.setIcon(R.drawable.fa_times_32);
+            if (ResponseDto.SC_OK == statusCode) dialog.setIcon(R.drawable.ic_check_24px);
+            else dialog.setIcon(R.drawable.ic_close_24px);
         }
         this.setCancelable(false);
         dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {

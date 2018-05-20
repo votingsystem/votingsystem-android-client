@@ -32,7 +32,7 @@ public class QRMessageDto<T> implements Serializable {
     public static final String SYSTEM_ENTITY_KEY  = "eid";
     public static final String URL_KEY            = "url";
     public static final String UUID_KEY           = "uid";
-
+//https://192.168.1.5/CurrencyServer/qr?cht=qr&chs=200x200&chl=srv=0;op=0;opid=KSDH;did=1000000000;pk=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCIo6q3076M9RLKSXG5ZXqV5886zOpNRFJUbtMfPjmVoWr1e0FEo6C7ilrv9bqh3Jh52ElbWkmjwS0MzB7fPQLBY+7382H7wwM7kqdJuvR0HyzwD4cD8y664J/yZ+ZJPs4YDto0/R4Noa3Cam04sBbnjfW59FiBV3/3sFe+LdwZMQIDAQAB
 
     private T data;
     private String originRevocationHash;

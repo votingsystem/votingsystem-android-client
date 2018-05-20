@@ -28,7 +28,6 @@ import org.votingsystem.util.Constants;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.util.PrefUtils;
 import org.votingsystem.util.RootUtils;
-import org.votingsystem.util.UIUtils;
 import org.votingsystem.xades.SignatureValidator;
 import org.votingsystem.xades.XmlSignature;
 import org.votingsystem.xml.XmlReader;
@@ -69,8 +68,6 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
     private Set<ElectionDto.State> electionStateLoaded = new HashSet<>();
     private AtomicInteger notificationId = new AtomicInteger(1);
     private boolean isRootedPhone = false;
-    private List<Integer> historyList;
-    private int defaultMainView = R.id.elections;
     private SystemEntityDto votingServiceProvider;
     private SystemEntityDto idProvider;
 
@@ -98,22 +95,15 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
             if (!Constants.ALLOW_ROOTED_PHONES && RootUtils.isDeviceRooted()) {
                 isRootedPhone = true;
             }
-            historyList = new ArrayList();
-            historyList.add(defaultMainView);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    public void finish() {
-        LOGD(TAG, "finish");
-        HttpConn.getInstance().shutdown();
-        UIUtils.killApp(true);
-    }
-
     @Override
     public void onTerminate() {
         super.onTerminate();
+        HttpConn.getInstance().shutdown();
         PrefUtils.unregisterPreferenceChangeListener(this);
     }
 
@@ -192,10 +182,10 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
                 .setAutoCancel(true).setContentTitle(responseDto.getCaption())
                 .setContentText(responseDto.getNotificationMessage()).setSound(soundUri);
         if (responseDto.getStatusCode() == ResponseDto.SC_ERROR)
-            builder.setSmallIcon(R.drawable.cancel_22);
+            builder.setSmallIcon(R.drawable.ic_close_24px);
         else if (responseDto.getStatusCode() == ResponseDto.SC_OK)
-            builder.setSmallIcon(R.drawable.fa_check_32);
-        else builder.setSmallIcon(R.drawable.mail_mark_unread_32);
+            builder.setSmallIcon(R.drawable.ic_check_24px);
+        else builder.setSmallIcon(R.drawable.ic_mail_outline_24px);
         mgr.notify(notificationId.getAndIncrement(), builder.build());
     }
 
@@ -230,20 +220,6 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
 
     public boolean isRootedPhone() {
         return isRootedPhone;
-    }
-
-    public boolean isHistoryEmpty() {
-        return historyList.isEmpty();
-    }
-
-    public Integer getHistoryItem() {
-        if (historyList.isEmpty()) return null;
-        else if (historyList.size() == 1) return historyList.remove(0);
-        else return historyList.remove(historyList.size() - 2);
-    }
-
-    public void addHistoryItem(Integer item) {
-        historyList.add(item);
     }
 
     public SystemEntityDto getVotingServiceProvider() {
